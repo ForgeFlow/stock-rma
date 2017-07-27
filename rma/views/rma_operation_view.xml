@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="rma_operation_tree" model="ir.ui.view">
+            <field name="name">rma.operation.tree</field>
+            <field name="model">rma.operation</field>
+            <field name="arch" type="xml">
+                <tree string="RMA Operations">
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="receipt_policy"/>
+                    <field name="delivery_policy"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="rma_operation_form" model="ir.ui.view">
+            <field name="name">rma.operation.form</field>
+            <field name="model">rma.operation</field>
+            <field name="arch" type="xml">
+                <form string="RMA Operations">
+                    <group colspan="4" col="2">
+                        <group name="description"
+                               string="Description">
+                            <field name="code"/>
+                            <field name="name"/>
+                            <field name="type"/>
+                        </group>
+                        <group name="policies"
+                               string="Policies">
+                            <field name="receipt_policy"/>
+                            <field name="delivery_policy"/>
+                        </group>
+                        <group name="inbound" string="Inbound">
+                            <field name="in_route_id"/>
+                            <field name="in_warehouse_id"/>
+                            <field name="location_id"
+                                domain="[('usage', '=', 'internal')]"/>
+                            <field name="customer_to_supplier"
+                                   attrs="{'invisible':[('type', '=', 'customer')]}"/>
+                        </group>
+                        <group name="outbound" string="Outbound">
+                            <field name="out_route_id"/>
+                            <field name="out_warehouse_id"/>
+                            <field name="supplier_to_customer"
+                                   attrs="{'invisible':[('type', '=', 'supplier')]}"/>
+                        </group>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_rma_operation" model="ir.actions.act_window">
+            <field name="name">Operations</field>
+            <field name="res_model">rma.operation</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="rma_operation_tree"/>
+        </record>
+
+        <menuitem id="menu_rma_operation"
+            name="Operations"
+            groups="rma.group_rma_manager"
+            sequence="35"
+            parent="rma.menu_rma_config"
+            action="action_rma_operation"/>
+
+    </data>
+</odoo>
