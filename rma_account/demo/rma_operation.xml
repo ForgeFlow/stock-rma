@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="rma.rma_operation_customer_replace" model="rma.operation">
+        <field name="refund_policy">no</field>
+    </record>
+
+    <record id="rma.rma_operation_supplier_replace" model="rma.operation">
+        <field name="refund_policy">no</field>
+    </record>
+
+    <record id="rma_operation_customer_refund" model="rma.operation">
+        <field name="name">Refund before receive</field>
+        <field name="code">RFC</field>
+        <field name="refund_policy">ordered</field>
+        <field name="receipt_policy">no</field>
+        <field name="delivery_policy">no</field>
+        <field name="type">customer</field>
+        <field name="in_route_id" ref="rma.route_rma_customer"/>
+    </record>
+
+    <record id="rma_operation_supplier_refund" model="rma.operation">
+        <field name="name">Refund Before deliver</field>
+        <field name="code">RFS</field>
+        <field name="refund_policy">ordered</field>
+        <field name="receipt_policy">no</field>
+        <field name="delivery_policy">no</field>
+        <field name="type">supplier</field>
+        <field name="out_route_id" ref="rma.route_rma_supplier"/>
+    </record>
+
+    <record id="rma.rma_operation_ds_replace" model="rma.operation">
+        <field name="refund_policy">no</field>
+    </record>
+
+    <record id="rma.rma_operation_ds_replace_customer" model="rma.operation">
+        <field name="refund_policy">no</field>
+    </record>
+
+    <record id="rma.rma_operation_ds_replace_supplier" model="rma.operation">
+        <field name="refund_policy">no</field>
+    </record>
+
+</odoo>
