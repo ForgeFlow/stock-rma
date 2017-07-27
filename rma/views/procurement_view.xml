@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="procurement_form_view" model="ir.ui.view">
+            <field name="name">procurement.order.form</field>
+            <field name="model">procurement.order</field>
+            <field name="inherit_id"
+                   ref="procurement.procurement_form_view"/>
+            <field name="arch" type="xml">
+                <field name="origin" position="after">
+                    <field name="rma_line_id"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="procurement_form_view_usage" model="ir.ui.view">
+            <field name="name">procurement.order.form.stock.inherit</field>
+            <field name="model">procurement.order</field>
+            <field name="inherit_id"
+                   ref="stock.view_procurement_form_stock_inherit"/>
+            <field name="arch" type="xml">
+                <field name="location_id" position="attributes">
+                    <attribute name="domain">[('usage', '!=', 'view')]</attribute>
+                </field>
+
+            </field>
+        </record>
+
+    </data>
+</odoo>
