@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2017 Eficent Business and IT Consulting Services S.L.
+     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl). -->
+
+<odoo>
+
+    <record id="qc_issue_form" model="ir.ui.view">
+        <field name="name">qc.issue.form - rma_quality_control_issue</field>
+        <field name="model">qc.issue</field>
+        <field name="inherit_id" ref="quality_control_issue.qc_issue_form"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button type="object"  name="action_view_rma_lines_supplier"
+                        class="oe_stat_button"
+                        icon="fa-list">
+                    <field name="rma_line_count_supplier" widget="statinfo"
+                           string="Supplier RMA lines"/>
+                </button>
+                <button type="object"  name="action_view_rma_lines_customer"
+                        class="oe_stat_button"
+                        icon="fa-list">
+                    <field name="rma_line_count_customer" widget="statinfo"
+                           string="Customer RMA lines"/>
+                </button>
+            </div>
+        </field>
+    </record>
+
+</odoo>
