@@ -129,7 +129,7 @@ class QcIssueMakeSupplierRma(models.TransientModel):
             action['domain'] = [('id', 'in', res)]
         elif len(res) == 1:
             view = self.env.ref('rma.view_rma_supplier_form',
-                               False)
+                                False)
             action['views'] = [(view and view.id or False, 'form')]
             action['res_id'] = res[0]
         return action

@@ -3,7 +3,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 import time
-from openerp import models, fields, exceptions, api, _
+from openerp import models, fields, api, _
 from openerp.exceptions import ValidationError
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FORMAT
 import openerp.addons.decimal_precision as dp
@@ -45,7 +45,7 @@ class RmaMakePicking(models.TransientModel):
         items = []
         lines = rma_line_obj.browse(rma_line_ids)
         if len(lines.mapped('partner_id')) > 1:
-            raise exceptions.Warning(
+            raise ValidationError(
                 _('Only RMA lines from the same partner can be processed at '
                   'the same time'))
         for line in lines:
@@ -71,12 +71,13 @@ class RmaMakePicking(models.TransientModel):
     @api.model
     def _get_address(self, item):
         if item.line_id.delivery_address_id:
-            delivery_address = item.line_id.delivery_address_id or \
-                               item.line_id.partner_id
+            delivery_address = item.line_id.delivery_address_id
         elif item.line_id.customer_to_supplier:
             delivery_address = item.line_id.supplier_address_id
+        elif item.line_id.partner_id:
+            delivery_address = item.line_id.partner_id
         else:
-            raise exceptions.Warning('Unknown delivery address')
+            raise ValidationError('Unknown delivery address')
         return delivery_address
 
     def _get_address_location(self, delivery_address_id, type):
@@ -103,9 +104,9 @@ class RmaMakePicking(models.TransientModel):
             warehouse = line.out_warehouse_id
             route = line.out_route_id
         if not route:
-            raise exceptions.Warning("No route specified")
+            raise ValidationError("No route specified")
         if not warehouse:
-            raise exceptions.Warning("No warehouse specified")
+            raise ValidationError("No warehouse specified")
         procurement_data = {
             'name': line.rma_id.name,
             'group_id': group.id,
@@ -147,16 +148,16 @@ class RmaMakePicking(models.TransientModel):
         for item in self.item_ids:
             line = item.line_id
             if line.state != 'approved':
-                raise exceptions.Warning(
+                raise ValidationError(
                     _('RMA %s is not approved') %
                     line.rma_id.name)
             if line.receipt_policy == 'no' and picking_type == \
                     'incoming':
-                raise exceptions.Warning(
+                raise ValidationError(
                     _('No shipments needed for this operation'))
             if line.delivery_policy == 'no' and picking_type == \
                     'outgoing':
-                raise exceptions.Warning(
+                raise ValidationError(
                     _('No deliveries needed for this operation'))
             procurement = self._create_procurement(item, picking_type)
             procurement_list.append(procurement)
@@ -191,7 +192,7 @@ class RmaMakePicking(models.TransientModel):
             if proc.group_id:
                 groups.append(proc.group_id.id)
         if len(groups):
-            pickings =self.env['stock.picking'].search(
+            pickings = self.env['stock.picking'].search(
                 [('group_id', 'in', groups)])
 
         action = self._get_action(pickings, procurements)
