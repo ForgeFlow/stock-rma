@@ -5,15 +5,10 @@
 from openerp import fields, models
 
 
-class ProductCategory(models.Model):
-    _inherit = 'product.category'
-
-    rma_operation_id = fields.Many2one(
-        comodel_name="rma.operation", string="RMA Operation")
-
-
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
     rma_operation_id = fields.Many2one(
         comodel_name="rma.operation", string="RMA Operation")
+    rma_approval_policy = fields.Selection(
+        related="categ_id.rma_approval_policy", readonly=True)

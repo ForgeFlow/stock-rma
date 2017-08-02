@@ -3,7 +3,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 {
-    'name': 'rma',
+    'name': 'RMA (Return Merchandise Authorization)',
     'version': '9.0.1.0.0',
     'license': 'LGPL-3',
     'category': 'RMA',
@@ -18,19 +18,16 @@
              ],
     'data': ['security/rma.xml',
              'security/ir.model.access.csv',
-
              'data/rma_sequence.xml',
              'data/stock_data.xml',
              'data/rma_operation.xml',
              'views/rma_order_view.xml',
              'views/rma_operation_view.xml',
-             'views/rma_rule_view.xml',
              'views/rma_order_line_view.xml',
              'views/stock_view.xml',
              'views/stock_warehouse.xml',
              'views/product_view.xml',
              'views/procurement_view.xml',
-             'views/res_company_view.xml',
              'wizards/rma_make_picking_view.xml',
              'wizards/rma_add_stock_move_view.xml',
              'wizards/stock_config_settings.xml',

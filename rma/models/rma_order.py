@@ -15,12 +15,6 @@ class RmaOrder(models.Model):
     _inherit = ['mail.thread']
 
     @api.model
-    def _compute_rule_id(self):
-        if self.company_id and self.company_id.id:
-            if self.company_id.rma_rule_id and self.company_id.rma_rule_id.id:
-                self.rule_id = self.company_id.rma_rule_id
-
-    @api.model
     def _get_default_type(self):
         if 'supplier' in self.env.context:
             return "supplier"
@@ -79,8 +73,6 @@ class RmaOrder(models.Model):
     requested_by = fields.Many2one('res.users', 'Requested by',
                                    track_visibility='onchange',
                                    default=lambda self: self.env.user)
-    rule_id = fields.Many2one('rma.rule', string='Approval Criteria',
-                              compute=_compute_rule_id)
     rma_line_ids = fields.One2many('rma.order.line', 'rma_id',
                                    string='RMA lines')
     in_shipment_count = fields.Integer(compute=_compute_in_shipment_count,
@@ -163,12 +155,12 @@ class RmaOrder(models.Model):
 
     @api.multi
     def action_rma_to_approve(self):
+        self.write({'state': 'to_approve'})
         for rec in self:
-            rec.state = 'to_approve'
-            if rec.rule_id and rec.rule_id.id:
-                if rec.rule_id.approval_policy == 'always':
-                    rec.assigned_to = self.env.uid
-                    rec.action_rma_approve()
+            pols = rec.mapped('rma_line_ids.product_id.rma_approval_policy')
+            if not any(x != 'one_step' for x in pols):
+                rec.write({'assigned_to': self.env.uid})
+                rec.action_rma_approve()
         return True
 
     @api.multi
@@ -180,8 +172,7 @@ class RmaOrder(models.Model):
     @api.multi
     def action_rma_approve(self):
         # pass the supplier address in case this is a customer RMA
-        for rec in self:
-            rec.state = 'approved'
+        self.write({'state': 'approved'})
         return True
 
     @api.multi
