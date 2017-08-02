@@ -17,7 +17,7 @@ class RmaOrder(models.Model):
         self.sale_count = len(list(set(sales_list)))
 
     sale_count = fields.Integer(compute=_compute_sales_count,
-                                 string='# of Sales', copy=False, default=0)
+                                string='# of Sales', copy=False, default=0)
 
     @api.model
     def _get_line_domain(self, rma_id, line):
