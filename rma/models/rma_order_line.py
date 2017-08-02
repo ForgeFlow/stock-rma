@@ -2,7 +2,7 @@
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from openerp import _, api, fields, models
+from openerp import api, fields, models
 from openerp.addons import decimal_precision as dp
 import operator
 ops = {'=': operator.eq,
@@ -90,8 +90,8 @@ class RmaOrderLine(models.Model):
             rec.qty_to_deliver = 0.0
             if rec.delivery_policy == 'ordered':
                 rec.qty_to_deliver = rec.product_qty - rec.qty_delivered
-            elif self.delivery_policy == 'received':
-                self.qty_to_deliver = rec.qty_received - rec.qty_delivered
+            elif rec.delivery_policy == 'received':
+                rec.qty_to_deliver = rec.qty_received - rec.qty_delivered
 
     @api.multi
     @api.depends('move_ids', 'move_ids.state', 'type')
@@ -180,7 +180,7 @@ class RmaOrderLine(models.Model):
         readonly=True, states={"new": [("readonly", False)]},
     )
     product_qty = fields.Float(
-        string='Ordered Qty', copy=False,
+        string='Ordered Qty', copy=False, default=1.0,
         digits=dp.get_precision('Product Unit of Measure'))
     uom_id = fields.Many2one('product.uom', string='Unit of Measure',
                              required=True)
@@ -197,8 +197,8 @@ class RmaOrderLine(models.Model):
     out_shipment_count = fields.Integer(compute=_compute_out_shipment_count,
                                         string='# of Deliveries', default=0)
     move_ids = fields.One2many('stock.move', 'rma_line_id',
-                               string='Stock Moves', readonly=True
-                               , copy=False)
+                               string='Stock Moves', readonly=True,
+                               copy=False)
     reference_move_id = fields.Many2one(comodel_name='stock.move',
                                         string='Originating stock move',
                                         readonly=True, copy=False)
@@ -243,7 +243,8 @@ class RmaOrderLine(models.Model):
         default=_default_location_id)
     customer_rma_id = fields.Many2one(
         'rma.order.line', string='Customer RMA line', ondelete='cascade')
-    supplier_rma_line_ids = fields.One2many('rma.order.line', 'customer_rma_id')
+    supplier_rma_line_ids = fields.One2many(
+        'rma.order.line', 'customer_rma_id')
     supplier_address_id = fields.Many2one(
         'res.partner', readonly=True,
         states={'draft': [('readonly', False)]},
@@ -408,10 +409,11 @@ class RmaOrderLine(models.Model):
 
     @api.multi
     def action_view_procurements(self):
-        action = self.env.ref('procurement.procurement_order_action_exceptions')
+        action = self.env.ref(
+            'procurement.procurement_order_action_exceptions')
         result = action.read()[0]
         procurements = self.procurement_ids.filtered(
-                lambda p: p.state == 'exception').ids
+            lambda p: p.state == 'exception').ids
         # choose the view_mode accordingly
         if len(procurements) != 1:
             result['domain'] = "[('id', 'in', " + \

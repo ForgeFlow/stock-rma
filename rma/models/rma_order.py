@@ -2,12 +2,7 @@
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from openerp import _, api, fields, models
-from openerp.addons import decimal_precision as dp
-from openerp.exceptions import UserError
-from dateutil.relativedelta import relativedelta
-from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
-from datetime import datetime
+from openerp import api, fields, models
 
 
 class RmaOrder(models.Model):
@@ -18,8 +13,7 @@ class RmaOrder(models.Model):
     def _get_default_type(self):
         if 'supplier' in self.env.context:
             return "supplier"
-        else:
-            return "customer"
+        return "customer"
 
     @api.multi
     def _compute_in_shipment_count(self):
@@ -47,23 +41,21 @@ class RmaOrder(models.Model):
         self.ensure_one()
         self.line_count = len(self._get_valid_lines())
 
-    name = fields.Char(string='Order Number', index=True,
-                       readonly=True,
-                       states={'progress': [('readonly', False)]},
-                       copy=False)
+    name = fields.Char(
+        string='Order Number', index=True, readonly=True,
+        states={'progress': [('readonly', False)]}, copy=False)
     type = fields.Selection(
         [('customer', 'Customer'), ('supplier', 'Supplier')],
         string="Type", required=True, default=_get_default_type, readonly=True)
-    reference = fields.Char(string='Reference',
+    reference = fields.Char(string='Partner Reference',
                             help="The partner reference of this RMA order.")
-
     comment = fields.Text('Additional Information', readonly=True, states={
         'draft': [('readonly', False)]})
 
     state = fields.Selection([('draft', 'Draft'), ('to_approve', 'To Approve'),
                               ('approved', 'Approved'),
                               ('done', 'Done')], string='State', index=True,
-                              default='draft')
+                               default='draft')
     date_rma = fields.Datetime(string='Order Date', index=True, copy=False)
     partner_id = fields.Many2one('res.partner', string='Partner',
                                  required=True, readonly=True,
@@ -165,8 +157,7 @@ class RmaOrder(models.Model):
 
     @api.multi
     def action_rma_draft(self):
-        for rec in self:
-            rec.state = 'draft'
+        self.write({'state': 'draft'})
         return True
 
     @api.multi
@@ -177,12 +168,13 @@ class RmaOrder(models.Model):
 
     @api.multi
     def action_rma_done(self):
-        for rec in self:
-            rec.state = 'done'
-            return True
+        self.write({'state': 'done'})
+        return True
 
     @api.multi
     def _get_valid_lines(self):
+        """:return: A recordset of rma lines.
+        """
         self.ensure_one()
         return self.rma_line_ids
 

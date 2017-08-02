@@ -72,7 +72,7 @@ class RmaLineMakeSupplierRma(models.TransientModel):
     @api.model
     def _prepare_supplier_rma_line(self, rma, item):
         operation = self.env['rma.operation'].search(
-                [('type', '=', 'supplier')], limit=1)
+            [('type', '=', 'supplier')], limit=1)
         return {
             'origin': item.line_id.rma_id.name,
             'delivery_address_id':

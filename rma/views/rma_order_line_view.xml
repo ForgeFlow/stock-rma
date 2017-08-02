@@ -5,7 +5,7 @@
             <field name="name">rma.order.line.tree</field>
             <field name="model">rma.order.line</field>
             <field name="arch" type="xml">
-                <tree string="RMA Line" nocreate="1"
+                <tree string="RMA Line" create="0"
                       decoration-muted="state in ('draft','to_approve')">
                     <field name="rma_id"/>
                     <field name="state" invisible="1"/>
@@ -27,7 +27,7 @@
             <field name="name">rma.order.line.supplier.tree</field>
             <field name="model">rma.order.line</field>
             <field name="arch" type="xml">
-                <tree string="RMA Line" nocreate="1"
+                <tree string="RMA Line" create="0"
                       decoration-muted="state in ('draft','to_approve')">
                     <field name="rma_id"/>
                     <field name="state" invisible="1"/>
@@ -48,7 +48,7 @@
             <field name="name">rma.order.line.supplier.form</field>
             <field name="model">rma.order.line</field>
             <field name="arch" type="xml">
-                <form string="RMA Line" nocreate="1">
+                <form string="RMA Line" create="0">
                     <sheet>
                         <header/>
                         <div name="button_box" class="oe_button_box">
@@ -171,7 +171,7 @@
             <field name="name">rma.order.line.form</field>
             <field name="model">rma.order.line</field>
             <field name="arch" type="xml">
-                <form string="Rma Line" nocreate="1">
+                <form string="Rma Line" create="0">
                     <sheet>
                         <header/>
                         <div name="button_box" class="oe_button_box">
