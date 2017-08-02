@@ -182,7 +182,7 @@ class RmaOrderLine(models.Model):
         readonly=True, states={"new": [("readonly", False)]},
     )
     product_qty = fields.Float(
-        string='Ordered Qty', copy=False,
+        string='Ordered Qty', copy=False, default=1.0,
         digits=dp.get_precision('Product Unit of Measure'))
     uom_id = fields.Many2one('product.uom', string='Unit of Measure',
                              required=True)

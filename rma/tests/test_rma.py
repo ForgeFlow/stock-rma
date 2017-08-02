@@ -40,7 +40,7 @@ class TestRma(common.TransactionCase):
         sale_values = self._prepare_sale()
         self.sale_order = self.env['sale.order'].create(sale_values)
         invoice_id = self.sale_order.action_invoice_create()[0]
-        self.invoice = self.env['account.invoice'].browse(invoice_id)
+        # self.invoice = self.env['account.invoice'].browse(invoice_id)
         # Create the RMA from the invoice
         self.rma_id = self.rma.create(
             {
