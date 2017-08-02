@@ -3,10 +3,8 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 import time
-from openerp import models, fields, exceptions, api, _
+from openerp import _, api, fields, models
 from openerp.exceptions import ValidationError
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FORMAT
-import openerp.addons.decimal_precision as dp
 
 
 class RmaAddPurchase(models.TransientModel):
@@ -31,18 +29,20 @@ class RmaAddPurchase(models.TransientModel):
         return res
 
     rma_id = fields.Many2one('rma.order',
-                              string='RMA Order',
-                              readonly=True,
-                              ondelete='cascade')
+                             string='RMA Order',
+                             readonly=True,
+                             ondelete='cascade')
 
     partner_id = fields.Many2one(comodel_name='res.partner', string='Partner',
                                  readonly=True)
-    purchase_id = fields.Many2one(comodel_name='purchase.order', string='Order')
-    purchase_line_ids = fields.Many2many('purchase.order.line',
-                                     'rma_add_purchase_add_line_rel',
-                                     'purchase_line_id', 'rma_add_purchase_id',
-                                     readonly=False,
-                                     string='Purcahse Order Lines')
+    purchase_id = fields.Many2one(
+        comodel_name='purchase.order', string='Order')
+    purchase_line_ids = fields.Many2many(
+        'purchase.order.line',
+        'rma_add_purchase_add_line_rel',
+        'purchase_line_id', 'rma_add_purchase_id',
+        readonly=False,
+        string='Purcahse Order Lines')
 
     def _prepare_rma_line_from_po_line(self, line):
         operation = line.product_id.rma_operation_id and \
@@ -75,7 +75,7 @@ class RmaAddPurchase(models.TransientModel):
             {'in_route_id': operation.in_route_id.id or route,
              'out_route_id': operation.out_route_id.id or route,
              'receipt_policy': operation.receipt_policy,
-             'location_id': operation.location_id.id or
+             'location_id': operation.location_id.id or \
                             self.env.ref('stock.stock_location_stock').id,
              'operation_id': operation.id,
              'refund_policy': operation.refund_policy,

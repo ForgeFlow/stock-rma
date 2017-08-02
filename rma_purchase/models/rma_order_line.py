@@ -3,7 +3,6 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 from openerp import api, fields, models
 from openerp.addons import decimal_precision as dp
-from random import randint
 
 
 class RmaOrderLine(models.Model):
