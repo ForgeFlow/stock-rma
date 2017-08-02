@@ -3,10 +3,8 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 import time
-from openerp import models, fields, exceptions, api, _
+from openerp import _, api, fields, models
 from openerp.exceptions import ValidationError
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FORMAT
-import openerp.addons.decimal_precision as dp
 
 
 class RmaAddinvoice(models.TransientModel):
