@@ -18,8 +18,8 @@ class ProcurementOrder(models.Model):
             res['rma_line_id'] = line.id
             if line.delivery_address_id:
                 res['partner_id'] = line.delivery_address_id.id
-            elif line.invoice_line_id.invoice_id.partner_id:
-                res['partner_id'] = line.invoice_id.partner_id.id
+            else:
+                res['partner_id'] = line.rma_id.partner_id.id
         return res
 
 
