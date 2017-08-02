@@ -4,6 +4,7 @@
 from openerp import _, api, fields, models
 from openerp.addons import decimal_precision as dp
 
+
 class RmaOrderLine(models.Model):
     _inherit = "rma.order.line"
 
