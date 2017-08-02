@@ -3,7 +3,7 @@
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl-3.0).
 
 import openerp.addons.decimal_precision as dp
-from openerp import _, api, exceptions, fields, models
+from openerp import api, models
 
 
 class RmaLineMakeSupplierRma(models.TransientModel):
