@@ -72,10 +72,4 @@
         <field name="out_route_id" ref="rma.route_rma_dropship"/>
     </record>
 
-    <record id="rma_rule_always" model="rma.rule">
-        <field name="name">Always</field>
-        <field name="code">alw</field>
-        <field name="approval_policy">always</field>
-    </record>
-
 </odoo>

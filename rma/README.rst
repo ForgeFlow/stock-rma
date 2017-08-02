@@ -1,10 +1,11 @@
 .. image:: https://img.shields.io/badge/licence-LGPL--3-blue.svg
     :alt: License LGPL-3
 
-RMA
-===
+======================================
+RMA (Return Merchandise Authorization)
+======================================
 
-A return merchandise authorization (RMA), is a part of the process of
+A Return Merchandise Authorization (RMA), is a part of the process of
 returning a product in order to receive a refund, replacement, or repair
 during the product's warranty period.
 
@@ -29,6 +30,7 @@ Configuration
 
 Security
 --------
+
 Go to Settings > Users and assign the appropiate permissions to users.
 Different security groups grant distinct levels of access to the RMA features.
 
@@ -38,11 +40,25 @@ Different security groups grant distinct levels of access to the RMA features.
 * Users in group "RMA Manager" can access to, create, approve and process RMA's
   associated to both customers and suppliers.
 
+RMA Approval Policy
+-------------------
 
+There are two RMA approval policies in product catogories:
 
+* One step: Always auto-approve RMAs that only contain products within
+  categories with this policy.
+* Two steps: A RMA order containing a product within a category with this
+  policy will request the RMA manager approval.
 
-#. Go to Settings > Users and assign the appropiate permissions to users.
-   Users assigned to the group 'RMA
+In order to change the approval policy of a product category follow the next
+steps:
+
+#. Go to *Inventory > Configuration > Products > Product Categories*.
+#. Select one and change the field *RMA Approval Policy* to your convenience.
+
+Other Settings
+--------------
+
 #. Go to Inventory > Settings > Return Merchandising Authorization and select
    the option "Display 3 fields on rma: partner, invoice address, delivery
    address" if needed.
@@ -51,16 +67,17 @@ Different security groups grant distinct levels of access to the RMA features.
    and suppliers RMA picking type. In case the warehouse is configured to
    use routes, you need to create at least one route per rma type with at
    least two push rules (one for inbound another for outbound) it's very
-   important to select the typeof operation supplier if we are moving in the
+   important to select the type of operation supplier if we are moving in the
    company and customer if we are moving out of the company.
 
 Usage
 =====
 
-RMA are accessible though Inventory menu. There's four menus, divided by type
-. Users can access to the list of RMA or RMA lines.
+RMA are accessible though Inventory menu. There's four menus, divided by type.
+Users can access to the list of RMA or RMA lines.
 
 Create an RMA:
+
 #. Select a partner. Enter RMA lines associated to an existing picking, or
    manually.
 #. Request approval and approve.
@@ -87,10 +104,9 @@ Contributors
 
 * Jordi Ballester Alomar <jordi.ballester@eficent.com>
 * Aaron Henriquez <ahenriquez@eficent.com>
-
+* Lois Rilo <lois.rilo@eficent.com>
 
 Maintainer
 ----------
 
 This module is maintained by Eficent.
-

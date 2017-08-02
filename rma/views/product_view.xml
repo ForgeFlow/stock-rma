@@ -8,6 +8,7 @@
             <field name="inherit_id" ref="product.product_category_form_view" />
             <field name="arch" type="xml">
                 <field name="type" position="after">
+                    <field name="rma_approval_policy"/>
                     <field name="rma_operation_id" groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"/>
                 </field>
             </field>
@@ -20,6 +21,7 @@
             <field name="arch" type="xml">
                  <group name="inventory" position="inside">
                     <group name="rma" groups="rma.group_rma_customer_user,rma.group_rma_supplier_user">
+                        <field name="rma_approval_policy"/>
                         <field name="rma_operation_id"/>
                     </group>
                 </group>
