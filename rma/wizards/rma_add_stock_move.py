@@ -2,7 +2,7 @@
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from openerp import models, fields, exceptions, api, _
+from openerp import models, fields, api, _
 from openerp.exceptions import ValidationError
 
 
@@ -100,7 +100,8 @@ class RmaAddStockMove(models.TransientModel):
                         rma_line_obj.with_context(
                             default_rma_id=self.rma_id.id).create(data)
                 else:
-                    data = self._prepare_rma_line_from_stock_move(sm, lot=False)
+                    data = self._prepare_rma_line_from_stock_move(
+                        sm, lot=False)
                     rma_line_obj.with_context(
                         default_rma_id=self.rma_id.id).create(data)
         return {'type': 'ir.actions.act_window_close'}

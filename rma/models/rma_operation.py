@@ -2,7 +2,7 @@
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from openerp import _, api, fields, models
+from openerp import api, fields, models
 
 
 class RmaOperation(models.Model):
@@ -11,9 +11,9 @@ class RmaOperation(models.Model):
 
     @api.model
     def _default_warehouse_id(self):
-        company = self.env.user.company_id.id
+        company_id = self.env.user.company_id.id
         warehouse = self.env['stock.warehouse'].search(
-            [('company_id', '=', company)], limit=1)
+            [('company_id', '=', company_id)], limit=1)
         return warehouse
 
     @api.model
@@ -44,16 +44,16 @@ class RmaOperation(models.Model):
     out_route_id = fields.Many2one(
         'stock.location.route', string='Outbound Route',
         domain=[('rma_selectable', '=', True)])
-    customer_to_supplier= fields.Boolean(
+    customer_to_supplier = fields.Boolean(
         'The customer will send to the supplier', default=False)
     supplier_to_customer = fields.Boolean(
         'The supplier will send to the customer', default=False)
-    in_warehouse_id = fields.Many2one('stock.warehouse',
-                                      string='Inbound Warehouse',
-                                      default=_default_warehouse_id)
-    out_warehouse_id = fields.Many2one('stock.warehouse',
-                                       string='Outbound Warehouse',
-                                       default=_default_warehouse_id)
+    in_warehouse_id = fields.Many2one(
+        comodel_name='stock.warehouse', string='Inbound Warehouse',
+        default=_default_warehouse_id)
+    out_warehouse_id = fields.Many2one(
+        comodel_name='stock.warehouse', string='Outbound Warehouse',
+        default=_default_warehouse_id)
     location_id = fields.Many2one(
         'stock.location', 'Send To This Company Location')
     type = fields.Selection([

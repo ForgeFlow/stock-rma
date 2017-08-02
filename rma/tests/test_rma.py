@@ -13,7 +13,7 @@ class TestRma(common.TransactionCase):
         super(TestRma, self).setUp()
 
         self.rma_make_picking = self.env['rma_make_picking.wizard']
-        self.rma_add_invoice = self.env['rma_add_invoice']
+        self.rma_add_stock_move = self.env['rma_add_stock_move']
         self.stockpicking = self.env['stock.picking']
         self.rma = self.env['rma.order']
         self.rma_line = self.env['rma.order.line']
@@ -29,59 +29,56 @@ class TestRma(common.TransactionCase):
         self.product_2.write({'rma_operation_id': self.rma_op_id.id})
         self.product_3.write({'rma_operation_id': self.rma_op_id.id})
         self.partner_id = self.env.ref('base.res_partner_12')
-
-        self.customer_location_id = self.env.ref(
-            'stock.stock_location_customers'
-        )
-        uom_unit = self.env.ref('product.product_uom_unit')
-        sale_values = self._prepare_sale()
-        self.sale_order = self.env['sale.order'].create(sale_values)
-        invoice_id = self.sale_order.action_invoice_create()[0]
-        self.invoice = self.env['account.invoice'].browse(invoice_id)
-        # Create the RMA from the invoice
+        self.stock_location = self.env.ref('stock.stock_location_stock')
+        self.stock_rma_location = self.env.ref('rma.location_rma')
+        self.customer_location = self.env.ref(
+            'stock.stock_location_customers')
+        self.product_uom_id = self.env.ref('product.product_uom_unit')
+        self.product_uom_id = self.env.ref('product.product_uom_unit')
+        moves = []
+        products2move = [(self.product_1, 3), (self.product_2, 5),
+                         (self.product_3, 2)]
+        for item in products2move:
+            move_values = self._prepare_move(item[0], item[1])
+            moves.append(self.env['stock.move'].create(move_values))
+        # Create the RMA from the stock_move
         self.rma_id = self.rma.create(
             {
                 'reference': '0001',
                 'type': 'customer',
                 'partner_id': self.env.ref('base.res_partner_2').id
             })
-
-        for line in self.invoice.invoice_line_ids:
-            data = self.rma_add_invoice.with_context(
-                {'invoice_id': self.invoice.id}
-            )._prepare_rma_line_from_inv_line(line)
-            data.update(rma_id=self.rma_id.id)
+        for move in moves:
+            data = self.rma_add_stock_move.with_context(
+                {'stock_move_id': move.id}
+            )._prepare_rma_line_from_stock_move(move)
+            operation = self.rma_op.browse(data['operation_id'])
+            data.update(
+                rma_id=self.rma_id.id,
+                receipt_policy=operation.receipt_policy,
+                delivery_policy=operation.delivery_policy,
+                in_warehouse_id=operation.in_warehouse_id.id,
+                out_warehouse_id=operation.out_warehouse_id.id,
+                location_id=self.stock_rma_location.id,
+                in_route_id=operation.in_route_id.id,
+                out_route_id=operation.out_route_id.id)
             self.rma_line.create(data)
-        #approve the RMA
+        # approve the RMA
         self.rma_id.action_rma_to_approve()
         self.rma_id.action_rma_approve()
 
-    def _prepare_sale(self):
-        values = {
-            'state': 'done',
-            'partner_id': self.env.ref('base.res_partner_2').id,
-            'pricelist_id': self.env.ref('product.list0').id,
-            'warehouse_id': self.env.ref('stock.warehouse0').id,
-            'partner_invoice_id': self.env.ref('base.res_partner_2').id,
-            'partner_shipping_id': self.env.ref('base.res_partner_2').id,
-            'picking_policy': 'direct',
-            'order_line': [
-                (0, False, {
-                    'name': product.name,
-                    'product_id': product.id,
-                    'product_uom_qty': qty,
-                    'qty_delivered': qty,
-                    'product_uom': self.uom_unit.id,
-                    'price_unit': product.list_price
-
-                }) for product, qty in [
-                    (self.product_1, 3),
-                    (self.product_2, 5),
-                    (self.product_3, 2),
-                ]
-            ]
+    def _prepare_move(self, product, qty):
+        res = {
+            'product_id': product.id,
+            'name': product.partner_ref,
+            'state': 'confirmed',
+            'product_uom': self.product_uom_id.id or product.uom_id.id,
+            'product_uom_qty': qty,
+            'origin': 'Test RMA',
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
         }
-        return values
+        return res
 
     def test_00_receive_items(self):
         wizard = self.rma_make_picking.with_context({
@@ -93,8 +90,7 @@ class TestRma(common.TransactionCase):
         procurements = wizard._create_picking()
         group_ids = set([proc.group_id.id for proc in procurements if
                          proc.group_id])
-        domain = "[('group_id','in',[" + ','.join(
-            map(str, list(group_ids))) + "])]"
+        domain = [('group_id', 'in', list(group_ids))]
         picking = self.stockpicking.search(domain)
         self.assertEquals(len(picking), 1,
                           "Incorrect number of pickings created")
@@ -102,6 +98,7 @@ class TestRma(common.TransactionCase):
         self.assertEquals(len(moves), 3,
                           "Incorrect number of moves created")
         for line in self.rma_id.rma_line_ids:
+            # common qtys for all products
             self.assertEquals(line.qty_received, 0,
                               "Wrong qty received")
             self.assertEquals(line.qty_to_deliver, 0,
@@ -110,10 +107,7 @@ class TestRma(common.TransactionCase):
                               "Wrong qty outgoing")
             self.assertEquals(line.qty_delivered, 0,
                               "Wrong qty delivered")
-            self.assertEquals(line.qty_to_refund, 0,
-                              "Wrong qty to refund")
-            self.assertEquals(line.qty_to_refunded, 0,
-                              "Wrong qty refunded")
+            # product specific
             if line.product_id == self.product_1:
                 self.assertEquals(line.qty_to_receive, 3,
                                   "Wrong qty to receive")
@@ -129,8 +123,8 @@ class TestRma(common.TransactionCase):
                                   "Wrong qty to receive")
                 self.assertEquals(line.qty_incoming, 2,
                                   "Wrong qty incoming")
-        pickings.action_assign()
-        pickings.do_transfer()
+        picking.action_assign()
+        picking.do_transfer()
         for line in self.rma_id.rma_line_ids:
             self.assertEquals(line.qty_to_receive, 0,
                               "Wrong qty to_receive")
@@ -140,10 +134,6 @@ class TestRma(common.TransactionCase):
                               "Wrong qty outgoing")
             self.assertEquals(line.qty_delivered, 0,
                               "Wrong qty delivered")
-            self.assertEquals(line.qty_to_refund, 0,
-                              "Wrong qty to refund")
-            self.assertEquals(line.qty_to_refunded, 0,
-                              "Wrong qty refunded")
             if line.product_id == self.product_1:
                 self.assertEquals(line.qty_received, 3,
                                   "Wrong qty received")
@@ -169,12 +159,12 @@ class TestRma(common.TransactionCase):
         procurements = wizard._create_picking()
         group_ids = set([proc.group_id.id for proc in procurements if
                          proc.group_id])
-        domain = "[('group_id','in',[" + ','.join(
-            map(str, list(group_ids))) + "])]"
-        picking = self.stockpicking.search(domain)
-        self.assertEquals(len(picking), 1,
+        domain = [('group_id', 'in', list(group_ids))]
+        pickings = self.stockpicking.search(domain)
+        self.assertEquals(len(pickings), 2,
                           "Incorrect number of pickings created")
-        moves = picking.move_lines
+        picking_out = pickings[1]
+        moves = picking_out.move_lines
         self.assertEquals(len(moves), 3,
                           "Incorrect number of moves created")
         for line in self.rma_id.rma_line_ids:
@@ -184,10 +174,6 @@ class TestRma(common.TransactionCase):
                               "Wrong qty incoming")
             self.assertEquals(line.qty_delivered, 0,
                               "Wrong qty delivered")
-            self.assertEquals(line.qty_to_refund, 0,
-                              "Wrong qty to refund")
-            self.assertEquals(line.qty_to_refunded, 0,
-                              "Wrong qty refunded")
             if line.product_id == self.product_1:
                 self.assertEquals(line.qty_to_deliver, 3,
                                   "Wrong qty to deliver")
@@ -209,8 +195,8 @@ class TestRma(common.TransactionCase):
                                   "Wrong qty to deliver")
                 self.assertEquals(line.qty_outgoing, 2,
                                   "Wrong qty outgoing")
-        pickings.action_assign()
-        pickings.do_transfer()
+        picking_out.action_assign()
+        picking_out.do_transfer()
         for line in self.rma_id.rma_line_ids:
             self.assertEquals(line.qty_to_receive, 0,
                               "Wrong qty to receive")
@@ -218,10 +204,6 @@ class TestRma(common.TransactionCase):
                               "Wrong qty incoming")
             self.assertEquals(line.qty_to_deliver, 0,
                               "Wrong qty to deliver")
-            self.assertEquals(line.qty_to_refund, 0,
-                              "Wrong qty to refund")
-            self.assertEquals(line.qty_to_refunded, 0,
-                              "Wrong qty refunded")
             self.assertEquals(line.qty_outgoing, 0,
                               "Wrong qty outgoing")
             if line.product_id == self.product_1:
