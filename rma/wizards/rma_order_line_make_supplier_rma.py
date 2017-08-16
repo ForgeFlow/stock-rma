@@ -4,6 +4,7 @@
 
 import openerp.addons.decimal_precision as dp
 from openerp import _, api, exceptions, fields, models
+from openerp.exceptions import ValidationError
 
 
 class RmaLineMakeSupplierRma(models.TransientModel):
@@ -48,7 +49,10 @@ class RmaLineMakeSupplierRma(models.TransientModel):
         for line in lines:
             items.append([0, 0, self._prepare_item(line)])
         suppliers = lines.mapped('supplier_address_id')
-        if len(suppliers) == 1:
+        if len(suppliers) == 0:
+            raise exceptions.Warning(
+                _('Please specify a supplier address'))
+        elif len(suppliers) == 1:
             res['partner_id'] = suppliers.id
         else:
             raise exceptions.Warning(
@@ -73,7 +77,8 @@ class RmaLineMakeSupplierRma(models.TransientModel):
     def _prepare_supplier_rma_line(self, rma, item):
         operation = self.env['rma.operation'].search(
             [('type', '=', 'supplier')], limit=1)
-        return {
+        data = {
+            'type': 'supplier',
             'origin': item.line_id.rma_id.name,
             'delivery_address_id':
                 item.line_id.delivery_address_id.id,
@@ -81,20 +86,38 @@ class RmaLineMakeSupplierRma(models.TransientModel):
             'customer_rma_id': item.line_id.id,
             'product_qty': item.product_qty,
             'rma_id': rma.id,
+            'uom_id': item.uom_id.id,
             'operation_id': operation.id,
             'receipt_policy': operation.receipt_policy,
             'delivery_policy': operation.delivery_policy,
-            'in_warehouse_id': operation.in_warehouse_id.id,
-            'out_warehouse_id': operation.out_warehouse_id.id,
-            'location_id': operation.location_id.id,
             'supplier_to_customer': operation.supplier_to_customer,
-            'in_route_id': operation.in_route_id.id,
-            'out_route_id': operation.out_route_id.id,
         }
+        if not operation.in_route_id or not operation.out_route_id:
+            route = self.env['stock.location.route'].search(
+                [('rma_selectable', '=', True)], limit=1)
+            if not route:
+                raise ValidationError(_("Please define an rma route"))
+        if not operation.in_warehouse_id or not operation.out_warehouse_id:
+            warehouse = self.env['stock.warehouse'].search(
+                [('company_id', '=', self.rma_id.company_id.id),
+                 ('lot_rma_id', '!=', False)], limit=1)
+            if not warehouse:
+                raise ValidationError(_("Please define a warehouse with a"
+                                      " default rma location"))
+        data.update(
+            {'in_warehouse_id': operation.in_warehouse_id.id or warehouse.id,
+             'out_warehouse_id': operation.out_warehouse_id.id or warehouse.id,
+             'in_route_id': operation.in_route_id.id or route.id,
+             'out_route_id': operation.out_route_id.id or route.id,
+             'location_id': (operation.location_id.id or
+                             operation.in_warehouse_id.lot_rma_id.id or
+                             warehouse.lot_rma_id.id)
+             })
+        return data
 
     @api.multi
     def make_supplier_rma(self):
-        res = []
+        self = self.with_context(supplier=True, customer=False)
         rma_obj = self.env['rma.order']
         rma_line_obj = self.env['rma.order.line']
         rma = False
@@ -113,16 +136,15 @@ class RmaLineMakeSupplierRma(models.TransientModel):
 
             rma_line_data = self._prepare_supplier_rma_line(rma, item)
             rma_line_obj.create(rma_line_data)
-            res.append(rma.id)
 
         return {
-            'domain': "[('id','in', ["+','.join(map(str, res))+"])]",
             'name': _('Supplier RMA'),
             'view_type': 'form',
-            'view_mode': 'tree,form',
+            'view_mode': 'form',
             'res_model': 'rma.order',
             'view_id': False,
-            'context': {'supplier': 1},
+            'res_id': rma.id,
+            'context': {'supplier': True, 'customer': False},
             'type': 'ir.actions.act_window'
         }
 
@@ -137,7 +159,8 @@ class RmaLineMakeRmaOrderItem(models.TransientModel):
         readonly=True)
     line_id = fields.Many2one('rma.order.line',
                               string='RMA Line',
-                              required=True)
+                              required=True,
+                              ondelete='cascade')
     rma_id = fields.Many2one('rma.order', related='line_id.rma_id',
                              string='RMA Order', readonly=True)
     product_id = fields.Many2one('product.product',

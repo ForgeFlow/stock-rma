@@ -2,7 +2,7 @@
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from openerp import models, fields, api, _
+from openerp import api, fields, models
 from openerp.exceptions import ValidationError
 
 
@@ -40,14 +40,18 @@ class RmaAddStockMove(models.TransientModel):
                                 domain="[('state', '=', 'done')]")
 
     def _prepare_rma_line_from_stock_move(self, sm, lot=False):
-        operation = sm.product_id.rma_operation_id or \
-            sm.product_id.categ_id.rma_operation_id
+        if self.env.context.get('customer'):
+            operation = sm.product_id.rma_customer_operation_id or \
+                sm.product_id.categ_id.rma_customer_operation_id
+        else:
+            operation = sm.product_id.rma_supplier_operation_id or \
+                sm.product_id.categ_id.rma_supplier_operation_id
         data = {
             'reference_move_id': sm.id,
             'product_id': sm.product_id.id,
             'lot_id': lot and lot.id or False,
             'name': sm.product_id.name_template,
-            'origin': sm.picking_id.name,
+            'origin': sm.picking_id.name or sm.name,
             'uom_id': sm.product_uom.id,
             'operation_id': operation.id,
             'product_qty': sm.product_uom_qty,
@@ -64,20 +68,26 @@ class RmaAddStockMove(models.TransientModel):
                 [('rma_selectable', '=', True)], limit=1)
             if not route:
                 raise ValidationError("Please define an rma route")
+
+        if not operation.in_warehouse_id or not operation.out_warehouse_id:
+            warehouse = self.env['stock.warehouse'].search(
+                [('company_id', '=', self.rma_id.company_id.id),
+                 ('lot_rma_id', '!=', False)], limit=1)
+            if not warehouse:
+                raise ValidationError("Please define a warehouse with a "
+                                      "default rma location")
         data.update(
-            {'in_route_id': operation.in_route_id.id,
-             'out_route_id': operation.out_route_id.id,
-             'receipt_policy': operation.receipt_policy,
+            {'receipt_policy': operation.receipt_policy,
              'operation_id': operation.id,
-             'refund_policy': operation.refund_policy,
-             'delivery_policy': operation.delivery_policy
+             'delivery_policy': operation.delivery_policy,
+             'in_warehouse_id': operation.in_warehouse_id.id or warehouse.id,
+             'out_warehouse_id': operation.out_warehouse_id.id or warehouse.id,
+             'in_route_id': operation.in_route_id.id or route.id,
+             'out_route_id': operation.out_route_id.id or route.id,
+             'location_id': (operation.location_id.id or
+                             operation.in_warehouse_id.lot_rma_id.id or
+                             warehouse.lot_rma_id.id)
              })
-        if operation.in_warehouse_id:
-            data['in_warehouse_id'] = operation.in_warehouse_id.id
-        if operation.out_warehouse_id:
-            data['out_warehouse_id'] = operation.out_warehouse_id.id
-        if operation.location_id:
-            data['location_id'] = operation.location_id.id
         return data
 
     @api.model
