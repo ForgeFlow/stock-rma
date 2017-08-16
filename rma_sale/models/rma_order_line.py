@@ -1,21 +1,12 @@
 # -*- coding: utf-8 -*-
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
-from openerp import _, api, fields, models
+from openerp import api, fields, models
 from openerp.addons import decimal_precision as dp
 
 
 class RmaOrderLine(models.Model):
     _inherit = "rma.order.line"
-
-    @api.model
-    def _default_sale_type(self):
-        return self.sale_type or False
-
-    sale_type = fields.Selection([
-        ('no', 'Not required'), ('ordered', 'Based on Ordered Quantities'),
-        ('received', 'Based on Received Quantities')],
-        string="Sale Policy", default=_default_sale_type)
 
     @api.one
     @api.depends('sale_line_ids', 'sale_type', 'sales_count',
