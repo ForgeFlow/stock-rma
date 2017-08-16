@@ -3,6 +3,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from openerp import api, fields, models
+from datetime import datetime
 
 
 class RmaOrder(models.Model):
@@ -38,8 +39,12 @@ class RmaOrder(models.Model):
 
     @api.multi
     def _compute_line_count(self):
-        self.ensure_one()
-        self.line_count = len(self._get_valid_lines())
+        for rec in self:
+            rec.line_count = len(rec._get_valid_lines())
+
+    @api.model
+    def _default_date_rma(self):
+        return datetime.now()
 
     name = fields.Char(
         string='Order Number', index=True, readonly=True,
@@ -55,8 +60,9 @@ class RmaOrder(models.Model):
     state = fields.Selection([('draft', 'Draft'), ('to_approve', 'To Approve'),
                               ('approved', 'Approved'),
                               ('done', 'Done')], string='State', index=True,
-                               default='draft')
-    date_rma = fields.Datetime(string='Order Date', index=True, copy=False)
+                             default='draft')
+    date_rma = fields.Datetime(string='Order Date', index=True,
+                               default=_default_date_rma)
     partner_id = fields.Many2one('res.partner', string='Partner',
                                  required=True, readonly=True,
                                  states={'draft': [('readonly', False)]})
@@ -72,11 +78,9 @@ class RmaOrder(models.Model):
     out_shipment_count = fields.Integer(compute=_compute_out_shipment_count,
                                         string='# of Outgoing Shipments')
     line_count = fields.Integer(compute=_compute_line_count,
-                                string='# of Outgoing Shipments',
-                                copy=False)
+                                string='# of Outgoing Shipments')
     supplier_line_count = fields.Integer(compute=_compute_supplier_line_count,
-                                         string='# of Outgoing Shipments',
-                                         copy=False)
+                                         string='# of Outgoing Shipments')
     company_id = fields.Many2one('res.company', string='Company',
                                  required=True, default=lambda self:
                                  self.env.user.company_id)
@@ -175,8 +179,8 @@ class RmaOrder(models.Model):
     def _get_valid_lines(self):
         """:return: A recordset of rma lines.
         """
-        self.ensure_one()
-        return self.rma_line_ids
+        for rec in self:
+            return rec.rma_line_ids
 
     @api.multi
     def action_view_lines(self):
@@ -205,7 +209,7 @@ class RmaOrder(models.Model):
         action = self.env.ref('rma.action_rma_supplier_lines')
         result = action.read()[0]
         lines = self.rma_line_ids
-        related_lines = [line.id for line in lines.children_ids]
+        related_lines = [line.id for line in lines.supplier_rma_line_ids]
         # choose the view_mode accordingly
         if len(related_lines) != 1:
             result['domain'] = "[('id', 'in', " + \
