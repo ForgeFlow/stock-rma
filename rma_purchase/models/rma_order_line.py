@@ -8,28 +8,32 @@ from openerp.addons import decimal_precision as dp
 class RmaOrderLine(models.Model):
     _inherit = "rma.order.line"
 
-    @api.one
+    @api.multi
     def _compute_purchase_count(self):
-        purchase_list = []
-        for procurement_id in self.procurement_ids:
-            if procurement_id.purchase_id and procurement_id.purchase_id.id:
-                purchase_list.append(procurement_id.purchase_id.id)
-        self.purchase_count = len(list(set(purchase_list)))
+        for rec in self:
+            purchase_list = []
+            for procurement_id in rec.procurement_ids:
+                if procurement_id.purchase_id and \
+                        procurement_id.purchase_id.id:
+                    purchase_list.append(procurement_id.purchase_id.id)
+            rec.purchase_count = len(list(set(purchase_list)))
 
-    @api.one
+    @api.multi
     @api.depends('procurement_ids.purchase_line_id')
     def _get_purchase_order_lines(self):
-        purchase_list = []
-        for procurement_id in self.procurement_ids:
-            if procurement_id.purchase_line_id and \
-                    procurement_id.purchase_line_id.id:
-                purchase_list.append(procurement_id.purchase_line_id.id)
-        self.purchase_order_line_ids = [(6, 0, purchase_list)]
+        for rec in self:
+            purchase_list = []
+            for procurement_id in rec.procurement_ids:
+                if procurement_id.purchase_line_id and \
+                        procurement_id.purchase_line_id.id:
+                    purchase_list.append(procurement_id.purchase_line_id.id)
+            rec.purchase_order_line_ids = [(6, 0, purchase_list)]
 
-    @api.one
+    @api.multi
     @api.depends('procurement_ids.purchase_line_id')
     def _compute_qty_purchased(self):
-        self.qty_purchased = self._get_rma_purchased_qty()
+        for rec in self:
+            rec.qty_purchased = rec._get_rma_purchased_qty()
 
     purchase_count = fields.Integer(compute=_compute_purchase_count,
                                     string='# of Purchases', copy=False,

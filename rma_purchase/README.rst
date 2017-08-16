@@ -2,7 +2,7 @@
     :alt: License LGPL-3
 
 RMA Purchase
-===========
+============
 
 Purchase as RMA source
 
