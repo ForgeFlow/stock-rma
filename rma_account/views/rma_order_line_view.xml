@@ -28,7 +28,7 @@
                     <field name="invoice_address_id"
                            groups='rma.group_rma_delivery_invoice_address'/>
                 </field>
-                <group name="deliver">
+                <group name="deliver" position="after">
                     <group name="refund">
                         <field name="qty_to_refund"/>
                         <field name="qty_refunded"/>
@@ -64,7 +64,7 @@
                     <field name="invoice_address_id"
                            groups='rma.group_rma_delivery_invoice_address'/>
                 </field>
-                <group name="deliver">
+                <group name="supplier_rma" position="after">
                     <group name="refund">
                         <field name="qty_to_refund"/>
                         <field name="qty_refunded"/>
