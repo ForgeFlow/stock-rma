@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
-from openerp import _, api, fields, models
-from openerp.addons import decimal_precision as dp
+from openerp import api, fields, models
 
 
 class RmaOrder(models.Model):
     _inherit = "rma.order"
 
-    @api.one
+    @api.multi
     def _compute_sales_count(self):
+        self.ensure_one()
         sales_list = []
         for rma_line in self.rma_line_ids:
             if rma_line.sale_line_id and rma_line.sale_line_id.id:
