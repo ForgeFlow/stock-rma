@@ -2,7 +2,7 @@
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from openerp import _, api, fields, models
+from openerp import api, fields, models
 from openerp.exceptions import ValidationError
 
 
@@ -43,10 +43,10 @@ class RmaAddSale(models.TransientModel):
 
     def _prepare_rma_line_from_sale_order_line(self, line):
         operation = line.product_id.rma_operation_id and \
-                    line.product_id.rma_operation_id.id or False
+            line.product_id.rma_operation_id.id or False
         if not operation:
             operation = line.product_id.categ_id.rma_operation_id and \
-                        line.product_id.categ_id.rma_operation_id.id or False
+                line.product_id.categ_id.rma_operation_id.id or False
         data = {
             'sale_line_id': line.id,
             'product_id': line.product_id.id,
@@ -74,8 +74,8 @@ class RmaAddSale(models.TransientModel):
             {'in_route_id': operation.in_route_id.id or route,
              'out_route_id': operation.out_route_id.id or route,
              'receipt_policy': operation.receipt_policy,
-             'location_id': operation.location_id.id or
-                            self.env.ref('stock.stock_location_stock').id,
+             'location_id': operation.location_id.id or self.env.ref(
+                 'stock.stock_location_stock').id,
              'operation_id': operation.id,
              'refund_policy': operation.refund_policy,
              'delivery_policy': operation.delivery_policy
