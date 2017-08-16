@@ -2,8 +2,7 @@
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-import time
-from openerp import _, api, fields, models
+from openerp import api, fields, models
 from openerp.exceptions import ValidationError
 
 
@@ -45,11 +44,12 @@ class RmaAddPurchase(models.TransientModel):
         string='Purcahse Order Lines')
 
     def _prepare_rma_line_from_po_line(self, line):
-        operation = line.product_id.rma_operation_id and \
-                    line.product_id.rma_operation_id.id or False
-        if not operation:
-            operation = line.product_id.categ_id.rma_operation_id and \
-                        line.product_id.categ_id.rma_operation_id.id or False
+        if self.env.context.get('customer'):
+            operation = line.product_id.rma_customer_operation_id or \
+                line.product_id.categ_id.rma_customer_operation_id
+        else:
+            operation = line.product_id.rma_supplier_operation_id or \
+                line.product_id.categ_id.rma_supplier_operation_id
         data = {
             'purchase_order_line_id': line.id,
             'product_id': line.product_id.id,
@@ -75,8 +75,8 @@ class RmaAddPurchase(models.TransientModel):
             {'in_route_id': operation.in_route_id.id or route,
              'out_route_id': operation.out_route_id.id or route,
              'receipt_policy': operation.receipt_policy,
-             'location_id': operation.location_id.id or \
-                            self.env.ref('stock.stock_location_stock').id,
+             'location_id': operation.location_id.id or
+                self.env.ref('stock.stock_location_stock').id,
              'operation_id': operation.id,
              'refund_policy': operation.refund_policy,
              'delivery_policy': operation.delivery_policy
