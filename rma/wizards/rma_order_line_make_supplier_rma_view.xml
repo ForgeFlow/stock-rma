@@ -13,7 +13,7 @@
                      <separator string="Existing Supplier RMA to update:"/>
                      <newline/>
                      <group>
-                        <field name="supplier_rma_id"/>
+                        <field name="supplier_rma_id" domain="[('partner_id', '=', partner_id)]"/>
                      </group>
                      <newline/>
                      <separator
