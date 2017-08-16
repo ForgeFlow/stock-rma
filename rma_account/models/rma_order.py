@@ -9,21 +9,21 @@ class RmaOrder(models.Model):
 
     @api.multi
     def _compute_invoice_refund_count(self):
-        self.ensure_one()
-        invoice_list = []
-        for line in self.rma_line_ids:
-            for refund in line.refund_line_ids:
-                invoice_list.append(refund.invoice_id.id)
-        self.invoice_refund_count = len(list(set(invoice_list)))
+        for rec in self:
+            invoice_list = []
+            for line in rec.rma_line_ids:
+                for refund in line.refund_line_ids:
+                    invoice_list.append(refund.invoice_id.id)
+            rec.invoice_refund_count = len(list(set(invoice_list)))
 
     @api.multi
     def _compute_invoice_count(self):
-        self.ensure_one()
-        invoice_list = []
-        for line in self.rma_line_ids:
-            if line.invoice_line_id and line.invoice_line_id.id:
-                invoice_list.append(line.invoice_line_id.invoice_id.id)
-        self.invoice_count = len(list(set(invoice_list)))
+        for rec in self:
+            invoice_list = []
+            for line in rec.rma_line_ids:
+                if line.invoice_line_id and line.invoice_line_id.id:
+                    invoice_list.append(line.invoice_line_id.invoice_id.id)
+            rec.invoice_count = len(list(set(invoice_list)))
 
     add_invoice_id = fields.Many2one('account.invoice', string='Add Invoice',
                                      ondelete='set null', readonly=True,
@@ -37,11 +37,12 @@ class RmaOrder(models.Model):
                                    copy=False)
 
     def _prepare_rma_line_from_inv_line(self, line):
-        operation = line.product_id.rma_operation_id and \
-                    line.product_id.rma_operation_id.id or False
-        if not operation:
-            operation = line.product_id.categ_id.rma_operation_id and \
-                        line.product_id.categ_id.rma_operation_id.id or False
+        if self.type == 'customer':
+            operation = self.product_id.rma_customer_operation_id or \
+                self.product_id.categ_id.rma_customer_operation_id
+        else:
+            operation = self.product_id.rma_supplier_operation_id or \
+                self.product_id.categ_id.rma_supplier_operation_id
         data = {
             'invoice_line_id': line.id,
             'product_id': line.product_id.id,

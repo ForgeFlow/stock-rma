@@ -2,8 +2,7 @@
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-import time
-from openerp import _, api, fields, models
+from openerp import api, fields, models
 from openerp.exceptions import ValidationError
 
 
@@ -20,11 +19,9 @@ class RmaAddinvoice(models.TransientModel):
         if not rma_id:
             return res
         assert active_model == 'rma.order', 'Bad context propagation'
-
         rma = rma_obj.browse(rma_id)
         res['rma_id'] = rma.id
         res['partner_id'] = rma.partner_id.id
-        res['invoice_id'] = False
         res['invoice_line_ids'] = False
         return res
 
@@ -32,8 +29,6 @@ class RmaAddinvoice(models.TransientModel):
                              ondelete='cascade')
     partner_id = fields.Many2one(comodel_name='res.partner', string='Partner',
                                  readonly=True)
-    invoice_id = fields.Many2one(comodel_name='account.invoice',
-                                 string='Invoice')
     invoice_line_ids = fields.Many2many('account.invoice.line',
                                         'rma_add_invoice_add_line_rel',
                                         'invoice_line_id',
@@ -41,8 +36,12 @@ class RmaAddinvoice(models.TransientModel):
                                         string='Invoice Lines')
 
     def _prepare_rma_line_from_inv_line(self, line):
-        operation = line.product_id.rma_operation_id or \
-            line.product_id.categ_id.rma_operation_id
+        if self.env.context.get('customer'):
+            operation = line.product_id.rma_customer_operation_id or \
+                line.product_id.categ_id.rma_customer_operation_id
+        else:
+            operation = line.product_id.rma_supplier_operation_id or \
+                line.product_id.categ_id.rma_supplier_operation_id
         data = {
             'invoice_line_id': line.id,
             'product_id': line.product_id.id,
@@ -52,8 +51,8 @@ class RmaAddinvoice(models.TransientModel):
             'product_qty': line.quantity,
             'price_unit': line.invoice_id.currency_id.compute(
                 line.price_unit, line.currency_id, round=False),
-            'delivery_address_id': self.invoice_id.partner_id.id,
-            'invoice_address_id': self.invoice_id.partner_id.id,
+            'delivery_address_id': line.invoice_id.partner_id.id,
+            'invoice_address_id': line.invoice_id.partner_id.id,
             'rma_id': self.rma_id.id
         }
         if not operation:
@@ -66,16 +65,26 @@ class RmaAddinvoice(models.TransientModel):
                 [('rma_selectable', '=', True)], limit=1)
             if not route:
                 raise ValidationError("Please define an rma route")
+
+        if not operation.in_warehouse_id or not operation.out_warehouse_id:
+            warehouse = self.env['stock.warehouse'].search(
+                [('company_id', '=', self.rma_id.company_id.id),
+                 ('lot_rma_id', '!=', False)], limit=1)
+            if not warehouse:
+                raise ValidationError("Please define a warehouse with a"
+                                      " default rma location")
         data.update(
-            {'in_route_id': operation.in_route_id.id,
-             'out_route_id': operation.out_route_id.id,
-             'in_warehouse_id': operation.in_warehouse_id.id,
-             'out_warehouse_id': operation.out_warehouse_id.id,
-             'receipt_policy': operation.receipt_policy,
-             'location_id': operation.location_id.id,
+            {'receipt_policy': operation.receipt_policy,
              'operation_id': operation.id,
              'refund_policy': operation.refund_policy,
-             'delivery_policy': operation.delivery_policy
+             'delivery_policy': operation.delivery_policy,
+             'in_warehouse_id': operation.in_warehouse_id.id or warehouse.id,
+             'out_warehouse_id': operation.out_warehouse_id.id or warehouse.id,
+             'in_route_id': operation.in_route_id.id or route.id,
+             'out_route_id': operation.out_route_id.id or route.id,
+             'location_id': (operation.location_id.id or
+                             operation.in_warehouse_id.lot_rma_id.id or
+                             warehouse.lot_rma_id.id)
              })
         return data
 
@@ -83,8 +92,10 @@ class RmaAddinvoice(models.TransientModel):
     def _get_rma_data(self):
         data = {
             'date_rma': fields.Datetime.now(),
-            'delivery_address_id': self.invoice_id.partner_id.id,
-            'invoice_address_id': self.invoice_id.partner_id.id
+            'delivery_address_id':
+                self.invoice_line_ids[0].invoice_id.partner_id.id,
+            'invoice_address_id':
+                self.invoice_line_ids[0].invoice_id.partner_id.id
         }
         return data
 
