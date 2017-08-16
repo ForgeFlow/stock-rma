@@ -19,13 +19,14 @@ class RmaOrder(models.Model):
                         purchase_list.append(procurement_id.purchase_id.id)
             rec.po_count = len(list(set(purchase_list)))
 
-    @api.one
+    @api.multi
     def _compute_origin_po_count(self):
         po_list = []
-        for rma_line in self.rma_line_ids:
-            if rma_line.purchase_order_line_id and \
-                    rma_line.purchase_order_line_id.id:
-                po_list.append(rma_line.purchase_order_line_id.order_id.id)
+        for rec in self:
+            for rma_line in rec.rma_line_ids:
+                if rma_line.purchase_order_line_id and \
+                        rma_line.purchase_order_line_id.id:
+                    po_list.append(rma_line.purchase_order_line_id.order_id.id)
         self.origin_po_count = len(list(set(po_list)))
 
     po_count = fields.Integer(compute=_compute_po_count,

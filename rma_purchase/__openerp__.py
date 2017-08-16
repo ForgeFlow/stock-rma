@@ -6,9 +6,7 @@
     'version': '9.0.1.0.0',
     'category': 'RMA',
     'summary': 'RMA from PO',
-    'description': """
-    RMA from PO
-""",
+    'license': 'LGPL-3',
     'author': 'Eficent',
     'website': 'http://www.github.com/OCA/rma',
     'depends': ['rma_account', 'purchase'],
