@@ -11,17 +11,51 @@
                            domain="[('customer','=',True)]"
                            string="Customer"/>
                 </group>
-                <separator string="Select Invoice from customer"/>
+                <separator string="Select Invoices lines to add"/>
+                <field name="invoice_line_ids"
+                       domain="[('invoice_id.partner_id', '=', partner_id),
+                       ('invoice_id.type', '=', 'out_invoice')]">
+                    <tree string="Invoice Lines">
+                        <field name="invoice_id"/>
+                        <field name="name"/>
+                        <field name="account_id" groups="account.group_account_user"/>
+                        <field name="quantity"/>
+                        <field name="uom_id" groups="product.group_uom"/>
+                        <field name="price_unit"/>
+                        <field name="discount" groups="sale.group_discount_per_so_line"/>
+                        <field name="price_subtotal"/>
+                        <field name="currency_id" invisible="1"/>
+                    </tree>
+                </field>
+                <footer>
+                    <button
+                            string="Confirm"
+                            name="add_lines" type="object"
+                            class="oe_highlight"/>
+                    or
+                    <button name="action_cancel"
+                            string="Cancel" class="oe_link" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_rma_add_invoice_supplier" model="ir.ui.view">
+        <field name="name">rma.add.invoice.supplier</field>
+        <field name="model">rma_add_invoice</field>
+        <field name="arch" type="xml">
+            <form string="Select Invoice from supplier">
                 <group>
-                    <field name="invoice_id"
-                           domain="[('type','=','out_invoice'),'|',('commercial_partner_id','=',partner_id),
-                           ('partner_id','=',partner_id), (('state','not in',['draft','cancel']))]"
-                            context="{'form_view_ref':'account.invoice_form','partner_id': partner_id}"/>
+                    <field name="partner_id"
+                           domain="[('supplier','=',True)]"
+                           string="Supplier"/>
                 </group>
                 <separator string="Select Invoices lines to add"/>
                 <field name="invoice_line_ids"
-                       domain="[('invoice_id', '=', invoice_id)]">
+                       domain="[('invoice_id.partner_id', '=', partner_id),
+                       ('invoice_id.type', '=', 'in_invoice')]">
                     <tree string="Invoice Lines">
+                        <field name="invoice_id"/>
                         <field name="name"/>
                         <field name="account_id" groups="account.group_account_user"/>
                         <field name="quantity"/>
@@ -54,9 +88,20 @@
         <field name="view_mode">form</field>
         <field name="target">new</field>
         <field name="view_id" ref="view_rma_add_invoice"/>
-        <field name="groups_id" eval="[(4, ref('rma.group_rma_customer_user')), (4, ref('rma.group_rma_customer_user'))]"/>
+        <field name="groups_id" eval="[(4, ref('rma.group_rma_customer_user'))]"/>
     </record>
 
+    <record id="action_rma_add_invoice_supplier" model="ir.actions.act_window">
+        <field name="name">Add Invoice</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">rma_add_invoice</field>
+        <field name="src_model">rma.order</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="view_rma_add_invoice_supplier"/>
+        <field name="groups_id" eval="[(4, ref('rma.group_rma_supplier_user'))]"/>
+    </record>
 
     <record id="view_rma_add_invoice_form" model="ir.ui.view">
         <field name="name">rma.order.line.form</field>
@@ -78,7 +123,7 @@
         <field name="inherit_id" ref="rma.view_rma_supplier_form"/>
         <field name="arch" type="xml">
             <button name="action_rma_done" position="after">
-                <button name="%(action_rma_add_invoice)d"
+                <button name="%(action_rma_add_invoice_supplier)d"
                         string="Add From Invoice"
                         type="action"
                         states="draft,to_approve"/>
