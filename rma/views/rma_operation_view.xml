@@ -6,6 +6,7 @@
             <field name="model">rma.operation</field>
             <field name="arch" type="xml">
                 <tree string="RMA Operations">
+                    <field name="active" invisible="1"/>
                     <field name="code"/>
                     <field name="name"/>
                     <field name="receipt_policy"/>
@@ -25,6 +26,7 @@
                             <field name="code"/>
                             <field name="name"/>
                             <field name="type"/>
+                            <field name="active"/>
                         </group>
                         <group name="policies"
                                string="Policies">
@@ -50,20 +52,39 @@
             </field>
         </record>
 
-        <record id="action_rma_operation" model="ir.actions.act_window">
-            <field name="name">Operations</field>
+        <record id="action_rma_operation_customer" model="ir.actions.act_window">
+            <field name="name">Customer Operations</field>
             <field name="res_model">rma.operation</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
+            <field name="context">{'default_type': "customer"}</field>
+            <field name="domain">[('type','=', 'customer')]</field>
             <field name="view_id" ref="rma_operation_tree"/>
         </record>
 
-        <menuitem id="menu_rma_operation"
-            name="Operations"
+        <record id="action_rma_operation_supplier" model="ir.actions.act_window">
+            <field name="name">Supplier Operations</field>
+            <field name="res_model">rma.operation</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'default_type': "supplier"}</field>
+            <field name="domain">[('type','=', 'supplier')]</field>
+            <field name="view_id" ref="rma_operation_tree"/>
+        </record>
+
+        <menuitem id="menu_rma_operation_customer"
+            name="Customer Operations"
             groups="rma.group_rma_manager"
             sequence="35"
             parent="rma.menu_rma_config"
-            action="action_rma_operation"/>
+            action="action_rma_operation_customer"/>
+
+        <menuitem id="menu_rma_operation_supplier"
+            name="Supplier Operations"
+            groups="rma.group_rma_manager"
+            sequence="40"
+            parent="rma.menu_rma_config"
+            action="action_rma_operation_supplier"/>
 
     </data>
 </odoo>

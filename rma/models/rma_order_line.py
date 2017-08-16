@@ -308,8 +308,12 @@ class RmaOrderLine(models.Model):
         self.product_qty = 1
         self.uom_id = self.product_id.uom_id.id
         self.price_unit = self.product_id.standard_price
-        self.operation_id = self.product_id.rma_operation_id or \
-            self.product_id.categ_id.rma_operation_id
+        if self.type == 'customer':
+            self.operation_id = self.product_id.rma_customer_operation_id or \
+                self.product_id.categ_id.rma_customer_operation_id
+        else:
+            self.operation_id = self.product_id.rma_supplier_operation_id or \
+                self.product_id.categ_id.rma_supplier_operation_id
         return result
 
     @api.onchange('operation_id')

@@ -26,10 +26,7 @@ class RmaOperation(models.Model):
 
     name = fields.Char('Description', required=True)
     code = fields.Char('Code', required=True)
-    refund_policy = fields.Selection([
-        ('no', 'No refund'), ('ordered', 'Based on Ordered Quantities'),
-        ('received', 'Based on Received Quantities')], string="Refund Policy",
-        default='no')
+    active = fields.Boolean(string='Active', default=True)
     receipt_policy = fields.Selection([
         ('no', 'Not required'), ('ordered', 'Based on Ordered Quantities'),
         ('received', 'Based on Delivered Quantities')],
@@ -58,6 +55,6 @@ class RmaOperation(models.Model):
         'stock.location', 'Send To This Company Location')
     type = fields.Selection([
         ('customer', 'Customer'), ('supplier', 'Supplier')],
-        string="Used in RMA of this type", required=True, default='customer')
+        string="Used in RMA of this type", required=True)
     rma_line_ids = fields.One2many('rma.order.line', 'operation_id',
                                    'RMA lines')

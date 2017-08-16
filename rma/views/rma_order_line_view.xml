@@ -332,8 +332,7 @@
             <field name="name">Customer RMA Lines</field>
             <field name="res_model">rma.order.line</field>
             <field name="domain">[('state','in', ['approved', 'done']),
-                ('type','=', 'customer'),
-                ('customer_to_supplier','=', False)
+                ('type','=', 'customer')
                 ]</field>
             <field name="context">{"search_default_assigned_to":uid}</field>
             <field name="view_type">form</field>

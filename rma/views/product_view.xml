@@ -8,8 +8,11 @@
             <field name="inherit_id" ref="product.product_category_form_view" />
             <field name="arch" type="xml">
                 <field name="type" position="after">
-                    <field name="rma_approval_policy"/>
-                    <field name="rma_operation_id" groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"/>
+                    <group name="rma">
+                        <field name="rma_approval_policy" groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"/>
+                        <field name="rma_customer_operation_id" groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"/>
+                        <field name="rma_supplier_operation_id" groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"/>
+                    </group>
                 </field>
             </field>
         </record>
@@ -22,7 +25,8 @@
                  <group name="inventory" position="inside">
                     <group name="rma" groups="rma.group_rma_customer_user,rma.group_rma_supplier_user">
                         <field name="rma_approval_policy"/>
-                        <field name="rma_operation_id"/>
+                        <field name="rma_customer_operation_id" groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"/>
+                        <field name="rma_supplier_operation_id" groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"/>
                     </group>
                 </group>
             </field>
