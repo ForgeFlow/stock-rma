@@ -42,24 +42,9 @@ class RmaAddSale(models.TransientModel):
                                      string='Sale Lines')
 
     def _prepare_rma_line_from_sale_order_line(self, line):
-        operation = line.product_id.rma_operation_id and \
-            line.product_id.rma_operation_id.id or False
+        operation = line.product_id.rma_customer_operation_id
         if not operation:
-            operation = line.product_id.categ_id.rma_operation_id and \
-                line.product_id.categ_id.rma_operation_id.id or False
-        data = {
-            'sale_line_id': line.id,
-            'product_id': line.product_id.id,
-            'origin': line.order_id.name,
-            'uom_id': line.product_uom.id,
-            'operation_id': operation,
-            'product_qty': line.product_uom_qty,
-            'delivery_address_id': self.sale_id.partner_id.id,
-            'invoice_address_id': self.sale_id.partner_id.id,
-            'price_unit': line.currency_id.compute(
-                line.price_unit, line.currency_id, round=False),
-            'rma_id': self.rma_id.id
-        }
+            operation = line.product_id.categ_id.rma_customer_operation_id
         if not operation:
             operation = self.env['rma.operation'].search(
                 [('type', '=', self.rma_id.type)], limit=1)
@@ -70,16 +55,26 @@ class RmaAddSale(models.TransientModel):
                 [('rma_selectable', '=', True)], limit=1)
             if not route:
                 raise ValidationError("Please define an rma route")
-        data.update(
-            {'in_route_id': operation.in_route_id.id or route,
-             'out_route_id': operation.out_route_id.id or route,
-             'receipt_policy': operation.receipt_policy,
-             'location_id': operation.location_id.id or self.env.ref(
-                 'stock.stock_location_stock').id,
-             'operation_id': operation.id,
-             'refund_policy': operation.refund_policy,
-             'delivery_policy': operation.delivery_policy
-             })
+        data = {
+            'sale_line_id': line.id,
+            'product_id': line.product_id.id,
+            'origin': line.order_id.name,
+            'uom_id': line.product_uom.id,
+            'operation_id': operation.id,
+            'product_qty': line.product_uom_qty,
+            'delivery_address_id': self.sale_id.partner_id.id,
+            'invoice_address_id': self.sale_id.partner_id.id,
+            'price_unit': line.currency_id.compute(
+                line.price_unit, line.currency_id, round=False),
+            'rma_id': self.rma_id.id,
+            'in_route_id': operation.in_route_id.id or route,
+            'out_route_id': operation.out_route_id.id or route,
+            'receipt_policy': operation.receipt_policy,
+            'location_id': operation.location_id.id or self.env.ref(
+                'stock.stock_location_stock').id,
+            'refund_policy': operation.refund_policy,
+            'delivery_policy': operation.delivery_policy
+        }
         return data
 
     @api.model
