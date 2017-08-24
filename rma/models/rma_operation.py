@@ -29,7 +29,7 @@ class RmaOperation(models.Model):
     active = fields.Boolean(string='Active', default=True)
     receipt_policy = fields.Selection([
         ('no', 'Not required'), ('ordered', 'Based on Ordered Quantities'),
-        ('received', 'Based on Delivered Quantities')],
+        ('delivered', 'Based on Delivered Quantities')],
         string="Receipts Policy", default='no')
     delivery_policy = fields.Selection([
         ('no', 'Not required'), ('ordered', 'Based on Ordered Quantities'),
