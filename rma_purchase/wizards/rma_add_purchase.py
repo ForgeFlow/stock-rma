@@ -27,21 +27,17 @@ class RmaAddPurchase(models.TransientModel):
         res['purchase_line_ids'] = False
         return res
 
-    rma_id = fields.Many2one('rma.order',
-                             string='RMA Order',
-                             readonly=True,
-                             ondelete='cascade')
-
-    partner_id = fields.Many2one(comodel_name='res.partner', string='Partner',
-                                 readonly=True)
+    rma_id = fields.Many2one(
+        comodel_name='rma.order', string='RMA Order', readonly=True)
+    partner_id = fields.Many2one(
+        comodel_name='res.partner', string='Partner', readonly=True)
     purchase_id = fields.Many2one(
         comodel_name='purchase.order', string='Order')
     purchase_line_ids = fields.Many2many(
-        'purchase.order.line',
-        'rma_add_purchase_add_line_rel',
-        'purchase_line_id', 'rma_add_purchase_id',
-        readonly=False,
-        string='Purcahse Order Lines')
+        comodel_name='purchase.order.line',
+        relation='rma_add_purchase_add_line_rel',
+        column1='rma_add_purchase_id', column2='purchase_line_id',
+        readonly=False, string='Purchase Order Lines')
 
     def _prepare_rma_line_from_po_line(self, line):
         if self.env.context.get('customer'):
@@ -50,17 +46,6 @@ class RmaAddPurchase(models.TransientModel):
         else:
             operation = line.product_id.rma_supplier_operation_id or \
                 line.product_id.categ_id.rma_supplier_operation_id
-        data = {
-            'purchase_order_line_id': line.id,
-            'product_id': line.product_id.id,
-            'origin': line.order_id.name,
-            'uom_id': line.product_uom.id,
-            'operation_id': operation,
-            'product_qty': line.product_qty,
-            'price_unit': line.currency_id.compute(
-                line.price_unit, line.currency_id, round=False),
-            'rma_id': self.rma_id.id
-        }
         if not operation:
             operation = self.env['rma.operation'].search(
                 [('type', '=', self.rma_id.type)], limit=1)
@@ -70,17 +55,35 @@ class RmaAddPurchase(models.TransientModel):
             route = self.env['stock.location.route'].search(
                 [('rma_selectable', '=', True)], limit=1)
             if not route:
-                raise ValidationError("Please define an rma route")
-        data.update(
-            {'in_route_id': operation.in_route_id.id or route,
-             'out_route_id': operation.out_route_id.id or route,
-             'receipt_policy': operation.receipt_policy,
-             'location_id': operation.location_id.id or
-                self.env.ref('stock.stock_location_stock').id,
-             'operation_id': operation.id,
-             'refund_policy': operation.refund_policy,
-             'delivery_policy': operation.delivery_policy
-             })
+                raise ValidationError("Please define a rma route.")
+        if not operation.in_warehouse_id or not operation.out_warehouse_id:
+            warehouse = self.env['stock.warehouse'].search(
+                [('company_id', '=', self.rma_id.company_id.id),
+                 ('lot_rma_id', '!=', False)], limit=1)
+            if not warehouse:
+                raise ValidationError("Please define a warehouse with a "
+                                      "default rma location.")
+        data = {
+            'purchase_order_line_id': line.id,
+            'product_id': line.product_id.id,
+            'origin': line.order_id.name,
+            'uom_id': line.product_uom.id,
+            'operation_id': operation.id,
+            'product_qty': line.product_qty,
+            'price_unit': line.currency_id.compute(
+                line.price_unit, line.currency_id, round=False),
+            'rma_id': self.rma_id.id,
+            'in_route_id': operation.in_route_id.id or route,
+            'out_route_id': operation.out_route_id.id or route,
+            'receipt_policy': operation.receipt_policy,
+            'location_id': (operation.location_id.id or
+                            operation.in_warehouse_id.lot_rma_id.id or
+                            warehouse.lot_rma_id.id),
+            'refund_policy': operation.refund_policy,
+            'delivery_policy': operation.delivery_policy,
+            'in_warehouse_id': operation.in_warehouse_id.id or warehouse.id,
+            'out_warehouse_id': operation.out_warehouse_id.id or warehouse.id,
+        }
         return data
 
     @api.model
