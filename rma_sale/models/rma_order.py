@@ -9,15 +9,12 @@ class RmaOrder(models.Model):
 
     @api.multi
     def _compute_sales_count(self):
-        self.ensure_one()
-        sales_list = []
-        for rma_line in self.rma_line_ids:
-            if rma_line.sale_line_id and rma_line.sale_line_id.id:
-                sales_list.append(rma_line.sale_line_id.order_id.id)
-        self.sale_count = len(list(set(sales_list)))
+        for rma in self:
+            sales = rma.mapped('rma_line_ids.sale_line_id.order_id')
+            rma.sale_count = len(sales)
 
-    sale_count = fields.Integer(compute=_compute_sales_count,
-                                string='# of Sales', copy=False, default=0)
+    sale_count = fields.Integer(
+        compute=_compute_sales_count, string='# of Sales')
 
     @api.model
     def _get_line_domain(self, rma_id, line):
@@ -33,9 +30,6 @@ class RmaOrder(models.Model):
     def action_view_sale_order(self):
         action = self.env.ref('sale.action_quotations')
         result = action.read()[0]
-        order_ids = []
-        for rma_line in self.rma_line_ids:
-            if rma_line.sale_line_id and rma_line.sale_line_id.id:
-                order_ids.append(rma_line.sale_line_id.order_id.id)
-        result['domain'] = [('id', 'in', order_ids)]
+        so_ids = self.mapped('rma_line_ids.sale_line_id.order_id').ids
+        result['domain'] = [('id', 'in', so_ids)]
         return result

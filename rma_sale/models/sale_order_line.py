@@ -8,8 +8,8 @@ from openerp import api, fields, models
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
 
-    rma_line_id = fields.Many2one('rma.order.line', string='RMA',
-                                  ondelete='restrict')
+    rma_line_id = fields.Many2one(
+        comodel_name='rma.order.line', string='RMA', ondelete='restrict')
 
     @api.multi
     def _prepare_order_line_procurement(self, group_id=False):
