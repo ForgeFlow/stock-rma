@@ -6,25 +6,25 @@ RMA Account
 ===========
 
 This module integrates Return Merchandise Authorizations (RMA) with invoices,
- allowing to:
+allowing to:
 
 #. Create complete RMA's using existing invoices as a reference.
-#. Create refunds from RMA.
+#. Create refunds from a RMA.
 
 Usage
 =====
 
-RMA are accessible though Inventory menu. There's four menus, divided by type
-. Users can access to the list of RMA or RMA lines.
+RMA are accessible though Inventory menu. There's four menus, divided by type.
+Users can access to the list of RMA or RMA lines.
 
 Create an RMA:
+
 #. Select a partner. Fill the rma lines by selecting an invoice.
 #. Request approval and approve.
 #. Click on RMA Lines button.
 #. Click on more and select an option: "Receive products", "Create Delivery
    Order, Create Refund".
 #. Go back to the RMA. Set the RMA to done if not further action is required.
-
 
 Bug Tracker
 ===========
@@ -34,7 +34,6 @@ Bugs are tracked on `GitHub Issues
 check there if your issue has already been reported. If you spotted it first,
 help us smashing it by providing a detailed and welcomed feedback.
 
-
 Credits
 =======
 
@@ -43,7 +42,7 @@ Contributors
 
 * Jordi Ballester Alomar <jordi.ballester@eficent.com>
 * Aaron Henriquez <ahenriquez@eficent.com>
-
+* Lois Rilo <lois.rilo@eficent.com>
 
 Maintainer
 ----------

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <odoo>
+
     <record id="view_rma_add_invoice" model="ir.ui.view">
         <field name="name">rma.add.invoice</field>
         <field name="model">rma_add_invoice</field>
@@ -104,7 +105,7 @@
     </record>
 
     <record id="view_rma_add_invoice_form" model="ir.ui.view">
-        <field name="name">rma.order.line.form</field>
+        <field name="name">rma.order.form - invoice wizard</field>
         <field name="model">rma.order</field>
         <field name="inherit_id" ref="rma.view_rma_form"/>
         <field name="arch" type="xml">
@@ -118,7 +119,7 @@
     </record>
 
     <record id="view_rma_add_invoice_button_form" model="ir.ui.view">
-        <field name="name">rma.order.line.supplier.form</field>
+        <field name="name">rma.order.supplier.form - invoice wizard</field>
         <field name="model">rma.order</field>
         <field name="inherit_id" ref="rma.view_rma_supplier_form"/>
         <field name="arch" type="xml">
@@ -130,6 +131,5 @@
             </button>
         </field>
     </record>
-
 
 </odoo>
