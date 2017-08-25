@@ -49,8 +49,8 @@
             <field name="model">rma.order.line</field>
             <field name="arch" type="xml">
                 <form string="RMA Line" create="0">
+                    <header/>
                     <sheet>
-                        <header/>
                         <div name="button_box" class="oe_button_box">
                             <button type="object"  name="action_view_in_shipments"
                                     class="oe_stat_button"
@@ -172,8 +172,8 @@
             <field name="model">rma.order.line</field>
             <field name="arch" type="xml">
                 <form string="Rma Line" create="0">
+                    <header/>
                     <sheet>
-                        <header/>
                         <div name="button_box" class="oe_button_box">
                             <button type="object"  name="action_view_in_shipments"
                                     class="oe_stat_button"

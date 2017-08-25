@@ -57,7 +57,7 @@
 
 
     <record id="view_rma_add_stock_move_customer_form" model="ir.ui.view">
-        <field name="name">rma.order.line.form</field>
+        <field name="name">rma.order.form - stock.move wizard</field>
         <field name="model">rma.order</field>
         <field name="inherit_id" ref="rma.view_rma_form"/>
         <field name="arch" type="xml">
@@ -112,7 +112,7 @@
 
     <record id="view_rma_add_stock_move_button_supplier_form"
             model="ir.ui.view">
-        <field name="name">rma.order.line.supplier.form</field>
+        <field name="name">rma.order.supplier.form - stock.move wizard</field>
         <field name="model">rma.order</field>
         <field name="inherit_id" ref="rma.view_rma_supplier_form"/>
         <field name="arch" type="xml">
