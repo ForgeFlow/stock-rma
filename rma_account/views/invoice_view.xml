@@ -9,7 +9,7 @@
         <field name="arch" type="xml">
             <field name="number" position="before">
                 <div class="oe_button_box" attrs="{'invisible': [('rma_count', '=', 0)]}">
-                    <button type="object"  name="action_view_rma"
+                    <button type="object"  name="action_view_rma_customer"
                             class="oe_stat_button"
                             icon="fa-eject"
                             groups="rma.group_rma_customer_user,rma.group_rma_supplier_user">
@@ -48,10 +48,10 @@
         <field name="arch" type="xml">
             <data>
                 <field name="name" position="after">
-                    <field name="rma_count" invisible="1"/>
+                    <field name="rma_line_count" invisible="1"/>
                     <field name="rma_line_id"
-                           string="RMA originated"/>
-                    <notebook attrs="{'invisible': [('rma_count', '=', 0)]}">
+                           string="RMA line originated"/>
+                    <notebook attrs="{'invisible': [('rma_line_count', '=', 0)]}">
                         <page string="RMA Lines">
                             <field name="rma_line_ids"/>
                         </page>

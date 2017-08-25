@@ -11,10 +11,10 @@ class RmaOrderLine(models.Model):
 
     @api.model
     def _default_invoice_address(self):
-        partner_id = self.env.context.get('partner_id', False)
+        partner_id = self.env.context.get('partner_id')
         if partner_id:
             return self.env['res.partner'].browse(partner_id)
-        return False
+        return self.env['res.partner']
 
     @api.multi
     @api.depends('refund_line_ids', 'refund_line_ids.invoice_id.state',
@@ -46,9 +46,8 @@ class RmaOrderLine(models.Model):
         default=_default_invoice_address,
         help="Invoice address for current rma order.")
 
-    refund_count = fields.Integer(compute=_compute_refund_count,
-                                  string='# of Refunds', copy=False, default=0)
-
+    refund_count = fields.Integer(
+        compute=_compute_refund_count, string='# of Refunds', default=0)
     invoice_line_id = fields.Many2one('account.invoice.line',
                                       string='Invoice Line',
                                       ondelete='restrict',
@@ -118,13 +117,10 @@ class RmaOrderLine(models.Model):
     def action_view_refunds(self):
         action = self.env.ref('account.action_invoice_tree2')
         result = action.read()[0]
-        invoice_ids = []
-        for inv_line in self.refund_line_ids:
-            invoice_ids.append(inv_line.invoice_id.id)
+        invoice_ids= self.mapped('refund_line_ids.invoice_id').ids
         # choose the view_mode accordingly
         if len(invoice_ids) != 1:
-            result['domain'] = "[('id', 'in', " + \
-                               str(invoice_ids) + ")]"
+            result['domain'] = [('id', 'in', invoice_ids)]
         elif len(invoice_ids) == 1:
             res = self.env.ref('account.invoice_supplier_form', False)
             result['views'] = [(res and res.id or False, 'form')]
