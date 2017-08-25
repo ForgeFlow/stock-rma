@@ -17,5 +17,5 @@ class RmaMakePicking(models.TransientModel):
 class RmaMakePickingItem(models.TransientModel):
     _inherit = "rma_make_picking.wizard.item"
 
-    sale_line_id = fields.Many2one('sale.order.line',
-                                   string='Sale Line')
+    sale_line_id = fields.Many2one(
+        comodel_name='sale.order.line', string='Sale Line')
