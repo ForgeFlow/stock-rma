@@ -64,7 +64,7 @@
 
 
     <record id="view_rma_add_sale_form" model="ir.ui.view">
-        <field name="name">rma.order.line.form</field>
+        <field name="name">rma.order.form - sale wizard</field>
         <field name="model">rma.order</field>
         <field name="inherit_id" ref="rma.view_rma_form"/>
         <field name="arch" type="xml">
