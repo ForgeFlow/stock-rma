@@ -17,5 +17,5 @@ class RmaRefund(models.TransientModel):
 class RmaRefundItem(models.TransientModel):
     _inherit = "rma.refund.item"
 
-    sale_line_id = fields.Many2one('sale.order.line',
-                                   string='Sale Line')
+    sale_line_id = fields.Many2one(
+        comodel_name='sale.order.line', string='Sale Order Line')

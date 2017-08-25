@@ -71,7 +71,7 @@
         <field name="arch" type="xml">
             <header position="inside">
                 <button name="%(action_rma_order_line_make_sale_order)d" states="approved"
-                        string="Create Sale Quotation" class="oe_highlight"
+                        string="Create Sales Quotation" class="oe_highlight"
                         type="action"/>
             </header>
         </field>
@@ -83,7 +83,7 @@
         <field name="arch" type="xml">
             <header position="inside">
                 <button name="%(action_rma_order_line_make_sale_order)d" states="approved"
-                        string="Create Sale Quotation" class="oe_highlight"
+                        string="Create Sales Quotation" class="oe_highlight"
                         type="action"/>
             </header>
         </field>
