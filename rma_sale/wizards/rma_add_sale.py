@@ -8,7 +8,7 @@ from openerp.exceptions import ValidationError
 
 class RmaAddSale(models.TransientModel):
     _name = 'rma_add_sale'
-    _description = 'Wizard to add rma lines'
+    _description = 'Wizard to add rma lines from SO lines'
 
     @api.model
     def default_get(self, fields):
@@ -27,11 +27,8 @@ class RmaAddSale(models.TransientModel):
         res['sale_line_ids'] = False
         return res
 
-    rma_id = fields.Many2one('rma.order',
-                             string='RMA Order',
-                             readonly=True,
-                             ondelete='cascade')
-
+    rma_id = fields.Many2one(
+        comodel_name='rma.order', string='RMA Order', readonly=True)
     partner_id = fields.Many2one(comodel_name='res.partner', string='Partner',
                                  readonly=True)
     sale_id = fields.Many2one(comodel_name='sale.order', string='Order')
@@ -55,6 +52,13 @@ class RmaAddSale(models.TransientModel):
                 [('rma_selectable', '=', True)], limit=1)
             if not route:
                 raise ValidationError("Please define an rma route")
+        if not operation.in_warehouse_id or not operation.out_warehouse_id:
+            warehouse = self.env['stock.warehouse'].search(
+                [('company_id', '=', self.rma_id.company_id.id),
+                 ('lot_rma_id', '!=', False)], limit=1)
+            if not warehouse:
+                raise ValidationError("Please define a warehouse with a "
+                                      "default rma location.")
         data = {
             'sale_line_id': line.id,
             'product_id': line.product_id.id,
@@ -67,13 +71,16 @@ class RmaAddSale(models.TransientModel):
             'price_unit': line.currency_id.compute(
                 line.price_unit, line.currency_id, round=False),
             'rma_id': self.rma_id.id,
-            'in_route_id': operation.in_route_id.id or route,
-            'out_route_id': operation.out_route_id.id or route,
+            'in_route_id': operation.in_route_id.id or route.id,
+            'out_route_id': operation.out_route_id.id or route.id,
             'receipt_policy': operation.receipt_policy,
-            'location_id': operation.location_id.id or self.env.ref(
-                'stock.stock_location_stock').id,
+            'location_id': (operation.location_id.id or
+                            operation.in_warehouse_id.lot_rma_id.id or
+                            warehouse.lot_rma_id.id),
             'refund_policy': operation.refund_policy,
-            'delivery_policy': operation.delivery_policy
+            'delivery_policy': operation.delivery_policy,
+            'in_warehouse_id': operation.in_warehouse_id.id or warehouse.id,
+            'out_warehouse_id': operation.out_warehouse_id.id or warehouse.id,
         }
         return data
 

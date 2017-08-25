@@ -8,18 +8,17 @@ from openerp import _, api, exceptions, fields, models
 
 class RmaLineMakeSaleOrder(models.TransientModel):
     _name = "rma.order.line.make.sale.order"
-    _description = "RMA Line Make Sales Order"
+    _description = "Make Sales Order from RMA Line"
 
-    partner_id = fields.Many2one('res.partner', string='Customer',
-                                 required=False,
-                                 domain=[('supplier', '=', True)])
+    partner_id = fields.Many2one(
+        comodel_name='res.partner', string='Customer', required=False,
+        domain=[('supplier', '=', True)])
     item_ids = fields.One2many(
-        'rma.order.line.make.sale.order.item',
-        'wiz_id', string='Items')
-    sale_order_id = fields.Many2one('sale.order',
-                                    string='Sales Order',
-                                    required=False,
-                                    domain=[('state', '=', 'draft')])
+        comodel_name='rma.order.line.make.sale.order.item',
+        inverse_name='wiz_id', string='Items')
+    sale_order_id = fields.Many2one(
+        comodel_name='sale.order', string='Sales Order', required=False,
+        domain=[('state', '=', 'draft')])
 
     @api.model
     def _prepare_item(self, line):
@@ -132,24 +131,23 @@ class RmaLineMakeSaleOrderItem(models.TransientModel):
     _description = "RMA Line Make Sale Order Item"
 
     wiz_id = fields.Many2one(
-        'rma.order.line.make.sale.order',
-        string='Wizard', required=True, ondelete='cascade',
-        readonly=True)
-    line_id = fields.Many2one('rma.order.line',
-                              string='RMA Line',
-                              required=True)
-    rma_id = fields.Many2one('rma.order', related='line_id.rma_id',
-                             string='RMA Order', readonly=True)
-    product_id = fields.Many2one('product.product', string='Product',
-                                 readonly=True)
+        comodel_name='rma.order.line.make.sale.order', string='Wizard',
+        required=True, readonly=True)
+    line_id = fields.Many2one(
+        comodel_name='rma.order.line', string='RMA Line', required=True)
+    rma_id = fields.Many2one(
+        comodel_name='rma.order', related='line_id.rma_id',
+        string='RMA Order', readonly=True)
+    product_id = fields.Many2one(
+        comodel_name='product.product', string='Product', readonly=True)
     name = fields.Char(string='Description', required=True, readonly=True)
-    product_qty = fields.Float(string='Quantity to sell',
-                               digits=dp.get_precision('Product UoS'))
-    product_uom_id = fields.Many2one('product.uom', string='UoM',
-                                     readonly=True)
-    out_warehouse_id = fields.Many2one('stock.warehouse',
-                                       string='Outbound Warehouse')
-    free_of_charge = fields.Boolean('Free of Charge')
+    product_qty = fields.Float(
+        string='Quantity to sell', digits=dp.get_precision('Product UoS'))
+    product_uom_id = fields.Many2one(
+        comodel_name='product.uom', string='UoM', readonly=True)
+    out_warehouse_id = fields.Many2one(
+        comodel_name='stock.warehouse', string='Outbound Warehouse')
+    free_of_charge = fields.Boolean(string='Free of Charge')
     out_route_id = fields.Many2one(
-        'stock.location.route', string='Outbound Route',
+        comodel_name='stock.location.route', string='Outbound Route',
         domain=[('rma_selectable', '=', True)])

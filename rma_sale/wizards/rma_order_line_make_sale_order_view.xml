@@ -51,7 +51,7 @@
 
         <record id="action_rma_order_line_make_sale_order"
                 model="ir.actions.act_window">
-            <field name="name">Create Sale Quotation</field>
+            <field name="name">Create Sales Quotation</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">rma.order.line.make.sale.order</field>
             <field name="view_type">form</field>
