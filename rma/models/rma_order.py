@@ -179,8 +179,8 @@ class RmaOrder(models.Model):
     def _get_valid_lines(self):
         """:return: A recordset of rma lines.
         """
-        for rec in self:
-            return rec.rma_line_ids
+        self.ensure_one()
+        return self.rma_line_ids
 
     @api.multi
     def action_view_lines(self):
@@ -192,8 +192,7 @@ class RmaOrder(models.Model):
         lines = self._get_valid_lines()
         # choose the view_mode accordingly
         if len(lines) != 1:
-            result['domain'] = "[('id', 'in', " + \
-                               str(lines.ids) + ")]"
+            result['domain'] = [('id', 'in', lines.ids)]
         elif len(lines) == 1:
             if self.type == 'customer':
                 res = self.env.ref('rma.view_rma_line_form', False)
