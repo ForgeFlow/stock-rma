@@ -10,31 +10,23 @@ class RmaOrder(models.Model):
     @api.multi
     def _compute_invoice_refund_count(self):
         for rec in self:
-            invoice_list = []
-            for line in rec.rma_line_ids:
-                for refund in line.refund_line_ids:
-                    invoice_list.append(refund.invoice_id.id)
-            rec.invoice_refund_count = len(list(set(invoice_list)))
+            invoices = rec.mapped(
+                'rma_line_ids.refund_line_ids.invoice_id')
+            rec.invoice_refund_count = len(invoices)
 
     @api.multi
     def _compute_invoice_count(self):
         for rec in self:
-            invoice_list = []
-            for line in rec.rma_line_ids:
-                if line.invoice_line_id and line.invoice_line_id.id:
-                    invoice_list.append(line.invoice_line_id.invoice_id.id)
-            rec.invoice_count = len(list(set(invoice_list)))
+            invoices = rec.mapped('rma_line_ids.invoice_id')
+            rec.invoice_count = len(invoices)
 
     add_invoice_id = fields.Many2one('account.invoice', string='Add Invoice',
                                      ondelete='set null', readonly=True,
                                      states={'draft': [('readonly', False)]})
     invoice_refund_count = fields.Integer(
-        compute=_compute_invoice_refund_count,
-        string='# of Refunds',
-        copy=False)
-    invoice_count = fields.Integer(compute=_compute_invoice_count,
-                                   string='# of Incoming Shipments',
-                                   copy=False)
+        compute=_compute_invoice_refund_count, string='# of Refunds')
+    invoice_count = fields.Integer(
+        compute=_compute_invoice_count, string='# of Invoices')
 
     def _prepare_rma_line_from_inv_line(self, line):
         if self.type == 'customer':
@@ -94,22 +86,13 @@ class RmaOrder(models.Model):
 
     @api.multi
     def action_view_invoice_refund(self):
-        """
-        This function returns an action that display existing vendor refund
-        bills of given purchase order id.
-        When only one found, show the vendor bill immediately.
-        """
         action = self.env.ref('account.action_invoice_tree2')
         result = action.read()[0]
-        invoice_list = []
-        for line in self.rma_line_ids:
-            for refund in line.refund_line_ids:
-                invoice_list.append(refund.invoice_id.id)
-        invoice_ids = list(set(invoice_list))
+        invoice_ids = self.mapped(
+            'rma_line_ids.refund_line_ids.invoice_id').ids
         # choose the view_mode accordingly
         if len(invoice_ids) != 1:
-            result['domain'] = "[('id', 'in', " + \
-                               str(invoice_ids) + ")]"
+            result['domain'] = [('id', 'in', invoice_ids)]
         elif len(invoice_ids) == 1:
             res = self.env.ref('account.invoice_supplier_form', False)
             result['views'] = [(res and res.id or False, 'form')]
@@ -123,14 +106,10 @@ class RmaOrder(models.Model):
         else:
             action = self.env.ref('account.action_invoice_tree')
         result = action.read()[0]
-        invoice_list = []
-        for line in self.rma_line_ids:
-            invoice_list.append(line.invoice_id.id)
-        invoice_ids = list(set(invoice_list))
+        invoice_ids = self.mapped('rma_line_ids.invoice_id').ids
         # choose the view_mode accordingly
         if len(invoice_ids) != 1:
-            result['domain'] = "[('id', 'in', " + \
-                               str(invoice_ids) + ")]"
+            result['domain'] = [('id', 'in', invoice_ids)]
         elif len(invoice_ids) == 1:
             if self.type == "supplier":
                 res = self.env.ref('account.invoice_supplier_form', False)
