@@ -66,8 +66,7 @@ class RmaRefund(models.TransientModel):
     description = fields.Char(string='Reason', required=True,
                               default=_get_reason)
     item_ids = fields.One2many(
-        'rma.refund.item',
-        'wiz_id', string='Items')
+        comodel_name='rma.refund.item', inverse_name='wiz_id', string='Items')
 
     @api.multi
     def compute_refund(self):
@@ -186,8 +185,7 @@ class RmaRefundItem(models.TransientModel):
     _description = "RMA Lines to refund"
 
     wiz_id = fields.Many2one(
-        'rma.refund',
-        string='Wizard', required=True)
+        comodel_name='rma.refund', string='Wizard', required=True)
     line_id = fields.Many2one('rma.order.line',
                               string='RMA order Line',
                               required=True,
@@ -204,13 +202,14 @@ class RmaRefundItem(models.TransientModel):
         string='Quantity Ordered', copy=False,
         digits=dp.get_precision('Product Unit of Measure'),
         readonly=True)
-    invoice_address_id = fields.Many2one('res.partner', 'Invoice Address')
+    invoice_address_id = fields.Many2one(
+        comodel_name='res.partner', string='Invoice Address')
     qty_to_refund = fields.Float(
         string='Quantity To Refund',
         digits=dp.get_precision('Product Unit of Measure'))
     uom_id = fields.Many2one('product.uom', string='Unit of Measure',
                              readonly=True)
-    refund_policy = fields.Selection([
+    refund_policy = fields.Selection(selection=[
         ('no', 'Not required'), ('ordered', 'Based on Ordered Quantities'),
         ('received', 'Based on Received Quantities')],
         string="Refund Policy")
