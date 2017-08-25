@@ -3,7 +3,7 @@
     <data>
 
         <record id="view_rma_form" model="ir.ui.view">
-            <field name="name">rma.order.form</field>
+            <field name="name">rma.order.form - rma_account</field>
             <field name="model">rma.order</field>
             <field name="inherit_id" ref="rma.view_rma_form"/>
             <field name="arch" type="xml">
@@ -36,7 +36,7 @@
         <record id="view_rma_supplier_form" model="ir.ui.view">
             <field name="name">rma.order.supplier.form</field>
             <field name="model">rma.order</field>
-            <field name="inherit_id" ref="rma.view_rma_form"/>
+            <field name="inherit_id" ref="rma.view_rma_supplier_form"/>
             <field name="arch" type="xml">
                  <button name="action_view_out_shipments"
                         position="after">

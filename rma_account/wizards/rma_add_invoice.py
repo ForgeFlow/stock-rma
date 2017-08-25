@@ -6,13 +6,13 @@ from openerp import api, fields, models
 from openerp.exceptions import ValidationError
 
 
-class RmaAddinvoice(models.TransientModel):
+class RmaAddInvoice(models.TransientModel):
     _name = 'rma_add_invoice'
     _description = 'Wizard to add rma lines'
 
     @api.model
     def default_get(self, fields):
-        res = super(RmaAddinvoice, self).default_get(fields)
+        res = super(RmaAddInvoice, self).default_get(fields)
         rma_obj = self.env['rma.order']
         rma_id = self.env.context['active_ids'] or []
         active_model = self.env.context['active_model']
@@ -42,19 +42,6 @@ class RmaAddinvoice(models.TransientModel):
         else:
             operation = line.product_id.rma_supplier_operation_id or \
                 line.product_id.categ_id.rma_supplier_operation_id
-        data = {
-            'invoice_line_id': line.id,
-            'product_id': line.product_id.id,
-            'origin': line.invoice_id.number,
-            'uom_id': line.uom_id.id,
-            'operation_id': operation.id,
-            'product_qty': line.quantity,
-            'price_unit': line.invoice_id.currency_id.compute(
-                line.price_unit, line.currency_id, round=False),
-            'delivery_address_id': line.invoice_id.partner_id.id,
-            'invoice_address_id': line.invoice_id.partner_id.id,
-            'rma_id': self.rma_id.id
-        }
         if not operation:
             operation = self.env['rma.operation'].search(
                 [('type', '=', self.rma_id.type)], limit=1)
@@ -73,19 +60,29 @@ class RmaAddinvoice(models.TransientModel):
             if not warehouse:
                 raise ValidationError("Please define a warehouse with a"
                                       " default rma location")
-        data.update(
-            {'receipt_policy': operation.receipt_policy,
-             'operation_id': operation.id,
-             'refund_policy': operation.refund_policy,
-             'delivery_policy': operation.delivery_policy,
-             'in_warehouse_id': operation.in_warehouse_id.id or warehouse.id,
-             'out_warehouse_id': operation.out_warehouse_id.id or warehouse.id,
-             'in_route_id': operation.in_route_id.id or route.id,
-             'out_route_id': operation.out_route_id.id or route.id,
-             'location_id': (operation.location_id.id or
-                             operation.in_warehouse_id.lot_rma_id.id or
-                             warehouse.lot_rma_id.id)
-             })
+        data = {
+            'invoice_line_id': line.id,
+            'product_id': line.product_id.id,
+            'origin': line.invoice_id.number,
+            'uom_id': line.uom_id.id,
+            'operation_id': operation.id,
+            'product_qty': line.quantity,
+            'price_unit': line.invoice_id.currency_id.compute(
+                line.price_unit, line.currency_id, round=False),
+            'delivery_address_id': line.invoice_id.partner_id.id,
+            'invoice_address_id': line.invoice_id.partner_id.id,
+            'rma_id': self.rma_id.id,
+            'receipt_policy': operation.receipt_policy,
+            'refund_policy': operation.refund_policy,
+            'delivery_policy': operation.delivery_policy,
+            'in_warehouse_id': operation.in_warehouse_id.id or warehouse.id,
+            'out_warehouse_id': operation.out_warehouse_id.id or warehouse.id,
+            'in_route_id': operation.in_route_id.id or route.id,
+            'out_route_id': operation.out_route_id.id or route.id,
+            'location_id': (operation.location_id.id or
+                            operation.in_warehouse_id.lot_rma_id.id or
+                            warehouse.lot_rma_id.id),
+        }
         return data
 
     @api.model
