@@ -35,22 +35,20 @@ class RmaOrderLine(models.Model):
         for rec in self:
             rec.qty_purchased = rec._get_rma_purchased_qty()
 
-    purchase_count = fields.Integer(compute=_compute_purchase_count,
-                                    string='# of Purchases', copy=False,
-                                    default=0)
-    purchase_order_line_id = fields.Many2one('purchase.order.line',
-                                             string='Origin Purchase Line',
-                                             ondelete='restrict')
+    purchase_count = fields.Integer(
+        compute='_compute_purchase_count', string='# of Purchases')
+    purchase_order_line_id = fields.Many2one(
+        comodel_name='purchase.order.line', string='Origin Purchase Line',
+        ondelete='restrict')
     purchase_order_line_ids = fields.Many2many(
-        'purchase.order.line', 'purchase_line_rma_line_rel',
-        'rma_order_line_id', 'purchase_order_line_id',
-        string='Purchase Order Lines', compute=_get_purchase_order_lines)
-
+        comodel_name='purchase.order.line',
+        relation='purchase_line_rma_line_rel',
+        column1='rma_order_line_id', column2='purchase_order_line_id',
+        string='Purchase Order Lines', compute='_get_purchase_order_lines')
     qty_purchased = fields.Float(
         string='Qty Purchased', copy=False,
         digits=dp.get_precision('Product Unit of Measure'),
-        readonly=True, compute=_compute_qty_purchased,
-        store=True)
+        readonly=True, compute='_compute_qty_purchased', store=True)
 
     @api.multi
     def action_view_purchase_order(self):
