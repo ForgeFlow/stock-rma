@@ -12,7 +12,7 @@ class RmaLineMakeSaleOrder(models.TransientModel):
 
     partner_id = fields.Many2one(
         comodel_name='res.partner', string='Customer', required=False,
-        domain=[('supplier', '=', True)])
+        domain=[('customer', '=', True)])
     item_ids = fields.One2many(
         comodel_name='rma.order.line.make.sale.order.item',
         inverse_name='wiz_id', string='Items')
