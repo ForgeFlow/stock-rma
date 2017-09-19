@@ -10,7 +10,8 @@ class RmaOrderLine(models.Model):
     _inherit = "rma.order.line"
 
     @api.one
-    @api.depends('repair_ids', 'repair_ids.state')
+    @api.depends('repair_ids', 'repair_type', 'repair_ids.state',
+                 'qty_to_receive')
     def _compute_qty_to_repair(self):
         if self.repair_type == 'no':
             self.qty_to_repair = 0.0
@@ -24,7 +25,8 @@ class RmaOrderLine(models.Model):
             self.qty_to_repair = 0.0
 
     @api.one
-    @api.depends('repair_ids', 'repair_type', 'repair_ids.state')
+    @api.depends('repair_ids', 'repair_type', 'repair_ids.state',
+                 'qty_to_receive')
     def _compute_qty_repaired(self):
         self.qty_repaired = self._get_rma_repaired_qty()
 
@@ -38,15 +40,15 @@ class RmaOrderLine(models.Model):
         string='Repair Orders', readonly=True,
         states={'draft': [('readonly', False)]}, copy=False)
     qty_to_repair = fields.Float(
-        string='Qty To Sell', copy=False,
+        string='Qty To Repair', copy=False,
         digits=dp.get_precision('Product Unit of Measure'),
         readonly=True, compute=_compute_qty_to_repair,
         store=True)
     qty_repaired = fields.Float(
-        string='Qty Sold', copy=False,
+        string='Qty Repaired', copy=False,
         digits=dp.get_precision('Product Unit of Measure'),
         readonly=True, compute=_compute_qty_repaired,
-        store=True)
+        store=True, help="Quantity repaired or being repaired.")
     repair_type = fields.Selection(selection=[
         ('no', 'Not required'), ('ordered', 'Based on Ordered Quantities'),
         ('received', 'Based on Received Quantities')],
@@ -69,7 +71,7 @@ class RmaOrderLine(models.Model):
                 lambda p: p.state != 'cancel'):
             repair_qty = self.env['product.uom']._compute_qty_obj(
                 self.uom_id,
-                repair.product_uom_qty,
+                repair.product_qty,
                 repair.product_uom,
             )
             qty += repair_qty

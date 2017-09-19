@@ -1,37 +1,31 @@
 .. image:: https://img.shields.io/badge/licence-LGPL--3-blue.svg
     :alt: License LGPL-3
 
-========
-RMA Sale
-========
+==========
+RMA Repair
+==========
 
-This module allows you to:
+wip:
+* fix wizard
+* change repair sequence to not use 'RMA'.
 
-#. Import sales order lines into RMA lines
-#. Create a sales order and/or sales order line from one or more RMA lines
+This module allows you to create repairs from one or more RMA lines.
+
+Installation
+============
+
+This module depends on ``mrp_repair_refurbish`` which is available at
+`OCA/manufacture <https://github.com/OCA/manufacture>`_.
 
 Usage
 =====
 
-**Import existing sales order lines into an RMA:**
-
-This feature is useful when you create an RMA associated to a product that
-was shipped and you have as a reference the customer PO number.
-
-#. Access to a customer RMA.
-#. Fill the customer.
-#. Press the button *Add from Sales Order*.
-#. In the wizard add a sales order and click on *add item* to select the
-   lines you want to add to the RMA.
-
-**Create a sales order and/or sales order line from RMA lines:**
+To create repairs from RMA lines:
 
 #. Go to a approved RMA line.
-#. Click on *Create a Sales Quotation*.
-#. In the wizard, select an *Existing Quotation to update* or leave it empty
-   if you want to create a new one.
-#. Fill the quantity to sell in the lines.
-#. Hit *Create a Sales Quotation*.
+#. Click on *Create Repair Order*.
+#. Fill the required information in the lines.
+#. Hit *Create Repair Orders*.
 
 Bug Tracker
 ===========
