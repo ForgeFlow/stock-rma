@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2017 Eficent Business and IT Consulting Services S.L.
+     License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl-3.0) -->
+<odoo>
+
+    <record id="view_rma_order_line_make_repair" model="ir.ui.view">
+        <field name="name">RMA Line Make Repair</field>
+        <field name="model">rma.order.line.make.repair</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+             <form string="Create Repair">
+                 <separator string="New Repair Orders details:"/>
+                 <newline/>
+                 <group>
+                     <field name="item_ids" nolabel="1" colspan="2">
+                          <tree string="Details" editable="bottom" create="false">
+                              <field name="line_id" options="{'no_open': true}"/>
+                              <field name="product_id"/>
+                              <field name="product_qty"/>
+                              <field name="product_uom_id" groups="product.group_uom"/>
+                              <field name="partner_id"/>
+                              <field name="to_refurbish"/>
+                              <field name="refurbish_product_id" attrs="{'required': [('to_refurbish', '=', True)]}"/>
+                              <field name="location_id"/>
+                              <field name="location_dest_id"/>
+                          </tree>
+                     </field>
+                 </group>
+                 <newline/>
+                 <group colspan="2">
+                     <button name="make_repair_order"
+                             string="Create Repair Orders" type="object"
+                             class="oe_highlight"/>
+                     <button special="cancel" string="Cancel" class="oe_link"/>
+                 </group>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_rma_order_line_make_repair"
+            model="ir.actions.act_window">
+        <field name="name">Create Repair</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">rma.order.line.make.repair</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record model="ir.values" id="rma_order_line_make_repair_multi">
+        <field name="model_id" ref="model_rma_order_line" />
+        <field name="name">Create Repairs</field>
+        <field name="key2">client_action_multi</field>
+        <field name="value"
+               eval="'ir.actions.act_window,' + str(ref('action_rma_order_line_make_repair'))" />
+        <field name="key">action</field>
+        <field name="model">rma.order.line</field>
+    </record>
+
+</odoo>
