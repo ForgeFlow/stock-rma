@@ -15,7 +15,9 @@
              "views/rma_operation_view.xml",
              "views/mrp_repair_view.xml",
              "wizards/rma_order_line_make_repair_view.xml",
-             "views/rma_order_line_view.xml"],
+             "views/rma_order_line_view.xml",
+             "data/mrp_repair_sequence.xml",
+             ],
     "installable": True,
     "auto_install": True,
 }
