@@ -139,7 +139,7 @@ class RmaLineMakeSaleOrderItem(models.TransientModel):
         comodel_name='rma.order', related='line_id.rma_id',
         string='RMA Order', readonly=True)
     product_id = fields.Many2one(
-        comodel_name='product.product', string='Product', readonly=True)
+        comodel_name='product.product', string='Product')
     name = fields.Char(string='Description', required=True, readonly=True)
     product_qty = fields.Float(
         string='Quantity to sell', digits=dp.get_precision('Product UoS'))
