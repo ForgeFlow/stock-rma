@@ -15,9 +15,13 @@
                                    string="Refunds"/>
                         </button>
                 </button>
+                <group name="main_info" position="inside">
+                    <field name="invoice_line_id"
+                           options="{'no_create': True}"
+                           domain="[('invoice_id.partner_id', '=', partner_id)]"/>
+                </group>
                 <field name="operation_id" position="after">
                     <field name="refund_policy"/>
-                    <field name="invoice_line_id" invisible="True"/>
                 </field>
                 <page name="stock" position="after">
                     <page name="refunds" string="Refunds">
@@ -51,9 +55,13 @@
                                    string="Refunds"/>
                         </button>
                 </button>
+                <group name="main_info" position="inside">
+                    <field name="invoice_line_id"
+                           options="{'no_create': True}"
+                           domain="[('invoice_id.partner_id', '=', partner_id)]"/>
+                </group>
                 <field name="operation_id" position="after">
                     <field name="refund_policy"/>
-                    <field name="invoice_line_id" invisible="True"/>
                 </field>
                 <page name="stock" position="after">
                     <page name="refunds" string="Refunds">
