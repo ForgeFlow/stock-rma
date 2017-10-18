@@ -15,6 +15,11 @@
                                string="Purchase Orders"/>
                 </button>
             </div>
+            <group name="main_info" position="inside">
+                <field name="purchase_order_line_id"
+                       options="{'no_create': True}"
+                       domain="[('order_id.partner_id', '=', partner_id)]"/>
+            </group>
             <group name="quantities" position="inside">
                 <group>
                     <field name="qty_purchased"/>
