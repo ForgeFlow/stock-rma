@@ -64,12 +64,11 @@
         <field name="model">rma.order</field>
         <field name="inherit_id" ref="rma.view_rma_supplier_form"/>
         <field name="arch" type="xml">
-            <button name="action_rma_done" position="after">
+            <xpath expr="//header" position="inside">
                 <button name="%(action_rma_add_purchase)d"
                         string="Add From Purchase Order"
-                        type="action"
-                        states="draft,to_approve"/>
-            </button>
+                        type="action"/>
+            </xpath>
         </field>
     </record>
 
