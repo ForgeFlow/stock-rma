@@ -47,30 +47,17 @@ class RmaOrder(models.Model):
         return datetime.now()
 
     name = fields.Char(
-        string='Order Number', index=True, readonly=True,
-        states={'progress': [('readonly', False)]}, copy=False)
+        string='Group Number', index=True, copy=False)
     type = fields.Selection(
         [('customer', 'Customer'), ('supplier', 'Supplier')],
         string="Type", required=True, default=_get_default_type, readonly=True)
     reference = fields.Char(string='Partner Reference',
                             help="The partner reference of this RMA order.")
-    comment = fields.Text('Additional Information', readonly=True, states={
-        'draft': [('readonly', False)]})
-
-    state = fields.Selection([('draft', 'Draft'), ('to_approve', 'To Approve'),
-                              ('approved', 'Approved'),
-                              ('done', 'Done')], string='State', index=True,
-                             default='draft')
+    comment = fields.Text('Additional Information')
     date_rma = fields.Datetime(string='Order Date', index=True,
                                default=_default_date_rma)
-    partner_id = fields.Many2one('res.partner', string='Partner',
-                                 required=True, readonly=True,
-                                 states={'draft': [('readonly', False)]})
-    assigned_to = fields.Many2one('res.users', 'Assigned to',
-                                  track_visibility='onchange')
-    requested_by = fields.Many2one('res.users', 'Requested by',
-                                   track_visibility='onchange',
-                                   default=lambda self: self.env.user)
+    partner_id = fields.Many2one(
+        comodel_name='res.partner', string='Partner', required=True)
     rma_line_ids = fields.One2many('rma.order.line', 'rma_id',
                                    string='RMA lines')
     in_shipment_count = fields.Integer(compute=_compute_in_shipment_count,
@@ -87,7 +74,8 @@ class RmaOrder(models.Model):
 
     @api.model
     def create(self, vals):
-        if self.env.context.get('supplier'):
+        if (self.env.context.get('supplier') or
+                vals.get('type') == 'supplier'):
             vals['name'] = self.env['ir.sequence'].next_by_code(
                 'rma.order.supplier')
         else:
@@ -148,32 +136,6 @@ class RmaOrder(models.Model):
             result['views'] = [(res and res.id or False, 'form')]
             result['res_id'] = shipments[0]
         return result
-
-    @api.multi
-    def action_rma_to_approve(self):
-        self.write({'state': 'to_approve'})
-        for rec in self:
-            pols = rec.mapped('rma_line_ids.product_id.rma_approval_policy')
-            if not any(x != 'one_step' for x in pols):
-                rec.write({'assigned_to': self.env.uid})
-                rec.action_rma_approve()
-        return True
-
-    @api.multi
-    def action_rma_draft(self):
-        self.write({'state': 'draft'})
-        return True
-
-    @api.multi
-    def action_rma_approve(self):
-        # pass the supplier address in case this is a customer RMA
-        self.write({'state': 'approved'})
-        return True
-
-    @api.multi
-    def action_rma_done(self):
-        self.write({'state': 'done'})
-        return True
 
     @api.multi
     def _get_valid_lines(self):
