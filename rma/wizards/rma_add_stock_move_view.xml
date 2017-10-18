@@ -61,12 +61,11 @@
         <field name="model">rma.order</field>
         <field name="inherit_id" ref="rma.view_rma_form"/>
         <field name="arch" type="xml">
-            <button name="action_rma_done" position="after">
+            <xpath expr="//header" position="inside">
                 <button name="%(action_rma_add_stock_move_customer)d"
                         string="Add From Stock Move"
-                        type="action"
-                        states="draft,to_approve"/>
-            </button>
+                        type="action"/>
+            </xpath>
         </field>
     </record>
 
@@ -82,7 +81,7 @@
                 </group>
                 <separator string="Select Stock Moves to add"/>
                 <field name="move_ids"
-                       domain="[('picking_id.partner_id', '=', partner_id), ('location_dest_id.usage', '=', 'supplier')]"/>
+                       domain="[('picking_id.partner_id', '=', partner_id), ('location_id.usage', '=', 'supplier')]"/>
                 <footer>
                     <button
                             string="Confirm"
@@ -116,12 +115,11 @@
         <field name="model">rma.order</field>
         <field name="inherit_id" ref="rma.view_rma_supplier_form"/>
         <field name="arch" type="xml">
-            <button name="action_rma_done" position="after">
+            <xpath expr="//header" position="inside">
                 <button name="%(action_rma_add_stock_move_supplier)d"
                         string="Add From Stock Move"
-                        type="action"
-                        states="draft,to_approve"/>
-            </button>
+                        type="action"/>
+            </xpath>
         </field>
     </record>
 

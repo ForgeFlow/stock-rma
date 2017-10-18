@@ -21,7 +21,7 @@ class RmaMakePicking(models.TransientModel):
                   'qty_to_receive': line.qty_to_receive,
                   'qty_to_deliver': line.qty_to_deliver,
                   'line_id': line.id,
-                  'rma_id': line.rma_id.id,
+                  'rma_id': line.rma_id and line.rma_id.id or False,
                   'wiz_id': self.env.context['active_id'],
                   }
         return values
@@ -58,13 +58,19 @@ class RmaMakePicking(models.TransientModel):
         'wiz_id', string='Items')
 
     def find_procurement_group(self, item):
-        return self.env['procurement.group'].search([('rma_id', '=',
-                                                      item.line_id.rma_id.id)])
+        if item.line_id.rma_id:
+            return self.env['procurement.group'].search([
+                ('rma_id', '=', item.line_id.rma_id.id)])
+        else:
+            return self.env['procurement.group'].search([
+                ('rma_line_id', '=', item.line_id.id)])
 
     def _get_procurement_group_data(self, item):
         group_data = {
-            'name': item.line_id.rma_id.name,
-            'rma_id': item.line_id.rma_id.id,
+            'name': item.line_id.rma_id.name or item.line_id.name,
+            'rma_id': item.line_id.rma_id and item.line_id.rma_id.id or False,
+            'rma_line_id': item.line_id.id if not item.line_id.rma_id else
+            False,
         }
         return group_data
 
@@ -80,6 +86,7 @@ class RmaMakePicking(models.TransientModel):
             raise ValidationError('Unknown delivery address')
         return delivery_address
 
+    @api.model
     def _get_address_location(self, delivery_address_id, type):
         if type == 'supplier':
             return delivery_address_id.property_stock_supplier
@@ -99,8 +106,8 @@ class RmaMakePicking(models.TransientModel):
             warehouse = line.in_warehouse_id
             route = line.in_route_id
         else:
-            location = self._get_address_location(delivery_address_id,
-                                                  line.rma_id.type)
+            location = self._get_address_location(
+                delivery_address_id, line.type)
             warehouse = line.out_warehouse_id
             route = line.out_route_id
         if not route:
@@ -108,9 +115,9 @@ class RmaMakePicking(models.TransientModel):
         if not warehouse:
             raise ValidationError("No warehouse specified")
         procurement_data = {
-            'name': line.rma_id.name,
+            'name': line.rma_id and line.rma_id.name or line.name,
             'group_id': group.id,
-            'origin': line.rma_id.name,
+            'origin': line.name,
             'warehouse_id': warehouse.id,
             'date_planned': time.strftime(DT_FORMAT),
             'product_id': item.product_id.id,
@@ -127,8 +134,8 @@ class RmaMakePicking(models.TransientModel):
     def _create_procurement(self, item, picking_type):
         group = self.find_procurement_group(item)
         if not group:
-            procurement_group = self._get_procurement_group_data(item)
-            group = self.env['procurement.group'].create(procurement_group)
+            pg_data = self._get_procurement_group_data(item)
+            group = self.env['procurement.group'].create(pg_data)
         if picking_type == 'incoming':
             qty = item.qty_to_receive
         else:
@@ -150,7 +157,7 @@ class RmaMakePicking(models.TransientModel):
             if line.state != 'approved':
                 raise ValidationError(
                     _('RMA %s is not approved') %
-                    line.rma_id.name)
+                    line.name)
             if line.receipt_policy == 'no' and picking_type == \
                     'incoming':
                 raise ValidationError(
@@ -216,7 +223,7 @@ class RmaMakePickingItem(models.TransientModel):
                               ondelete='cascade')
     rma_id = fields.Many2one('rma.order',
                              related='line_id.rma_id',
-                             string='RMA',
+                             string='RMA Group',
                              readonly=True)
     product_id = fields.Many2one('product.product', string='Product',
                                  readonly=True)

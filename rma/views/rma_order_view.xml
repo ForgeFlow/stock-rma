@@ -6,16 +6,11 @@
             <field name="name">rma.order.tree</field>
             <field name="model">rma.order</field>
             <field name="arch" type="xml">
-                <tree decoration-info="state == 'draft'"
-                      decoration-muted="state== 'done'" string="RMA">
+                <tree string="RMA">
                     <field name="name"/>
-                    <field name="state" invisible="1"/>
                     <field name="reference"/>
                     <field name="partner_id" groups="base.group_user" string="Customer"/>
-                    <field name="requested_by" groups="base.group_user"/>
-                    <field name="assigned_to" groups="base.group_user"/>
                     <field name="date_rma"/>
-                    <field name="state"/>
                 </tree>
             </field>
         </record>
@@ -24,17 +19,12 @@
             <field name="name">rma.order.supplier.tree</field>
             <field name="model">rma.order</field>
             <field name="arch" type="xml">
-                <tree decoration-info="state == 'draft'"
-                      decoration-muted="state== 'done'" string="RMA">
+                <tree string="RMA">
                     <field name="name"/>
-                    <field name="state" invisible="1"/>
                     <field name="reference"/>
                     <field name="partner_id" groups="base.group_user"
                            string="Supplier"/>
-                    <field name="requested_by" groups="base.group_user"/>
-                    <field name="assigned_to" groups="base.group_user"/>
                     <field name="date_rma"/>
-                    <field name="state"/>
                 </tree>
             </field>
         </record>
@@ -44,25 +34,7 @@
             <field name="model">rma.order</field>
             <field name="arch" type="xml">
                 <form string="RMA">
-                <field name="state" invisible="True"/>
-                <header>
-                    <button name="action_rma_to_approve" type="object"
-                            string="Request Approval"
-                            attrs="{'invisible':[('state', '!=', 'draft')]}"
-                            class="oe_highlight" groups="rma.group_rma_customer_user"/>
-                    <button name="action_rma_draft" type="object"
-                            string="Back to Draft"
-                            attrs="{'invisible':[('state', '=', 'draft')]}" class="oe_highlight"
-                            groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"/>
-                    <button name="action_rma_approve" type="object"
-                            string="Approve"
-                            attrs="{'invisible':[('state', '!=', 'to_approve')]}" class="oe_highlight" groups="rma.group_rma_customer_user"/>
-                    <button name="action_rma_done" type="object"
-                            string="Done"
-                            attrs="{'invisible':[('state', 'in', ('done', 'draft'))]}"
-                            groups="rma.group_rma_customer_user"/>
-                    <field name="state" widget="statusbar" nolabel="1"/>
-                </header>
+                <header/>
                 <sheet name='rma' string="RMA">
                     <div class="oe_button_box" name="button_box">
                         <button type="object"  name="action_view_in_shipments"
@@ -109,15 +81,8 @@
                     </group>
                     <group>
                         <group col="4">
-                            <field name="assigned_to"
-                                   groups="base.group_user"
-                                   context="{'default_groups_ref': ['rma.rma_user']}"/>
                             <field name="reference"/>
-                            <field name="requested_by"
-                                   groups="base.group_user"
-                                   context="{'default_groups_ref': ['rma.rma_user']}"/>
                             <field name="date_rma"/>
-                            <field name="type" invisible="1"/>
                         </group>
                     </group>
                     <notebook colspan="4">
@@ -145,6 +110,7 @@
                             </group>
                             <group name="comments">
                                 <field name="comment"/>
+                                <field name="type" readonly="1"/>
                             </group>
                         </page>
                     </notebook>
@@ -162,26 +128,7 @@
             <field name="model">rma.order</field>
             <field name="arch" type="xml">
                 <form string="RMA">
-                <field name="state" invisible="True"/>
-                <header>
-                    <button name="action_rma_to_approve" type="object"
-                            string="Request Approval"
-                            attrs="{'invisible':[('state', '!=', 'draft')]}"
-                            class="oe_highlight"
-                            groups="rma.group_rma_supplier_user"/>
-                    <button name="action_rma_draft" type="object"
-                            string="Back to Draft"
-                            attrs="{'invisible':[('state', '=', 'draft')]}" class="oe_highlight"
-                            groups="rma.group_rma_supplier_user"/>
-                    <button name="action_rma_approve" type="object"
-                            string="Approve"
-                            attrs="{'invisible':[('state', '!=', 'to_approve')]}" class="oe_highlight" groups="rma.group_rma_supplier_user"/>
-                    <button name="action_rma_done" type="object"
-                            string="Done"
-                            attrs="{'invisible':[('state', 'in', ('done', 'draft'))]}"
-                            groups="rma.group_rma_manager"/>
-                    <field name="state" widget="statusbar" nolabel="1"/>
-                </header>
+                <header/>
                 <sheet string="RMA">
                     <div class="oe_button_box" name="button_box">
                         <button type="object"  name="action_view_in_shipments"
@@ -218,15 +165,8 @@
                     </group>
                     <group>
                         <group col="4">
-                            <field name="assigned_to"
-                                   groups="base.group_user"
-                                   context="{'default_groups_ref': ['rma.rma_user']}"/>
                             <field name="reference"/>
-                            <field name="requested_by"
-                                   groups="base.group_user"
-                                   context="{'default_groups_ref': ['rma.rma_user']}"/>
                             <field name="date_rma"/>
-                            <field name="type" invisible="1"/>
                         </group>
                     </group>
                     <notebook colspan="4">
@@ -258,6 +198,7 @@
                             </group>
                             <group name="comments">
                                 <field name="comment"/>
+                                <field name="type" readonly="1"/>
                             </group>
                         </page>
                     </notebook>
@@ -278,10 +219,7 @@
                     <field name="reference"/>
                     <field name="name"/>
                     <field name="partner_id"/>
-                    <field name="requested_by"/>
-                    <field name="assigned_to"/>
                     <separator/>
-                    <filter domain="[('assigned_to','=',uid)]" help="My RMAs"/>
                     <group expand="0" string="Group By">
                         <filter name="partner" string="Partner" domain="[]"
                                 context="{'group_by':'partner_id'}"/>
@@ -293,23 +231,21 @@
         </record>
 
         <record id="action_rma_customer" model="ir.actions.act_window">
-            <field name="name">Customer RMA</field>
+            <field name="name">Customer RMA Group</field>
             <field name="res_model">rma.order</field>
             <field name="view_type">form</field>
             <field name="domain">[('type','=', 'customer')]</field>
-            <field name="context">{"search_default_assigned_to":uid,
-                'customer':1}</field>
+            <field name="context">{'customer':1}</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="view_rma_tree"/>
         </record>
 
         <record id="action_rma_supplier" model="ir.actions.act_window">
-            <field name="name">Supplier RMA</field>
+            <field name="name">Supplier RMA Group</field>
             <field name="res_model">rma.order</field>
             <field name="view_type">form</field>
             <field name="domain">[('type','=', 'supplier')]</field>
-            <field name="context">{"search_default_assigned_to":uid,
-                'supplier':1}</field>
+            <field name="context">{'supplier':1}</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="view_rma_supplier_tree"/>
         </record>
@@ -343,14 +279,14 @@
 
         <menuitem
             id="menu_rma_act_customer"
-            sequence="10"
+            sequence="50"
             parent="menu_customer_rma"
             groups="rma.group_rma_customer_user"
             action="action_rma_customer"/>
 
         <menuitem
             id="menu_rma_act_supplier"
-            sequence="10"
+            sequence="50"
             parent="menu_supplier_rma"
             groups="rma.group_rma_supplier_user"
             action="action_rma_supplier"/>

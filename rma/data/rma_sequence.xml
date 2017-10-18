@@ -4,7 +4,7 @@
         <field name="name">Customer RMA sequence</field>
         <field name="code">rma.order.customer</field>
         <field name="padding">5</field>
-        <field name="prefix">RMA/%(year)s/</field>
+        <field name="prefix">RMAG/%(year)s/</field>
         <field eval="1" name="number_next"/>
         <field eval="1" name="number_increment"/>
     </record>
@@ -13,7 +13,7 @@
         <field name="name">Supplier RMA sequence</field>
         <field name="code">rma.order.supplier</field>
         <field name="padding">5</field>
-        <field name="prefix">RTV/%(year)s/</field>
+        <field name="prefix">RTVG/%(year)s/</field>
         <field eval="1" name="number_next"/>
         <field eval="1" name="number_increment"/>
     </record>
@@ -22,7 +22,7 @@
         <field name="name">Customer RMA Line sequence</field>
         <field name="code">rma.order.line.customer</field>
         <field name="padding">5</field>
-        <field name="prefix">RMAL/%(year)s/</field>
+        <field name="prefix">RMA/%(year)s/</field>
         <field eval="1" name="number_next"/>
         <field eval="1" name="number_increment"/>
     </record>
@@ -31,7 +31,7 @@
         <field name="name">Supplier RMA Line sequence</field>
         <field name="code">rma.order.line.supplier</field>
         <field name="padding">5</field>
-        <field name="prefix">RTVL/%(year)s/</field>
+        <field name="prefix">RTV/%(year)s/</field>
         <field eval="1" name="number_next"/>
         <field eval="1" name="number_increment"/>
     </record>
