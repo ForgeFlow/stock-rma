@@ -61,6 +61,7 @@ class RmaAddInvoice(models.TransientModel):
                 raise ValidationError("Please define a warehouse with a"
                                       " default rma location")
         data = {
+            'partner_id': self.partner_id.id,
             'invoice_line_id': line.id,
             'product_id': line.product_id.id,
             'origin': line.invoice_id.number,
