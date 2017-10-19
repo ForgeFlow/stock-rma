@@ -64,6 +64,7 @@ class RmaAddPurchase(models.TransientModel):
                 raise ValidationError("Please define a warehouse with a "
                                       "default rma location.")
         data = {
+            'partner_id': self.partner_id.id,
             'purchase_order_line_id': line.id,
             'product_id': line.product_id.id,
             'origin': line.order_id.name,
