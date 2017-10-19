@@ -9,4 +9,6 @@ class RmaOrderLine(models.Model):
     _inherit = "rma.order.line"
 
     qc_issue_id = fields.Many2one(
-        comodel_name="qc.issue", string="Quality Control Issue", copy=False)
+        comodel_name="qc.issue", string="Originating QC Issue",
+        copy=False, readonly=True,
+    )
