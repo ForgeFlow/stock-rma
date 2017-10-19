@@ -426,6 +426,17 @@ class RmaOrderLine(models.Model):
         self._remove_other_data_origin('reference_move_id')
 
     @api.multi
+    @api.constrains('reference_move_id', 'partner_id')
+    def _check_move_partner(self):
+        for rec in self:
+            if (rec.reference_move_id and
+                    rec.reference_move_id.picking_id.partner_id !=
+                    rec.partner_id):
+                raise ValidationError(_(
+                    "RMA customer and originating stock move customer "
+                    "doesn't match."))
+
+    @api.multi
     def _remove_other_data_origin(self, exception):
         if not exception == 'reference_move_id':
             self.reference_move_id = False
