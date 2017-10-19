@@ -141,6 +141,17 @@ class RmaOrderLine(models.Model):
         self._remove_other_data_origin('invoice_line_id')
 
     @api.multi
+    @api.constrains('invoice_line_id', 'partner_id')
+    def _check_invoice_partner(self):
+        for rec in self:
+            if (rec.invoice_line_id and
+                    rec.invoice_line_id.invoice_id.partner_id !=
+                    rec.partner_id):
+                raise ValidationError(_(
+                    "RMA customer and originating invoice line customer "
+                    "doesn't match."))
+
+    @api.multi
     def _remove_other_data_origin(self, exception):
         res = super(RmaOrderLine, self)._remove_other_data_origin(exception)
         if not exception == 'invoice_line_id':
