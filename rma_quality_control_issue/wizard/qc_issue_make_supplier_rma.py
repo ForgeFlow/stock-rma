@@ -4,7 +4,7 @@
 
 import openerp.addons.decimal_precision as dp
 from openerp import api, fields, models, _
-from openerp.exceptions import UserError
+from openerp.exceptions import ValidationError
 
 
 class QcIssueMakeSupplierRma(models.TransientModel):
@@ -12,16 +12,19 @@ class QcIssueMakeSupplierRma(models.TransientModel):
 
     _description = "QC Issue Make Supplier RMA"
 
-    partner_id = fields.Many2one('res.partner', string='Supplier',
-                                 required=False,
-                                 domain=[('supplier', '=', True)])
+    partner_id = fields.Many2one(
+        comodel_name='res.partner', string='Supplier',
+        required=False, domain=[('supplier', '=', True)],
+    )
     item_ids = fields.One2many(
-        'qc.issue.make.supplier.rma.item',
-        'wiz_id', string='Items')
-    supplier_rma_id = fields.Many2one('rma.order',
-                                      string='Supplier RMA Order',
-                                      required=False,
-                                      domain=[('state', '=', 'draft')])
+        comodel_name='qc.issue.make.supplier.rma.item',
+        inverse_name='wiz_id', string='Items',
+    )
+    supplier_rma_id = fields.Many2one(
+        comodel_name='rma.order', string='Supplier RMA Group',
+        required=False, domain=[('type', '=', 'supplier')]
+    )
+    use_group = fields.Boolean(string="Use RMA Group")
 
     @api.model
     def _prepare_item(self, issue):
@@ -56,7 +59,7 @@ class QcIssueMakeSupplierRma(models.TransientModel):
     @api.model
     def _prepare_supplier_rma(self, company):
         if not self.partner_id:
-            raise UserError(
+            raise ValidationError(
                 _('Enter a supplier.'))
         return {
             'partner_id': self.partner_id.id,
@@ -66,11 +69,13 @@ class QcIssueMakeSupplierRma(models.TransientModel):
         }
 
     @api.model
-    def _prepare_supplier_rma_line(self, rma, item):
+    def _prepare_supplier_rma_line(self, item, rma=False):
         operation = self.env['rma.operation'].search(
             [('type', '=', 'supplier')], limit=1)
         data = {
-            'rma_id': rma.id,
+            'partner_id': rma and rma.partner_id.id or self.partner_id.id,
+            'type': 'supplier',
+            'rma_id': rma and rma.id or False,
             'lot_id': item.issue_id.lot_id,
             'origin': item.issue_id.name,
             'product_id': item.product_id.id,
@@ -82,7 +87,8 @@ class QcIssueMakeSupplierRma(models.TransientModel):
             'delivery_policy': operation.delivery_policy,
             'in_warehouse_id': operation.in_warehouse_id.id,
             'out_warehouse_id': operation.out_warehouse_id.id,
-            'location_id': operation.location_id.id,
+            'location_id': operation.location_id.id or
+            operation.in_warehouse_id.lot_rma_id.id,
             'supplier_to_customer': operation.supplier_to_customer,
             'in_route_id': operation.in_route_id.id,
             'out_route_id': operation.out_route_id.id,
@@ -100,7 +106,7 @@ class QcIssueMakeSupplierRma(models.TransientModel):
         return data
 
     @api.multi
-    def make_supplier_rma(self):
+    def make_supplier_rma_group(self):
         res = []
         rma_obj = self.env['rma.order']
         rma_line_obj = self.env['rma.order.line']
@@ -112,7 +118,7 @@ class QcIssueMakeSupplierRma(models.TransientModel):
         for item in self.item_ids:
             issue = item.issue_id
             if item.product_qty <= 0.0:
-                raise UserError(
+                raise ValidationError(
                     _('Enter a positive quantity.'))
 
             if self.supplier_rma_id:
@@ -121,7 +127,7 @@ class QcIssueMakeSupplierRma(models.TransientModel):
                 rma_data = self._prepare_supplier_rma(issue.company_id)
                 rma = rma_obj.create(rma_data)
 
-            rma_line_data = self._prepare_supplier_rma_line(rma, item)
+            rma_line_data = self._prepare_supplier_rma_line(item, rma)
             rma_line_obj.create(rma_line_data)
             res.append(rma.id)
 
@@ -133,6 +139,37 @@ class QcIssueMakeSupplierRma(models.TransientModel):
             action['views'] = [(view and view.id or False, 'form')]
             action['res_id'] = res[0]
         return action
+
+    @api.multi
+    def make_supplier_rma_no_group(self):
+        res = []
+        rma_line_obj = self.env['rma.order.line']
+        action = self.env.ref(
+            'rma.action_rma_supplier_lines')
+        action = action.read()[0]
+        for item in self.item_ids:
+            if item.product_qty <= 0.0:
+                raise ValidationError(
+                    _('Enter a positive quantity.'))
+            rma_line_data = self._prepare_supplier_rma_line(item)
+            rma_line = rma_line_obj.create(rma_line_data)
+            res.append(rma_line.id)
+
+        if len(res) != 1:
+            action['domain'] = [('id', 'in', res)]
+        elif len(res) == 1:
+            view = self.env.ref(
+                'rma.view_rma_line_supplier_form', False)
+            action['views'] = [(view and view.id or False, 'form')]
+            action['res_id'] = res[0]
+        return action
+
+    @api.multi
+    def make_supplier_rma(self):
+        if self.use_group:
+            return self.make_supplier_rma_group()
+        else:
+            return self.make_supplier_rma_no_group()
 
 
 class QcIssueMakeSupplierRmaItem(models.TransientModel):
