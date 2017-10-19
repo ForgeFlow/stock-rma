@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
-from openerp import api, fields, models
+from openerp import api, fields, models, _
+from openerp.exceptions import ValidationError
 from openerp.addons import decimal_precision as dp
 
 
@@ -58,6 +59,80 @@ class RmaOrderLine(models.Model):
         string="Sale Policy", default='no', required=True)
     sales_count = fields.Integer(
         compute=_compute_sales_count, string='# of Sales')
+
+    @api.multi
+    def _prepare_rma_line_from_sale_order_line(self, line):
+        self.ensure_one()
+        if not self.type:
+            self.type = self._get_default_type()
+        operation = line.product_id.rma_customer_operation_id
+        if not operation:
+            operation = line.product_id.categ_id.rma_customer_operation_id
+        if not operation:
+            operation = self.env['rma.operation'].search(
+                [('type', '=', self.type)], limit=1)
+            if not operation:
+                raise ValidationError(_("Please define an operation first"))
+        if not operation.in_route_id or not operation.out_route_id:
+            route = self.env['stock.location.route'].search(
+                [('rma_selectable', '=', True)], limit=1)
+            if not route:
+                raise ValidationError(_("Please define an RMA route"))
+        if not operation.in_warehouse_id or not operation.out_warehouse_id:
+            warehouse = self.env['stock.warehouse'].search(
+                [('company_id', '=', self.company_id.id),
+                 ('lot_rma_id', '!=', False)], limit=1)
+            if not warehouse:
+                raise ValidationError(_(
+                    "Please define a warehouse with a default RMA location."))
+        data = {
+            'product_id': line.product_id.id,
+            'origin': line.order_id.name,
+            'uom_id': line.product_uom.id,
+            'operation_id': operation.id,
+            'product_qty': line.product_uom_qty,
+            'delivery_address_id': line.order_id.partner_id.id,
+            'invoice_address_id': line.order_id.partner_id.id,
+            'price_unit': line.currency_id.compute(
+                line.price_unit, line.currency_id, round=False),
+            'in_route_id': operation.in_route_id.id or route.id,
+            'out_route_id': operation.out_route_id.id or route.id,
+            'receipt_policy': operation.receipt_policy,
+            'location_id': (operation.location_id.id or
+                            operation.in_warehouse_id.lot_rma_id.id or
+                            warehouse.lot_rma_id.id),
+            'refund_policy': operation.refund_policy,
+            'delivery_policy': operation.delivery_policy,
+            'in_warehouse_id': operation.in_warehouse_id.id or warehouse.id,
+            'out_warehouse_id': operation.out_warehouse_id.id or warehouse.id,
+        }
+        return data
+
+    @api.onchange('sale_line_id')
+    def _onchange_sale_line_id(self):
+        if not self.sale_line_id:
+            return
+        data = self._prepare_rma_line_from_sale_order_line(
+            self.sale_line_id)
+        self.update(data)
+        self._remove_other_data_origin('sale_line_id')
+
+    @api.multi
+    def _remove_other_data_origin(self, exception):
+        res = super(RmaOrderLine, self)._remove_other_data_origin(exception)
+        if not exception == 'sale_line_id':
+            self.sale_line_id = False
+        return res
+
+    @api.multi
+    @api.constrains('sale_line_id', 'partner_id')
+    def _check_sale_partner(self):
+        for rec in self:
+            if (rec.sale_line_id and rec.sale_line_id.order_id.partner_id !=
+                    rec.partner_id):
+                raise ValidationError(_(
+                    "RMA customer and originating sales order line customer "
+                    "doesn't match."))
 
     @api.multi
     def action_view_sale_order(self):
