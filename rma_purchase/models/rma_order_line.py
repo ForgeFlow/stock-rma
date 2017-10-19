@@ -118,6 +118,17 @@ class RmaOrderLine(models.Model):
         self._remove_other_data_origin('purchase_order_line_id')
 
     @api.multi
+    @api.constrains('purchase_order_line_id', 'partner_id')
+    def _check_purchase_partner(self):
+        for rec in self:
+            if (rec.purchase_order_line_id and
+                    rec.purchase_order_line_id.order_id.partner_id !=
+                    rec.partner_id):
+                raise ValidationError(_(
+                    "RMA customer and originating purchase line customer "
+                    "doesn't match."))
+
+    @api.multi
     def _remove_other_data_origin(self, exception):
         res = super(RmaOrderLine, self)._remove_other_data_origin(exception)
         if not exception == 'purchase_order_line_id':
