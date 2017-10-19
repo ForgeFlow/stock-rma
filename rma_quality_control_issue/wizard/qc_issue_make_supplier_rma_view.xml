@@ -10,17 +10,25 @@
         <field name="type">form</field>
         <field name="arch" type="xml">
              <form string="Create Supplier RMA">
-                 <separator string="Existing Supplier RMA to update:"/>
-                 <newline/>
-                 <group>
-                    <field name="supplier_rma_id"/>
+                 <group name="configuration">
+                     <field name="use_group"/>
                  </group>
-                 <newline/>
-                 <separator
-                         string="New RMA details:"/>
+                 <div attrs="{'invisible':[('use_group', '=', False)]}">
+                     <separator string="Existing Supplier RMA Group to update:"/>
+                     <newline/>
+                     <group>
+                        <field name="supplier_rma_id"/>
+                     </group>
+                     <newline/>
+                     <separator string="New RMA Group details:"/>
+                 </div>
+                 <div attrs="{'invisible':[('use_group', '=', True)]}">
+                     <separator string="New RMA details:"/>
+                 </div>
                  <newline/>
                  <group>
-                     <field name="partner_id"/>
+                     <field name="partner_id"
+                            attrs="{'required':[('use_group','=', False)]}"/>
                  </group>
                  <newline/>
                  <group>

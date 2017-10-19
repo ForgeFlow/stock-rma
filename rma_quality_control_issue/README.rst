@@ -18,6 +18,10 @@ To use this module, you need to:
 #. Click on the button *Create RMA*.
 #. Follow the wizard instructions.
 
+Roadmap
+=======
+
+* Manage lots correctly when creating RMA group.
 
 Credits
 =======
