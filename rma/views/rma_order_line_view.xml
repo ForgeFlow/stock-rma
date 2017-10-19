@@ -202,7 +202,7 @@
             <field name="name">rma.order.line.form</field>
             <field name="model">rma.order.line</field>
             <field name="arch" type="xml">
-                <form string="Rma Line" create="0">
+                <form string="Rma Line">
                     <header>
                         <button name="action_rma_to_approve" type="object"
                             string="Request Approval"
