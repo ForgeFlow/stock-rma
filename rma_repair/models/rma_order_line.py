@@ -60,7 +60,13 @@ class RmaOrderLine(models.Model):
     def action_view_repair_order(self):
         action = self.env.ref('mrp_repair.action_repair_order_tree')
         result = action.read()[0]
-        result['domain'] = [('id', 'in', self.repair_ids.ids)]
+        repair_ids = self.repair_ids.ids
+        if len(repair_ids) != 1:
+            result['domain'] = [('id', 'in', repair_ids)]
+        elif len(repair_ids) == 1:
+            res = self.env.ref('mrp_repair.view_repair_order_form', False)
+            result['views'] = [(res and res.id or False, 'form')]
+            result['res_id'] = repair_ids[0]
         return result
 
     @api.multi

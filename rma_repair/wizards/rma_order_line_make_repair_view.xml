@@ -23,6 +23,7 @@
                               <field name="refurbish_product_id" attrs="{'required': [('to_refurbish', '=', True)]}"/>
                               <field name="location_id"/>
                               <field name="location_dest_id"/>
+                              <field name="invoice_method"/>
                           </tree>
                      </field>
                  </group>
