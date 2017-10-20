@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016 Eficent Business and IT Consulting Services S.L.
+# Copyright 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl-3.0).
 
 import openerp.addons.decimal_precision as dp
@@ -31,10 +31,11 @@ class RmaLineMakeRepair(models.TransientModel):
             'out_route_id': line.out_route_id.id,
             'product_uom_id': line.uom_id.id,
             'partner_id': line.partner_id.id,
-            # 'location_dest_id': which default here?,
             'to_refurbish': to_refurbish,
             'refurbish_product_id': refurbish_product_id,
             'location_id': line.location_id.id,
+            'location_dest_id': line.location_id.id,
+            'invoice_method': 'after_repair'
         }
 
     @api.model
@@ -95,32 +96,55 @@ class RmaLineMakeRepairItem(models.TransientModel):
 
     wiz_id = fields.Many2one(
         comodel_name='rma.order.line.make.repair', string='Wizard',
-        ondelete='cascade', readonly=True)
+        ondelete='cascade', readonly=True,
+    )
     line_id = fields.Many2one(
-        comodel_name='rma.order.line', string='RMA Line', required=True)
+        comodel_name='rma.order.line', string='RMA',
+        required=True, readonly=True,
+    )
     rma_id = fields.Many2one(
         comodel_name='rma.order', related='line_id.rma_id',
-        string='RMA Order', readonly=True)
+        string='RMA Order', readonly=True,
+    )
     product_id = fields.Many2one(
-        comodel_name='product.product', string='Product', readonly=True)
+        comodel_name='product.product', string='Product', readonly=True,
+    )
     product_qty = fields.Float(
-        string='Quantity to repair', digits=dp.get_precision('Product UoS'))
+        string='Quantity to repair', digits=dp.get_precision('Product UoS'),
+    )
     product_uom_id = fields.Many2one(
-        comodel_name='product.uom', string='UoM', readonly=True)
+        comodel_name='product.uom', string='UoM', readonly=True,
+    )
     out_route_id = fields.Many2one(
         comodel_name='stock.location.route', string='Outbound Route',
-        domain=[('rma_selectable', '=', True)])
+        domain=[('rma_selectable', '=', True)],
+    )
     partner_id = fields.Many2one(
         comodel_name='res.partner', string='Customer', required=False,
-        domain=[('customer', '=', True)])
+        domain=[('customer', '=', True)], readonly=True,
+    )
     location_id = fields.Many2one(
-        comodel_name="stock.location", string="Location", required=True)
+        comodel_name="stock.location", string="Location", required=True,
+    )
     location_dest_id = fields.Many2one(
         comodel_name="stock.location", string="Destination location",
-        required=True)
+        required=True,
+    )
     to_refurbish = fields.Boolean(string="To Refurbish?")
     refurbish_product_id = fields.Many2one(
-        comodel_name="product.product", string="Refurbished Product")
+        comodel_name="product.product", string="Refurbished Product",
+    )
+    invoice_method = fields.Selection(
+        string="Invoice Method", selection=[
+            ("none", "No Invoice"),
+            ("b4repair", "Before Repair"),
+            ("after_repair", "After Repair")],
+        required=True,
+        help="Selecting 'Before Repair' or 'After Repair' will allow you "
+             "to generate invoice before or after the repair is done "
+             "respectively. 'No invoice' means you don't want to generate "
+             "invoice for this repair order.",
+    )
 
     @api.model
     def _prepare_repair_order(self, rma_line):
@@ -140,4 +164,5 @@ class RmaLineMakeRepairItem(models.TransientModel):
             'refurbish_location_dest_id': refurbish_location_dest_id,
             'refurbish_product_id': self.refurbish_product_id.id,
             'to_refurbish': self.to_refurbish,
+            'invoice_method': self.invoice_method,
         }
