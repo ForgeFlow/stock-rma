@@ -35,7 +35,7 @@ class RmaLineMakeRepair(models.TransientModel):
             'refurbish_product_id': refurbish_product_id,
             'location_id': line.location_id.id,
             'location_dest_id': line.location_id.id,
-            'invoice_method': 'after_repair'
+            'invoice_method': 'after_repair',
         }
 
     @api.model
@@ -165,4 +165,5 @@ class RmaLineMakeRepairItem(models.TransientModel):
             'refurbish_product_id': self.refurbish_product_id.id,
             'to_refurbish': self.to_refurbish,
             'invoice_method': self.invoice_method,
+            'partner_invoice_id': rma_line.invoice_address_id.id,
         }
