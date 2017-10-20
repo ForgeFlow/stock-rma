@@ -5,10 +5,6 @@
 RMA Repair
 ==========
 
-wip:
-* fix wizard
-* change repair sequence to not use 'RMA'.
-
 This module allows you to create repairs from one or more RMA lines.
 
 Installation
@@ -22,7 +18,7 @@ Usage
 
 To create repairs from RMA lines:
 
-#. Go to a approved RMA line.
+#. Go to an approved RMA.
 #. Click on *Create Repair Order*.
 #. Fill the required information in the lines.
 #. Hit *Create Repair Orders*.
