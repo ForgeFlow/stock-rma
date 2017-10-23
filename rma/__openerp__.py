@@ -26,6 +26,7 @@
              'views/stock_warehouse.xml',
              'views/product_view.xml',
              'views/procurement_view.xml',
+             'views/res_partner_view.xml',
              'wizards/rma_make_picking_view.xml',
              'wizards/rma_add_stock_move_view.xml',
              'wizards/stock_config_settings.xml',
