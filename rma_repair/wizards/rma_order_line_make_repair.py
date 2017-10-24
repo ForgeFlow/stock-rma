@@ -95,7 +95,7 @@ class RmaLineMakeRepairItem(models.TransientModel):
 
     wiz_id = fields.Many2one(
         comodel_name='rma.order.line.make.repair', string='Wizard',
-        required=True, readonly=True)
+        ondelete='cascade', readonly=True)
     line_id = fields.Many2one(
         comodel_name='rma.order.line', string='RMA Line', required=True)
     rma_id = fields.Many2one(
