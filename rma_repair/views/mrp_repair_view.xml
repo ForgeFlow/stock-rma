@@ -8,6 +8,7 @@
         <field name="arch" type="xml">
             <field name="guarantee_limit" position="after">
                 <field name="rma_line_id"/>
+                <field name="under_warranty"/>
             </field>
         </field>
     </record>
