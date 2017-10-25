@@ -9,4 +9,8 @@ class MrpRepair(models.Model):
     _inherit = "mrp.repair"
 
     rma_line_id = fields.Many2one(
-        comodel_name='rma.order.line', string='RMA', ondelete='restrict')
+        comodel_name='rma.order.line', string='RMA', ondelete='restrict',
+    )
+    under_warranty = fields.Boolean(
+        related='rma_line_id.under_warranty',
+    )
