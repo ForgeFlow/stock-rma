@@ -257,9 +257,14 @@
                         </h1>
                         </div>
                         <group name="partner">
-                            <field name="partner_id"
+                            <group name="partner">
+                                <field name="partner_id"
                                    domain="[('customer','=',True)]"
                                    string="Customer"/>
+                            </group>
+                            <group name="warranty">
+                                <field name="under_warranty"/>
+                            </group>
                         </group>
                         <group name="main_info" string="Origin">
                             <field name="reference_move_id"
