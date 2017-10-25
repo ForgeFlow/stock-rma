@@ -353,6 +353,10 @@ class RmaOrderLine(models.Model):
         digits=dp.get_precision('Product Unit of Measure'),
         readonly=True, compute=_compute_qty_supplier_rma,
         store=True)
+    under_warranty = fields.Boolean(
+        string="Under Warranty?",
+        readonly=True, states={'draft': [('readonly', False)]},
+    )
 
     @api.multi
     def _prepare_rma_line_from_stock_move(self, sm, lot=False):
