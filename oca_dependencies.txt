@@ -1,0 +1,5 @@
+stock-logistics-workflow-scrap https://github.com/eficent/stock-logistics-workflow 9.0-add-stock_scrap
+manufacture-quality_control https://github.com/eficent/manufacture 9.0-mig-quality_control
+manufacture-quality_control_team https://github.com/eficent/manufacture 9.0-add-quality_control_team
+manufacture-quality_control_issue https://github.com/eficent/manufacture 9.0-add-quality_control_issue
+manufacture-mrp_repair_refurbish https://github.com/eficent/manufacture 9.0-mrp_repair_refurbish
