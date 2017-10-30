@@ -117,7 +117,7 @@ class RmaOrderLine(models.Model):
     def action_view_refunds(self):
         action = self.env.ref('account.action_invoice_tree2')
         result = action.read()[0]
-        invoice_ids= self.mapped('refund_line_ids.invoice_id').ids
+        invoice_ids = self.mapped('refund_line_ids.invoice_id').ids
         # choose the view_mode accordingly
         if len(invoice_ids) != 1:
             result['domain'] = [('id', 'in', invoice_ids)]
