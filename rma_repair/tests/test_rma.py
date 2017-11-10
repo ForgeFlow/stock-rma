@@ -2,8 +2,7 @@
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo.tests import common
-from odoo.exceptions import ValidationError
+from openerp.tests import common
 
 
 class TestRma(common.TransactionCase):
@@ -53,20 +52,30 @@ class TestRma(common.TransactionCase):
             products2move, 'customer', self.env.ref('base.res_partner_2'),
             dropship=False)
 
+    def _create_picking(self, partner):
+        return self.stockpicking.create({
+            'partner_id': partner.id,
+            'picking_type_id': self.env.ref('stock.picking_type_in').id,
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.supplier_location.id
+            })
+
     def _create_rma_from_move(self, products2move, type, partner, dropship,
                               supplier_address_id=None):
+        picking_in = self._create_picking(partner)
+
         moves = []
         if type == 'customer':
             for item in products2move:
                 move_values = self._prepare_move(
                     item[0], item[1], self.stock_location,
-                    self.customer_location)
+                    self.customer_location, picking_in)
                 moves.append(self.env['stock.move'].create(move_values))
         else:
             for item in products2move:
                 move_values = self._prepare_move(
                     item[0], item[1], self.supplier_location,
-                    self.stock_rma_location)
+                    self.stock_rma_location, picking_in)
                 moves.append(self.env['stock.move'].create(move_values))
         # Create the RMA from the stock_move
         rma_id = self.rma.create(
@@ -85,6 +94,7 @@ class TestRma(common.TransactionCase):
                      }
                 ).create({})
                 data = wizard._prepare_rma_line_from_stock_move(move)
+                wizard.add_lines()
             else:
                 wizard = self.rma_add_stock_move.with_context(
                     {'stock_move_id': move.id, 'supplier': True,
@@ -93,17 +103,33 @@ class TestRma(common.TransactionCase):
                      }
                 ).create({})
                 data = wizard._prepare_rma_line_from_stock_move(move)
+                wizard.add_lines()
             if dropship:
                 data.update(customer_to_supplier=dropship,
                             supplier_address_id=supplier_address_id.id)
-            self.rma_line.create(data)
+            self.line = self.rma_line.create(data)
+            # approve the RMA Line
+            self.rma_line.action_rma_to_approve()
+            self.line.action_rma_approve()
+        rma_id._get_default_type()
+        rma_id._compute_in_shipment_count()
+        rma_id._compute_out_shipment_count()
+        rma_id._compute_supplier_line_count()
+        rma_id._compute_line_count()
+        rma_id.action_view_in_shipments()
+        rma_id.action_view_out_shipments()
+        rma_id.action_view_lines()
+
+        rma_id.partner_id.action_open_partner_rma()
+        rma_id.partner_id._compute_rma_line_count()
         # approve the RMA
-        rma_id.action_rma_to_approve()
-        rma_id.action_rma_approve()
+#        rma_id.action_rma_to_approve()
+#        rma_id.action_rma_approve()
         return rma_id
 
-    def _prepare_move(self, product, qty, src, dest):
+    def _prepare_move(self, product, qty, src, dest, picking_in):
         res = {
+            'partner_id': self.partner_id.id,
             'product_id': product.id,
             'name': product.partner_ref,
             'state': 'confirmed',
@@ -112,8 +138,95 @@ class TestRma(common.TransactionCase):
             'origin': 'Test RMA',
             'location_id': src.id,
             'location_dest_id': dest.id,
+            'picking_id': picking_in.id
         }
         return res
+
+    def test_rma_order_line(self):
+        for line in self.rma_customer_id.rma_line_ids:
+            line.with_context({'default_rma_id': line.rma_id.id
+                               })._default_warehouse_id()
+            line._default_location_id()
+            line.with_context({'partner_id': line.rma_id.partner_id.id
+                               })._default_delivery_address()
+            line._compute_in_shipment_count()
+            line._compute_out_shipment_count()
+            line._compute_procurement_count()
+
+            data = {'reference_move_id': line.reference_move_id.id}
+            new_line = self.rma_line.new(data)
+            new_line._onchange_reference_move_id()
+
+            line.action_rma_to_approve()
+            line.action_rma_draft()
+            line.action_rma_done()
+
+            data = {'product_id': line.product_id.id}
+            new_line = self.rma_line.new(data)
+            new_line._onchange_product_id()
+
+            data = {'operation_id': line.operation_id.id}
+            new_line = self.rma_line.new(data)
+            new_line._onchange_operation_id()
+
+            data = {'customer_to_supplier': line.customer_to_supplier}
+            new_line = self.rma_line.new(data)
+            new_line._onchange_receipt_policy()
+
+            data = {'lot_id': line.lot_id.id}
+            new_line = self.rma_line.new(data)
+            new_line._onchange_lot_id()
+
+            line.action_view_in_shipments()
+            line.action_view_out_shipments()
+            line.action_view_procurements()
+
+        self.rma_customer_id.action_view_supplier_lines()
+
+    def test_rma_order_line_make_repair_wizard(self):
+        self.rma_line_repair_item = self.env['rma.order.line.make.repair.item']
+        self.rma_line_repair = self.env['rma.order.line.make.repair']
+
+        self.product_id.income =\
+            self.env.ref('account.data_account_type_receivable').id
+        self.product_id.expense =\
+            self.env.ref('account.data_account_type_expenses').id
+        location_id = self.env.ref('stock.stock_location_stock')
+        location_dest_id = self.env.ref('stock.stock_location_customers')
+
+        self.product_id.write({'refurbish_product_id': self.product_1.id})
+
+        repair_id = self.rma_line_repair.with_context({
+            'active_ids': self.rma_customer_id.rma_line_ids.ids,
+            'active_model': 'rma.order.line',
+            'active_id': 1
+        }).create({'item_ids': [(0, 0, {
+            'line_id': self.rma_customer_id.rma_line_ids[0].id,
+            'rma_id': self.rma_customer_id.id,
+            'product_id': self.product_id.id,
+            'name': 'Test RMA Refund',
+            'product_qty': self.rma_customer_id.rma_line_ids[0].product_qty,
+            'invoice_method': 'after_repair',
+            'location_id': location_id.id,
+            'location_dest_id': location_dest_id.id,
+            'refurbish_product_id': self.product_1.id,
+            'to_refurbish': True
+            })]})
+        repair_id.default_get([str(repair_id.item_ids)])
+        repair_id.make_repair_order()
+
+        data = {'to_refurbish': True}
+        new_line = self.rma_line_repair_item.new(data)
+        new_line._onchange_to_refurbish()
+
+        self.rma_customer_id._compute_repair_count()
+        self.rma_customer_id.action_view_repair_order()
+        for line in self.rma_customer_id.rma_line_ids:
+            line.refund_policy = 'ordered'
+            line._compute_qty_to_repair()
+            line._compute_qty_repaired()
+            line._compute_repair_count()
+            line.action_view_repair_order()
 
     def test_customer_rma(self):
         wizard = self.rma_make_picking.with_context({
@@ -256,6 +369,6 @@ class TestRma(common.TransactionCase):
                                   "Wrong qty received")
                 self.assertEquals(line.qty_delivered, 2,
                                   "Wrong qty delivered")
-        self.rma_customer_id.action_rma_done()
-        self.assertEquals(self.rma_customer_id.state, 'done',
-                          "Wrong State")
+            self.line.action_rma_done()
+            self.assertEquals(self.line.state, 'done',
+                              "Wrong State")

@@ -9,7 +9,6 @@ from odoo.addons import decimal_precision as dp
 class RmaOrderLine(models.Model):
     _inherit = "rma.order.line"
 
-    @api.one
     @api.depends('sale_line_ids', 'sale_type', 'sales_count',
                  'sale_line_ids.state')
     def _compute_qty_to_sell(self):
@@ -24,7 +23,6 @@ class RmaOrderLine(models.Model):
         else:
             self.qty_to_sell = 0.0
 
-    @api.one
     @api.depends('sale_line_ids', 'sale_type', 'sales_count',
                  'sale_line_ids.state')
     def _compute_qty_sold(self):
