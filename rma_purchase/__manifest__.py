@@ -7,7 +7,7 @@
     'category': 'RMA',
     'summary': 'RMA from PO',
     'license': 'LGPL-3',
-    'author': 'Eficent',
+    'author': 'Eficent, Odoo Community Association (OCA)',
     'website': 'http://www.github.com/OCA/rma',
     'depends': ['rma_account', 'purchase'],
     'data': ['views/rma_order_view.xml',

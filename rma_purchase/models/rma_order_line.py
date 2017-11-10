@@ -21,7 +21,7 @@ class RmaOrderLine(models.Model):
 
     @api.multi
     @api.depends('procurement_ids.purchase_line_id')
-    def _get_purchase_order_lines(self):
+    def _compute_purchase_order_lines(self):
         for rec in self:
             purchase_list = []
             for procurement_id in rec.procurement_ids:
@@ -53,7 +53,7 @@ class RmaOrderLine(models.Model):
         comodel_name='purchase.order.line',
         relation='purchase_line_rma_line_rel',
         column1='rma_order_line_id', column2='purchase_order_line_id',
-        string='Purchase Order Lines', compute='_get_purchase_order_lines',
+        string='Purchase Order Lines', compute='_compute_purchase_order_lines',
     )
     qty_purchased = fields.Float(
         string='Qty Purchased', copy=False,
@@ -139,7 +139,6 @@ class RmaOrderLine(models.Model):
         if not exception == 'purchase_order_line_id':
             self.purchase_order_line_id = False
         return res
-
 
     @api.multi
     def action_view_purchase_order(self):
