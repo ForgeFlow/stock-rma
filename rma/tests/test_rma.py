@@ -54,6 +54,14 @@ class TestRma(common.TransactionCase):
 
     def _create_rma_from_move(self, products2move, type, partner, dropship,
                               supplier_address_id=None):
+
+        self.picking_in = self.stockpicking.create({
+            'partner_id': partner.id,
+            'picking_type_id': self.env.ref('stock.picking_type_in').id,
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.supplier_location.id
+            })
+
         moves = []
         if type == 'customer':
             for item in products2move:
@@ -95,14 +103,18 @@ class TestRma(common.TransactionCase):
             if dropship:
                 data.update(customer_to_supplier=dropship,
                             supplier_address_id=supplier_address_id.id)
-            self.rma_line.create(data)
+            self.line = self.rma_line.create(data)
+            # approve the RMA Line
+            self.rma_line.action_rma_to_approve()
+            self.line.action_rma_approve()
         # approve the RMA
-        rma_id.action_rma_to_approve()
-        rma_id.action_rma_approve()
+#        rma_id.action_rma_to_approve()
+#        rma_id.action_rma_approve()
         return rma_id
 
     def _prepare_move(self, product, qty, src, dest):
         res = {
+            'partner_id': self.partner_id.id,
             'product_id': product.id,
             'name': product.partner_ref,
             'state': 'confirmed',
@@ -111,6 +123,7 @@ class TestRma(common.TransactionCase):
             'origin': 'Test RMA',
             'location_id': src.id,
             'location_dest_id': dest.id,
+            'picking_id': self.picking_in.id
         }
         return res
 
@@ -255,6 +268,6 @@ class TestRma(common.TransactionCase):
                                   "Wrong qty received")
                 self.assertEquals(line.qty_delivered, 2,
                                   "Wrong qty delivered")
-        self.rma_customer_id.action_rma_done()
-        self.assertEquals(self.rma_customer_id.state, 'done',
-                          "Wrong State")
+            self.line.action_rma_done()
+            self.assertEquals(self.line.state, 'done',
+                              "Wrong State")
