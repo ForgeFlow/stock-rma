@@ -3,7 +3,6 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from openerp.tests import common
-from openerp.exceptions import ValidationError
 
 
 class TestRma(common.TransactionCase):
@@ -96,13 +95,6 @@ class TestRma(common.TransactionCase):
                 ).create({})
                 data = wizard._prepare_rma_line_from_stock_move(move)
                 wizard.add_lines()
-
-                for operation in move.product_id.rma_customer_operation_id:
-                    operation.in_route_id = False
-                move.product_id.categ_id.rma_customer_operation_id = False
-                move.product_id.rma_customer_operation_id = False
-                wizard._prepare_rma_line_from_stock_move(move)
-
             else:
                 wizard = self.rma_add_stock_move.with_context(
                     {'stock_move_id': move.id, 'supplier': True,
@@ -112,33 +104,12 @@ class TestRma(common.TransactionCase):
                 ).create({})
                 data = wizard._prepare_rma_line_from_stock_move(move)
                 wizard.add_lines()
-
-                wizard = self.rma_add_stock_move.with_context(
-                    {'stock_move_id': move.id, 'supplier': True,
-                     'active_ids': [],
-                     'active_model': 'rma.order',
-                     }
-                ).create({})
-                wizard.add_lines()
-
-                wizard = self.rma_add_stock_move.with_context(
-                    {'stock_move_id': move.id, 'supplier': True,
-                     'active_ids': rma_id.id,
-                     'active_model': 'rma.order',
-                     }
-                ).create({})
-                data = wizard._prepare_rma_line_from_stock_move(move)
-                for operation in move.product_id.rma_customer_operation_id:
-                    operation.in_route_id = False
-                move.product_id.rma_customer_operation_id = False
-                wizard.add_lines()
-
             if dropship:
                 data.update(customer_to_supplier=dropship,
                             supplier_address_id=supplier_address_id.id)
             self.line = self.rma_line.create(data)
             # approve the RMA Line
-            self.line.action_rma_to_approve()
+            self.rma_line.action_rma_to_approve()
             self.line.action_rma_approve()
         rma_id._get_default_type()
         rma_id._compute_in_shipment_count()
@@ -172,21 +143,6 @@ class TestRma(common.TransactionCase):
         return res
 
     def test_rma_order_line(self):
-        picking_in = self._create_picking(self.env.ref('base.res_partner_2'))
-        moves_1 = []
-        move_values = self._prepare_move(self.product_1, 3,
-                                         self.stock_location,
-                                         self.customer_location, picking_in)
-        moves_1.append(self.env['stock.move'].create(move_values))
-        wizard_1 = self.rma_add_stock_move.with_context(
-            {'supplier': True,
-             'stock_move_id': [(6, 0, [m.id for m in moves_1])],
-             'active_ids': self.rma_customer_id.id,
-             'active_model': 'rma.order',
-             }
-        ).create({'move_ids': [(6, 0, [m.id for m in moves_1])]})
-        wizard_1.add_lines()
-
         for line in self.rma_customer_id.rma_line_ids:
             line.with_context({'default_rma_id': line.rma_id.id
                                })._default_warehouse_id()
@@ -224,12 +180,53 @@ class TestRma(common.TransactionCase):
             line.action_view_in_shipments()
             line.action_view_out_shipments()
             line.action_view_procurements()
-            self.rma_customer_id.action_view_supplier_lines()
-            with self.assertRaises(ValidationError):
-                line.rma_id.partner_id = self.partner_id.id
-                self.rma_customer_id.rma_line_ids[0].\
-                    partner_id = self.partner_id.id
+
         self.rma_customer_id.action_view_supplier_lines()
+
+    def test_rma_order_line_make_repair_wizard(self):
+        self.rma_line_repair_item = self.env['rma.order.line.make.repair.item']
+        self.rma_line_repair = self.env['rma.order.line.make.repair']
+
+        self.product_id.income =\
+            self.env.ref('account.data_account_type_receivable').id
+        self.product_id.expense =\
+            self.env.ref('account.data_account_type_expenses').id
+        location_id = self.env.ref('stock.stock_location_stock')
+        location_dest_id = self.env.ref('stock.stock_location_customers')
+
+        self.product_id.write({'refurbish_product_id': self.product_1.id})
+
+        repair_id = self.rma_line_repair.with_context({
+            'active_ids': self.rma_customer_id.rma_line_ids.ids,
+            'active_model': 'rma.order.line',
+            'active_id': 1
+        }).create({'item_ids': [(0, 0, {
+            'line_id': self.rma_customer_id.rma_line_ids[0].id,
+            'rma_id': self.rma_customer_id.id,
+            'product_id': self.product_id.id,
+            'name': 'Test RMA Refund',
+            'product_qty': self.rma_customer_id.rma_line_ids[0].product_qty,
+            'invoice_method': 'after_repair',
+            'location_id': location_id.id,
+            'location_dest_id': location_dest_id.id,
+            'refurbish_product_id': self.product_1.id,
+            'to_refurbish': True
+            })]})
+        repair_id.default_get([str(repair_id.item_ids)])
+        repair_id.make_repair_order()
+
+        data = {'to_refurbish': True}
+        new_line = self.rma_line_repair_item.new(data)
+        new_line._onchange_to_refurbish()
+
+        self.rma_customer_id._compute_repair_count()
+        self.rma_customer_id.action_view_repair_order()
+        for line in self.rma_customer_id.rma_line_ids:
+            line.refund_policy = 'ordered'
+            line._compute_qty_to_repair()
+            line._compute_qty_repaired()
+            line._compute_repair_count()
+            line.action_view_repair_order()
 
     def test_customer_rma(self):
         wizard = self.rma_make_picking.with_context({
@@ -375,6 +372,3 @@ class TestRma(common.TransactionCase):
             self.line.action_rma_done()
             self.assertEquals(self.line.state, 'done',
                               "Wrong State")
-        self.rma_customer_id.action_view_in_shipments()
-        self.rma_customer_id.action_view_out_shipments()
-        self.rma_customer_id.action_view_lines()

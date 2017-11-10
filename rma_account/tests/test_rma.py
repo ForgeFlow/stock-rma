@@ -3,7 +3,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from openerp.tests import common
-from openerp.exceptions import ValidationError
+from openerp import fields
 
 
 class TestRma(common.TransactionCase):
@@ -25,6 +25,12 @@ class TestRma(common.TransactionCase):
         self.rma_sup_replace_op_id = self.env.ref(
             'rma.rma_operation_supplier_replace')
         self.product_id = self.env.ref('product.product_product_4')
+        self.product_id.product_tmpl_id.categ_id.\
+            property_stock_account_input_categ_id =\
+            self.env.ref('account.data_account_type_receivable').id
+        self.product_id.product_tmpl_id.categ_id.\
+            property_stock_account_output_categ_id =\
+            self.env.ref('account.data_account_type_expenses').id
         self.product_1 = self.env.ref('product.product_product_25')
         self.product_2 = self.env.ref('product.product_product_30')
         self.product_3 = self.env.ref('product.product_product_33')
@@ -86,6 +92,16 @@ class TestRma(common.TransactionCase):
                 'partner_id': partner.id,
                 'company_id': self.env.ref('base.main_company').id
             })
+        rma_id._compute_invoice_refund_count()
+        rma_id._compute_invoice_count()
+
+        data = {'add_invoice_id': self._create_invoice().id}
+        new_line = self.rma.new(data)
+        new_line.on_change_invoice()
+
+        rma_id.action_view_invoice_refund()
+        rma_id.action_view_invoice()
+
         for move in moves:
             if type == 'customer':
                 wizard = self.rma_add_stock_move.with_context(
@@ -95,14 +111,6 @@ class TestRma(common.TransactionCase):
                      }
                 ).create({})
                 data = wizard._prepare_rma_line_from_stock_move(move)
-                wizard.add_lines()
-
-                for operation in move.product_id.rma_customer_operation_id:
-                    operation.in_route_id = False
-                move.product_id.categ_id.rma_customer_operation_id = False
-                move.product_id.rma_customer_operation_id = False
-                wizard._prepare_rma_line_from_stock_move(move)
-
             else:
                 wizard = self.rma_add_stock_move.with_context(
                     {'stock_move_id': move.id, 'supplier': True,
@@ -111,46 +119,18 @@ class TestRma(common.TransactionCase):
                      }
                 ).create({})
                 data = wizard._prepare_rma_line_from_stock_move(move)
-                wizard.add_lines()
-
-                wizard = self.rma_add_stock_move.with_context(
-                    {'stock_move_id': move.id, 'supplier': True,
-                     'active_ids': [],
-                     'active_model': 'rma.order',
-                     }
-                ).create({})
-                wizard.add_lines()
-
-                wizard = self.rma_add_stock_move.with_context(
-                    {'stock_move_id': move.id, 'supplier': True,
-                     'active_ids': rma_id.id,
-                     'active_model': 'rma.order',
-                     }
-                ).create({})
-                data = wizard._prepare_rma_line_from_stock_move(move)
-                for operation in move.product_id.rma_customer_operation_id:
-                    operation.in_route_id = False
-                move.product_id.rma_customer_operation_id = False
-                wizard.add_lines()
-
             if dropship:
                 data.update(customer_to_supplier=dropship,
                             supplier_address_id=supplier_address_id.id)
             self.line = self.rma_line.create(data)
             # approve the RMA Line
-            self.line.action_rma_to_approve()
-            self.line.action_rma_approve()
-        rma_id._get_default_type()
-        rma_id._compute_in_shipment_count()
-        rma_id._compute_out_shipment_count()
-        rma_id._compute_supplier_line_count()
-        rma_id._compute_line_count()
-        rma_id.action_view_in_shipments()
-        rma_id.action_view_out_shipments()
-        rma_id.action_view_lines()
+            self.line._compute_refund_count()
+            self.rma_line.action_rma_to_approve()
 
-        rma_id.partner_id.action_open_partner_rma()
-        rma_id.partner_id._compute_rma_line_count()
+            self.line.action_rma_approve()
+            self.line.action_view_invoice()
+            self.line.action_view_refunds()
+
         # approve the RMA
 #        rma_id.action_rma_to_approve()
 #        rma_id.action_rma_approve()
@@ -171,65 +151,103 @@ class TestRma(common.TransactionCase):
         }
         return res
 
-    def test_rma_order_line(self):
-        picking_in = self._create_picking(self.env.ref('base.res_partner_2'))
-        moves_1 = []
-        move_values = self._prepare_move(self.product_1, 3,
-                                         self.stock_location,
-                                         self.customer_location, picking_in)
-        moves_1.append(self.env['stock.move'].create(move_values))
-        wizard_1 = self.rma_add_stock_move.with_context(
-            {'supplier': True,
-             'stock_move_id': [(6, 0, [m.id for m in moves_1])],
-             'active_ids': self.rma_customer_id.id,
-             'active_model': 'rma.order',
-             }
-        ).create({'move_ids': [(6, 0, [m.id for m in moves_1])]})
-        wizard_1.add_lines()
+    def test_rma_refund(self):
+
+        self.rma_refund_item = self.env['rma.refund.item']
+        self.rma_refund = self.env['rma.refund']
+
+        self.product_id.income =\
+            self.env.ref('account.data_account_type_receivable').id
+        self.product_id.expense =\
+            self.env.ref('account.data_account_type_expenses').id
 
         for line in self.rma_customer_id.rma_line_ids:
-            line.with_context({'default_rma_id': line.rma_id.id
-                               })._default_warehouse_id()
-            line._default_location_id()
-            line.with_context({'partner_id': line.rma_id.partner_id.id
-                               })._default_delivery_address()
-            line._compute_in_shipment_count()
-            line._compute_out_shipment_count()
-            line._compute_procurement_count()
+            line.refund_policy = 'ordered'
 
-            data = {'reference_move_id': line.reference_move_id.id}
-            new_line = self.rma_line.new(data)
-            new_line._onchange_reference_move_id()
+        refund = self.rma_refund.with_context({
+            'active_ids': self.rma_customer_id.rma_line_ids.ids,
+            'active_model': 'rma.order.line',
+            'active_id': 1
+        }).create({'description': 'Test Reason',
+                   'date_invoice': fields.datetime.now()
+                   })
+        self.rma_refund_item.create({
+            'line_id': self.rma_customer_id.rma_line_ids[0].id,
+            'rma_id': self.rma_customer_id.id,
+            'product_id': self.product_id.id,
+            'name': 'Test RMA Refund',
+            'product_qty': self.rma_customer_id.rma_line_ids[0].product_qty,
+            'wiz_id': refund.id
+        })
+        refund.invoice_refund()
 
-            line.action_rma_to_approve()
-            line.action_rma_draft()
-            line.action_rma_done()
+        data = {'invoice_line_id': self._create_invoice().invoice_line_ids.id}
+        new_line = self.rma_line.new(data)
+        new_line._onchange_invoice_line_id()
+        self.rma_customer_id.action_view_invoice_refund()
+        self.rma_customer_id.action_view_invoice()
 
-            data = {'product_id': line.product_id.id}
-            new_line = self.rma_line.new(data)
-            new_line._onchange_product_id()
+    def test_on_change_invoice_rma(self):
 
-            data = {'operation_id': line.operation_id.id}
-            new_line = self.rma_line.new(data)
-            new_line._onchange_operation_id()
+        wizard = self.env['rma_add_invoice'].with_context({
+            'active_ids': self.rma_customer_id.ids,
+            'active_model': 'rma.order',
+            'active_id': self.rma_customer_id.id
+        }).create({'partner_id': self.partner_id.id,
+                   'rma_id': self.rma_customer_id.id,
+                   'invoice_line_ids':
+                   [(6, 0, [self._create_invoice().invoice_line_ids.id])],
+                   })
+        wizard.default_get([str(self._create_invoice().id),
+                            str(self._create_invoice().invoice_line_ids.id),
+                            str(self.partner_id.id)])
+        wizard.add_lines()
+        self.rma_customer_id.action_view_invoice_refund()
+        self.rma_customer_id.action_view_invoice()
+        self.rma_customer_id.rma_line_ids[0].\
+            invoice_id = self._create_invoice().id
+        self.rma_customer_id.action_view_invoice()
+        self.rma_customer_id.add_invoice_id = self._create_invoice().id
+        for line in self.rma_customer_id.rma_line_ids:
+            line.invoice_id.action_view_rma_supplier()
+            line.invoice_id.action_view_rma_customer()
 
-            data = {'customer_to_supplier': line.customer_to_supplier}
-            new_line = self.rma_line.new(data)
-            new_line._onchange_receipt_policy()
+    def _create_invoice(self):
+        self.Account = self.env['account.account']
+        self.AccountInvoice = self.env['account.invoice']
+        self.AccountInvoiceLine = self.env['account.invoice.line']
 
-            data = {'lot_id': line.lot_id.id}
-            new_line = self.rma_line.new(data)
-            new_line._onchange_lot_id()
+        self.account_receivable =\
+            self.env.ref('account.data_account_type_receivable')
+        self.account_expenses =\
+            self.env.ref('account.data_account_type_expenses')
+        invoice_account = self.Account.\
+            search([('user_type_id', '=', self.account_receivable.id)], limit=1
+                   ).id
+        invoice_line_account = self.Account.\
+            search([('user_type_id', '=', self.account_expenses.id)], limit=1
+                   ).id
 
-            line.action_view_in_shipments()
-            line.action_view_out_shipments()
-            line.action_view_procurements()
-            self.rma_customer_id.action_view_supplier_lines()
-            with self.assertRaises(ValidationError):
-                line.rma_id.partner_id = self.partner_id.id
-                self.rma_customer_id.rma_line_ids[0].\
-                    partner_id = self.partner_id.id
-        self.rma_customer_id.action_view_supplier_lines()
+        invoice = self.AccountInvoice.create({
+            'partner_id': self.partner_id.id,
+            'account_id': invoice_account,
+            'type': 'in_invoice',
+        })
+
+        invoice_line = self.AccountInvoiceLine.create({
+            'product_id': self.product_1.id,
+            'quantity': 1.0,
+            'price_unit': 100.0,
+            'invoice_id': invoice.id,
+            'uom_id': 1,
+            'name': 'product that cost 100',
+            'account_id': invoice_line_account,
+        })
+        invoice._compute_rma_count()
+        invoice_line._compute_rma_count()
+        invoice.action_view_rma_customer()
+        invoice.action_view_rma_supplier()
+        return invoice
 
     def test_customer_rma(self):
         wizard = self.rma_make_picking.with_context({
@@ -375,6 +393,3 @@ class TestRma(common.TransactionCase):
             self.line.action_rma_done()
             self.assertEquals(self.line.state, 'done',
                               "Wrong State")
-        self.rma_customer_id.action_view_in_shipments()
-        self.rma_customer_id.action_view_out_shipments()
-        self.rma_customer_id.action_view_lines()
