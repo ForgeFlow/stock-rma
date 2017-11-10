@@ -31,11 +31,13 @@ class RmaOrder(models.Model):
 
     def _prepare_rma_line_from_inv_line(self, line):
         if self.type == 'customer':
-            operation = self.product_id.rma_customer_operation_id or \
-                self.product_id.categ_id.rma_customer_operation_id
+            operation =\
+                self.rma_line_ids.product_id.rma_customer_operation_id or \
+                self.rma_line_ids.product_id.categ_id.rma_customer_operation_id
         else:
-            operation = self.product_id.rma_supplier_operation_id or \
-                self.product_id.categ_id.rma_supplier_operation_id
+            operation =\
+                self.rma_line_ids.product_id.rma_supplier_operation_id or \
+                self.rma_line_ids.product_id.categ_id.rma_supplier_operation_id
         data = {
             'invoice_line_id': line.id,
             'product_id': line.product_id.id,
@@ -46,7 +48,7 @@ class RmaOrder(models.Model):
             'product_qty': line.quantity,
             'price_unit': line.invoice_id.currency_id.compute(
                 line.price_unit, line.currency_id, round=False),
-            'rma_id': self._origin.id
+            'rma_id': self.id
         }
         return data
 
