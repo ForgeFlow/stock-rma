@@ -4,6 +4,7 @@
 
 from openerp import _, api, fields, models
 from openerp.exceptions import ValidationError
+from openerp.tools.safe_eval import safe_eval as eval
 import openerp.addons.decimal_precision as dp
 
 
@@ -164,7 +165,6 @@ class RmaRefund(models.TransientModel):
         return values
 
     @api.constrains('item_ids')
-    @api.one
     def check_unique_invoice_address_id(self):
         addresses = self.item_ids.mapped('invoice_address_id')
         if len(addresses) > 1:

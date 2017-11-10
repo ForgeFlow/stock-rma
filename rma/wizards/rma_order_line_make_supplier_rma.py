@@ -110,7 +110,7 @@ class RmaLineMakeSupplierRma(models.TransientModel):
             'location_id': (operation.location_id.id or
                             operation.in_warehouse_id.lot_rma_id.id or
                             warehouse.lot_rma_id.id)
-             }
+        }
         return data
 
     @api.multi
