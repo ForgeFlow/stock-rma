@@ -8,7 +8,7 @@
     'license': 'LGPL-3',
     'category': 'RMA',
     'summary': 'Integrates RMA with Invoice Processing',
-    'author': "Eficent",
+    'author': "Eficent, Odoo Community Association (OCA)",
     'website': 'http://www.github.com/OCA/rma',
     'depends': ['account', 'rma'],
     'demo': ['demo/rma_operation.xml'],

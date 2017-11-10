@@ -25,16 +25,16 @@ class RmaOrderLine(models.Model):
                 lambda i: i.invoice_id.state in ('open', 'paid')).mapped(
                 'quantity'))
 
-    @api.one
     @api.depends('refund_line_ids', 'refund_line_ids.invoice_id.state',
                  'refund_policy', 'move_ids', 'move_ids.state', 'type')
     def _compute_qty_to_refund(self):
         qty = 0.0
-        if self.refund_policy == 'ordered':
-            qty = self.product_qty - self.qty_refunded
-        elif self.refund_policy == 'received':
-            qty = self.qty_received - self.qty_refunded
-        self.qty_to_refund = qty
+        for res in self:
+            if res.refund_policy == 'ordered':
+                qty = res.product_qty - res.qty_refunded
+            elif res.refund_policy == 'received':
+                qty = res.qty_received - res.qty_refunded
+            res.qty_to_refund = qty
 
     @api.multi
     def _compute_refund_count(self):
@@ -94,21 +94,21 @@ class RmaOrderLine(models.Model):
             operation = self.env['rma.operation'].search(
                 [('type', '=', self.type)], limit=1)
             if not operation:
-                raise ValidationError("Please define an operation first")
+                raise ValidationError(_("Please define an operation first"))
 
         if not operation.in_route_id or not operation.out_route_id:
             route = self.env['stock.location.route'].search(
                 [('rma_selectable', '=', True)], limit=1)
             if not route:
-                raise ValidationError("Please define an rma route")
+                raise ValidationError(_("Please define an rma route"))
 
         if not operation.in_warehouse_id or not operation.out_warehouse_id:
             warehouse = self.env['stock.warehouse'].search(
                 [('company_id', '=', self.company_id.id),
                  ('lot_rma_id', '!=', False)], limit=1)
             if not warehouse:
-                raise ValidationError("Please define a warehouse with a"
-                                      " default rma location")
+                raise ValidationError(_("Please define a warehouse with a"
+                                      " default rma location"))
         data = {
             'product_id': line.product_id.id,
             'origin': line.invoice_id.number,
@@ -189,7 +189,6 @@ class RmaOrderLine(models.Model):
         result['views'] = [(res and res.id or False, 'form')]
         result['view_id'] = res and res.id or False
         result['res_id'] = self.invoice_line_id.invoice_id.id
-
         return result
 
     @api.multi
