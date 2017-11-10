@@ -2,7 +2,7 @@
 <odoo>
     <data>
 
-        <record id="procurement_form_view" model="ir.ui.view">
+        <record id="procurement_form_view_0" model="ir.ui.view">
             <field name="name">procurement.order.form</field>
             <field name="model">procurement.order</field>
             <field name="inherit_id"
