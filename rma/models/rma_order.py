@@ -171,7 +171,6 @@ class RmaOrder(models.Model):
                 res = self.env.ref('rma.view_rma_line_form', False)
             else:
                 res = self.env.ref('rma.view_rma_line_supplier_form', False)
-
             result['views'] = [(res and res.id or False, 'form')]
             result['res_id'] = lines.id
         return result
@@ -181,13 +180,14 @@ class RmaOrder(models.Model):
         action = self.env.ref('rma.action_rma_supplier_lines')
         result = action.read()[0]
         lines = self.rma_line_ids
-        related_lines = [line.id for line in lines.supplier_rma_line_ids]
-        # choose the view_mode accordingly
-        if len(related_lines) != 1:
-            result['domain'] = "[('id', 'in', " + \
-                               str(related_lines) + ")]"
-        elif len(related_lines) == 1:
-            res = self.env.ref('rma.view_rma_line_supplier_form', False)
-            result['views'] = [(res and res.id or False, 'form')]
-            result['res_id'] = related_lines[0]
+        for line_id in lines:
+            related_lines = [line.id for line in line_id.supplier_rma_line_ids]
+            # choose the view_mode accordingly
+            if len(related_lines) != 1:
+                result['domain'] = "[('id', 'in', " + \
+                                   str(related_lines) + ")]"
+            elif len(related_lines) == 1:
+                res = self.env.ref('rma.view_rma_line_supplier_form', False)
+                result['views'] = [(res and res.id or False, 'form')]
+                result['res_id'] = related_lines[0]
         return result

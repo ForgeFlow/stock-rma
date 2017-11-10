@@ -372,21 +372,21 @@ class RmaOrderLine(models.Model):
             operation = self.env['rma.operation'].search(
                 [('type', '=', self.type)], limit=1)
             if not operation:
-                raise ValidationError("Please define an operation first.")
+                raise ValidationError(_("Please define an operation first."))
 
         if not operation.in_route_id or not operation.out_route_id:
             route = self.env['stock.location.route'].search(
                 [('rma_selectable', '=', True)], limit=1)
             if not route:
-                raise ValidationError("Please define an RMA route.")
+                raise ValidationError(_("Please define an RMA route."))
 
         if not operation.in_warehouse_id or not operation.out_warehouse_id:
             warehouse = self.env['stock.warehouse'].search(
                 [('company_id', '=', self.company_id.id),
                  ('lot_rma_id', '!=', False)], limit=1)
             if not warehouse:
-                raise ValidationError(
-                    "Please define a warehouse with a default RMA location.")
+                raise ValidationError(_(
+                    "Please define a warehouse with a default RMA location."))
 
         data = {
             'product_id': sm.product_id.id,
