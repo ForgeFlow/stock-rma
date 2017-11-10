@@ -8,7 +8,7 @@
     'license': 'LGPL-3',
     'category': 'RMA',
     'summary': 'Links RMA with Sales Orders',
-    'author': "Eficent",
+    'author': "Eficent, Odoo Community Association (OCA)",
     'website': 'http://www.github.com/OCA/rma',
     'depends': ['rma_account', 'sale_stock'],
     'data': ['views/rma_order_view.xml',
