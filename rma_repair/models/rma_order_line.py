@@ -9,26 +9,26 @@ from openerp.addons import decimal_precision as dp
 class RmaOrderLine(models.Model):
     _inherit = "rma.order.line"
 
-    @api.one
     @api.depends('repair_ids', 'repair_type', 'repair_ids.state',
                  'qty_to_receive')
     def _compute_qty_to_repair(self):
-        if self.repair_type == 'no':
-            self.qty_to_repair = 0.0
-        elif self.repair_type == 'ordered':
-            qty = self._get_rma_repaired_qty()
-            self.qty_to_repair = self.product_qty - qty
-        elif self.repair_type == 'received':
-            qty = self._get_rma_repaired_qty()
-            self.qty_to_repair = self.qty_received - qty
-        else:
-            self.qty_to_repair = 0.0
+        for line in self:
+            if line.repair_type == 'no':
+                line.qty_to_repair = 0.0
+            elif line.repair_type == 'ordered':
+                qty = line._get_rma_repaired_qty()
+                line.qty_to_repair = line.product_qty - qty
+            elif line.repair_type == 'received':
+                qty = line._get_rma_repaired_qty()
+                line.qty_to_repair = line.qty_received - qty
+            else:
+                line.qty_to_repair = 0.0
 
-    @api.one
     @api.depends('repair_ids', 'repair_type', 'repair_ids.state',
                  'qty_to_receive')
     def _compute_qty_repaired(self):
-        self.qty_repaired = self._get_rma_repaired_qty()
+        for line in self:
+            line.qty_repaired = line._get_rma_repaired_qty()
 
     @api.multi
     def _compute_repair_count(self):

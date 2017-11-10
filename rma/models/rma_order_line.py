@@ -87,8 +87,8 @@ class RmaOrderLine(models.Model):
             rec.qty_to_receive = 0.0
             if rec.receipt_policy == 'ordered':
                 rec.qty_to_receive = rec.product_qty - rec.qty_received
-            elif self.receipt_policy == 'delivered':
-                self.qty_to_receive = rec.qty_delivered - rec.qty_received
+            elif rec.receipt_policy == 'delivered':
+                rec.qty_to_receive = rec.qty_delivered - rec.qty_received
 
     @api.multi
     @api.depends('move_ids', 'move_ids.state',
@@ -197,6 +197,7 @@ class RmaOrderLine(models.Model):
     partner_id = fields.Many2one(
         comodel_name='res.partner', required=True, store=True,
         track_visibility='onchange',
+        string="Partner",
         readonly=True, states={'draft': [('readonly', False)]},
     )
     sequence = fields.Integer(
@@ -373,21 +374,21 @@ class RmaOrderLine(models.Model):
             operation = self.env['rma.operation'].search(
                 [('type', '=', self.type)], limit=1)
             if not operation:
-                raise ValidationError("Please define an operation first.")
+                raise ValidationError(_("Please define an operation first."))
 
         if not operation.in_route_id or not operation.out_route_id:
             route = self.env['stock.location.route'].search(
                 [('rma_selectable', '=', True)], limit=1)
             if not route:
-                raise ValidationError("Please define an RMA route.")
+                raise ValidationError(_("Please define an RMA route."))
 
         if not operation.in_warehouse_id or not operation.out_warehouse_id:
             warehouse = self.env['stock.warehouse'].search(
                 [('company_id', '=', self.company_id.id),
                  ('lot_rma_id', '!=', False)], limit=1)
             if not warehouse:
-                raise ValidationError(
-                    "Please define a warehouse with a default RMA location.")
+                raise ValidationError(_(
+                    "Please define a warehouse with a default RMA location."))
 
         data = {
             'product_id': sm.product_id.id,
@@ -434,11 +435,14 @@ class RmaOrderLine(models.Model):
     def _check_move_partner(self):
         for rec in self:
             if (rec.reference_move_id and
-                    rec.reference_move_id.picking_id.partner_id !=
-                    rec.partner_id):
-                raise ValidationError(_(
-                    "RMA customer and originating stock move customer "
-                    "doesn't match."))
+               (rec.reference_move_id.partner_id != rec.partner_id) and
+               (rec.reference_move_id.picking_id.partner_id !=
+                    rec.partner_id)):
+                    raise ValidationError(_(
+                        "RMA customer (%s) and originating stock move customer"
+                        " (%s) doesn't match." % (
+                            rec.reference_move_id.partner_id.name,
+                            rec.partner_id.name)))
 
     @api.multi
     def _remove_other_data_origin(self, exception):
