@@ -8,7 +8,7 @@ from odoo import api, fields, models
 class AccountInvoice(models.Model):
     _inherit = "account.invoice"
 
-    @api.one
+    @api.depends('invoice_line_ids.rma_line_ids')
     def _compute_rma_count(self):
         for inv in self:
             rmas = self.mapped('invoice_line_ids.rma_line_ids')
