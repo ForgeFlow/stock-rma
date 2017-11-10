@@ -2,8 +2,8 @@
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo.tests import common
-from odoo.exceptions import ValidationError
+from openerp.tests import common
+from openerp import fields
 
 
 class TestRma(common.TransactionCase):
@@ -25,6 +25,12 @@ class TestRma(common.TransactionCase):
         self.rma_sup_replace_op_id = self.env.ref(
             'rma.rma_operation_supplier_replace')
         self.product_id = self.env.ref('product.product_product_4')
+        self.product_id.product_tmpl_id.categ_id.\
+            property_stock_account_input_categ_id =\
+            self.env.ref('account.data_account_type_receivable').id
+        self.product_id.product_tmpl_id.categ_id.\
+            property_stock_account_output_categ_id =\
+            self.env.ref('account.data_account_type_expenses').id
         self.product_1 = self.env.ref('product.product_product_25')
         self.product_2 = self.env.ref('product.product_product_30')
         self.product_3 = self.env.ref('product.product_product_33')
@@ -53,20 +59,30 @@ class TestRma(common.TransactionCase):
             products2move, 'customer', self.env.ref('base.res_partner_2'),
             dropship=False)
 
+    def _create_picking(self, partner):
+        return self.stockpicking.create({
+            'partner_id': partner.id,
+            'picking_type_id': self.env.ref('stock.picking_type_in').id,
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.supplier_location.id
+            })
+
     def _create_rma_from_move(self, products2move, type, partner, dropship,
                               supplier_address_id=None):
+        picking_in = self._create_picking(partner)
+
         moves = []
         if type == 'customer':
             for item in products2move:
                 move_values = self._prepare_move(
                     item[0], item[1], self.stock_location,
-                    self.customer_location)
+                    self.customer_location, picking_in)
                 moves.append(self.env['stock.move'].create(move_values))
         else:
             for item in products2move:
                 move_values = self._prepare_move(
                     item[0], item[1], self.supplier_location,
-                    self.stock_rma_location)
+                    self.stock_rma_location, picking_in)
                 moves.append(self.env['stock.move'].create(move_values))
         # Create the RMA from the stock_move
         rma_id = self.rma.create(
@@ -76,6 +92,16 @@ class TestRma(common.TransactionCase):
                 'partner_id': partner.id,
                 'company_id': self.env.ref('base.main_company').id
             })
+        rma_id._compute_invoice_refund_count()
+        rma_id._compute_invoice_count()
+
+        data = {'add_invoice_id': self._create_invoice().id}
+        new_line = self.rma.new(data)
+        new_line.on_change_invoice()
+
+        rma_id.action_view_invoice_refund()
+        rma_id.action_view_invoice()
+
         for move in moves:
             if type == 'customer':
                 wizard = self.rma_add_stock_move.with_context(
@@ -96,14 +122,22 @@ class TestRma(common.TransactionCase):
             if dropship:
                 data.update(customer_to_supplier=dropship,
                             supplier_address_id=supplier_address_id.id)
-            self.rma_line.create(data)
+            self.line = self.rma_line.create(data)
+            # approve the RMA Line
+            self.rma_line.action_rma_to_approve()
+
+            self.line.action_rma_approve()
+            self.line.action_view_invoice()
+            self.line.action_view_refunds()
+
         # approve the RMA
-        rma_id.action_rma_to_approve()
-        rma_id.action_rma_approve()
+#        rma_id.action_rma_to_approve()
+#        rma_id.action_rma_approve()
         return rma_id
 
-    def _prepare_move(self, product, qty, src, dest):
+    def _prepare_move(self, product, qty, src, dest, picking_in):
         res = {
+            'partner_id': self.partner_id.id,
             'product_id': product.id,
             'name': product.partner_ref,
             'state': 'confirmed',
@@ -112,8 +146,153 @@ class TestRma(common.TransactionCase):
             'origin': 'Test RMA',
             'location_id': src.id,
             'location_dest_id': dest.id,
+            'picking_id': picking_in.id
         }
         return res
+
+    def test_rma_refund(self):
+
+        self.rma_refund_item = self.env['rma.refund.item']
+        self.rma_refund = self.env['rma.refund']
+
+        self.product_id.income =\
+            self.env.ref('account.data_account_type_receivable').id
+        self.product_id.expense =\
+            self.env.ref('account.data_account_type_expenses').id
+
+        for line in self.rma_customer_id.rma_line_ids:
+            line.refund_policy = 'ordered'
+
+        refund = self.rma_refund.with_context({
+            'active_ids': self.rma_customer_id.rma_line_ids.ids,
+            'active_model': 'rma.order.line',
+            'active_id': 1
+        }).create({'description': 'Test Reason',
+                   'date_invoice': fields.datetime.now()
+                   })
+        self.rma_refund_item.create({
+            'line_id': self.rma_customer_id.rma_line_ids[0].id,
+            'rma_id': self.rma_customer_id.id,
+            'product_id': self.product_id.id,
+            'name': 'Test RMA Refund',
+            'product_qty': self.rma_customer_id.rma_line_ids[0].product_qty,
+            'wiz_id': refund.id
+        })
+        refund.invoice_refund()
+
+    def test_rma_add_invoice_wizard(self):
+
+        wizard = self.env['rma_add_invoice'].with_context({
+            'active_ids': self.rma_customer_id.ids,
+            'active_model': 'rma.order',
+            'active_id': self.rma_customer_id.id
+        }).create({'partner_id': self.partner_id.id,
+                   'rma_id': self.rma_customer_id.id,
+                   'invoice_line_ids':
+                   [(6, 0, [self._create_invoice().invoice_line_ids.id])],
+                   })
+        wizard.add_lines()
+
+    def _create_invoice(self):
+        self.Account = self.env['account.account']
+        self.AccountInvoice = self.env['account.invoice']
+        self.AccountInvoiceLine = self.env['account.invoice.line']
+
+        self.account_receivable =\
+            self.env.ref('account.data_account_type_receivable')
+        self.account_expenses =\
+            self.env.ref('account.data_account_type_expenses')
+        invoice_account = self.Account.\
+            search([('user_type_id', '=', self.account_receivable.id)], limit=1
+                   ).id
+        invoice_line_account = self.Account.\
+            search([('user_type_id', '=', self.account_expenses.id)], limit=1
+                   ).id
+
+        invoice = self.AccountInvoice.create({
+            'partner_id': self.partner_id.id,
+            'account_id': invoice_account,
+            'type': 'in_invoice',
+        })
+
+        invoice_line = self.AccountInvoiceLine.create({
+            'product_id': self.product_1.id,
+            'quantity': 1.0,
+            'price_unit': 100.0,
+            'invoice_id': invoice.id,
+            'uom_id': 1,
+            'name': 'product that cost 100',
+            'account_id': invoice_line_account,
+        })
+        invoice._compute_rma_count()
+        invoice_line._compute_rma_count()
+        invoice.action_view_rma_customer()
+        invoice.action_view_rma_supplier()
+        return invoice
+
+    def test_rma_make_picking(self):
+
+        wizard = self.rma_make_picking.with_context({
+            'active_ids': self.rma_customer_id.rma_line_ids.ids,
+            'active_model': 'rma.order.line',
+            'picking_type': 'incoming',
+            'active_id': 1
+        }).create({})
+
+        wizard.action_create_picking()
+        data = {'purchase_order_line_id':
+                self._create_purchase_order().order_line.id}
+        new_line = self.rma_line.new(data)
+        new_line._onchange_purchase_order_line_id()
+
+        self.rma_customer_id._compute_po_count()
+        self.rma_customer_id._compute_origin_po_count()
+
+        self.rma_customer_id.action_view_purchase_order()
+        self.rma_customer_id.action_view_origin_purchase_order()
+
+        self.rma_customer_id.rma_line_ids[0]._compute_purchase_count()
+        self.rma_customer_id.rma_line_ids[0]._compute_purchase_order_lines()
+        self.rma_customer_id.rma_line_ids[0].action_view_purchase_order()
+        self.rma_customer_id.rma_line_ids[0]._get_rma_purchased_qty()
+
+    def test_rma_add_purchase_wizard(self):
+        wizard = self.env['rma_add_purchase'].with_context({
+            'active_ids': self.rma_customer_id.ids,
+            'active_model': 'rma.order',
+            'active_id': self.rma_customer_id.id
+        }).create({'partner_id': self.partner_id.id,
+                   'rma_id': self.rma_customer_id.id,
+                   'purchase_id': self._create_purchase_order().id,
+                   'purchase_line_ids':
+                   [(6, 0, [self._create_purchase_order().order_line.id])],
+                   })
+        wizard.default_get([str(self._create_purchase_order().id),
+                            str(self._create_purchase_order().order_line.id),
+                            str(self.partner_id.id)])
+        wizard.add_lines()
+
+    def _create_purchase_order(self):
+        purchase_order_id = self.env["purchase.order"].create({
+            "partner_id": self.partner_id.id,
+            "order_line": [
+                (0, 0, {
+                    "product_id": self.product_id.id,
+                    "name": self.product_id.name,
+                    "product_qty": 5,
+                    "price_unit": 100,
+                    "product_uom": self.product_id.uom_id.id,
+                    "date_planned": fields.datetime.now(),
+                }),
+            ],
+        })
+        self.env["purchase.order.line"].\
+            name_search(name=self.product_id.name, operator='ilike',
+                        args=[('id', 'in', purchase_order_id.order_line.ids)])
+        self.env["purchase.order.line"].\
+            _name_search(name=self.product_id.name, operator='ilike',
+                         args=[('id', 'in', purchase_order_id.order_line.ids)])
+        return purchase_order_id
 
     def test_customer_rma(self):
         wizard = self.rma_make_picking.with_context({
@@ -256,6 +435,6 @@ class TestRma(common.TransactionCase):
                                   "Wrong qty received")
                 self.assertEquals(line.qty_delivered, 2,
                                   "Wrong qty delivered")
-        self.rma_customer_id.action_rma_done()
-        self.assertEquals(self.rma_customer_id.state, 'done',
-                          "Wrong State")
+            self.line.action_rma_done()
+            self.assertEquals(self.line.state, 'done',
+                              "Wrong State")
