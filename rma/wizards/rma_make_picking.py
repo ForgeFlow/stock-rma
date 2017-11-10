@@ -83,7 +83,7 @@ class RmaMakePicking(models.TransientModel):
         elif item.line_id.partner_id:
             delivery_address = item.line_id.partner_id
         else:
-            raise ValidationError('Unknown delivery address')
+            raise ValidationError(_('Unknown delivery address'))
         return delivery_address
 
     @api.model
@@ -111,9 +111,9 @@ class RmaMakePicking(models.TransientModel):
             warehouse = line.out_warehouse_id
             route = line.out_route_id
         if not route:
-            raise ValidationError("No route specified")
+            raise ValidationError(_("No route specified"))
         if not warehouse:
-            raise ValidationError("No warehouse specified")
+            raise ValidationError(_("No warehouse specified"))
         procurement_data = {
             'name': line.rma_id and line.rma_id.name or line.name,
             'group_id': group.id,

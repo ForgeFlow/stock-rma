@@ -24,8 +24,9 @@ class TestRmaDropship(test_rma.TestRma):
         }).create({})
         res = wizard.make_supplier_rma()
         supplier_rma = self.rma.browse(res['res_id'])
-        supplier_rma.action_rma_to_approve()
-        supplier_rma.action_rma_approve()
+        for line in supplier_rma.rma_line_ids:
+            line.action_rma_to_approve()
+            line.action_rma_approve()
         wizard = self.rma_make_picking.with_context({
             'active_id': 1,
             'active_ids': supplier_rma.rma_line_ids.ids,
@@ -89,3 +90,7 @@ class TestRmaDropship(test_rma.TestRma):
                                   "Wrong qty to supplier rma")
                 self.assertEquals(line.qty_in_supplier_rma, 2,
                                   "Wrong qty in supplier rma")
+        for line in self.rma_droship_id.rma_line_ids:
+            line.action_rma_done()
+            self.assertEquals(line.state, 'done',
+                              "Wrong State")
