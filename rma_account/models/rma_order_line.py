@@ -56,10 +56,11 @@ class RmaOrderLine(models.Model):
         index=True,
         readonly=True, states={'draft': [('readonly', False)]},
     )
-    refund_line_ids = fields.One2many(comodel_name='account.invoice.line',
-                                      inverse_name='rma_line_id',
-                                      string='Refund Lines',
-                                      copy=False, index=True, readonly=True)
+    refund_line_ids = fields.One2many(
+        comodel_name='account.invoice.line',
+        inverse_name='rma_line_id', string='Refund Lines',
+        copy=False, index=True, readonly=True,
+    )
     invoice_id = fields.Many2one('account.invoice', string='Source',
                                  related='invoice_line_id.invoice_id',
                                  index=True, readonly=True)
