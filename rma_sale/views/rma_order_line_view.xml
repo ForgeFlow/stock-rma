@@ -32,6 +32,10 @@
                 <field name="delivery_policy" position="after">
                     <field name="sale_type"/>
                 </field>
+                <field name="origin" position="after">
+                    <field name="sale_id"
+                           attrs="{'invisible': [('sale_line_id', '=', False)]}"/>
+                </field>
                 <notebook position="inside">
                     <page name="sale" string="Sale Lines">
                         <field name="sale_line_ids" nolabel="1"/>
