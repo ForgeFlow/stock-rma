@@ -18,7 +18,9 @@
                 <group name="main_info" position="inside">
                     <field name="invoice_line_id"
                            options="{'no_create': True}"
-                           domain="[('invoice_id.partner_id', '=', partner_id)]"/>
+                           domain="['|',
+                                    ('invoice_id.partner_id', '=', partner_id),
+                                    ('invoice_id.partner_id', 'child_of', partner_id)]"/>
                 </group>
                 <field name="operation_id" position="after">
                     <field name="refund_policy"/>
@@ -58,7 +60,9 @@
                 <group name="main_info" position="inside">
                     <field name="invoice_line_id"
                            options="{'no_create': True}"
-                           domain="[('invoice_id.partner_id', '=', partner_id)]"/>
+                           domain="['|',
+                                    ('invoice_id.partner_id', '=', partner_id),
+                                    ('invoice_id.partner_id', 'child_of', partner_id)]"/>
                 </group>
                 <field name="operation_id" position="after">
                     <field name="refund_policy"/>
