@@ -41,6 +41,10 @@ class RmaOrderLine(models.Model):
         ondelete='restrict', copy=False,
         readonly=True, states={'draft': [('readonly', False)]},
     )
+    sale_id = fields.Many2one(
+        string="Source Sales Order", related='sale_line_id.order_id',
+        readonly=True,
+    )
     sale_line_ids = fields.One2many(
         comodel_name='sale.order.line', inverse_name='rma_line_id',
         string='Sales Order Lines', readonly=True,
