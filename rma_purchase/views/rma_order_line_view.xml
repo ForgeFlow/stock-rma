@@ -18,7 +18,9 @@
             <group name="main_info" position="inside">
                 <field name="purchase_order_line_id"
                        options="{'no_create': True}"
-                       domain="[('order_id.partner_id', '=', partner_id)]"/>
+                       domain="['|',
+                                ('order_id.partner_id', '=', partner_id),
+                                ('order_id.partner_id', 'child_of', partner_id)]"/>
             </group>
             <group name="quantities" position="inside">
                 <group>
