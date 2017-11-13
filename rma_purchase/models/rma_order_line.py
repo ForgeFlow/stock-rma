@@ -44,6 +44,11 @@ class RmaOrderLine(models.Model):
         ondelete='restrict',
         readonly=True, states={'draft': [('readonly', False)]},
     )
+    purchase_id = fields.Many2one(
+        string="Source Purchase Order",
+        related='purchase_order_line_id.order_id',
+        readonly=True,
+    )
     purchase_order_line_ids = fields.Many2many(
         comodel_name='purchase.order.line',
         relation='purchase_line_rma_line_rel',
