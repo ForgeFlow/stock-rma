@@ -65,13 +65,9 @@ class TestSupplierRma(test_rma.TestRma):
 
         picking.action_assign()
         picking.do_transfer()
-        for line in self.rma_supplier_id.rma_line_ids[0]:
-            self.assertEquals(line.qty_to_deliver, 0,
-                              "Wrong qty to deliver")
+        for line in self.rma_supplier_id.rma_line_ids:
             self.assertEquals(line.qty_incoming, 0,
                               "Wrong qty incoming")
-            self.assertEquals(line.qty_outgoing, 0,
-                              "Wrong qty outgoing")
             self.assertEquals(line.qty_received, 0,
                               "Wrong qty received")
             if line.product_id == self.product_1:
@@ -80,12 +76,12 @@ class TestSupplierRma(test_rma.TestRma):
                 self.assertEquals(line.qty_to_receive, 3,
                                   "Wrong qty to receive")
             if line.product_id == self.product_2:
-                self.assertEquals(line.qty_delivered, 5,
+                self.assertEquals(line.qty_outgoing, 5,
                                   "Wrong qty delivered")
                 self.assertEquals(line.qty_to_receive, 5,
                                   "Wrong qty to receive")
             if line.product_id == self.product_3:
-                self.assertEquals(line.qty_delivered, 2,
+                self.assertEquals(line.qty_outgoing, 2,
                                   "Wrong qty delivered")
                 self.assertEquals(line.qty_to_receive, 2,
                                   "Wrong qty to receive")
@@ -106,11 +102,9 @@ class TestSupplierRma(test_rma.TestRma):
         moves = picking_out.move_lines
         self.assertEquals(len(moves), 2,
                           "Incorrect number of moves created")
-        for line in self.rma_supplier_id.rma_line_ids[0]:
-            self.assertEquals(line.qty_to_deliver, 0,
-                              "Wrong qty to deliver")
-            self.assertEquals(line.qty_outgoing, 3,
-                              "Wrong qty outgoing")
+        for line in self.rma_supplier_id.rma_line_ids:
+            self.assertEquals(line.qty_incoming, 0,
+                              "Wrong qty incoming")
             self.assertEquals(line.qty_received, 0,
                               "Wrong qty received")
             if line.product_id == self.product_1:
@@ -123,17 +117,13 @@ class TestSupplierRma(test_rma.TestRma):
             if line.product_id == self.product_2:
                 self.assertEquals(line.qty_to_receive, 5,
                                   "Wrong qty to receive")
-                self.assertEquals(line.qty_incoming, 5,
-                                  "Wrong qty incoming")
-                self.assertEquals(line.qty_delivered, 5,
-                                  "Wrong qty delivered")
+                self.assertEquals(line.qty_to_deliver, 5,
+                                  "Wrong qty to deliver")
             if line.product_id == self.product_3:
                 self.assertEquals(line.qty_to_receive, 2,
                                   "Wrong qty to receive")
-                self.assertEquals(line.qty_incoming, 2,
-                                  "Wrong qty incoming")
-                self.assertEquals(line.qty_delivered, 2,
-                                  "Wrong qty delivered")
+                self.assertEquals(line.qty_to_deliver, 2,
+                                  "Wrong qty to deliver")
         picking_out.action_assign()
         picking_out.do_transfer()
         for line in self.rma_supplier_id.rma_line_ids[0]:
