@@ -52,28 +52,30 @@ class TestRma(common.TransactionCase):
             products2move, 'customer', self.env.ref('base.res_partner_2'),
             dropship=False)
 
-    def _create_rma_from_move(self, products2move, type, partner, dropship,
-                              supplier_address_id=None):
-
-        self.picking_in = self.stockpicking.create({
+    def _create_picking(self, partner):
+        return self.stockpicking.create({
             'partner_id': partner.id,
             'picking_type_id': self.env.ref('stock.picking_type_in').id,
             'location_id': self.stock_location.id,
             'location_dest_id': self.supplier_location.id
             })
 
+    def _create_rma_from_move(self, products2move, type, partner, dropship,
+                              supplier_address_id=None):
+        picking_in = self._create_picking(partner)
+
         moves = []
         if type == 'customer':
             for item in products2move:
                 move_values = self._prepare_move(
                     item[0], item[1], self.stock_location,
-                    self.customer_location)
+                    self.customer_location, picking_in)
                 moves.append(self.env['stock.move'].create(move_values))
         else:
             for item in products2move:
                 move_values = self._prepare_move(
                     item[0], item[1], self.supplier_location,
-                    self.stock_rma_location)
+                    self.stock_rma_location, picking_in)
                 moves.append(self.env['stock.move'].create(move_values))
         # Create the RMA from the stock_move
         rma_id = self.rma.create(
@@ -112,7 +114,7 @@ class TestRma(common.TransactionCase):
 #        rma_id.action_rma_approve()
         return rma_id
 
-    def _prepare_move(self, product, qty, src, dest):
+    def _prepare_move(self, product, qty, src, dest, picking_in):
         res = {
             'partner_id': self.partner_id.id,
             'product_id': product.id,
@@ -123,7 +125,7 @@ class TestRma(common.TransactionCase):
             'origin': 'Test RMA',
             'location_id': src.id,
             'location_dest_id': dest.id,
-            'picking_id': self.picking_in.id
+            'picking_id': picking_in.id
         }
         return res
 
