@@ -135,7 +135,6 @@ class RmaOrderLine(models.Model):
             self.purchase_order_line_id = False
         return res
 
-
     @api.multi
     def action_view_purchase_order(self):
         action = self.env.ref('purchase.purchase_rfq')
