@@ -9,7 +9,6 @@ from openerp.addons import decimal_precision as dp
 class RmaOrderLine(models.Model):
     _inherit = "rma.order.line"
 
-    @api.one
     @api.depends('repair_ids', 'repair_type', 'repair_ids.state',
                  'qty_to_receive')
     def _compute_qty_to_repair(self):
@@ -24,7 +23,6 @@ class RmaOrderLine(models.Model):
         else:
             self.qty_to_repair = 0.0
 
-    @api.one
     @api.depends('repair_ids', 'repair_type', 'repair_ids.state',
                  'qty_to_receive')
     def _compute_qty_repaired(self):

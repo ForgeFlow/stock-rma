@@ -25,7 +25,6 @@ class RmaOrderLine(models.Model):
                 lambda i: i.invoice_id.state in ('open', 'paid')).mapped(
                 'quantity'))
 
-    @api.one
     @api.depends('refund_line_ids', 'refund_line_ids.invoice_id.state',
                  'refund_policy', 'move_ids', 'move_ids.state', 'type')
     def _compute_qty_to_refund(self):
@@ -94,21 +93,21 @@ class RmaOrderLine(models.Model):
             operation = self.env['rma.operation'].search(
                 [('type', '=', self.type)], limit=1)
             if not operation:
-                raise ValidationError("Please define an operation first")
+                raise ValidationError(_("Please define an operation first"))
 
         if not operation.in_route_id or not operation.out_route_id:
             route = self.env['stock.location.route'].search(
                 [('rma_selectable', '=', True)], limit=1)
             if not route:
-                raise ValidationError("Please define an rma route")
+                raise ValidationError(_("Please define an rma route"))
 
         if not operation.in_warehouse_id or not operation.out_warehouse_id:
             warehouse = self.env['stock.warehouse'].search(
                 [('company_id', '=', self.company_id.id),
                  ('lot_rma_id', '!=', False)], limit=1)
             if not warehouse:
-                raise ValidationError("Please define a warehouse with a"
-                                      " default rma location")
+                raise ValidationError(_("Please define a warehouse with a"
+                                      " default rma location"))
         data = {
             'product_id': line.product_id.id,
             'origin': line.invoice_id.number,
