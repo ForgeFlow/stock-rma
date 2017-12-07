@@ -5,6 +5,7 @@
 from openerp import api, fields, models
 
 
+
 class AccountInvoice(models.Model):
     _inherit = "account.invoice"
 
