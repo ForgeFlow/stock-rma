@@ -2,9 +2,9 @@
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from openerp import api, fields, models, _
-from openerp.exceptions import ValidationError, UserError
-from openerp.addons import decimal_precision as dp
+from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError, UserError
+from odoo.addons import decimal_precision as dp
 import operator
 ops = {'=': operator.eq,
        '!=': operator.ne}
@@ -74,9 +74,8 @@ class RmaOrderLine(models.Model):
             for move in rec.procurement_ids.mapped('move_ids').filtered(
                     lambda m: m.state in states and op(m.location_id.usage,
                                                        rec.type)):
-                qty += product_obj._compute_qty_obj(
-                    move.product_uom, move.product_uom_qty,
-                    rec.uom_id)
+                qty += product_obj._compute_quantity(
+                    move.product_uom_qty, rec.uom_id)
             return qty
 
     @api.multi
