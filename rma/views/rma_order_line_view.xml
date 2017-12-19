@@ -300,7 +300,7 @@
                         </group>
                         <notebook>
                             <page name="route" string="Routes">
-                                <group>
+
                                     <group>
                                         <group name="inbound" string="Inbound">
                                             <field name="in_warehouse_id"/>
@@ -319,29 +319,27 @@
                                             <field name="out_route_id"/>
                                         </group>
                                     </group>
-                                </group>
+
                             </page>
                             <page name="stock" string="Stock Moves">
                                 <field name="move_ids" nolabel="1" readonly="1"/>
                             </page>
                             <page name="quantities" string="Quantities">
-                                <group>
-                                    <group name="quantities" col="4" string="Quantities">
-                                        <group name="receive">
-                                            <field name="qty_to_receive"/>
-                                            <field name="qty_incoming"/>
-                                            <field name="qty_received"/>
-                                        </group>
-                                        <group name="deliver">
-                                            <field name="qty_to_deliver"/>
-                                            <field name="qty_outgoing"/>
-                                            <field name="qty_delivered"/>
-                                        </group>
-                                        <group name="supplier_rma"
-                                               attrs="{'invisible':[('customer_to_supplier','=',False)]}">
-                                            <field name="qty_to_supplier_rma"/>
-                                            <field name="qty_in_supplier_rma"/>
-                                        </group>
+                                <group name="quantities" string="Quantities">
+                                    <group name="receive">
+                                        <field name="qty_to_receive"/>
+                                        <field name="qty_incoming"/>
+                                        <field name="qty_received"/>
+                                    </group>
+                                    <group name="deliver">
+                                        <field name="qty_to_deliver"/>
+                                        <field name="qty_outgoing"/>
+                                        <field name="qty_delivered"/>
+                                    </group>
+                                    <group name="supplier_rma"
+                                           attrs="{'invisible':[('customer_to_supplier','=',False)]}">
+                                        <field name="qty_to_supplier_rma"/>
+                                        <field name="qty_in_supplier_rma"/>
                                     </group>
                                 </group>
                             </page>
