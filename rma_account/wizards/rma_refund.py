@@ -4,6 +4,7 @@
 
 from openerp import _, api, fields, models
 from openerp.exceptions import ValidationError
+from openerp.tools.safe_eval import safe_eval as eval
 import openerp.addons.decimal_precision as dp
 
 
