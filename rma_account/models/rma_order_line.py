@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
-from openerp import _, api, fields, models
-from openerp.exceptions import ValidationError, UserError
-from openerp.addons import decimal_precision as dp
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError, UserError
+from odoo.addons import decimal_precision as dp
 
 
 class RmaOrderLine(models.Model):
