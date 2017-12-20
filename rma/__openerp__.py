@@ -9,7 +9,7 @@
     'category': 'RMA',
     'summary': 'Introduces the return merchandise authorization (RMA) process '
                'in odoo',
-    'author': "Eficent",
+    'author': "Eficent, Odoo Community Association (OCA)",
     'website': 'http://www.github.com/OCA/rma',
     'depends': ['stock', 'mail', 'procurement'],
     'demo': ['demo/stock_demo.xml',
@@ -26,6 +26,7 @@
              'views/stock_warehouse.xml',
              'views/product_view.xml',
              'views/procurement_view.xml',
+             'views/res_partner_view.xml',
              'wizards/rma_make_picking_view.xml',
              'wizards/rma_add_stock_move_view.xml',
              'wizards/stock_config_settings.xml',

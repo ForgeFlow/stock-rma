@@ -2,7 +2,7 @@
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from openerp import api, fields, models
+from openerp import api, fields, models, _
 from openerp.exceptions import ValidationError
 
 
@@ -46,20 +46,21 @@ class RmaAddSale(models.TransientModel):
             operation = self.env['rma.operation'].search(
                 [('type', '=', self.rma_id.type)], limit=1)
             if not operation:
-                raise ValidationError("Please define an operation first")
+                raise ValidationError(_("Please define an operation first"))
         if not operation.in_route_id or not operation.out_route_id:
             route = self.env['stock.location.route'].search(
                 [('rma_selectable', '=', True)], limit=1)
             if not route:
-                raise ValidationError("Please define an rma route")
+                raise ValidationError(_("Please define an rma route"))
         if not operation.in_warehouse_id or not operation.out_warehouse_id:
             warehouse = self.env['stock.warehouse'].search(
                 [('company_id', '=', self.rma_id.company_id.id),
                  ('lot_rma_id', '!=', False)], limit=1)
             if not warehouse:
-                raise ValidationError("Please define a warehouse with a "
-                                      "default rma location.")
+                raise ValidationError(_("Please define a warehouse with a "
+                                      "default rma location."))
         data = {
+            'partner_id': self.partner_id.id,
             'sale_line_id': line.id,
             'product_id': line.product_id.id,
             'origin': line.order_id.name,

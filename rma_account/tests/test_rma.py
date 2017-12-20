@@ -85,6 +85,8 @@ class TestRma(common.TransactionCase):
                 'partner_id': partner.id,
                 'company_id': self.env.ref('base.main_company').id
             })
+        rma_id._compute_invoice_refund_count()
+        rma_id._compute_invoice_count()
         for move in moves:
             if type == 'customer':
                 wizard = self.rma_add_stock_move.with_context(
@@ -128,6 +130,53 @@ class TestRma(common.TransactionCase):
             'picking_id': picking_in.id
         }
         return res
+
+    def test_on_change_invoice_rma(self):
+        data = {'add_invoice_id': 1}
+        new_line = self.rma.new(data)
+        new_line.on_change_invoice()
+
+        wizard = self.env['rma_add_invoice'].with_context({
+            'active_ids': self.rma_customer_id.ids,
+            'active_model': 'rma.order',
+            'active_id': 1
+        }).create({'partner_id': self.partner_id.id,
+                   'rma_id': self.rma_customer_id.id,
+                   'invoice_line_ids': [(6, 0, [self._create_invoice().id])],
+                   })
+        wizard.add_lines()
+
+    def _create_invoice(self):
+        self.Account = self.env['account.account']
+        self.AccountInvoice = self.env['account.invoice']
+        self.AccountInvoiceLine = self.env['account.invoice.line']
+        self.account_receivable =\
+            self.env.ref('account.data_account_type_receivable')
+        self.account_expenses =\
+            self.env.ref('account.data_account_type_expenses')
+        invoice_account = self.Account.\
+            search([('user_type_id', '=', self.account_receivable.id)], limit=1
+                   ).id
+        invoice_line_account = self.Account.\
+            search([('user_type_id', '=', self.account_expenses.id)], limit=1
+                   ).id
+
+        invoice = self.AccountInvoice.create({
+            'partner_id': self.partner_id.id,
+            'account_id': invoice_account,
+            'type': 'in_invoice',
+        })
+
+        self.AccountInvoiceLine.create({
+            'product_id': self.product_1.id,
+            'quantity': 1.0,
+            'price_unit': 100.0,
+            'invoice_id': invoice.id,
+            'uom_id': 1,
+            'name': 'product that cost 100',
+            'account_id': invoice_line_account,
+        })
+        return invoice
 
     def test_customer_rma(self):
         wizard = self.rma_make_picking.with_context({

@@ -8,10 +8,10 @@ from openerp import api, fields, models
 class AccountInvoice(models.Model):
     _inherit = "account.invoice"
 
-    @api.one
+    @api.depends('invoice_line_ids.rma_line_ids')
     def _compute_rma_count(self):
         for inv in self:
-            rmas = self.mapped('invoice_line_ids.rma_line_ids.rma_id')
+            rmas = self.mapped('invoice_line_ids.rma_line_ids')
             inv.rma_count = len(rmas)
 
     rma_count = fields.Integer(
@@ -19,28 +19,28 @@ class AccountInvoice(models.Model):
 
     @api.multi
     def action_view_rma_supplier(self):
-        action = self.env.ref('rma.action_rma_supplier')
+        action = self.env.ref('rma.action_rma_supplier_lines')
         result = action.read()[0]
-        rma_list = self.mapped('invoice_line_ids.rma_line_ids.rma_id').ids
+        rma_list = self.mapped('invoice_line_ids.rma_line_ids').ids
         # choose the view_mode accordingly
         if len(rma_list) != 1:
             result['domain'] = [('id', 'in', rma_list)]
         elif len(rma_list) == 1:
-            res = self.env.ref('rma.view_rma_supplier_form', False)
+            res = self.env.ref('rma.view_rma_line_supplier_form', False)
             result['views'] = [(res and res.id or False, 'form')]
             result['res_id'] = rma_list[0]
         return result
 
     @api.multi
     def action_view_rma_customer(self):
-        action = self.env.ref('rma.action_rma_customer')
+        action = self.env.ref('rma.action_rma_customer_lines')
         result = action.read()[0]
-        rma_list = self.mapped('invoice_line_ids.rma_line_ids.rma_id').ids
+        rma_list = self.mapped('invoice_line_ids.rma_line_ids').ids
         # choose the view_mode accordingly
         if len(rma_list) != 1:
             result['domain'] = [('id', 'in', rma_list)]
         elif len(rma_list) == 1:
-            res = self.env.ref('rma.view_rma_form', False)
+            res = self.env.ref('rma.view_rma_line_form', False)
             result['views'] = [(res and res.id or False, 'form')]
             result['res_id'] = rma_list[0]
         return result
