@@ -18,6 +18,6 @@
              "views/rma_order_line_view.xml",
              "data/mrp_repair_sequence.xml",
              ],
-    "installable": True,
+    "installable": False,
     "auto_install": True,
 }
