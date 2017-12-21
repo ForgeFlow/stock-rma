@@ -79,11 +79,9 @@
                                colspan="4"
                         />
                     </group>
-                    <group>
-                        <group col="4">
-                            <field name="reference"/>
-                            <field name="date_rma"/>
-                        </group>
+                    <group name="info">
+                        <field name="reference"/>
+                        <field name="date_rma"/>
                     </group>
                     <notebook colspan="4">
                         <page string="RMA Lines" name="lines">
