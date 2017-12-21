@@ -17,6 +17,6 @@
         "wizard/qc_issue_make_supplier_rma_view.xml",
         "views/rma_order_line_view.xml",
     ],
-    "installable": True,
+    "installable": False,
     "auto_install": True,
 }
