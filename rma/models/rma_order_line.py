@@ -144,7 +144,8 @@ class RmaOrderLine(models.Model):
     def _compute_qty_supplier_rma(self):
         for rec in self:
             qty = rec._get_supplier_rma_qty()
-            rec.qty_to_supplier_rma = rec.qty_to_receive - qty
+            rec.qty_to_supplier_rma = (rec.qty_to_receive - qty
+                                       if rec.customer_to_supplier else 0)
             rec.qty_in_supplier_rma = qty
 
     @api.multi
@@ -433,11 +434,14 @@ class RmaOrderLine(models.Model):
     def _check_move_partner(self):
         for rec in self:
             if (rec.reference_move_id and
-                    rec.reference_move_id.picking_id.partner_id !=
-                    rec.partner_id):
-                raise ValidationError(_(
-                    "RMA customer and originating stock move customer "
-                    "doesn't match."))
+               (rec.reference_move_id.partner_id != rec.partner_id) and
+               (rec.reference_move_id.picking_id.partner_id !=
+                        rec.partner_id)):
+                    raise ValidationError(_(
+                        "RMA customer (%s) and originating stock move customer"
+                        " (%s) doesn't match." % (
+                            rec.reference_move_id.partner_id.name,
+                            rec.partner_id.name)))
 
     @api.multi
     def _remove_other_data_origin(self, exception):
