@@ -23,6 +23,10 @@ class ProcurementOrder(models.Model):
                 res['partner_id'] = line.delivery_address_id.id
             else:
                 res['partner_id'] = line.rma_id.partner_id.id
+            dest_loc = self.env["stock.location"].browse([
+                res["location_dest_id"]])[0]
+            if dest_loc.usage == "internal":
+                res["price_unit"] = line.price_unit
         return res
 
 
