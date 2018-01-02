@@ -375,6 +375,8 @@ class TestRma(common.TransactionCase):
                          proc.group_id])
         domain = [('group_id', 'in', list(group_ids))]
         pickings = self.stockpicking.search(domain)
+        procurements[0].purchase_id = self._create_purchase_order().id
+        wizard._get_action(pickings, procurements)
         self.assertEquals(len(pickings), 2,
                           "Incorrect number of pickings created")
         picking_out = pickings[1]
