@@ -165,7 +165,6 @@ class RmaRefund(models.TransientModel):
         return values
 
     @api.constrains('item_ids')
-    @api.one
     def check_unique_invoice_address_id(self):
         addresses = self.item_ids.mapped('invoice_address_id')
         if len(addresses) > 1:
