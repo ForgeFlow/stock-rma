@@ -5,7 +5,8 @@
 {
     "name": "Analytic Account in RMA",
     "version": "10.0.1.0.0",
-    "author": "Eficent",
+    "author": "Eficent,"
+              "Odoo Community Association (OCA)",
     "license": "LGPL-3",
     "website": "http://www.eficent.com",
     "category": "Analytic",
