@@ -11,7 +11,8 @@ class SaleOrderLine(models.Model):
     @api.constrains('analytic_account_id')
     def check_analytic(self):
         for line in self:
-            if line.analytic_account_id != line.rma_line_id.analytic_account_id:
+            if (line.analytic_account_id !=
+                    line.rma_line_id.analytic_account_id):
                 raise exceptions.ValidationError(
                     _("The analytic account in the sale line it's not the same"
                       " as in the rma line"))
