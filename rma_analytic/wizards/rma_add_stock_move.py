@@ -13,5 +13,5 @@ class RmaAddStockMove(models.TransientModel):
     def _prepare_rma_line_from_stock_move(self, sm, lot=False):
         data = super(RmaAddStockMove, self)._prepare_rma_line_from_stock_move(
             sm, lot)
-        data.update(analytic_account_id=sm.analytic_account_id)
+        data.update(analytic_account_id=sm.analytic_account_id.id)
         return data
