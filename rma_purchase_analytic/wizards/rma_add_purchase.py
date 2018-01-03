@@ -5,12 +5,11 @@
 from odoo import api, models
 
 
-class RmaAddSale(models.TransientModel):
-    _inherit = 'rma_add_sale'
+class RmaAddPurchase(models.TransientModel):
+    _inherit = 'rma_add_purchase'
 
     @api.model
-    def _prepare_rma_line_from_sale_order_line(self, line):
-        data = super(RmaAddSale, self).\
-            _prepare_rma_line_from_sale_order_line(line)
+    def _prepare_rma_line_from_po_line(self, line):
+        data = super(RmaAddPurchase, self)._prepare_rma_line_from_po_line(line)
         data.update(analytic_account_id=line.analytic_account_id.id)
         return data
