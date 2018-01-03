@@ -1,0 +1,70 @@
+FIELDS RMA ORDER v9: v7
+description: comment
+reference: code
+partner_id: partner_id
+type(no type other in PRI database):claim_type
+date_rma:date
+name: number
+origin:ref
+
+ORIGIN
+invoice_line_id:ref==account.invoice->search invoice line
+
+
+FIELDS RMA ORDER LINE from crm_claim
+operation:empty
+v7subject(new)
+problem(new): claim_descr
+
+assigned_to:user_id
+type(no type other in PRI database):claim_type
+status:state
+    draft:draft
+    approved:pending
+    approved:open
+    done:cancel
+    done:done
+
+in_warehouse_id: warehouse_id
+out_warehouse_id: warehouse_id
+
+in_route_id: warehouse_id:search route
+out_route_id: warehouse_id:search route
+
+receipt_policy: 'Ordered quantity' if move_in_id else 'not required'
+delivery_policy: 'Ordered quantity' if move_out_id else 'not required'
+refund_policy: 'Ordered quantity' if refund_line_id else 'not required'
+sale_type: 'not required'
+
+origin: ref
+partner_id: partner_id
+delivery_address_id: delivery_address_id
+
+
+ONE2MANIES:
+v7 refund_line_id from claim_line -> (account.invoice.line)rma_line_id
+v7 invoice_line_id from claim_line -> (account.invoice.line)rma_line_id
+
+v7 move_out_id from claim_line -> (stock.move)rma_line_id
+v7 move_in_id from claim_line -> (stock.move)rma_line_id
+
+
+
+FIELDS RMA ORDER LINE from crm_claim_line
+product_qty: product_returned_qty
+status:state
+uom_id: product_id.uom_id
+rma_id: claim_id
+message_ids: search for the field and for other examples
+price_unit: unit_sale_price
+
+NEW MODULES
+custom_rma: v7subject and problem
+
+rma_analytic_*: add the account_analytic_id field.
+    get the analytic from any source (move, sale, purchase, invoice)
+    propagate the analytic to stock move
+    ""                          sale
+
+
+rma_operating_unit: add the operating_unit_id field

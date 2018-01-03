@@ -213,7 +213,7 @@ class RmaOrderLine(models.Model):
         readonly=True, states={"new": [("readonly", False)]},
     )
     product_qty = fields.Float(
-        string='Ordered Qty', copy=False, default=1.0,
+        string='Ordered Qty', copy=False,
         digits=dp.get_precision('Product Unit of Measure'),
         readonly=True, states={'draft': [('readonly', False)]},
     )
@@ -227,12 +227,11 @@ class RmaOrderLine(models.Model):
         readonly=True, states={'draft': [('readonly', False)]},
     )
     procurement_count = fields.Integer(compute=_compute_procurement_count,
-                                       string='# of Procurements', copy=False,
-                                       default=0)
+                                       string='# of Procurements', copy=False)
     in_shipment_count = fields.Integer(compute=_compute_in_shipment_count,
-                                       string='# of Shipments', default=0)
+                                       string='# of Shipments')
     out_shipment_count = fields.Integer(compute=_compute_out_shipment_count,
-                                        string='# of Deliveries', default=0)
+                                        string='# of Deliveries')
     move_ids = fields.One2many('stock.move', 'rma_line_id',
                                string='Stock Moves', readonly=True,
                                copy=False)
@@ -434,14 +433,11 @@ class RmaOrderLine(models.Model):
     def _check_move_partner(self):
         for rec in self:
             if (rec.reference_move_id and
-               (rec.reference_move_id.partner_id != rec.partner_id) and
-               (rec.reference_move_id.picking_id.partner_id !=
-                        rec.partner_id)):
-                    raise ValidationError(_(
-                        "RMA customer (%s) and originating stock move customer"
-                        " (%s) doesn't match." % (
-                            rec.reference_move_id.partner_id.name,
-                            rec.partner_id.name)))
+                    rec.reference_move_id.picking_id.partner_id !=
+                    rec.partner_id):
+                raise ValidationError(_(
+                    "RMA customer and originating stock move customer "
+                    "doesn't match."))
 
     @api.multi
     def _remove_other_data_origin(self, exception):
