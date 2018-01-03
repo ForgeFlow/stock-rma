@@ -10,7 +10,7 @@ class RmaAddSale(models.TransientModel):
 
     @api.model
     def _prepare_rma_line_from_sale_order_line(self, line):
-        data = super(RmaAddInvoice, self).\
+        data = super(RmaAddSale, self).\
             _prepare_rma_line_from_sale_order_line(line)
         data.update(analytic_account_id=line.analytic_account_id.id)
         return data
