@@ -10,7 +10,7 @@ class RmaRefund(models.TransientModel):
 
     @api.model
     def prepare_refund_line(self, item, refund):
-        refund_line = super(RmaAddInvoice, self).prepare_refund_line(
+        refund_line = super(RmaRefund, self).prepare_refund_line(
             item, refund)
         refund_line.update(
             analytic_account_id=item.line_id.analytic_account_id.id)
