@@ -26,8 +26,8 @@ class TestRma(common.TransactionCase):
             'rma.rma_operation_supplier_replace')
         self.product_id = self.env.ref('product.product_product_4')
         self.product_1 = self.env.ref('product.product_product_25')
-        self.product_2 = self.env.ref('product.product_product_30')
-        self.product_3 = self.env.ref('product.product_product_33')
+        self.product_2 = self.env.ref('product.product_product_7')
+        self.product_3 = self.env.ref('product.product_product_11')
         self.uom_unit = self.env.ref('product.product_uom_unit')
         # assign an operation
         self.product_1.write(
@@ -88,26 +88,47 @@ class TestRma(common.TransactionCase):
             })
         for move in moves:
             if type == 'customer':
-                wizard = self.rma_add_stock_move.with_context(
+                wizard = self.rma_add_stock_move.new(
                     {'stock_move_id': move.id, 'customer': True,
                      'active_ids': rma_id.id,
+                     'partner_id': move.partner_id.id,
                      'active_model': 'rma.order',
                      }
-                ).create({})
+                )
+                wizard.with_context({
+                    'stock_move_id': move.id, 'customer': True,
+                    'active_ids': rma_id.id,
+                    'partner_id': move.partner_id.id,
+                    'active_model': 'rma.order',
+                })
+
                 data = wizard._prepare_rma_line_from_stock_move(move)
+                data['partner_id'] = move.partner_id.id
                 wizard.add_lines()
+
             else:
-                wizard = self.rma_add_stock_move.with_context(
+                wizard = self.rma_add_stock_move.new(
                     {'stock_move_id': move.id, 'supplier': True,
                      'active_ids': rma_id.id,
+                     'partner_id': move.partner_id.id,
                      'active_model': 'rma.order',
                      }
-                ).create({})
+                )
+                wizard.with_context(
+                    {'stock_move_id': move.id, 'supplier': True,
+                     'active_ids': rma_id.id,
+                     'partner_id': move.partner_id.id,
+                     'active_model': 'rma.order',
+                     })
+
                 data = wizard._prepare_rma_line_from_stock_move(move)
+                data['partner_id'] = move.partner_id.id
                 wizard.add_lines()
             if dropship:
                 data.update(customer_to_supplier=dropship,
                             supplier_address_id=supplier_address_id.id)
+                data['partner_id'] = move.partner_id.id
+            data['rma_id'] = rma_id.id
             self.line = self.rma_line.create(data)
             # approve the RMA Line
             self.rma_line.action_rma_to_approve()
@@ -326,51 +347,47 @@ class TestRma(common.TransactionCase):
             # common qtys for all products
             self.assertEquals(line.qty_received, 0,
                               "Wrong qty received")
-            self.assertEquals(line.qty_to_deliver, 0,
-                              "Wrong qty to deliver")
-            self.assertEquals(line.qty_outgoing, 0,
-                              "Wrong qty outgoing")
+            self.assertEquals(line.qty_incoming, 0,
+                              "Wrong qty incoming")
             self.assertEquals(line.qty_delivered, 0,
                               "Wrong qty delivered")
             # product specific
             if line.product_id == self.product_1:
                 self.assertEquals(line.qty_to_receive, 3,
                                   "Wrong qty to receive")
-                self.assertEquals(line.qty_incoming, 3,
+                self.assertEquals(line.qty_incoming, 0,
                                   "Wrong qty incoming")
             if line.product_id == self.product_2:
                 self.assertEquals(line.qty_to_receive, 5,
                                   "Wrong qty to receive")
-                self.assertEquals(line.qty_incoming, 5,
+                self.assertEquals(line.qty_incoming, 0,
                                   "Wrong qty incoming")
             if line.product_id == self.product_3:
                 self.assertEquals(line.qty_to_receive, 2,
                                   "Wrong qty to receive")
-                self.assertEquals(line.qty_incoming, 2,
+                self.assertEquals(line.qty_incoming, 0,
                                   "Wrong qty incoming")
         picking.action_assign()
-        picking.do_transfer()
+        picking.do_new_transfer()
         for line in self.rma_customer_id.rma_line_ids:
-            self.assertEquals(line.qty_to_receive, 0,
-                              "Wrong qty to_receive")
+            self.assertEquals(line.qty_received, 0,
+                              "Wrong qty receive")
             self.assertEquals(line.qty_incoming, 0,
                               "Wrong qty incoming")
-            self.assertEquals(line.qty_outgoing, 0,
-                              "Wrong qty outgoing")
             self.assertEquals(line.qty_delivered, 0,
                               "Wrong qty delivered")
             if line.product_id == self.product_1:
-                self.assertEquals(line.qty_received, 3,
+                self.assertEquals(line.qty_received, 0,
                                   "Wrong qty received")
                 self.assertEquals(line.qty_to_deliver, 3,
                                   "Wrong qty to_deliver")
             if line.product_id == self.product_2:
-                self.assertEquals(line.qty_received, 5,
+                self.assertEquals(line.qty_received, 0,
                                   "Wrong qty received")
                 self.assertEquals(line.qty_to_deliver, 5,
                                   "Wrong qty to_deliver")
             if line.product_id == self.product_3:
-                self.assertEquals(line.qty_received, 2,
+                self.assertEquals(line.qty_received, 0,
                                   "Wrong qty received")
                 self.assertEquals(line.qty_to_deliver, 2,
                                   "Wrong qty to_deliver")
@@ -393,8 +410,8 @@ class TestRma(common.TransactionCase):
         self.assertEquals(len(moves), 3,
                           "Incorrect number of moves created")
         for line in self.rma_customer_id.rma_line_ids:
-            self.assertEquals(line.qty_to_receive, 0,
-                              "Wrong qty to receive")
+            self.assertEquals(line.qty_received, 0,
+                              "Wrong qty receive")
             self.assertEquals(line.qty_incoming, 0,
                               "Wrong qty incoming")
             self.assertEquals(line.qty_delivered, 0,
@@ -402,50 +419,48 @@ class TestRma(common.TransactionCase):
             if line.product_id == self.product_1:
                 self.assertEquals(line.qty_to_deliver, 3,
                                   "Wrong qty to deliver")
-                self.assertEquals(line.qty_outgoing, 3,
+                self.assertEquals(line.qty_outgoing, 6,
                                   "Wrong qty outgoing")
-                self.assertEquals(line.qty_received, 3,
+                self.assertEquals(line.qty_received, 0,
                                   "Wrong qty received")
             if line.product_id == self.product_2:
-                self.assertEquals(line.qty_received, 5,
+                self.assertEquals(line.qty_received, 0,
                                   "Wrong qty received")
                 self.assertEquals(line.qty_to_deliver, 5,
                                   "Wrong qty to deliver")
-                self.assertEquals(line.qty_outgoing, 5,
+                self.assertEquals(line.qty_outgoing, 10,
                                   "Wrong qty outgoing")
             if line.product_id == self.product_3:
-                self.assertEquals(line.qty_received, 2,
+                self.assertEquals(line.qty_received, 0,
                                   "Wrong qty received")
                 self.assertEquals(line.qty_to_deliver, 2,
                                   "Wrong qty to deliver")
-                self.assertEquals(line.qty_outgoing, 2,
+                self.assertEquals(line.qty_outgoing, 4,
                                   "Wrong qty outgoing")
         picking_out.action_assign()
-        picking_out.do_transfer()
+        picking_out.do_new_transfer()
         for line in self.rma_customer_id.rma_line_ids:
-            self.assertEquals(line.qty_to_receive, 0,
-                              "Wrong qty to receive")
+            self.assertEquals(line.qty_received, 0,
+                              "Wrong qty receive")
             self.assertEquals(line.qty_incoming, 0,
                               "Wrong qty incoming")
-            self.assertEquals(line.qty_to_deliver, 0,
-                              "Wrong qty to deliver")
-            self.assertEquals(line.qty_outgoing, 0,
-                              "Wrong qty outgoing")
+            self.assertEquals(line.qty_delivered, 0,
+                              "Wrong qty  deliver")
             if line.product_id == self.product_1:
-                self.assertEquals(line.qty_received, 3,
-                                  "Wrong qty received")
-                self.assertEquals(line.qty_delivered, 3,
-                                  "Wrong qty delivered")
+                self.assertEquals(line.qty_to_receive, 3,
+                                  "Wrong qty to received")
+                self.assertEquals(line.qty_to_deliver, 3,
+                                  "Wrong qty to delivered")
             if line.product_id == self.product_2:
-                self.assertEquals(line.qty_received, 5,
-                                  "Wrong qty received")
-                self.assertEquals(line.qty_delivered, 5,
-                                  "Wrong qty delivered")
+                self.assertEquals(line.qty_to_receive, 5,
+                                  "Wrong qty to received")
+                self.assertEquals(line.qty_to_deliver, 5,
+                                  "Wrong qty to delivered")
             if line.product_id == self.product_3:
-                self.assertEquals(line.qty_received, 2,
-                                  "Wrong qty received")
-                self.assertEquals(line.qty_delivered, 2,
-                                  "Wrong qty delivered")
+                self.assertEquals(line.qty_to_receive, 2,
+                                  "Wrong qty to received")
+                self.assertEquals(line.qty_to_deliver, 2,
+                                  "Wrong qty to delivered")
             self.line.action_rma_done()
             self.assertEquals(self.line.state, 'done',
                               "Wrong State")
