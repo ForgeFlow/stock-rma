@@ -435,7 +435,7 @@ class RmaOrderLine(models.Model):
             if (rec.reference_move_id and
                (rec.reference_move_id.partner_id != rec.partner_id) and
                (rec.reference_move_id.picking_id.partner_id !=
-                        rec.partner_id)):
+                    rec.partner_id)):
                     raise ValidationError(_(
                         "RMA customer (%s) and originating stock move customer"
                         " (%s) doesn't match." % (
