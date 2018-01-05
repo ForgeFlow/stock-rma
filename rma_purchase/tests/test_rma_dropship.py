@@ -9,6 +9,18 @@ class TestRmaDropship(test_rma.TestRma):
 
     def setUp(self):
         super(TestRmaDropship, self).setUp()
+        self.product_id.write(
+            {'rma_customer_operation_id': self.rma_cust_replace_op_id.id,
+             'rma_supplier_operation_id': self.rma_sup_replace_op_id.id})
+        self.product_1.write(
+            {'rma_customer_operation_id': self.rma_cust_replace_op_id.id,
+             'rma_supplier_operation_id': self.rma_sup_replace_op_id.id})
+        self.product_2.write(
+            {'rma_customer_operation_id': self.rma_cust_replace_op_id.id,
+             'rma_supplier_operation_id': self.rma_sup_replace_op_id.id})
+        self.product_3.write(
+            {'rma_customer_operation_id': self.rma_cust_replace_op_id.id,
+             'rma_supplier_operation_id': self.rma_sup_replace_op_id.id})
         products2move = [(self.product_1, 3), (self.product_2, 5),
                          (self.product_3, 2)]
         self.rma_droship_id = self._create_rma_from_move(

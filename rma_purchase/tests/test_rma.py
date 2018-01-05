@@ -32,8 +32,8 @@ class TestRma(common.TransactionCase):
             property_stock_account_output_categ_id =\
             self.env.ref('account.data_account_type_expenses').id
         self.product_1 = self.env.ref('product.product_product_25')
-        self.product_2 = self.env.ref('product.product_product_30')
-        self.product_3 = self.env.ref('product.product_product_33')
+        self.product_2 = self.env.ref('product.product_product_7')
+        self.product_3 = self.env.ref('product.product_product_11')
         self.uom_unit = self.env.ref('product.product_uom_unit')
         # assign an operation
         self.product_1.write(
@@ -104,24 +104,43 @@ class TestRma(common.TransactionCase):
 
         for move in moves:
             if type == 'customer':
-                wizard = self.rma_add_stock_move.with_context(
+                wizard = self.rma_add_stock_move.new(
                     {'stock_move_id': move.id, 'customer': True,
                      'active_ids': rma_id.id,
+                     'partner_id': move.partner_id.id,
                      'active_model': 'rma.order',
                      }
-                ).create({})
-                data = wizard._prepare_rma_line_from_stock_move(move)
+                )
+                wizard.with_context({
+                    'stock_move_id': move.id, 'customer': True,
+                    'active_ids': rma_id.id,
+                    'partner_id': move.partner_id.id,
+                    'active_model': 'rma.order',
+                })
+                data = wizard.with_context(customer=1).\
+                    _prepare_rma_line_from_stock_move(move)
+                data['partner_id'] = move.partner_id.id
             else:
-                wizard = self.rma_add_stock_move.with_context(
+                wizard = self.rma_add_stock_move.new(
                     {'stock_move_id': move.id, 'supplier': True,
                      'active_ids': rma_id.id,
+                     'partner_id': move.partner_id.id,
                      'active_model': 'rma.order',
                      }
-                ).create({})
+                )
+                wizard.with_context(
+                    {'stock_move_id': move.id, 'supplier': True,
+                     'active_ids': rma_id.id,
+                     'partner_id': move.partner_id.id,
+                     'active_model': 'rma.order',
+                     })
                 data = wizard._prepare_rma_line_from_stock_move(move)
+                data['partner_id'] = move.partner_id.id
             if dropship:
                 data.update(customer_to_supplier=dropship,
                             supplier_address_id=supplier_address_id.id)
+                data['partner_id'] = move.partner_id.id
+            data['rma_id'] = rma_id.id
             self.line = self.rma_line.create(data)
             # approve the RMA Line
             self.rma_line.action_rma_to_approve()
