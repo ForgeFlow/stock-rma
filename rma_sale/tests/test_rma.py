@@ -193,6 +193,9 @@ class TestRma(common.TransactionCase):
             new_line._onchange_sale_line_id()
 
             line.action_view_sale_order()
+        self.rma_customer_id.\
+            _get_line_domain(self.rma_customer_id,
+                             self.rma_customer_id.rma_line_ids[3])
         self.rma_customer_id._compute_sales_count()
         self.rma_customer_id.action_view_sale_order()
 
