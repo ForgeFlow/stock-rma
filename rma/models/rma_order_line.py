@@ -196,6 +196,7 @@ class RmaOrderLine(models.Model):
     partner_id = fields.Many2one(
         comodel_name='res.partner', required=True, store=True,
         track_visibility='onchange',
+        string="Partner",
         readonly=True, states={'draft': [('readonly', False)]},
     )
     sequence = fields.Integer(
