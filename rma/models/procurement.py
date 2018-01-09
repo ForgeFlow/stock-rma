@@ -14,10 +14,10 @@ class ProcurementOrder(models.Model):
     )
 
     @api.model
-    def _run_move_create(self, procurement):
-        res = super(ProcurementOrder, self)._run_move_create(procurement)
-        if procurement.rma_line_id:
-            line = procurement.rma_line_id
+    def _get_stock_move_values(self):
+        res = super(ProcurementOrder, self)._get_stock_move_values()
+        if self.rma_line_id:
+            line = self.rma_line_id
             res['rma_line_id'] = line.id
             if line.delivery_address_id:
                 res['partner_id'] = line.delivery_address_id.id
