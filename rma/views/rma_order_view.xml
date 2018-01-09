@@ -86,7 +86,7 @@
                     <notebook colspan="4">
                         <page string="RMA Lines" name="lines">
                             <field name="rma_line_ids" context="{'default_rma_id': active_id,
-                                                                 'partner_id': partner_id,
+                                                                 'default_partner_id': partner_id,
                                                                  'hide_title': True}">
                                 <tree string="RMA Lines" name="lines">
                                     <field name="sequence" widget="handle"/>
@@ -172,7 +172,7 @@
                             <field name="rma_line_ids"
                                    context="{'form_view_ref':'rma.view_rma_line_supplier_form',
                                              'default_rma_id': active_id,
-                                             'partner_id': partner_id,
+                                             'default_partner_id': partner_id,
                                              'supplier': 1,
                                              'hide_title': True}">
                                 <tree string="RMA Lines">
