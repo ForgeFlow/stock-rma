@@ -275,6 +275,9 @@ class TestRma(common.TransactionCase):
             'active_id': 1
         }).default_get({})
         procurements = wizard._create_picking()
+        for proc in procurements:
+            proc._get_stock_move_values()
+
         group_ids = set([proc.group_id.id for proc in procurements if
                          proc.group_id])
         domain = [('group_id', 'in', list(group_ids))]
