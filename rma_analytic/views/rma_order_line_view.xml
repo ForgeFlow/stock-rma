@@ -40,11 +40,9 @@
         <field name="model">rma.order.line</field>
         <field name="inherit_id" ref="rma.view_rma_line_form"/>
         <field name="arch" type="xml">
-            <field name="arch" type="xml">
-                <group name="main_info" position="inside">
-                    <field name="analytic_account_id" groups="analytic.group_analytic_accounting"/>
-                </group>
-            </field>
+            <group name="main_info" position="inside">
+                <field name="analytic_account_id" groups="analytic.group_analytic_accounting"/>
+            </group>
         </field>
     </record>
 </odoo>
