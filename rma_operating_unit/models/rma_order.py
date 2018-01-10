@@ -11,7 +11,7 @@ class RmaOrder(models.Model):
     _inherit = "rma.order"
 
     @api.multi
-    @api.constrains('rma_line_ids', 'rma_line_ids.operating_unit')
+    @api.constrains('rma_line_ids', 'rma_line_ids.operating_unit_id')
     def _check_operating_unit(self):
         for rma in self:
             bad_lines = rma.rma_line_ids.filtered(
