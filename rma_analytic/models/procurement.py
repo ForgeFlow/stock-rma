@@ -9,11 +9,11 @@ class ProcurementOrder(models.Model):
 
     _inherit = "procurement.order"
 
-
-@api.constrains('analytic_account_id')
-def check_analytic(self):
-    for order in self:
-        if order.analytic_account_id != order.rma_line_id.analytic_account_id:
-            raise exceptions.ValidationError(
-                _("The analytic account in the procurement it's not the same"
-                  " as in the rma line"))
+    @api.constrains('analytic_account_id')
+    def check_analytic(self):
+        for order in self:
+            if (order.analytic_account_id !=
+                    order.rma_line_id.analytic_account_id):
+                raise exceptions.ValidationError(
+                    _("The analytic account in the procurement it's not the "
+                      "same as in the rma line"))
