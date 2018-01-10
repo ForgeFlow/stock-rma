@@ -24,9 +24,11 @@ Contributors
 ------------
 
 * Aaron Henriquez <ahenriquez@eficent.com>
+* Serpent Consulting Services Pvt. Ltd. <support@serpentcs.com>
 
 
 Maintainer
 ----------
 
 This module is maintained by Eficent.
+
