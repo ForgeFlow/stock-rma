@@ -10,6 +10,6 @@ class RmaOrderLine(models.Model):
     _inherit = "rma.order.line"
 
     analytic_account_id = fields.Many2one(
-        comodel_name='account.analytic',
+        comodel_name='account.analytic.account',
         string='Analytic Account',
     )
