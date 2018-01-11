@@ -181,9 +181,37 @@ class TestRma(common.TransactionCase):
         })
         refund.invoice_refund()
 
-        data = {'invoice_line_id': self._create_invoice().invoice_line_ids.id}
+        invoice_line = self._create_invoice().invoice_line_ids
+        data = {'invoice_line_id': invoice_line.id}
         new_line = self.rma_line.new(data)
         new_line._onchange_invoice_line_id()
+
+        # check assert if call _onchange_invoice_line_id onchange
+        operation = invoice_line.product_id.rma_customer_operation_id
+        self.assertEquals(new_line.invoice_line_id, invoice_line)
+        self.assertEquals(new_line.product_id, invoice_line.product_id)
+        self.assertEquals(new_line.product_qty, invoice_line.quantity)
+        self.assertEquals(new_line.price_unit, invoice_line.price_unit)
+        self.assertEquals(new_line.origin,
+                          invoice_line.invoice_id.name)
+        self.assertEquals(new_line.qty_to_receive,
+                          invoice_line.quantity)
+        self.assertEquals(new_line.operation_id, operation)
+        self.assertEquals(new_line.delivery_address_id,
+                          invoice_line.invoice_id.partner_id)
+        self.assertEquals(new_line.invoice_address_id,
+                          invoice_line.invoice_id.partner_id)
+        self.assertEquals(new_line.refund_policy,
+                          operation.refund_policy)
+        self.assertEquals(new_line.delivery_policy,
+                          operation.delivery_policy)
+        self.assertEquals(new_line.in_warehouse_id,
+                          operation.in_warehouse_id)
+        self.assertEquals(new_line.out_warehouse_id,
+                          operation.out_warehouse_id)
+        self.assertEquals(new_line.in_route_id, operation.in_route_id)
+        self.assertEquals(new_line.out_route_id, operation.out_route_id)
+
         self.rma_customer_id.action_view_invoice_refund()
         self.rma_customer_id.action_view_invoice()
 

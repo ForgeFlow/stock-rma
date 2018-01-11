@@ -436,9 +436,8 @@ class RmaOrderLine(models.Model):
             if (rec.reference_move_id and
                     rec.reference_move_id.picking_id.partner_id !=
                     rec.partner_id):
-                raise ValidationError(_(
-                    "RMA customer and originating stock move customer "
-                    "doesn't match."))
+                raise ValidationError(_("""RMA customer and originating stock
+                    move customerdoesn't match."""))
 
     @api.multi
     def _remove_other_data_origin(self, exception):

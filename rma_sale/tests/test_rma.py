@@ -159,6 +159,7 @@ class TestRma(common.TransactionCase):
                             str(self.partner_id.id)])
         wizard.add_lines()
 
+        sale_order = self._create_sale_order().order_line
         for line in self.rma_customer_id.rma_line_ids:
             line._compute_qty_to_sell()
             line.sale_type = 'ordered'
@@ -168,9 +169,31 @@ class TestRma(common.TransactionCase):
             line._compute_qty_sold()
             line._compute_sales_count()
 
-            data = {'sale_line_id': self._create_sale_order().order_line.id}
+            data = {'sale_line_id': sale_order.id}
             new_line = self.rma_line.new(data)
             new_line._onchange_sale_line_id()
+            operation = self.env['rma.operation'].search(
+                [('type', '=', line.type)], limit=1)
+
+            # check assert if call _onchange_sale_line_id onchange
+            self.assertEquals(new_line.sale_line_id.id, sale_order.id)
+            self.assertEquals(new_line.product_id, sale_order.product_id)
+            self.assertEquals(new_line.product_qty, sale_order.product_uom_qty)
+            self.assertEquals(new_line.price_unit, sale_order.price_unit)
+            self.assertEquals(new_line.sale_id, sale_order.order_id)
+            self.assertEquals(new_line.qty_to_receive,
+                              sale_order.product_uom_qty)
+            self.assertEquals(new_line.operation_id, operation)
+            self.assertEquals(new_line.refund_policy,
+                              operation.refund_policy)
+            self.assertEquals(new_line.delivery_policy,
+                              operation.delivery_policy)
+            self.assertEquals(new_line.in_warehouse_id,
+                              operation.in_warehouse_id)
+            self.assertEquals(new_line.out_warehouse_id,
+                              operation.out_warehouse_id)
+            self.assertEquals(new_line.origin,
+                              sale_order.order_id.name)
 
             line.action_view_sale_order()
         self.rma_customer_id._compute_sales_count()

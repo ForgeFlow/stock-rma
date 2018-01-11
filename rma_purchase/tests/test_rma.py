@@ -240,10 +240,36 @@ class TestRma(common.TransactionCase):
         }).create({})
 
         wizard.action_create_picking()
-        data = {'purchase_order_line_id':
-                self._create_purchase_order().order_line.id}
+        purchase_order = self._create_purchase_order().order_line
+        data = {'purchase_order_line_id': purchase_order.id}
         new_line = self.rma_line.new(data)
         new_line._onchange_purchase_order_line_id()
+
+        # check assert if call _onchange_purchase_order_line_id onchange
+        operation = self.env['rma.operation'].\
+            search([('type', '=', self.rma_customer_id.rma_line_ids[0].type)],
+                   limit=1)
+        self.assertEquals(new_line.purchase_order_line_id, purchase_order)
+        self.assertEquals(new_line.product_id, purchase_order.product_id)
+        self.assertEquals(new_line.product_qty, purchase_order.product_qty)
+        self.assertEquals(new_line.price_unit, purchase_order.price_unit)
+        self.assertEquals(new_line.origin,
+                          purchase_order.order_id.name)
+        self.assertEquals(new_line.purchase_id,
+                          purchase_order.order_id)
+        self.assertEquals(new_line.qty_to_receive,
+                          purchase_order.product_qty)
+        self.assertEquals(new_line.operation_id, operation)
+        self.assertEquals(new_line.refund_policy,
+                          operation.refund_policy)
+        self.assertEquals(new_line.delivery_policy,
+                          operation.delivery_policy)
+        self.assertEquals(new_line.in_warehouse_id,
+                          operation.in_warehouse_id)
+        self.assertEquals(new_line.out_warehouse_id,
+                          operation.out_warehouse_id)
+        self.assertEquals(new_line.in_route_id, operation.in_route_id)
+        self.assertEquals(new_line.out_route_id, operation.out_route_id)
 
         self.rma_customer_id._compute_po_count()
         self.rma_customer_id._compute_origin_po_count()

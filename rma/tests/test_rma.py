@@ -201,6 +201,20 @@ class TestRma(common.TransactionCase):
             new_line = self.rma_line.new(data)
             new_line._onchange_reference_move_id()
 
+            # check assert if call reference_move_id onchange
+            self.assertEquals(new_line.product_id,
+                              line.reference_move_id.product_id)
+            self.assertEquals(new_line.product_qty,
+                              line.reference_move_id.product_uom_qty)
+            self.assertEquals(new_line.location_id.location_id,
+                              line.reference_move_id.location_id)
+            self.assertEquals(new_line.origin,
+                              line.reference_move_id.picking_id.name)
+            self.assertEquals(new_line.delivery_address_id,
+                              line.reference_move_id.picking_partner_id)
+            self.assertEquals(new_line.qty_to_receive,
+                              line.reference_move_id.product_uom_qty)
+
             line.action_rma_to_approve()
             line.action_rma_draft()
             line.action_rma_done()
@@ -212,6 +226,10 @@ class TestRma(common.TransactionCase):
             data = {'operation_id': line.operation_id.id}
             new_line = self.rma_line.new(data)
             new_line._onchange_operation_id()
+
+            # check assert if call operation_id onchange
+            self.assertEquals(new_line.operation_id.receipt_policy,
+                              line.receipt_policy)
 
             data = {'customer_to_supplier': line.customer_to_supplier}
             new_line = self.rma_line.new(data)
