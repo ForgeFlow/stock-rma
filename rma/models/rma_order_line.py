@@ -71,7 +71,7 @@ class RmaOrderLine(models.Model):
                 op = ops['=']
             else:
                 op = ops['!=']
-            for move in rec.procurement_ids.mapped('move_ids').filtered(
+            for move in rec.move_ids.filtered(
                     lambda m: m.state in states and op(m.location_id.usage,
                                                        rec.type)):
                 qty += product_obj._compute_quantity(
