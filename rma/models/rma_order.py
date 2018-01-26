@@ -21,7 +21,7 @@ class RmaOrder(models.Model):
     def _compute_in_shipment_count(self):
         for rec in self:
             rec.in_shipment_count = len(rec.rma_line_ids.mapped(
-                'procurement_ids.move_ids').filtered(
+                'move_ids').filtered(
                 lambda m: m.location_dest_id.usage == 'internal').mapped(
                 'picking_id'))
 
@@ -29,7 +29,7 @@ class RmaOrder(models.Model):
     def _compute_out_shipment_count(self):
         for rec in self:
             rec.out_shipment_count = len(rec.rma_line_ids.mapped(
-                'procurement_ids.move_ids').filtered(
+                'move_ids').filtered(
                 lambda m: m.location_id.usage == 'internal').mapped(
                 'picking_id'))
 
