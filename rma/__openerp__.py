@@ -33,5 +33,7 @@
              'wizards/rma_order_line_make_supplier_rma_view.xml',
              ],
     'installable': True,
+    "pre_init_hook": "pre_init_hook",
+    "post_init_hook": "post_init_hook",
     'auto_install': False,
 }

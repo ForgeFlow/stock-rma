@@ -1,0 +1,16 @@
+custom_rma module
+rma_operating_unit module
+rma_analytic modules (only v10)
+
+renamed_columns:
+only straight changes
+
+assigned status
+assigned origin
+
+assigned in/out warehouses
+assigned policies
+
+linked moves and invoice lines to rma lines
+
+assign routes (custom)
