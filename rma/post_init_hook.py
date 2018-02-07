@@ -240,5 +240,5 @@ def post_init_hook(cr, registry):
     set_policies(env.cr)
     set_type(env.cr)
     link_moves(env.cr)
-    # force_recompute(env)
     drop_columns(env.cr)
+    force_recompute(env)
