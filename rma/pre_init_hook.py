@@ -34,6 +34,7 @@ column_copies = {
         ('claim_descr', None, None),
     ],
     'crm_claim': [('warehouse_id', None, None),
+                  ('operating_unit_id', None, None),
                   ('name', None, None),
                   ('claim_type', None, None),
                   ('number', None, None),

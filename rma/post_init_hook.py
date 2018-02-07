@@ -55,6 +55,20 @@ def map_crm_claim_warehouse_id(cr):
     openupgrade.logged_query(cr, query)
 
 
+def assign_operating_unit_id(cr):
+    query = """
+        update rma_order ro
+        set operating_unit_id = %s
+    """ % (openupgrade.get_legacy_name('operating_unit_id'))
+    openupgrade.logged_query(cr, query)
+    query = """
+        update rma_order_line rol
+        set operating_unit_id = ro.operating_unit_id
+        form rma_order ro where ro.id = rol.rma_id
+    """
+    openupgrade.logged_query(cr, query)
+
+
 def set_policies(cr):
     query = """
         update rma_order_line rml
