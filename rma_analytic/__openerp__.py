@@ -4,12 +4,12 @@
 
 {
     "name": "Analytic Account in RMA",
-    "version": "10.0.1.0.0",
+    "version": "9.0.1.0.0",
     "author": "Eficent",
     "license": "LGPL-3",
     "website": "http://www.eficent.com",
     "category": "Analytic",
-    "depends": ["rma", "analytic", "procurement_analytic"],
+    "depends": ["rma", "analytic"],
     "data": [
         "views/rma_order_line_view.xml"
     ],

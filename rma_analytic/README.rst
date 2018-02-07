@@ -10,16 +10,7 @@ This module introduces the following features:
 
 * Adds the analytic account to the RMA order lines.
 
-* Propagates the analytic account to the procurements created
-
-* Introduce rules to ensure consistency
-
-
-Usage
-=====
-
-* Add the analytic information in the rma line or let the system fill it
-  from origin
+This module is not complete, it only exists for migration purposes
 
 
 Contributors
