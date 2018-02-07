@@ -29,6 +29,7 @@ column_copies = {
         ('move_out_id', None, None),
         ('refund_line_id', None, None),
         ('invoice_line_id', None, None),
+        ('analytic_account_id', None, None),
         ('state', None, None),
         ('claim_id', None, None),
         ('claim_descr', None, None),

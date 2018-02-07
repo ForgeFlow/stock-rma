@@ -55,7 +55,7 @@ def map_crm_claim_warehouse_id(cr):
     openupgrade.logged_query(cr, query)
 
 
-def assign_operating_unit_id(cr):
+def assign_operating_unit(cr):
     query = """
         update rma_order ro
         set operating_unit_id = %s
@@ -66,6 +66,14 @@ def assign_operating_unit_id(cr):
         set operating_unit_id = ro.operating_unit_id
         form rma_order ro where ro.id = rol.rma_id
     """
+    openupgrade.logged_query(cr, query)
+
+
+def assign_analytic_account(cr):
+    query = """
+        update rma_order_line rol
+        set analytic_account_id = %s
+    """ % (openupgrade.get_legacy_name('analytic_account_id'))
     openupgrade.logged_query(cr, query)
 
 
@@ -249,6 +257,8 @@ def post_init_hook(cr, registry):
     assign_origin(env)
     assign_partner(env.cr)
     assign_messages(env.cr)
+    assign_operating_unit(cr)
+    assign_analytic_account(cr)
     map_crm_claim_warehouse_id(env.cr)
     assign_name(cr)
     set_policies(env.cr)
