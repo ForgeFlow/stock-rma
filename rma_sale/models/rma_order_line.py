@@ -11,17 +11,19 @@ class RmaOrderLine(models.Model):
 
     @api.depends('sale_line_ids', 'sale_type', 'sales_count',
                  'sale_line_ids.state')
+    @api.multi
     def _compute_qty_to_sell(self):
-        if self.sale_type == 'no':
-            self.qty_to_sell = 0.0
-        elif self.sale_type == 'ordered':
-            qty = self._get_rma_sold_qty()
-            self.qty_to_sell = self.product_qty - qty
-        elif self.sale_type == 'received':
-            qty = self._get_rma_sold_qty()
-            self.qty_to_sell = self.qty_received - qty
-        else:
-            self.qty_to_sell = 0.0
+        for rec in self:
+            if rec.sale_type == 'no':
+                rec.qty_to_sell = 0.0
+            elif rec.sale_type == 'ordered':
+                qty = self._get_rma_sold_qty()
+                rec.qty_to_sell = self.product_qty - qty
+            elif rec.sale_type == 'received':
+                qty = self._get_rma_sold_qty()
+                rec.qty_to_sell = self.qty_received - qty
+            else:
+                rec.qty_to_sell = 0.0
 
     @api.depends('sale_line_ids', 'sale_type', 'sales_count',
                  'sale_line_ids.state')
