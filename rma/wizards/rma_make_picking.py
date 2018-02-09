@@ -209,7 +209,7 @@ class RmaMakePicking(models.TransientModel):
             else:
                 form = self.env.ref('stock.view_picking_form', False)
                 action['views'] = [(form and form.id or False, 'form')]
-                action['res_id'] = pickings[0]
+                action['res_id'] = pickings and pickings[0]
         return action
 
     @api.multi
