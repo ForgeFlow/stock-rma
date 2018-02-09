@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
-from odoo.tools.safe_eval import safe_eval as eval
 import odoo.addons.decimal_precision as dp
 
 
@@ -38,6 +36,7 @@ class RmaRefund(models.TransientModel):
         lines the supplier field is empty otherwise is the unique line
         supplier.
         """
+        context = self._context.copy()
         res = super(RmaRefund, self).default_get(fields)
         rma_line_obj = self.env['rma.order.line']
         rma_line_ids = self.env.context['active_ids'] or []
@@ -55,6 +54,7 @@ class RmaRefund(models.TransientModel):
         for line in lines:
             items.append([0, 0, self._prepare_item(line)])
         res['item_ids'] = items
+        context.update({'items_ids': items})
         return res
 
     date_invoice = fields.Date(
@@ -96,11 +96,11 @@ class RmaRefund(models.TransientModel):
         new_invoice = self.compute_refund()
         action = 'action_invoice_tree1' if (
             new_invoice.type in ['out_refund', 'out_invoice']) \
-            else 'action_invoice_tree2'
+            else 'action_invoice_in_refund'
         result = self.env.ref('account.%s' % action).read()[0]
-        invoice_domain = eval(result['domain'])
-        invoice_domain.append(('id', '=', new_invoice.id))
-        result['domain'] = invoice_domain
+        form_view = self.env.ref('account.invoice_supplier_form', False)
+        result['views'] = [(form_view and form_view.id or False, 'form')]
+        result['res_id'] = new_invoice.id
         return result
 
     @api.model
@@ -189,8 +189,9 @@ class RmaRefundItem(models.TransientModel):
                              related='line_id.rma_id',
                              string='RMA',
                              readonly=True)
-    product_id = fields.Many2one('product.product', string='Product',
-                                 readonly=True)
+    product_id = fields.Many2one('product.product', string='Product')
+    product = fields.Many2one('product.product', string='Product',
+                              readonly=True)
     name = fields.Char(string='Description', required=True)
     product_qty = fields.Float(
         string='Quantity Ordered', copy=False,
