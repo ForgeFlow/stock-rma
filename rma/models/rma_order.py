@@ -2,7 +2,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import UserError
 from datetime import datetime
 
 
@@ -110,8 +110,6 @@ class RmaOrder(models.Model):
                     if move.picking_id.location_id == suppliers:
                         picking_ids.append(move.picking_id.id)
         shipments = list(set(picking_ids))
-        if not shipments:
-            raise ValidationError(_("No shipments found!"))
         # choose the view_mode accordingly
         if shipments:
             if len(shipments) > 1:
@@ -139,10 +137,8 @@ class RmaOrder(models.Model):
                     if move.picking_id.location_id != suppliers:
                         picking_ids.append(move.picking_id.id)
         shipments = list(set(picking_ids))
-        if not shipments:
-            raise ValidationError(_("No deliveries found!"))
         # choose the view_mode accordingly
-        if len(shipments) > 1:
+        if len(shipments) != 1:
             result['domain'] = [('id', 'in', shipments)]
         else:
             res = self.env.ref('stock.view_picking_form', False)
@@ -167,10 +163,8 @@ class RmaOrder(models.Model):
             res = self.env.ref('rma.view_rma_line_supplier_form', False)
         result = action.read()[0]
         lines = self._get_valid_lines()
-        if not lines:
-            raise ValidationError(_("No rma %s lines found!") % self.type)
         # choose the view_mode accordingly
-        if len(lines.ids) > 1:
+        if len(lines.ids) != 1:
             result['domain'] = [('id', 'in', lines.ids)]
         else:
             result['views'] = [(res and res.id or False, 'form')]
@@ -185,10 +179,8 @@ class RmaOrder(models.Model):
         lines = self.rma_line_ids
         for line_id in lines:
             related_lines = [line.id for line in line_id.supplier_rma_line_ids]
-            if not related_lines:
-                raise ValidationError(_("No rma supplier lines found!"))
             # choose the view_mode accordingly
-            if len(related_lines) > 1:
+            if len(related_lines) != 1:
                 result['domain'] = [('id', 'in', related_lines)]
             else:
                 res = self.env.ref('rma.view_rma_line_supplier_form', False)

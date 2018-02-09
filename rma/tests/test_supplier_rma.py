@@ -22,9 +22,7 @@ class TestSupplierRma(test_rma.TestRma):
             'active_id': 1
         }).create({})
         procurements = wizard._create_picking()
-        group_ids = set([proc.group_id.id for proc in procurements if
-                         proc.group_id])
-        domain = [('group_id', 'in', list(group_ids))]
+        domain = [('origin', '=', procurements)]
         picking = self.stockpicking.search(domain)
         self.assertEquals(len(picking), 1,
                           "Incorrect number of pickings created")
@@ -91,9 +89,7 @@ class TestSupplierRma(test_rma.TestRma):
             'picking_type': 'incoming',
         }).create({})
         procurements = wizard._create_picking()
-        group_ids = set([proc.group_id.id for proc in procurements if
-                         proc.group_id])
-        domain = [('group_id', 'in', list(group_ids))]
+        domain = [('origin', '=', procurements)]
         pickings = self.stockpicking.search(domain)
         self.assertEquals(len(pickings), 2,
                           "Incorrect number of pickings created")
