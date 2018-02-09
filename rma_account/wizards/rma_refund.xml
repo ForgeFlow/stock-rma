@@ -1,85 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
-
-        <record id="view_rma_refund" model="ir.ui.view">
-            <field name="name">rma.refund.form</field>
-            <field name="model">rma.refund</field>
-            <field name="arch" type="xml">
-                <form string="Credit Note">
-                    <group>
-                         <group>
-                             <field name="description"/>
-                         </group>
-                         <group>
-                             <field name="date_invoice"/>
-                             <field name="date" groups="base.group_no_one"/>
-                         </group>
-                    </group>
-                    <field name="item_ids">
-                        <tree string="RMA Lines" editable="bottom">
-                            <field name="rma_id"/>
-                            <field name="product_id"/>
-                            <field name="name"/>
-                            <field name="product_qty"/>
-                            <field name="uom_id" groups="product.group_uom"/>
-                            <field name="qty_to_refund" readonly="0"/>
-                        </tree>
-                    </field>
-                    <footer>
-                        <button string='Create Refund' name="invoice_refund" type="object" class="btn-primary"/>
-                        <button string="Cancel" class="btn-default" special="cancel"/>
-                    </footer>
-               </form>
-            </field>
-        </record>
-
-        <record id="action_rma_refund" model="ir.actions.act_window">
-            <field name="name">Create Refund</field>
-            <field name="res_model">rma.refund</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">tree,form</field>
-            <field name="view_id" ref="view_rma_refund"/>
-            <field name="groups_id"
-                   eval="[(4, ref('account.group_account_invoice'))]"/>
-            <field name="target">new</field>
-        </record>
-
-        <record id="view_rma_line_button_refund_form" model="ir.ui.view">
-            <field name="name">rma.order.line.form</field>
-            <field name="model">rma.order.line</field>
-            <field name="inherit_id" ref="rma.view_rma_line_form"/>
-            <field name="arch" type="xml">
-                <xpath expr="//header" position="inside">
-                    <button name="%(action_rma_refund)d" states="approved"
-                            string="Create Refund" class="oe_highlight"
-                            type="action"/>
-                </xpath>
-            </field>
-        </record>
-
-        <record id="view_rma_line_supplier_button_refund_form" model="ir.ui.view">
-            <field name="name">rma.order.line.supplier.form</field>
-            <field name="model">rma.order.line</field>
-            <field name="inherit_id" ref="rma.view_rma_line_supplier_button_form"/>
-            <field name="arch" type="xml">
-                <xpath expr="//header" position="inside">
-                    <button name="%(action_rma_refund)d" states="approved"
-                            string="Create Refund" class="oe_highlight"
-                            type="action"/>
-                </xpath>
-            </field>
+    <record id="view_rma_refund" model="ir.ui.view">
+        <field name="name">rma.refund.form</field>
+        <field name="model">rma.refund</field>
+        <field name="arch" type="xml">
+            <form string="Credit Note">
+                <group>
+                     <group>
+                         <field name="description"/>
+                     </group>
+                     <group>
+                         <field name="date_invoice"/>
+                         <field name="date" groups="base.group_no_one"/>
+                     </group>
+                </group>
+                <field name="item_ids">
+                    <tree string="RMA Lines" editable="bottom">
+                        <field name="rma_id"/>
+                        <field name="product_id" invisible="1"/>
+                        <field name="product"/>
+                        <field name="name"/>
+                        <field name="product_qty"/>
+                        <field name="uom_id" groups="product.group_uom"/>
+                        <field name="qty_to_refund" readonly="0"/>
+                    </tree>
+                </field>
+                <footer>
+                    <button string='Create Refund' name="invoice_refund" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-default" special="cancel"/>
+                </footer>
+           </form>
+        </field>
     </record>
 
-    <record model="ir.values" id="values_action_rma_refund">
-        <field name="model_id" ref="model_rma_order_line"/>
+    <record id="action_rma_refund" model="ir.actions.act_window">
         <field name="name">Create Refund</field>
-        <field name="key2">client_action_multi</field>
-        <field name="value"
-               eval="'ir.actions.act_window,' + str(ref('action_rma_refund'))" />
-        <field name="key">action</field>
-        <field name="model">rma.order.line</field>
+        <field name="res_model">rma.refund</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_rma_refund"/>
+        <field name="groups_id"
+               eval="[(4, ref('account.group_account_invoice'))]"/>
+        <field name="target">new</field>
     </record>
 
-    </data>
+    <record id="view_rma_line_button_refund_form" model="ir.ui.view">
+        <field name="name">rma.order.line.form</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_line_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="%(action_rma_refund)d" states="approved"
+                        string="Create Refund" class="oe_highlight"
+                        type="action"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_rma_line_supplier_button_refund_form" model="ir.ui.view">
+        <field name="name">rma.order.line.supplier.form</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_line_supplier_button_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="%(action_rma_refund)d" states="approved"
+                        string="Create Refund" class="oe_highlight"
+                        type="action"/>
+            </xpath>
+        </field>
+    </record>
 </odoo>
