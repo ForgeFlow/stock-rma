@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
@@ -267,13 +266,10 @@ class TestRma(common.TransactionCase):
         self.rma_customer_id._compute_po_count()
         self.rma_customer_id._compute_origin_po_count()
 
-        self.rma_customer_id.action_view_purchase_order()
         self.rma_customer_id.action_view_origin_purchase_order()
 
         self.rma_customer_id.rma_line_ids[0]._compute_purchase_count()
         self.rma_customer_id.rma_line_ids[0]._compute_purchase_order_lines()
-        self.rma_customer_id.rma_line_ids[0].action_view_purchase_order()
-        self.rma_customer_id.rma_line_ids[0]._get_rma_purchased_qty()
 
     def test_rma_add_purchase_wizard(self):
         wizard = self.env['rma_add_purchase'].with_context({
@@ -320,13 +316,11 @@ class TestRma(common.TransactionCase):
             'picking_type': 'incoming',
             'active_id': 1
         }).create({})
-        procurements = wizard._create_picking()
-        group_ids = set([proc.group_id.id for proc in procurements if
-                         proc.group_id])
-        domain = [('group_id', 'in', list(group_ids))]
-        picking = self.stockpicking.search(domain)
-        self.assertEquals(len(picking), 1,
-                          "Incorrect number of pickings created")
+        wizard._create_picking()
+        res = self.rma_customer_id.rma_line_ids.action_view_in_shipments()
+        self.assertTrue('res_id' in res,
+                        "Incorrect number of pickings created")
+        picking = self.env['stock.picking'].browse(res['res_id'])
         moves = picking.move_lines
         self.assertEquals(len(moves), 3,
                           "Incorrect number of moves created")
@@ -356,8 +350,11 @@ class TestRma(common.TransactionCase):
                                   "Wrong qty to receive")
                 self.assertEquals(line.qty_incoming, 2,
                                   "Wrong qty incoming")
+        picking.action_confirm()
         picking.action_assign()
-        picking.do_transfer()
+        for line in picking.move_line_ids:
+            line.qty_done = line.product_uom_qty
+        picking.action_done()
         for line in self.rma_customer_id.rma_line_ids:
             self.assertEquals(line.qty_to_receive, 0,
                               "Wrong qty to_receive")
@@ -389,17 +386,12 @@ class TestRma(common.TransactionCase):
             'active_model': 'rma.order.line',
             'picking_type': 'outgoing',
         }).create({})
-        procurements = wizard._create_picking()
-        group_ids = set([proc.group_id.id for proc in procurements if
-                         proc.group_id])
-        domain = [('group_id', 'in', list(group_ids))]
-        pickings = self.stockpicking.search(domain)
-        procurements[0].purchase_id = self._create_purchase_order().id
-        wizard._get_action(pickings, procurements)
-        self.assertEquals(len(pickings), 2,
-                          "Incorrect number of pickings created")
-        picking_out = pickings[1]
-        moves = picking_out.move_lines
+        wizard._create_picking()
+        res = self.rma_customer_id.rma_line_ids.action_view_out_shipments()
+        self.assertTrue('res_id' in res,
+                        "Incorrect number of pickings created")
+        picking = self.env['stock.picking'].browse(res['res_id'])
+        moves = picking.move_lines
         self.assertEquals(len(moves), 3,
                           "Incorrect number of moves created")
         for line in self.rma_customer_id.rma_line_ids:
@@ -430,8 +422,11 @@ class TestRma(common.TransactionCase):
                                   "Wrong qty to deliver")
                 self.assertEquals(line.qty_outgoing, 2,
                                   "Wrong qty outgoing")
-        picking_out.action_assign()
-        picking_out.do_transfer()
+        picking.action_confirm()
+        picking.action_assign()
+        for line in picking.move_line_ids:
+            line.qty_done = line.product_uom_qty
+        picking.action_done()
         for line in self.rma_customer_id.rma_line_ids:
             self.assertEquals(line.qty_to_receive, 0,
                               "Wrong qty to receive")
