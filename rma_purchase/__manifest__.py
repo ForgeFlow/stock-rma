@@ -13,6 +13,6 @@
     'data': ['views/rma_order_view.xml',
              'views/rma_order_line_view.xml',
              'wizards/rma_add_purchase.xml'],
-    'installable': True,
+    'installable': False,
     'auto_install': True,
 }
