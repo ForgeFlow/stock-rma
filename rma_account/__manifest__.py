@@ -20,6 +20,6 @@
         'wizards/rma_add_invoice.xml',
         'wizards/rma_refund.xml',
     ],
-    'installable': True,
+    'installable': False,
     'auto_install': True,
 }
