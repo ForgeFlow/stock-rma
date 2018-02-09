@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
@@ -45,13 +44,11 @@ class TestRmaDropship(test_rma.TestRma):
             'active_model': 'rma.order.line',
             'picking_type': 'incoming',
         }).create({})
-        procurements = wizard._create_picking()
-        group_ids = set([proc.group_id.id for proc in procurements if
-                         proc.group_id])
-        domain = [('group_id', 'in', list(group_ids))]
-        picking = self.stockpicking.search(domain)
-        self.assertEquals(len(picking), 1,
-                          "Incorrect number of pickings created")
+        wizard._create_picking()
+        res = supplier_rma.rma_line_ids.action_view_in_shipments()
+        self.assertTrue('res_id' in res,
+                        "Incorrect number of pickings created")
+        picking = self.env['stock.picking'].browse(res['res_id'])
         moves = picking.move_lines
         self.assertEquals(len(moves), 3,
                           "Incorrect number of moves created")
