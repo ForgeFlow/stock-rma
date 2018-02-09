@@ -32,6 +32,7 @@ class RmaMakePicking(models.TransientModel):
         lines the supplier field is empty otherwise is the unique line
         supplier.
         """
+        context = self._context.copy()
         res = super(RmaMakePicking, self).default_get(fields)
         rma_line_obj = self.env['rma.order.line']
         rma_line_ids = self.env.context['active_ids'] or []
@@ -51,6 +52,7 @@ class RmaMakePicking(models.TransientModel):
         for line in lines:
             items.append([0, 0, self._prepare_item(line)])
         res['item_ids'] = items
+        context.update({'items_ids': items})
         return res
 
     item_ids = fields.One2many(
@@ -67,6 +69,7 @@ class RmaMakePicking(models.TransientModel):
 
     def _get_procurement_group_data(self, item):
         group_data = {
+            'partner_id': item.line_id.partner_id.id,
             'name': item.line_id.rma_id.name or item.line_id.name,
             'rma_id': item.line_id.rma_id and item.line_id.rma_id.id or False,
             'rma_line_id': item.line_id.id if not item.line_id.rma_id else
@@ -116,17 +119,17 @@ class RmaMakePicking(models.TransientModel):
             raise ValidationError(_("No warehouse specified"))
         procurement_data = {
             'name': line.rma_id and line.rma_id.name or line.name,
-            'group_id': group.id,
+            'group_id': group,
             'origin': line.name,
-            'warehouse_id': warehouse.id,
+            'warehouse_id': warehouse,
             'date_planned': time.strftime(DT_FORMAT),
-            'product_id': item.product_id.id,
+            'product_id': item.product_id,
             'product_qty': qty,
-            'partner_dest_id': delivery_address_id.id,
+            'partner_id': delivery_address_id.id,
             'product_uom': line.product_id.product_tmpl_id.uom_id.id,
-            'location_id': location.id,
+            'location_id': location,
             'rma_line_id': line.id,
-            'route_ids': [(4, route.id)]
+            'route_ids': route
         }
         return procurement_data
 
@@ -140,18 +143,23 @@ class RmaMakePicking(models.TransientModel):
             qty = item.qty_to_receive
         else:
             qty = item.qty_to_deliver
-        procurement_data = self._get_procurement_data(
-            item, group, qty, picking_type)
+        values = self._get_procurement_data(item, group, qty, picking_type)
         # create picking
-        procurement = self.env['procurement.order'].create(procurement_data)
-        procurement.run()
-        return procurement.id
+        self.env['procurement.group'].run(
+            item.line_id.product_id,
+            qty,
+            item.line_id.product_id.product_tmpl_id.uom_id,
+            values.get('location_id'),
+            values.get('origin'),
+            values.get('origin'),
+            values
+        )
+        return values.get('origin')
 
     @api.multi
     def _create_picking(self):
         """Method called when the user clicks on create picking"""
         picking_type = self.env.context.get('picking_type')
-        procurement_list = []
         for item in self.item_ids:
             line = item.line_id
             if line.state != 'approved':
@@ -167,9 +175,7 @@ class RmaMakePicking(models.TransientModel):
                 raise ValidationError(
                     _('No deliveries needed for this operation'))
             procurement = self._create_procurement(item, picking_type)
-            procurement_list.append(procurement)
-        procurements = self.env['procurement.order'].browse(procurement_list)
-        return procurements
+        return procurement
 
     @api.model
     def _get_action(self, pickings, procurements):
@@ -179,30 +185,32 @@ class RmaMakePicking(models.TransientModel):
             action = self.env.ref(
                 'procurement.procurement_order_action_exceptions')
             action = action.read()[0]
-            # choose the view_mode accordingly
-            procurement_ids = procurements.ids
-            if len(procurement_ids) != 1:
-                action['domain'] = "[('id', 'in', " + \
-                                   str(procurement_ids) + ")]"
-            elif len(procurements) == 1:
-                res = self.env.ref('procurement.procurement_form_view',
-                                   False)
-                action['views'] = [(res and res.id or False, 'form')]
-                action['res_id'] = procurement_ids[0]
+            if procurements:
+                # choose the view_mode accordingly
+                if len(procurements.ids) <= 1:
+                    res = self.env.ref('procurement.procurement_form_view',
+                                       False)
+                    action['views'] = [(res and res.id or False, 'form')]
+                    action['res_id'] = procurements.ids[0]
+                else:
+                    action['domain'] = [('id', 'in', procurements.ids)]
         return action
 
     @api.multi
     def action_create_picking(self):
-        procurements = self._create_picking()
-        groups = []
-        for proc in procurements:
-            if proc.group_id:
-                groups.append(proc.group_id.id)
-        if len(groups):
+        procurement = self._create_picking()
+        pickings = False
+        action = self.env.ref('stock.do_view_pickings')
+        action = action.read()[0]
+        if procurement:
             pickings = self.env['stock.picking'].search(
-                [('group_id', 'in', groups)])
-
-        action = self._get_action(pickings, procurements)
+                [('origin', '=', procurement)]).ids
+            if len(pickings) > 1:
+                action['domain'] = [('id', 'in', pickings)]
+            else:
+                form = self.env.ref('stock.view_picking_form', False)
+                action['views'] = [(form and form.id or False, 'form')]
+                action['res_id'] = pickings[0]
         return action
 
     @api.multi

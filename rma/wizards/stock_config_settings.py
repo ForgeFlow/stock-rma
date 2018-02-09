@@ -6,7 +6,7 @@ from odoo import models, fields
 
 
 class StockConfigSettings(models.TransientModel):
-    _inherit = 'stock.config.settings'
+    _inherit = 'res.config.settings'
 
     group_rma_delivery_address = fields.Selection([
         (0, "Invoicing and shipping addresses are always the same "
