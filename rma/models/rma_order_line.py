@@ -514,15 +514,13 @@ class RmaOrderLine(models.Model):
         picking_ids = self.env['stock.picking'].search(
             [('origin', '=', self.name),
              ('picking_type_code', '=', 'incoming')]).ids
-        if not picking_ids:
-            raise ValidationError(_("No shipments found!"))
         # choose the view_mode accordingly
         if len(picking_ids) > 1:
             result['domain'] = [('id', 'in', picking_ids)]
         else:
             res = self.env.ref('stock.view_picking_form', False)
             result['views'] = [(res and res.id or False, 'form')]
-            result['res_id'] = picking_ids[0]
+            result['res_id'] = picking_ids and picking_ids[0]
         return result
 
     @api.multi
@@ -532,13 +530,11 @@ class RmaOrderLine(models.Model):
         picking_ids = self.env['stock.picking'].search(
             [('origin', '=', self.name),
              ('picking_type_code', '=', 'outgoing')]).ids
-        if not picking_ids:
-            raise ValidationError(_("No deliveries found!"))
         # choose the view_mode accordingly
         if len(picking_ids) > 1:
             result['domain'] = [('id', 'in', picking_ids)]
         else:
             res = self.env.ref('stock.view_picking_form', False)
             result['views'] = [(res and res.id or False, 'form')]
-            result['res_id'] = picking_ids[0]
+            result['res_id'] = picking_ids and picking_ids[0]
         return result
