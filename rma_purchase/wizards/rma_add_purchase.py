@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
@@ -91,8 +90,6 @@ class RmaAddPurchase(models.TransientModel):
     def _get_rma_data(self):
         data = {
             'date_rma': fields.Datetime.now(),
-            'delivery_address_id': self.purchase_id.partner_id.id,
-            'invoice_address_id': self.purchase_id.partner_id.id
         }
         return data
 
