@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0"?>
 <odoo>
     <record id="rma_operation_tree" model="ir.ui.view">
         <field name="name">rma.operation.tree</field>
