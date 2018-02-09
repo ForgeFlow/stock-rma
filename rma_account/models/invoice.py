@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
@@ -72,28 +71,30 @@ class AccountInvoice(models.Model):
     def action_view_rma_supplier(self):
         action = self.env.ref('rma.action_rma_supplier_lines')
         result = action.read()[0]
-        rma_list = self.mapped('invoice_line_ids.rma_line_ids').ids
-        # choose the view_mode accordingly
-        if len(rma_list) != 1:
-            result['domain'] = [('id', 'in', rma_list)]
-        elif len(rma_list) == 1:
-            res = self.env.ref('rma.view_rma_line_supplier_form', False)
-            result['views'] = [(res and res.id or False, 'form')]
-            result['res_id'] = rma_list[0]
+        rma_ids = self.mapped('invoice_line_ids.rma_line_ids').ids
+        if rma_ids:
+            # choose the view_mode accordingly
+            if len(rma_ids) > 1:
+                result['domain'] = [('id', 'in', rma_ids)]
+            else:
+                res = self.env.ref('rma.view_rma_line_supplier_form', False)
+                result['views'] = [(res and res.id or False, 'form')]
+                result['res_id'] = rma_ids[0]
         return result
 
     @api.multi
     def action_view_rma_customer(self):
         action = self.env.ref('rma.action_rma_customer_lines')
         result = action.read()[0]
-        rma_list = self.mapped('invoice_line_ids.rma_line_ids').ids
-        # choose the view_mode accordingly
-        if len(rma_list) != 1:
-            result['domain'] = [('id', 'in', rma_list)]
-        elif len(rma_list) == 1:
-            res = self.env.ref('rma.view_rma_line_form', False)
-            result['views'] = [(res and res.id or False, 'form')]
-            result['res_id'] = rma_list[0]
+        rma_ids = self.mapped('invoice_line_ids.rma_line_ids').ids
+        if rma_ids:
+            # choose the view_mode accordingly
+            if len(rma_ids) > 1:
+                result['domain'] = [('id', 'in', rma_ids)]
+            else:
+                res = self.env.ref('rma.view_rma_line_form', False)
+                result['views'] = [(res and res.id or False, 'form')]
+                result['res_id'] = rma_ids[0]
         return result
 
 

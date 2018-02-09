@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
+
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError, UserError
 from odoo.addons import decimal_precision as dp
@@ -211,12 +211,12 @@ class RmaOrderLine(models.Model):
         result = action.read()[0]
         invoice_ids = self.mapped('refund_line_ids.invoice_id').ids
         # choose the view_mode accordingly
-        if len(invoice_ids) != 1:
+        if len(invoice_ids) > 1:
             result['domain'] = [('id', 'in', invoice_ids)]
-        elif len(invoice_ids) == 1:
+        else:
             res = self.env.ref('account.invoice_supplier_form', False)
             result['views'] = [(res and res.id or False, 'form')]
-            result['res_id'] = invoice_ids[0]
+            result['res_id'] = invoice_ids and invoice_ids[0]
         return result
 
     @api.multi
