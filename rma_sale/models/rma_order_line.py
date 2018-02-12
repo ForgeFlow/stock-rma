@@ -153,7 +153,9 @@ class RmaOrderLine(models.Model):
     def _get_rma_sold_qty(self):
         self.ensure_one()
         qty = 0.0
-        for sale_line in self.sale_line_ids.filtered(
-                lambda p: p.state not in ('draft', 'sent', 'cancel')):
-            qty += sale_line.product_uom_qty
-        return qty
+        for rec in self:
+            for sale_line in rec.sale_line_ids.filtered(
+                    lambda p: p.state not in ('draft', 'sent', 'cancel')):
+                qty += sale_line.product_uom_qty
+            return qty
+
