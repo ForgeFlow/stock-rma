@@ -99,17 +99,10 @@ class RmaOrder(models.Model):
         action = self.env.ref('stock.action_picking_tree_all')
         result = action.read()[0]
         picking_ids = []
-        suppliers = self.env.ref('stock.stock_location_suppliers')
-        customers = self.env.ref('stock.stock_location_customers')
         for line in self.rma_line_ids:
-            if line.type == 'customer':
-                for move in line.move_ids:
-                    if move.picking_id.location_id == customers:
-                        picking_ids.append(move.picking_id.id)
-            else:
-                for move in line.move_ids:
-                    if move.picking_id.location_id == suppliers:
-                        picking_ids.append(move.picking_id.id)
+            for move in line.move_ids:
+                if move.location_dest_id.usage == 'internal':
+                    picking_ids.append(move.picking_id.id)
         shipments = list(set(picking_ids))
         # choose the view_mode accordingly
         if len(shipments) != 1:
@@ -126,17 +119,10 @@ class RmaOrder(models.Model):
         action = self.env.ref('stock.action_picking_tree_all')
         result = action.read()[0]
         picking_ids = []
-        suppliers = self.env.ref('stock.stock_location_suppliers')
-        customers = self.env.ref('stock.stock_location_customers')
         for line in self.rma_line_ids:
-            if line.type == 'customer':
-                for move in line.move_ids:
-                    if move.picking_id.location_id != customers:
-                        picking_ids.append(move.picking_id.id)
-            else:
-                for move in line.move_ids:
-                    if move.picking_id.location_id != suppliers:
-                        picking_ids.append(move.picking_id.id)
+            for move in line.move_ids:
+                if move.location_dest_id.usage in ('supplier', 'customer'):
+                    picking_ids.append(move.picking_id.id)
         shipments = list(set(picking_ids))
         # choose the view_mode accordingly
         if len(shipments) != 1:

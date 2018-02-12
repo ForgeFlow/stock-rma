@@ -47,7 +47,7 @@ class RmaOrderLine(models.Model):
     @api.multi
     def _compute_in_shipment_count(self):
         for line in self:
-            moves = line.procurement_ids.mapped('move_ids').filtered(
+            moves = line.mapped('move_ids').filtered(
                 lambda m: m.location_dest_id.usage == 'internal' and
                 m.state != 'cancel')
             pickings = moves.mapped('picking_id')
@@ -56,7 +56,7 @@ class RmaOrderLine(models.Model):
     @api.multi
     def _compute_out_shipment_count(self):
         for line in self:
-            moves = line.procurement_ids.mapped('move_ids').filtered(
+            moves = line.mapped('move_ids').filtered(
                 lambda m: m.location_dest_id.usage != 'internal' and
                 m.state != 'cancel')
             pickings = moves.mapped('picking_id')
@@ -214,7 +214,7 @@ class RmaOrderLine(models.Model):
         readonly=True, states={"new": [("readonly", False)]},
     )
     product_qty = fields.Float(
-        string='Ordered Qty', copy=False, default=1.0,
+        string='Ordered Qty', copy=False,
         digits=dp.get_precision('Product Unit of Measure'),
         readonly=True, states={'draft': [('readonly', False)]},
     )
@@ -228,12 +228,11 @@ class RmaOrderLine(models.Model):
         readonly=True, states={'draft': [('readonly', False)]},
     )
     procurement_count = fields.Integer(compute=_compute_procurement_count,
-                                       string='# of Procurements', copy=False,
-                                       default=0)
+                                       string='# of Procurements', copy=False)
     in_shipment_count = fields.Integer(compute=_compute_in_shipment_count,
-                                       string='# of Shipments', default=0)
+                                       string='# of Shipments')
     out_shipment_count = fields.Integer(compute=_compute_out_shipment_count,
-                                        string='# of Deliveries', default=0)
+                                        string='# of Deliveries')
     move_ids = fields.One2many('stock.move', 'rma_line_id',
                                string='Stock Moves', readonly=True,
                                copy=False)
@@ -374,21 +373,21 @@ class RmaOrderLine(models.Model):
             operation = self.env['rma.operation'].search(
                 [('type', '=', self.type)], limit=1)
             if not operation:
-                raise ValidationError(_("Please define an operation first."))
+                raise ValidationError("Please define an operation first.")
 
         if not operation.in_route_id or not operation.out_route_id:
             route = self.env['stock.location.route'].search(
                 [('rma_selectable', '=', True)], limit=1)
             if not route:
-                raise ValidationError(_("Please define an RMA route."))
+                raise ValidationError("Please define an RMA route.")
 
         if not operation.in_warehouse_id or not operation.out_warehouse_id:
             warehouse = self.env['stock.warehouse'].search(
                 [('company_id', '=', self.company_id.id),
                  ('lot_rma_id', '!=', False)], limit=1)
             if not warehouse:
-                raise ValidationError(_(
-                    "Please define a warehouse with a default RMA location."))
+                raise ValidationError(
+                    "Please define a warehouse with a default RMA location.")
 
         data = {
             'product_id': sm.product_id.id,
@@ -435,14 +434,11 @@ class RmaOrderLine(models.Model):
     def _check_move_partner(self):
         for rec in self:
             if (rec.reference_move_id and
-               (rec.reference_move_id.partner_id != rec.partner_id) and
-               (rec.reference_move_id.picking_id.partner_id !=
-                    rec.partner_id)):
-                    raise ValidationError(_(
-                        "RMA customer (%s) and originating stock move customer"
-                        " (%s) doesn't match." % (
-                            rec.reference_move_id.partner_id.name,
-                            rec.partner_id.name)))
+                    rec.reference_move_id.picking_id.partner_id !=
+                    rec.partner_id):
+                raise ValidationError(_(
+                    "RMA customer and originating stock move customer "
+                    "doesn't match."))
 
     @api.multi
     def _remove_other_data_origin(self, exception):
@@ -550,17 +546,10 @@ class RmaOrderLine(models.Model):
         action = self.env.ref('stock.action_picking_tree_all')
         result = action.read()[0]
         picking_ids = []
-        suppliers = self.env.ref('stock.stock_location_suppliers')
-        customers = self.env.ref('stock.stock_location_customers')
         for line in self:
-            if line.type == 'customer':
-                for move in line.move_ids:
-                    if move.picking_id.location_id == customers:
-                        picking_ids.append(move.picking_id.id)
-            else:
-                for move in line.move_ids:
-                    if move.picking_id.location_id == suppliers:
-                        picking_ids.append(move.picking_id.id)
+            for move in line.move_ids:
+                if move.location_dest_id.usage == 'internal':
+                    picking_ids.append(move.picking_id.id)
         shipments = list(set(picking_ids))
         # choose the view_mode accordingly
         if len(shipments) != 1:
@@ -577,17 +566,10 @@ class RmaOrderLine(models.Model):
         action = self.env.ref('stock.action_picking_tree_all')
         result = action.read()[0]
         picking_ids = []
-        suppliers = self.env.ref('stock.stock_location_suppliers')
-        customers = self.env.ref('stock.stock_location_customers')
         for line in self:
-            if line.type == 'customer':
-                for move in line.move_ids:
-                    if move.picking_id.location_id != customers:
-                        picking_ids.append(move.picking_id.id)
-            else:
-                for move in line.move_ids:
-                    if move.picking_id.location_id != suppliers:
-                        picking_ids.append(move.picking_id.id)
+            for move in line.move_ids:
+                if move.location_dest_id.usage in ('supplier', 'customer'):
+                    picking_ids.append(move.picking_id.id)
         shipments = list(set(picking_ids))
         # choose the view_mode accordingly
         if len(shipments) != 1:
