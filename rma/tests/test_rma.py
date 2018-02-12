@@ -224,7 +224,6 @@ class TestRma(common.TransactionCase):
                                })._default_delivery_address()
             line._compute_in_shipment_count()
             line._compute_out_shipment_count()
-            line._compute_procurement_count()
 
             data = {'reference_move_id': line.reference_move_id.id}
             new_line = self.rma_line.new(data)
@@ -252,7 +251,6 @@ class TestRma(common.TransactionCase):
 
             line.action_view_in_shipments()
             line.action_view_out_shipments()
-            line.action_view_procurements()
             self.rma_customer_id.action_view_supplier_lines()
             with self.assertRaises(ValidationError):
                 line.rma_id.partner_id = partner2.id
@@ -274,12 +272,7 @@ class TestRma(common.TransactionCase):
             'active_id': 1
         }).default_get({})
         procurements = wizard._create_picking()
-        for proc in procurements:
-            proc._get_stock_move_values()
-
-        group_ids = set([proc.group_id.id for proc in procurements if
-                         proc.group_id])
-        domain = [('group_id', 'in', list(group_ids))]
+        domain = [('origin', '=', procurements)]
         picking = self.stockpicking.search(domain)
         self.assertEquals(len(picking), 1,
                           "Incorrect number of pickings created")
@@ -351,9 +344,7 @@ class TestRma(common.TransactionCase):
             'picking_type': 'outgoing',
         }).create({})
         procurements = wizard._create_picking()
-        group_ids = set([proc.group_id.id for proc in procurements if
-                         proc.group_id])
-        domain = [('group_id', 'in', list(group_ids))]
+        domain = [('origin', '=', procurements)]
         pickings = self.stockpicking.search(domain)
         self.assertEquals(len(pickings), 2,
                           "Incorrect number of pickings created")

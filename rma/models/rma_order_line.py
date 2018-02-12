@@ -514,8 +514,6 @@ class RmaOrderLine(models.Model):
         picking_ids = self.env['stock.picking'].search(
             [('origin', '=', self.name),
              ('picking_type_code', '=', 'incoming')]).ids
-        if not picking_ids:
-            raise ValidationError(_("No shipments found!"))
         # choose the view_mode accordingly
         if len(picking_ids) > 1:
             result['domain'] = [('id', 'in', picking_ids)]
@@ -532,8 +530,6 @@ class RmaOrderLine(models.Model):
         picking_ids = self.env['stock.picking'].search(
             [('origin', '=', self.name),
              ('picking_type_code', '=', 'outgoing')]).ids
-        if not picking_ids:
-            raise ValidationError(_("No deliveries found!"))
         # choose the view_mode accordingly
         if len(picking_ids) > 1:
             result['domain'] = [('id', 'in', picking_ids)]
