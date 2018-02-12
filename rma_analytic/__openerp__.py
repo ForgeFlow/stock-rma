@@ -10,9 +10,6 @@
     "website": "http://www.eficent.com",
     "category": "Analytic",
     "depends": ["rma", "analytic"],
-    "data": [
-        "views/rma_order_line_view.xml"
-    ],
     'installable': True,
     "post_init_hook": "post_init_hook",
 }
