@@ -520,7 +520,7 @@ class RmaOrderLine(models.Model):
         else:
             res = self.env.ref('stock.view_picking_form', False)
             result['views'] = [(res and res.id or False, 'form')]
-            result['res_id'] = picking_ids[0]
+            result['res_id'] = picking_ids and picking_ids[0]
         return result
 
     @api.multi
@@ -536,5 +536,5 @@ class RmaOrderLine(models.Model):
         else:
             res = self.env.ref('stock.view_picking_form', False)
             result['views'] = [(res and res.id or False, 'form')]
-            result['res_id'] = picking_ids[0]
+            result['res_id'] = picking_ids and picking_ids[0]
         return result
