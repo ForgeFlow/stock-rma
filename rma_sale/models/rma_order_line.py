@@ -151,7 +151,6 @@ class RmaOrderLine(models.Model):
 
     @api.multi
     def _get_rma_sold_qty(self):
-        self.ensure_one()
         qty = 0.0
         for rec in self:
             for sale_line in rec.sale_line_ids.filtered(
