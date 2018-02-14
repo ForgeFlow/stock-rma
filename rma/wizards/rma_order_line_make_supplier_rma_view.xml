@@ -56,29 +56,20 @@
         <field name="view_mode">form</field>
         <field name="view_id" ref="view_rma_order_line_make_supplier_rma"/>
         <field name="target">new</field>
+        <field name="binding_model_id" ref="rma.model_rma_order_line"/>
     </record>
 
-    <!--record model="ir.values" id="rma_order_line_make_supplier_rma">
-        <field name="model_id" ref="model_rma_order_line" />
-        <field name="name">Create Supplier RMA Group</field>
-        <field name="key2">client_action_multi</field>
-        <field name="value"
-               eval="'ir.actions.act_window,' + str(ref('action_rma_order_line_make_supplier_rma'))" />
-        <field name="key">action</field>
-        <field name="model">rma.order.line</field>
-    </record-->
-
-     <record id="view_rma_line_supplier_rma_button_form" model="ir.ui.view">
-        <field name="name">rma.order.line.supplier.rma.form</field>
-        <field name="model">rma.order.line</field>
-        <field name="inherit_id" ref="rma.view_rma_line_form"/>
-        <field name="arch" type="xml">
-            <header position="inside">
-                <button name="%(action_rma_order_line_make_supplier_rma)d"
-                        states="approved"
-                        string="Create Supplier RMA Group" class="oe_highlight"
-                        type="action"/>
-            </header>
-        </field>
+    <record id="view_rma_line_supplier_rma_button_form" model="ir.ui.view">
+    <field name="name">rma.order.line.supplier.rma.form</field>
+    <field name="model">rma.order.line</field>
+    <field name="inherit_id" ref="rma.view_rma_line_form"/>
+    <field name="arch" type="xml">
+        <header position="inside">
+            <button name="%(action_rma_order_line_make_supplier_rma)d"
+                    states="approved"
+                    string="Create Supplier RMA Group" class="oe_highlight"
+                    type="action"/>
+        </header>
+    </field>
     </record>
 </odoo>
