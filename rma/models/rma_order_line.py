@@ -46,16 +46,18 @@ class RmaOrderLine(models.Model):
     @api.multi
     def _compute_in_shipment_count(self):
         for line in self:
-            line.in_shipment_count = len(self.env['stock.picking'].search(
-                [('origin', '=', line.name),
-                 ('picking_type_code', '=', 'incoming')]).ids)
+            moves = self.env['stock.move'].search([
+                ('rma_line_id', '=', line.id)])
+            line.in_shipment_count = len(moves.mapped('picking_id').filtered(
+                lambda p: p.picking_type_code == 'incoming').ids)
 
     @api.multi
     def _compute_out_shipment_count(self):
         for line in self:
-            line.out_shipment_count = len(self.env['stock.picking'].search(
-                [('origin', '=', line.name),
-                 ('picking_type_code', '=', 'outgoing')]).ids)
+            moves = self.env['stock.move'].search([
+                ('rma_line_id', '=', line.id)])
+            line.out_shipment_count = len(moves.mapped('picking_id').filtered(
+                lambda p: p.picking_type_code == 'outgoing').ids)
 
     @api.multi
     def _get_rma_move_qty(self, states, direction='in'):
