@@ -8,18 +8,26 @@ class TestRmaDropship(test_rma.TestRma):
 
     def setUp(self):
         super(TestRmaDropship, self).setUp()
+        rma_operation_ds_replace = self.env.ref(
+            'rma.rma_operation_ds_replace')
+        self.rma_operation_ds_replace_supplier = self.env.ref(
+            'rma.rma_operation_ds_replace_supplier')
         self.product_id.write(
-            {'rma_customer_operation_id': self.rma_cust_replace_op_id.id,
-             'rma_supplier_operation_id': self.rma_sup_replace_op_id.id})
+            {'rma_customer_operation_id': rma_operation_ds_replace.id,
+             'rma_supplier_operation_id':
+                 self.rma_operation_ds_replace_supplier.id})
         self.product_1.write(
-            {'rma_customer_operation_id': self.rma_cust_replace_op_id.id,
-             'rma_supplier_operation_id': self.rma_sup_replace_op_id.id})
+            {'rma_customer_operation_id': rma_operation_ds_replace.id,
+             'rma_supplier_operation_id':
+                 self.rma_operation_ds_replace_supplier.id})
         self.product_2.write(
-            {'rma_customer_operation_id': self.rma_cust_replace_op_id.id,
-             'rma_supplier_operation_id': self.rma_sup_replace_op_id.id})
+            {'rma_customer_operation_id': rma_operation_ds_replace.id,
+             'rma_supplier_operation_id':
+                 self.rma_operation_ds_replace_supplier.id})
         self.product_3.write(
-            {'rma_customer_operation_id': self.rma_cust_replace_op_id.id,
-             'rma_supplier_operation_id': self.rma_sup_replace_op_id.id})
+            {'rma_customer_operation_id': rma_operation_ds_replace.id,
+             'rma_supplier_operation_id':
+                 self.rma_operation_ds_replace_supplier.id})
         products2move = [(self.product_1, 3), (self.product_2, 5),
                          (self.product_3, 2)]
         self.rma_droship_id = self._create_rma_from_move(
@@ -32,13 +40,14 @@ class TestRmaDropship(test_rma.TestRma):
             'active_ids': self.rma_droship_id.rma_line_ids.ids,
             'active_model': 'rma.order.line',
             'active_id': 1
-        }).create({'partner_id': self.partner_id.id,
-                   'supplier_rma_id': self.rma_droship_id.id,
-                   })
+        }).create({})
 
         res = wizard.make_supplier_rma()
         supplier_rma = self.rma.browse(res['res_id'])
         for line in supplier_rma.rma_line_ids:
+            line.delivery_address_id = self.env.ref('base.res_partner_2')
+            line.operation_id = self.rma_operation_ds_replace_supplier
+            line._onchange_operation_id()
             line.action_rma_to_approve()
             line.action_rma_approve()
         wizard = self.rma_make_picking.with_context({
@@ -47,22 +56,15 @@ class TestRmaDropship(test_rma.TestRma):
             'active_model': 'rma.order.line',
             'picking_type': 'incoming',
         }).create({})
-        procurements = wizard._create_picking()
-        domain = [('origin', '=', procurements)]
-        picking = self.stockpicking.search(domain)
-        self.assertEquals(len(picking), 1,
-                          "Incorrect number of pickings created")
+        wizard._create_picking()
+        res = supplier_rma.rma_line_ids.action_view_in_shipments()
+        self.assertTrue('res_id' in res,
+                        "Incorrect number of pickings created")
+        picking = self.env['stock.picking'].browse(res['res_id'])
         moves = picking.move_lines
         self.assertEquals(len(moves), 3,
                           "Incorrect number of moves created")
         for line in supplier_rma.rma_line_ids:
-            # common qtys for all products
-            self.assertEquals(line.qty_received, 0,
-                              "Wrong qty received")
-            self.assertEquals(line.qty_outgoing, 0,
-                              "Wrong qty incoming")
-            self.assertEquals(line.qty_delivered, 0,
-                              "Wrong qty delivered")
             # product specific
             if line.product_id == self.product_1:
                 self.assertEquals(line.qty_to_receive, 3,

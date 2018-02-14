@@ -66,15 +66,16 @@ class RmaLineMakeSupplierRma(models.TransientModel):
             raise ValidationError(_('Enter a supplier.'))
         return {
             'partner_id': self.partner_id.id,
-            'delivery_address_id': self.partner_id.id,
             'type': 'supplier',
             'company_id': company.id,
         }
 
     @api.model
     def _prepare_supplier_rma_line(self, rma, item):
-        operation = self.env['rma.operation'].search(
-            [('type', '=', 'supplier')], limit=1)
+        operation = item.line_id.product_id.rma_supplier_operation_id
+        if not operation:
+            operation = self.env['rma.operation'].search(
+                [('type', '=', 'supplier')], limit=1)
         if not operation.in_route_id or not operation.out_route_id:
             route = self.env['stock.location.route'].search(
                 [('rma_selectable', '=', True)], limit=1)
@@ -97,7 +98,7 @@ class RmaLineMakeSupplierRma(models.TransientModel):
             'customer_rma_id': item.line_id.id,
             'product_qty': item.product_qty,
             'rma_id': rma.id,
-            'uom_id': item.uom_id.id,
+            'uom_id': item.line_id.uom_id.id,
             'operation_id': operation.id,
             'receipt_policy': operation.receipt_policy,
             'delivery_policy': operation.delivery_policy,

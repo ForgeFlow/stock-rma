@@ -144,9 +144,12 @@
                                         </group>
                                         <group name="outbound" string="Outbound">
                                             <field name="out_warehouse_id"/>
-                                            <field name="delivery_address_id"
-                                                   groups='rma.group_rma_delivery_invoice_address'/>
                                             <field name="out_route_id"/>
+                                        </group>
+                                        <group name="delivery_address"
+                                               string="Delivery Address (drop ship">
+                                            <field name="delivery_address_id"
+                                                       groups='rma.group_rma_delivery_invoice_address'/>
                                         </group>
                                     </group>
                                 </group>

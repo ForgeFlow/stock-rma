@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<odoo noupdate="1">
+<odoo noupdate="0">
     <record id="rma_operation_customer_replace" model="rma.operation">
         <field name="name">Replace After Receive</field>
         <field name="code">RPLC</field>
@@ -21,29 +21,24 @@
     </record>
 
     <record id="rma_operation_ds_replace" model="rma.operation">
-        <field name="name">Replace deliver to vendor</field>
+        <field name="name">Drop Ship - Replace deliver to vendor</field>
         <field name="code">DSRPLB</field>
         <field name="receipt_policy">ordered</field>
         <field name="delivery_policy">no</field>
         <field name="type">customer</field>
-        <field name="out_route_id" ref="rma.route_rma_dropship"/>
-    </record>
-
-    <record id="rma_operation_ds_replace_customer" model="rma.operation">
-        <field name="name">Replace receive in vendor</field>
-        <field name="code">DSRPLV</field>
-        <field name="receipt_policy">no</field>
-        <field name="delivery_policy">received</field>
-        <field name="type">customer</field>
+        <field name="customer_to_supplier">True</field>
+        <field name="in_route_id" ref="rma.route_rma_dropship"/>
         <field name="out_route_id" ref="rma.route_rma_dropship"/>
     </record>
 
     <record id="rma_operation_ds_replace_supplier" model="rma.operation">
-        <field name="name">Replace deliver to customer</field>
+        <field name="name">Drop Ship - Replace deliver to customer</field>
         <field name="code">DSRPC</field>
-        <field name="receipt_policy">no</field>
-        <field name="delivery_policy">received</field>
+        <field name="receipt_policy">ordered</field>
+        <field name="delivery_policy">no</field>
         <field name="type">supplier</field>
+        <field name="supplier_to_customer">True</field>
+        <field name="in_route_id" ref="rma.route_rma_dropship"/>
         <field name="out_route_id" ref="rma.route_rma_dropship"/>
     </record>
 

@@ -38,13 +38,13 @@
                         <field name="location_id"
                             domain="[('usage', '=', 'internal')]"/>
                         <field name="customer_to_supplier"
+                               attrs="{'invisible':[('type', '=', 'supplier')]}"/>
+                        <field name="supplier_to_customer"
                                attrs="{'invisible':[('type', '=', 'customer')]}"/>
                     </group>
                     <group name="outbound" string="Outbound">
                         <field name="out_route_id"/>
                         <field name="out_warehouse_id"/>
-                        <field name="supplier_to_customer"
-                               attrs="{'invisible':[('type', '=', 'supplier')]}"/>
                     </group>
                 </group>
             </form>
