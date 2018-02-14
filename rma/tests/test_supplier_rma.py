@@ -8,6 +8,8 @@ class TestSupplierRma(test_rma.TestRma):
 
     def setUp(self):
         super(TestSupplierRma, self).setUp()
+        self.rma_operation_supplier_replace = self.env.ref(
+            'rma.rma_operation_supplier_replace')
         products2move = [(self.product_1, 3), (self.product_2, 5),
                          (self.product_3, 2)]
         self.rma_supplier_id = self._create_rma_from_move(
@@ -15,17 +17,22 @@ class TestSupplierRma(test_rma.TestRma):
             dropship=False)
 
     def test_supplier_rma(self):
+        for line in self.rma_supplier_id.rma_line_ids:
+            line.operation_id = self.rma_operation_supplier_replace
+            line._onchange_operation_id()
+            line.action_rma_to_approve()
+            line.action_rma_approve()
         wizard = self.rma_make_picking.with_context({
             'active_ids': self.rma_supplier_id.rma_line_ids.ids,
             'active_model': 'rma.order.line',
             'picking_type': 'outgoing',
             'active_id': 1
         }).create({})
-        procurements = wizard._create_picking()
-        domain = [('origin', '=', procurements)]
-        picking = self.stockpicking.search(domain)
-        self.assertEquals(len(picking), 1,
-                          "Incorrect number of pickings created")
+        wizard._create_picking()
+        res = self.rma_supplier_id.rma_line_ids.action_view_out_shipments()
+        self.assertTrue('res_id' in res,
+                        "Incorrect number of pickings created")
+        picking = self.env['stock.picking'].browse(res['res_id'])
         moves = picking.move_lines
         self.assertEquals(len(moves), 3,
                           "Incorrect number of moves created")
@@ -59,26 +66,27 @@ class TestSupplierRma(test_rma.TestRma):
                                   "Wrong qty to deliver")
                 self.assertEquals(line.qty_outgoing, 2,
                                   "Wrong qty outgoing")
-
-        picking.action_assign()
-        picking.do_new_transfer()
+        picking.force_assign()
+        for line in picking.move_lines:
+            line.quantity_done = line.product_uom_qty
+        picking.button_validate()
         for line in self.rma_supplier_id.rma_line_ids:
             self.assertEquals(line.qty_incoming, 0,
                               "Wrong qty incoming")
             self.assertEquals(line.qty_received, 0,
                               "Wrong qty received")
             if line.product_id == self.product_1:
-                self.assertEquals(line.qty_delivered, 0,
+                self.assertEquals(line.qty_delivered, 3,
                                   "Wrong qty delivered")
                 self.assertEquals(line.qty_to_receive, 3,
                                   "Wrong qty to receive")
             if line.product_id == self.product_2:
-                self.assertEquals(line.qty_delivered, 0,
+                self.assertEquals(line.qty_delivered, 5,
                                   "Wrong qty delivered")
                 self.assertEquals(line.qty_to_receive, 5,
                                   "Wrong qty to receive")
             if line.product_id == self.product_3:
-                self.assertEquals(line.qty_delivered, 0,
+                self.assertEquals(line.qty_delivered, 2,
                                   "Wrong qty delivered")
                 self.assertEquals(line.qty_to_receive, 2,
                                   "Wrong qty to receive")
@@ -88,63 +96,48 @@ class TestSupplierRma(test_rma.TestRma):
             'active_model': 'rma.order.line',
             'picking_type': 'incoming',
         }).create({})
-        procurements = wizard._create_picking()
-        domain = [('origin', '=', procurements)]
-        pickings = self.stockpicking.search(domain)
-        self.assertEquals(len(pickings), 2,
-                          "Incorrect number of pickings created")
-        picking_out = pickings[0]
-        moves = picking_out.move_lines
+        wizard._create_picking()
+        res = self.rma_supplier_id.rma_line_ids.action_view_in_shipments()
+        self.assertTrue('res_id' in res,
+                        "Incorrect number of pickings created")
+        picking = self.env['stock.picking'].browse(res['res_id'])
+        moves = picking.move_lines
         self.assertEquals(len(moves), 3,
                           "Incorrect number of moves created")
         for line in self.rma_supplier_id.rma_line_ids:
-            self.assertEquals(line.qty_incoming, 0,
-                              "Wrong qty incoming")
             self.assertEquals(line.qty_received, 0,
                               "Wrong qty received")
             if line.product_id == self.product_1:
                 self.assertEquals(line.qty_to_receive, 3,
                                   "Wrong qty to receive")
-                self.assertEquals(line.qty_incoming, 0,
+                self.assertEquals(line.qty_incoming, 3,
                                   "Wrong qty incoming")
-                self.assertEquals(line.qty_delivered, 0,
-                                  "Wrong qty delivered")
             if line.product_id == self.product_2:
                 self.assertEquals(line.qty_to_receive, 5,
                                   "Wrong qty to receive")
-                self.assertEquals(line.qty_to_deliver, 5,
-                                  "Wrong qty to deliver")
+                self.assertEquals(line.qty_incoming, 5,
+                                  "Wrong qty incoming")
             if line.product_id == self.product_3:
                 self.assertEquals(line.qty_to_receive, 2,
                                   "Wrong qty to receive")
-                self.assertEquals(line.qty_to_deliver, 2,
-                                  "Wrong qty to deliver")
-        picking_out.action_assign()
-        picking_out.do_new_transfer()
+                self.assertEquals(line.qty_incoming, 2,
+                                  "Wrong qty incoming")
+        picking.action_assign()
+        for line in picking.move_line_ids:
+            line.qty_done = line.product_uom_qty
+        picking.action_done()
         for line in self.rma_supplier_id.rma_line_ids[0]:
-            self.assertEquals(line.qty_to_receive, 3,
-                              "Wrong qty to receive")
             self.assertEquals(line.qty_incoming, 0,
                               "Wrong qty incoming")
-            self.assertEquals(line.qty_to_deliver, 3,
-                              "Wrong qty to deliver")
-            self.assertEquals(line.qty_outgoing, 6,
-                              "Wrong qty outgoing")
             if line.product_id == self.product_1:
-                self.assertEquals(line.qty_received, 0,
+                self.assertEquals(line.qty_received, 3,
                                   "Wrong qty received")
-                self.assertEquals(line.qty_delivered, 0,
-                                  "Wrong qty delivered")
             if line.product_id == self.product_2:
-                self.assertEquals(line.qty_received, 0,
+                self.assertEquals(line.qty_received, 5,
                                   "Wrong qty received")
-                self.assertEquals(line.qty_delivered, 5,
-                                  "Wrong qty delivered")
             if line.product_id == self.product_3:
                 self.assertEquals(line.qty_received, 2,
                                   "Wrong qty received")
-                self.assertEquals(line.qty_delivered, 2,
-                                  "Wrong qty delivered")
         for line in self.rma_supplier_id.rma_line_ids:
             line.action_rma_done()
             self.assertEquals(line.state, 'done',
