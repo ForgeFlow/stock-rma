@@ -3,7 +3,7 @@
 
 import time
 from odoo import models, fields, api, _
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FORMAT
 import odoo.addons.decimal_precision as dp
 
@@ -103,6 +103,9 @@ class RmaMakePicking(models.TransientModel):
             if line.customer_to_supplier:
                 location = self._get_address_location(
                     delivery_address_id, 'supplier')
+            elif line.supplier_to_customer:
+                location = self._get_address_location(
+                    delivery_address_id, 'customer')
             else:
                 location = line.location_id
             warehouse = line.in_warehouse_id
@@ -134,6 +137,7 @@ class RmaMakePicking(models.TransientModel):
 
     @api.model
     def _create_procurement(self, item, picking_type):
+        errors = []
         group = self.find_procurement_group(item)
         if not group:
             pg_data = self._get_procurement_group_data(item)
@@ -144,15 +148,20 @@ class RmaMakePicking(models.TransientModel):
             qty = item.qty_to_deliver
         values = self._get_procurement_data(item, group, qty, picking_type)
         # create picking
-        self.env['procurement.group'].run(
-            item.line_id.product_id,
-            qty,
-            item.line_id.product_id.product_tmpl_id.uom_id,
-            values.get('location_id'),
-            values.get('origin'),
-            values.get('origin'),
-            values
-        )
+        try:
+            self.env['procurement.group'].run(
+                item.line_id.product_id,
+                qty,
+                item.line_id.product_id.product_tmpl_id.uom_id,
+                values.get('location_id'),
+                values.get('origin'),
+                values.get('origin'),
+                values
+            )
+        except UserError as error:
+                errors.append(error.name)
+        if errors:
+            raise UserError('\n'.join(errors))
         return values.get('origin')
 
     @api.multi
@@ -198,7 +207,6 @@ class RmaMakePicking(models.TransientModel):
     @api.multi
     def action_create_picking(self):
         procurement = self._create_picking()
-        pickings = False
         action = self.env.ref('stock.do_view_pickings')
         action = action.read()[0]
         if procurement:
