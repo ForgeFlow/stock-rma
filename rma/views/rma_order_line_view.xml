@@ -136,9 +136,6 @@
                             </group>
                         </group>
                         <notebook>
-                            <page name="description" string="Description">
-                                <field name="description" nolabel="1"/>
-                            </page>
                             <page name="route" string="Routes" groups="stock.group_adv_location">
                                 <group>
                                     <group>
