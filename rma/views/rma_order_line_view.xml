@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0"?>
 <odoo>
     <data>
         <record id="view_rma_line_tree" model="ir.ui.view">
@@ -83,13 +83,6 @@
                                 <field name="out_shipment_count" widget="statinfo"
                                        string="Deliveries"/>
                             </button>
-                            <button type="object" name="action_view_procurements"
-                                    class="oe_stat_button"
-                                    icon="fa-warning"
-                                    groups="stock.group_stock_user">
-                                <field name="procurement_count" widget="statinfo"
-                                       string="Proc. Exceptions"/>
-                            </button>
                         </div>
                         <div class="oe_title" name="title">
                         <h1>
@@ -151,9 +144,12 @@
                                         </group>
                                         <group name="outbound" string="Outbound">
                                             <field name="out_warehouse_id"/>
-                                            <field name="delivery_address_id"
-                                                   groups='rma.group_rma_delivery_invoice_address'/>
                                             <field name="out_route_id"/>
+                                        </group>
+                                        <group name="delivery_address"
+                                               string="Delivery Address (drop ship">
+                                            <field name="delivery_address_id"
+                                                       groups='rma.group_rma_delivery_invoice_address'/>
                                         </group>
                                     </group>
                                 </group>
@@ -241,13 +237,6 @@
                                     class="oe_stat_button"
                                     icon="fa-pencil-square-o"
                                     string="Origin Inv">
-                            </button>
-                            <button type="object" name="action_view_procurements"
-                                    class="oe_stat_button"
-                                    icon="fa-warning"
-                                    groups="stock.group_stock_user">
-                                <field name="procurement_count" widget="statinfo"
-                                       string="Exceptions"/>
                             </button>
                         </div>
                         <div class="oe_title" name="title">

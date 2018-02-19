@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
-# © 2017 Eficent Business and IT Consulting Services S.L.
+# Copyright (C) 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from odoo import models, fields
 
 
 class StockConfigSettings(models.TransientModel):
-    _inherit = 'stock.config.settings'
+    _inherit = 'res.config.settings'
 
     group_rma_delivery_address = fields.Selection([
         (0, "Invoicing and shipping addresses are always the same "

@@ -13,5 +13,5 @@
     "depends": ["rma_account", "rma_analytic", "stock_analytic_account"],
     "data": [
     ],
-    'installable': True,
+    'installable': False,
 }

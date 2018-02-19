@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# © 2017 Eficent Business and IT Consulting Services S.L.
+# Copyright (C) 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from odoo import api, fields, models, _
@@ -102,15 +101,16 @@ class RmaAddStockMove(models.TransientModel):
         existing_stock_moves = self._get_existing_stock_moves()
         for sm in self.move_ids:
             if sm not in existing_stock_moves:
-                if sm.lot_ids:
-                    for lot in sm.lot_ids:
-                        data = self._prepare_rma_line_from_stock_move(sm,
-                                                                      lot=lot)
-                        rma_line_obj.with_context(
-                            default_rma_id=self.rma_id.id).create(data)
+                if sm.product_id.tracking == 'none':
+                    data = self._prepare_rma_line_from_stock_move(sm,
+                                                                  lot=False)
+                    rma_line_obj.with_context(
+                        default_rma_id=self.rma_id.id).create(data)
                 else:
+                    lot_ids = [x.lot_id.id for x in sm.move_line_ids if
+                               x.lot_id]
                     data = self._prepare_rma_line_from_stock_move(
-                        sm, lot=False)
+                        sm, lot=lot_ids[0])
                     rma_line_obj.with_context(
                         default_rma_id=self.rma_id.id).create(data)
         return {'type': 'ir.actions.act_window_close'}

@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# © 2017 Eficent Business and IT Consulting Services S.L.
+# Copyright (C) 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from odoo import api, fields, models
@@ -30,9 +29,8 @@ class StockMove(models.Model):
 
     @api.model
     def create(self, vals):
-        if vals.get('procurement_id'):
-            procurement = self.env['procurement.order'].browse(
-                vals['procurement_id'])
-            if procurement.rma_line_id:
-                vals['rma_line_id'] = procurement.rma_line_id.id
+        if vals.get('group_id'):
+            group = self.env['procurement.group'].browse(vals['group_id'])
+            if group.rma_line_id:
+                vals['rma_line_id'] = group.rma_line_id.id
         return super(StockMove, self).create(vals)

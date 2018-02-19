@@ -1,5 +1,0 @@
-stock-logistics-workflow
-manufacture
-operating-unit
-pidgeon https://github.com/acsone/account-analytic.git 10.0-purchase_analytic-cpi
-pmis https://github.com/eficent/pmis 10.0

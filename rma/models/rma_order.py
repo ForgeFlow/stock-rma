@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# © 2017 Eficent Business and IT Consulting Services S.L.
+# Copyright (C) 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from odoo import api, fields, models, _
@@ -20,18 +19,18 @@ class RmaOrder(models.Model):
     @api.multi
     def _compute_in_shipment_count(self):
         for rec in self:
-            rec.in_shipment_count = len(rec.rma_line_ids.mapped(
-                'move_ids').filtered(
-                lambda m: m.location_dest_id.usage == 'internal').mapped(
-                'picking_id'))
+            rec.in_shipment_count = len(
+                rec.rma_line_ids.mapped('move_ids').filtered(
+                    lambda m: m.location_dest_id.usage == 'internal').mapped(
+                    'picking_id'))
 
     @api.multi
     def _compute_out_shipment_count(self):
         for rec in self:
-            rec.out_shipment_count = len(rec.rma_line_ids.mapped(
-                'move_ids').filtered(
-                lambda m: m.location_id.usage == 'internal').mapped(
-                'picking_id'))
+            rec.out_shipment_count = len(
+                rec.rma_line_ids.mapped('move_ids').filtered(
+                    lambda m: m.location_id.usage == 'internal').mapped(
+                    'picking_id'))
 
     @api.multi
     def _compute_supplier_line_count(self):
@@ -112,13 +111,13 @@ class RmaOrder(models.Model):
                         picking_ids.append(move.picking_id.id)
         shipments = list(set(picking_ids))
         # choose the view_mode accordingly
-        if len(shipments) != 1:
-            result['domain'] = "[('id', 'in', " + \
-                               str(shipments) + ")]"
-        elif len(shipments) == 1:
-            res = self.env.ref('stock.view_picking_form', False)
-            result['views'] = [(res and res.id or False, 'form')]
-            result['res_id'] = shipments[0]
+        if shipments:
+            if len(shipments) > 1:
+                result['domain'] = [('id', 'in', shipments)]
+            else:
+                res = self.env.ref('stock.view_picking_form', False)
+                result['views'] = [(res and res.id or False, 'form')]
+                result['res_id'] = shipments[0]
         return result
 
     @api.multi
@@ -140,9 +139,8 @@ class RmaOrder(models.Model):
         shipments = list(set(picking_ids))
         # choose the view_mode accordingly
         if len(shipments) != 1:
-            result['domain'] = "[('id', 'in', " + \
-                               str(shipments) + ")]"
-        elif len(shipments) == 1:
+            result['domain'] = [('id', 'in', shipments)]
+        else:
             res = self.env.ref('stock.view_picking_form', False)
             result['views'] = [(res and res.id or False, 'form')]
             result['res_id'] = shipments[0]
@@ -159,20 +157,19 @@ class RmaOrder(models.Model):
     def action_view_lines(self):
         if self.type == 'customer':
             action = self.env.ref('rma.action_rma_customer_lines')
+            res = self.env.ref('rma.view_rma_line_form', False)
         else:
             action = self.env.ref('rma.action_rma_supplier_lines')
+            res = self.env.ref('rma.view_rma_line_supplier_form', False)
         result = action.read()[0]
         lines = self._get_valid_lines()
         # choose the view_mode accordingly
-        if len(lines) != 1:
+        if len(lines.ids) != 1:
             result['domain'] = [('id', 'in', lines.ids)]
-        elif len(lines) == 1:
-            if self.type == 'customer':
-                res = self.env.ref('rma.view_rma_line_form', False)
-            else:
-                res = self.env.ref('rma.view_rma_line_supplier_form', False)
+        else:
             result['views'] = [(res and res.id or False, 'form')]
             result['res_id'] = lines.id
+        result['context'] = {}
         return result
 
     @api.multi
@@ -184,9 +181,8 @@ class RmaOrder(models.Model):
             related_lines = [line.id for line in line_id.supplier_rma_line_ids]
             # choose the view_mode accordingly
             if len(related_lines) != 1:
-                result['domain'] = "[('id', 'in', " + \
-                                   str(related_lines) + ")]"
-            elif len(related_lines) == 1:
+                result['domain'] = [('id', 'in', related_lines)]
+            else:
                 res = self.env.ref('rma.view_rma_line_supplier_form', False)
                 result['views'] = [(res and res.id or False, 'form')]
                 result['res_id'] = related_lines[0]
