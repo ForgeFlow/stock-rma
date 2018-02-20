@@ -223,6 +223,9 @@ class RmaOrderLine(models.Model):
     move_ids = fields.One2many('stock.move', 'rma_line_id',
                                string='Stock Moves', readonly=True,
                                copy=False)
+    procurement_ids = fields.One2many('procurement.order', 'rma_line_id',
+                                      string='Procurements', readonly=True,
+                                      copy=False)
     reference_move_id = fields.Many2one(
         comodel_name='stock.move', string='Originating Stock Move',
         copy=False,
@@ -542,4 +545,21 @@ class RmaOrderLine(models.Model):
             res = self.env.ref('stock.view_picking_form', False)
             result['views'] = [(res and res.id or False, 'form')]
             result['res_id'] = picking_ids and picking_ids[0]
+        return result
+    
+    @api.multi
+    def action_view_procurements(self):
+        action = self.env.ref(
+            'procurement.procurement_order_action_exceptions')
+        result = action.read()[0]
+        procurements = self.procurement_ids.filtered(
+            lambda p: p.state == 'exception').ids
+        # choose the view_mode accordingly
+        if len(procurements) != 1:
+            result['domain'] = "[('id', 'in', " + \
+                               str(procurements) + ")]"
+        elif len(procurements) == 1:
+            res = self.env.ref('procurement.procurement_form_view', False)
+            result['views'] = [(res and res.id or False, 'form')]
+            result['res_id'] = procurements[0]
         return result
