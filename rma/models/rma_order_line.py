@@ -143,6 +143,12 @@ class RmaOrderLine(models.Model):
             rec.qty_to_supplier_rma = rec.product_qty - qty
             rec.qty_in_supplier_rma = qty
 
+    @api.multi
+    def _compute_procurement_count(self):
+        for rec in self:
+            rec.procurement_count = len(rec.procurement_ids.filtered(
+                lambda p: p.state == 'exception'))
+
     delivery_address_id = fields.Many2one(
         comodel_name='res.partner', string='Partner delivery address',
         default=_default_delivery_address,
@@ -216,6 +222,8 @@ class RmaOrderLine(models.Model):
         string='Price Unit',
         readonly=True, states={'draft': [('readonly', False)]},
     )
+    procurement_count = fields.Integer(compute=_compute_procurement_count,
+                                       string='# of Procurements', copy=False)
     in_shipment_count = fields.Integer(compute=_compute_in_shipment_count,
                                        string='# of Shipments', default=0)
     out_shipment_count = fields.Integer(compute=_compute_out_shipment_count,
