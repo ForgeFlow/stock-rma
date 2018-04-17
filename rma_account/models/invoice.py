@@ -49,6 +49,29 @@ class AccountInvoice(models.Model):
 class AccountInvoiceLine(models.Model):
     _inherit = "account.invoice.line"
 
+    @api.model
+    def name_search(self, name, args=None, operator='ilike', limit=100):
+        """Allows to search by Invoice number. This has to be done this way,
+        as Odoo adds extra args to name_search on _name_search method that
+        will make impossible to get the desired result."""
+        if not args:
+            args = []
+        lines = self.search(
+            [('invoice_id.number', operator, name)] + args, limit=limit,
+        )
+        res = lines.name_get()
+        if limit:
+            limit_rest = limit - len(lines)
+        else:
+            # limit can be 0 or None representing infinite
+            limit_rest = limit
+        if limit_rest or not limit:
+            args += [('id', 'not in', lines.ids)]
+            res += super(AccountInvoiceLine, self).name_search(
+                name, args=args, operator=operator, limit=limit_rest,
+            )
+        return res
+
     @api.multi
     def _compute_rma_count(self):
         for invl in self:
