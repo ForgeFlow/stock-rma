@@ -11,8 +11,9 @@
     'author': "Eficent, Odoo Community Association (OCA)",
     'website': 'http://www.github.com/OCA/rma',
     'depends': ['account', 'rma'],
-    'demo': ['demo/rma_operation.xml'],
+    'demo': [],
     'data': [
+        'data/rma_operation.xml',
         'views/rma_order_view.xml',
         'views/rma_operation_view.xml',
         'views/rma_order_line_view.xml',
