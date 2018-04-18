@@ -3,4 +3,4 @@ manufacture
 manufacture-quality_control_team https://github.com/eficent/manufacture 9.0-add-quality_control_team
 manufacture-quality_control_issue https://github.com/eficent/manufacture 9.0-add-quality_control_issue
 manufacture-mrp_repair_refurbish https://github.com/eficent/manufacture 9.0-mrp_repair_refurbish
-operating_unit
+operating-unit
