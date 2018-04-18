@@ -41,7 +41,8 @@ class TestRma(common.TransactionCase):
              'rma_supplier_operation_id': self.rma_sup_replace_op_id.id})
         self.partner_id = self.env.ref('base.res_partner_12')
         self.stock_location = self.env.ref('stock.stock_location_stock')
-        self.stock_rma_location = self.env.ref('rma.location_rma')
+        wh = self.env.ref('stock.warehouse0')
+        self.stock_rma_location = wh.lot_rma_id
         self.customer_location = self.env.ref(
             'stock.stock_location_customers')
         self.supplier_location = self.env.ref(
