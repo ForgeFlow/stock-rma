@@ -122,48 +122,36 @@ class RmaMakePicking(models.TransientModel):
             raise ValidationError(_("No warehouse specified"))
         procurement_data = {
             'name': line.rma_id and line.rma_id.name or line.name,
-            'group_id': group,
+            'group_id': group.id,
             'origin': line.name,
-            'warehouse_id': warehouse,
+            'warehouse_id': warehouse.id,
             'date_planned': time.strftime(DT_FORMAT),
-            'product_id': item.product_id,
+            'product_id': item.product_id.id,
             'product_qty': qty,
             'partner_id': delivery_address_id.id,
             'product_uom': line.product_id.product_tmpl_id.uom_id.id,
-            'location_id': location,
+            'location_id': location.id,
             'rma_line_id': line.id,
-            'route_ids': route
+            'route_ids': [(4, route.id)]
         }
         return procurement_data
 
     @api.model
     def _create_procurement(self, item, picking_type):
-        errors = []
         group = self.find_procurement_group(item)
         if not group:
-            pg_data = self._get_procurement_group_data(item)
-            group = self.env['procurement.group'].create(pg_data)
+            procurement_group = self._get_procurement_group_data(item)
+            group = self.env['procurement.group'].create(procurement_group)
         if picking_type == 'incoming':
             qty = item.qty_to_receive
         else:
             qty = item.qty_to_deliver
-        values = self._get_procurement_data(item, group, qty, picking_type)
+        procurement_data = self._get_procurement_data(
+            item, group, qty, picking_type)
         # create picking
-        try:
-            self.env['procurement.group'].run(
-                item.line_id.product_id,
-                qty,
-                item.line_id.product_id.product_tmpl_id.uom_id,
-                values.get('location_id'),
-                values.get('origin'),
-                values.get('origin'),
-                values
-            )
-        except UserError as error:
-                errors.append(error.name)
-        if errors:
-            raise UserError('\n'.join(errors))
-        return values.get('origin')
+        procurement = self.env['procurement.order'].create(procurement_data)
+        procurement.run()
+        return procurement.id
 
     @api.multi
     def _create_picking(self):
