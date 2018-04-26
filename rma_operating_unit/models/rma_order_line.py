@@ -12,7 +12,7 @@ class RmaOrderLine(models.Model):
     @api.model
     def _default_operating_unit(self):
         if self.rma_id.operating_unit_id:
-            return self.rma_id.operating_unit_id.id
+            return self.rma_id.operating_unit_id
         return self.env.user.default_operating_unit_id
 
     operating_unit_id = fields.Many2one(

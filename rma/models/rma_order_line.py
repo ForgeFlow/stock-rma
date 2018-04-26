@@ -411,7 +411,7 @@ class RmaOrderLine(models.Model):
             data = self._prepare_rma_line_from_stock_move(move, lot=False)
             self.update(data)
             self._remove_other_data_origin('reference_move_id')
-            lot_ids = [x.lot_id.id for x in move.move_line_ids if x.lot_id]
+            lot_ids = [x.lot_id.id for x in self.move_ids if x.lot_id]
             return {'domain': {'lot_id': [('id', 'in', lot_ids)]}}
 
     @api.multi
