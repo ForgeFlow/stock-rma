@@ -47,16 +47,18 @@ class RmaOrderLine(models.Model):
     @api.multi
     def _compute_in_shipment_count(self):
         for line in self:
-            line.in_shipment_count = len(self.env['stock.picking'].search(
-                [('origin', '=', line.name),
-                 ('picking_type_code', '=', 'incoming')]).ids)
+            moves = line.procurement_ids.mapped('move_ids').filtered(
+                lambda m: m.location_dest_id.usage == 'internal')
+            pickings = moves.mapped('picking_id')
+            line.in_shipment_count = len(pickings)
 
     @api.multi
     def _compute_out_shipment_count(self):
         for line in self:
-            line.out_shipment_count = len(self.env['stock.picking'].search(
-                [('origin', '=', line.name),
-                 ('picking_type_code', '=', 'outgoing')]).ids)
+            moves = line.procurement_ids.mapped('move_ids').filtered(
+                lambda m: m.location_dest_id.usage != 'internal')
+            pickings = moves.mapped('picking_id')
+            line.out_shipment_count = len(pickings)
 
     @api.multi
     def _get_rma_move_qty(self, states, direction='in'):
@@ -67,7 +69,7 @@ class RmaOrderLine(models.Model):
                 op = ops['=']
             else:
                 op = ops['!=']
-            for move in rec.move_ids.filtered(
+            for move in rec.procurement_ids.mapped('move_ids').filtered(
                     lambda m: m.state in states and op(m.location_id.usage,
                                                        rec.type)):
                 qty += product_obj._compute_quantity(
@@ -82,8 +84,8 @@ class RmaOrderLine(models.Model):
             rec.qty_to_receive = 0.0
             if rec.receipt_policy == 'ordered':
                 rec.qty_to_receive = rec.product_qty - rec.qty_received
-            elif rec.receipt_policy == 'delivered':
-                rec.qty_to_receive = rec.qty_delivered - rec.qty_received
+            elif self.receipt_policy == 'delivered':
+                self.qty_to_receive = rec.qty_delivered - rec.qty_received
 
     @api.multi
     @api.depends('move_ids', 'move_ids.state',
@@ -525,36 +527,42 @@ class RmaOrderLine(models.Model):
     def action_view_in_shipments(self):
         action = self.env.ref('stock.action_picking_tree_all')
         result = action.read()[0]
-        moves = self.env['stock.move'].search([
-            ('rma_line_id', 'in', self.ids)])
-        picking_ids = moves.mapped('picking_id').filtered(
-            lambda p: p.picking_type_code == 'incoming').ids
+        picking_ids = []
+        for line in self:
+            for move in line.move_ids:
+                if move.location_dest_id.usage == 'internal':
+                    picking_ids.append(move.picking_id.id)
+        shipments = list(set(picking_ids))
         # choose the view_mode accordingly
-        if len(picking_ids) > 1:
-            result['domain'] = [('id', 'in', picking_ids)]
-        else:
+        if len(shipments) != 1:
+            result['domain'] = "[('id', 'in', " + \
+                               str(shipments) + ")]"
+        elif len(shipments) == 1:
             res = self.env.ref('stock.view_picking_form', False)
             result['views'] = [(res and res.id or False, 'form')]
-            result['res_id'] = picking_ids and picking_ids[0]
+            result['res_id'] = shipments[0]
         return result
 
     @api.multi
     def action_view_out_shipments(self):
         action = self.env.ref('stock.action_picking_tree_all')
         result = action.read()[0]
-        moves = self.env['stock.move'].search([
-            ('rma_line_id', 'in', self.ids)])
-        picking_ids = moves.mapped('picking_id').filtered(
-            lambda p: p.picking_type_code == 'outgoing').ids
+        picking_ids = []
+        for line in self:
+            for move in line.move_ids:
+                if move.location_dest_id.usage in ('supplier', 'customer'):
+                    picking_ids.append(move.picking_id.id)
+        shipments = list(set(picking_ids))
         # choose the view_mode accordingly
-        if len(picking_ids) > 1:
-            result['domain'] = [('id', 'in', picking_ids)]
-        else:
+        if len(shipments) != 1:
+            result['domain'] = "[('id', 'in', " + \
+                               str(shipments) + ")]"
+        elif len(shipments) == 1:
             res = self.env.ref('stock.view_picking_form', False)
             result['views'] = [(res and res.id or False, 'form')]
-            result['res_id'] = picking_ids and picking_ids[0]
+            result['res_id'] = shipments[0]
         return result
-    
+
     @api.multi
     def action_view_procurements(self):
         action = self.env.ref(

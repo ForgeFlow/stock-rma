@@ -112,8 +112,12 @@ class RmaMakePicking(models.TransientModel):
             warehouse = line.in_warehouse_id
             route = line.in_route_id
         else:
-            location = self._get_address_location(
-                delivery_address_id, line.type)
+            if line.supplier_to_customer:
+                location = self._get_address_location(
+                    delivery_address_id, 'customer')
+            else:
+                location = self._get_address_location(
+                    delivery_address_id, line.type)
             warehouse = line.out_warehouse_id
             route = line.out_route_id
         if not route:
@@ -157,6 +161,7 @@ class RmaMakePicking(models.TransientModel):
     def _create_picking(self):
         """Method called when the user clicks on create picking"""
         picking_type = self.env.context.get('picking_type')
+        procurement_list = []
         for item in self.item_ids:
             line = item.line_id
             if line.state != 'approved':
@@ -172,7 +177,9 @@ class RmaMakePicking(models.TransientModel):
                 raise ValidationError(
                     _('No deliveries needed for this operation'))
             procurement = self._create_procurement(item, picking_type)
-        return procurement
+            procurement_list.append(procurement)
+        procurements = self.env['procurement.order'].browse(procurement_list)
+        return procurements
 
     @api.model
     def _get_action(self, pickings, procurements):
@@ -195,19 +202,18 @@ class RmaMakePicking(models.TransientModel):
 
     @api.multi
     def action_create_picking(self):
-        procurement = self._create_picking()
-        action = self.env.ref('stock.do_view_pickings')
-        action = action.read()[0]
-        if procurement:
+        procurements = self._create_picking()
+        groups = []
+        for proc in procurements:
+            if proc.group_id:
+                groups.append(proc.group_id.id)
+        if len(groups):
             pickings = self.env['stock.picking'].search(
-                [('origin', '=', procurement)]).ids
-            if len(pickings) > 1:
-                action['domain'] = [('id', 'in', pickings)]
-            else:
-                form = self.env.ref('stock.view_picking_form', False)
-                action['views'] = [(form and form.id or False, 'form')]
-                action['res_id'] = pickings and pickings[0]
+                [('group_id', 'in', groups)])
+
+        action = self._get_action(pickings, procurements)
         return action
+
 
     @api.multi
     def action_cancel(self):
