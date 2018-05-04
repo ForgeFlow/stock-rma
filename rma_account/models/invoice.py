@@ -73,6 +73,25 @@ class AccountInvoiceLine(models.Model):
         return res
 
     @api.multi
+    def name_get(self):
+        res = []
+        if self.env.context.get('rma'):
+            for inv in self:
+                if inv.invoice_id.reference:
+                    res.append((inv.id, "%s %s %s qty:%s" % (
+                        inv.invoice_id.number, inv.invoice_id.reference,
+                        inv.product_id.name, inv.quantity)))
+                elif inv.invoice_id.number:
+                    res.append((inv.id, "%s %s qty:%s" % (
+                        inv.invoice_id.number or '',
+                        inv.product_id.name, inv.quantity)))
+                else:
+                    res.append(super(AccountInvoiceLine, inv).name_get()[0])
+            return res
+        else:
+            return super(AccountInvoiceLine, self).name_get()
+
+    @api.multi
     def _compute_rma_count(self):
         for invl in self:
             rma_lines = invl.mapped('rma_line_ids')

@@ -17,6 +17,7 @@
                 </button>
                 <group name="main_info" position="inside">
                     <field name="invoice_line_id"
+                           context="{'rma': True}"
                            options="{'no_create': True}"
                            domain="['|',
                                     ('invoice_id.partner_id', '=', partner_id),
@@ -59,6 +60,7 @@
                 </button>
                 <group name="main_info" position="inside">
                     <field name="invoice_line_id"
+                           context="{'rma': True}"
                            options="{'no_create': True}"
                            domain="['|',
                                     ('invoice_id.partner_id', '=', partner_id),

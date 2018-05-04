@@ -138,23 +138,21 @@
                         <notebook>
                             <page name="route" string="Routes" groups="stock.group_adv_location">
                                 <group>
-                                    <group>
-                                        <group name="inbound" string="Inbound">
-                                            <field name="in_warehouse_id"/>
-                                            <field name="location_id"
-                                                   domain="[('usage', '=', 'internal')]"/>
-                                            <field name="in_route_id"/>
-                                            <field name="supplier_to_customer"/>
-                                        </group>
-                                        <group name="outbound" string="Outbound">
-                                            <field name="out_warehouse_id"/>
-                                            <field name="out_route_id"/>
-                                        </group>
-                                        <group name="delivery_address"
-                                               string="Delivery Address (drop ship">
-                                            <field name="delivery_address_id"
-                                                       groups='rma.group_rma_delivery_invoice_address'/>
-                                        </group>
+                                    <group name="inbound" string="Inbound">
+                                        <field name="in_warehouse_id"/>
+                                        <field name="location_id"
+                                               domain="[('usage', '=', 'internal')]"/>
+                                        <field name="in_route_id"/>
+                                        <field name="supplier_to_customer"/>
+                                    </group>
+                                    <group name="outbound" string="Outbound">
+                                        <field name="out_warehouse_id"/>
+                                        <field name="out_route_id"/>
+                                    </group>
+                                    <group name="delivery_address"
+                                           string="Delivery Address (drop ship">
+                                        <field name="delivery_address_id"
+                                                   groups='rma.group_rma_delivery_invoice_address'/>
                                     </group>
                                 </group>
                             </page>
