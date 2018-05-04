@@ -27,6 +27,21 @@ class SaleOrderLine(models.Model):
             name='', args=args, operator=operator, limit=limit,
             name_get_uid=name_get_uid)
 
+    @api.multi
+    def name_get(self):
+        res = []
+        if self.env.context.get('rma'):
+            for sale in self:
+                if sale.order_id.name:
+                    res.append((sale.id, "%s %s qty:%s" % (
+                        sale.order_id.name,
+                        sale.product_id.name, sale.product_uom_qty)))
+                else:
+                    res.append(super(SaleOrderLine, sale).name_get()[0])
+            return res
+        else:
+            return super(SaleOrderLine, self).name_get()
+
     rma_line_id = fields.Many2one(
         comodel_name='rma.order.line', string='RMA', ondelete='restrict')
 
