@@ -37,7 +37,8 @@ class PurchaseOrderLine(models.Model):
                         purchase.order_id.name,
                         purchase.product_id.name, purchase.product_qty)))
                 else:
-                    res.append(super(purchaseOrderLine, purchase).name_get()[0])
+                    res.append(
+                        super(PurchaseOrderLine, purchase).name_get()[0])
             return res
         else:
-            return super(purchaseOrderLine, self).name_get()
+            return super(PurchaseOrderLine, self).name_get()

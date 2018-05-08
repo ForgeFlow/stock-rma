@@ -37,20 +37,22 @@
                          </field>
                      </group>
                      <newline/>
-                     <group colspan="2">
-                         <button name="make_supplier_rma"
-                                 string="Create/Update Supplier RMA"
-                                 type="object"
-                                 class="oe_highlight"/>
-                         <button special="cancel" string="Cancel" class="oe_link"/>
-                     </group>
+                     <footer>
+                         <group colspan="2">
+                             <button name="make_supplier_rma"
+                                     string="Create/Update Supplier RMA"
+                                     type="object"
+                                     class="oe_highlight"/>
+                             <button special="cancel" string="Cancel" class="oe_link"/>
+                         </group>
+                     </footer>
                 </form>
             </field>
         </record>
 
         <record id="action_rma_order_line_make_supplier_rma"
                 model="ir.actions.act_window">
-            <field name="name">Create Supplier RMA Group</field>
+            <field name="name">Create Supplier RMA</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">rma.order.line.make.supplier.rma</field>
             <field name="view_type">form</field>

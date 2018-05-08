@@ -4,7 +4,7 @@
 
 import time
 from odoo import models, fields, api, _
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import ValidationError
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FORMAT
 import odoo.addons.decimal_precision as dp
 
@@ -106,7 +106,7 @@ class RmaMakePicking(models.TransientModel):
                     delivery_address_id, 'supplier')
             elif line.supplier_to_customer:
                 location = self._get_address_location(
-                    delivery_address_id, 'customer')
+                    delivery_address_id, '  ')
             else:
                 location = line.location_id
             warehouse = line.in_warehouse_id
@@ -132,7 +132,7 @@ class RmaMakePicking(models.TransientModel):
             'date_planned': time.strftime(DT_FORMAT),
             'product_id': item.product_id.id,
             'product_qty': qty,
-            'partner_id': delivery_address_id.id,
+            'partner_dest_id': delivery_address_id.id,
             'product_uom': line.product_id.product_tmpl_id.uom_id.id,
             'location_id': location.id,
             'rma_line_id': line.id,
@@ -213,7 +213,6 @@ class RmaMakePicking(models.TransientModel):
 
         action = self._get_action(pickings, procurements)
         return action
-
 
     @api.multi
     def action_cancel(self):

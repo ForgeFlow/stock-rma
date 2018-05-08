@@ -2,12 +2,12 @@
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo import api, models, _
+from odoo import models, _
 from odoo.exceptions import ValidationError
 
 
 class RmaAddStockMove(models.TransientModel):
-    _name = 'rma_add_stock_move'
+    _inherit = 'rma_add_stock_move'
     _description = 'Wizard to add rma lines from pickings'
 
     def _prepare_rma_line_from_stock_move(self, sm, lot=False):
@@ -34,4 +34,4 @@ class RmaAddStockMove(models.TransientModel):
             if not warehouse:
                 raise ValidationError(_(
                     "Please define a warehouse with a default RMA location"))
-        res.update(warehouse_id=warehouse.id)
+            res.update(warehouse_id=warehouse.id)

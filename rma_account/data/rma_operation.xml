@@ -33,12 +33,4 @@
         <field name="refund_policy">no</field>
     </record>
 
-    <record id="rma.rma_operation_ds_replace_customer" model="rma.operation">
-        <field name="refund_policy">no</field>
-    </record>
-
-    <record id="rma.rma_operation_ds_replace_supplier" model="rma.operation">
-        <field name="refund_policy">no</field>
-    </record>
-
 </odoo>

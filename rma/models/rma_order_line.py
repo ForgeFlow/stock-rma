@@ -447,7 +447,8 @@ class RmaOrderLine(models.Model):
 
     @api.multi
     def action_rma_draft(self):
-        if self.in_shipment_count or self.out_shipment_count:
+        if self.procurement_ids.mapped('move_ids').filtered(
+                lambda m: m.state != 'cancel'):
             raise UserError(_(
                 "You cannot reset to draft a RMA with related pickings."))
         self.write({'state': 'draft'})
