@@ -98,7 +98,7 @@ class RmaLineMakeSupplierRma(models.TransientModel):
             'product_id': item.line_id.product_id.id,
             'customer_rma_id': item.line_id.id,
             'product_qty': item.product_qty,
-            'rma_id': rma.id,
+            'rma_id': rma.id if rma else False,
             'uom_id': item.line_id.uom_id.id,
             'operation_id': operation.id,
             'receipt_policy': operation.receipt_policy,
@@ -129,23 +129,34 @@ class RmaLineMakeSupplierRma(models.TransientModel):
 
             if self.supplier_rma_id:
                 rma = self.supplier_rma_id
-            if not rma:
+            if not rma and len(self.item_ids) > 1:
                 rma_data = self._prepare_supplier_rma(line.company_id)
                 rma = rma_obj.create(rma_data)
 
             rma_line_data = self._prepare_supplier_rma_line(rma, item)
-            rma_line_obj.create(rma_line_data)
-
-        return {
-            'name': _('Supplier RMA'),
-            'view_type': 'form',
-            'view_mode': 'form',
-            'res_model': 'rma.order',
-            'view_id': False,
-            'res_id': rma.id,
-            'context': {'supplier': True, 'customer': False},
-            'type': 'ir.actions.act_window'
-        }
+            rma_line = rma_line_obj.create(rma_line_data)
+        if rma:
+            return {
+                'name': _('Supplier RMA'),
+                'view_type': 'form',
+                'view_mode': 'form',
+                'res_model': 'rma.order',
+                'view_id': False,
+                'res_id': rma.id,
+                'context': {'supplier': True, 'customer': False},
+                'type': 'ir.actions.act_window'
+            }
+        else:
+            return {
+                'name': _('Supplier RMA Line'),
+                'view_type': 'form',
+                'view_mode': 'form',
+                'res_model': 'rma.order.line',
+                'view_id': False,
+                'res_id': rma_line.id,
+                'context': {'supplier': True, 'customer': False},
+                'type': 'ir.actions.act_window'
+            }
 
 
 class RmaLineMakeRmaOrderItem(models.TransientModel):

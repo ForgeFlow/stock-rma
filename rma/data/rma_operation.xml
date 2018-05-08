@@ -29,20 +29,11 @@
         <field name="out_route_id" ref="rma.route_rma_dropship"/>
     </record>
 
-    <record id="rma_operation_ds_replace_customer" model="rma.operation">
-        <field name="name">Replace receive in vendor</field>
-        <field name="code">DSRPLV</field>
-        <field name="receipt_policy">no</field>
-        <field name="delivery_policy">received</field>
-        <field name="type">customer</field>
-        <field name="out_route_id" ref="rma.route_rma_dropship"/>
-    </record>
-
     <record id="rma_operation_ds_replace_supplier" model="rma.operation">
         <field name="name">Replace deliver to customer</field>
         <field name="code">DSRPC</field>
         <field name="receipt_policy">no</field>
-        <field name="delivery_policy">received</field>
+        <field name="delivery_policy">ordered</field>
         <field name="type">supplier</field>
         <field name="out_route_id" ref="rma.route_rma_dropship"/>
     </record>

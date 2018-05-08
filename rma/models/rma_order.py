@@ -103,15 +103,14 @@ class RmaOrder(models.Model):
             for move in line.move_ids:
                 if move.location_dest_id.usage == 'internal':
                     picking_ids.append(move.picking_id.id)
-        shipments = list(set(picking_ids))
         # choose the view_mode accordingly
-        if len(shipments) != 1:
+        if len(picking_ids) != 1:
             result['domain'] = "[('id', 'in', " + \
-                               str(shipments) + ")]"
-        elif len(shipments) == 1:
+                               str(picking_ids) + ")]"
+        elif len(picking_ids) == 1:
             res = self.env.ref('stock.view_picking_form', False)
             result['views'] = [(res and res.id or False, 'form')]
-            result['res_id'] = shipments[0]
+            result['res_id'] = picking_ids[0]
         return result
 
     @api.multi
