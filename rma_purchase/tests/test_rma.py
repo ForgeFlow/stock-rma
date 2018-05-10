@@ -35,6 +35,12 @@ class TestRma(common.TransactionCase):
         self.product_2 = self.env.ref('product.product_product_7')
         self.product_3 = self.env.ref('product.product_product_11')
         self.uom_unit = self.env.ref('product.product_uom_unit')
+        self.valuation_account = self.env.ref(
+            'l10n_generic_coa.1_conf_cas')
+        self.stock_input_account = self.env.ref(
+            'l10n_generic_coa.1_current_liabilities')
+        self.stock_output_account = self.env.ref(
+            'l10n_generic_coa.1_conf_a_expense')
         # assign an operation
         self.product_1.write(
             {'rma_customer_operation_id': self.rma_cust_replace_op_id.id,
@@ -175,11 +181,18 @@ class TestRma(common.TransactionCase):
         self.rma_refund_item = self.env['rma.refund.item']
         self.rma_refund = self.env['rma.refund']
 
-        self.product_id.income =\
-            self.env.ref('account.data_account_type_receivable').id
-        self.product_id.expense =\
-            self.env.ref('account.data_account_type_expenses').id
-
+        self.product_categ = self.env.ref('product.product_category_5')
+        self.product_categ.update({
+            'property_valuation': 'real_time',
+            'property_stock_valuation_account_id': self.valuation_account.id,
+            'property_stock_account_input_categ_id':
+                self.stock_input_account.id,
+            'property_stock_account_output_categ_id':
+                self.stock_output_account.id,
+        })
+        self.product_id.update({
+            'categ_id': self.product_categ.id,
+        })
         for line in self.rma_customer_id.rma_line_ids:
             line.refund_policy = 'ordered'
 
