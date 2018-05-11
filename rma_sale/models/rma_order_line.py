@@ -134,7 +134,9 @@ class RmaOrderLine(models.Model):
     @api.constrains('sale_line_id', 'partner_id')
     def _check_sale_partner(self):
         for rec in self:
-            if (rec.sale_line_id and rec.sale_line_id.order_id.partner_id !=
+            if (rec.sale_line_id and
+                    rec.sale_line_id.order_id.partner_id != rec.partner_id and
+                    rec.sale_line_id.order_id.partner_id.parent_id !=
                     rec.partner_id):
                 raise ValidationError(_(
                     "RMA customer and originating sales order line customer "
