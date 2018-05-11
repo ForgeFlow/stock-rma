@@ -19,10 +19,9 @@ class ProcurementOrder(models.Model):
         if procurement.rma_line_id:
             line = procurement.rma_line_id
             res['rma_line_id'] = line.id
-            if line.delivery_address_id:
-                res['partner_id'] = line.delivery_address_id.id
-            else:
-                res['partner_id'] = line.rma_id.partner_id.id
+            # Propagate partner_dest_id for proper drop-shipment reports.
+            if procurement.partner_dest_id:
+                res['partner_id'] = procurement.partner_dest_id.id
             dest_loc = self.env["stock.location"].browse([
                 res["location_dest_id"]])[0]
             if dest_loc.usage == "internal":

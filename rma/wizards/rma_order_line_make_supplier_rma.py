@@ -24,13 +24,27 @@ class RmaLineMakeSupplierRma(models.TransientModel):
     )
 
     @api.model
+    def _get_default_operation(self):
+        """Dropshipping is the most common use case of this wizard, thus
+        trying to default to a dropshipping operation first."""
+        operation = self.env['rma.operation'].search([
+            ('type', '=', 'supplier'),
+            ('supplier_to_customer', '=', True)], limit=1)
+        if not operation:
+            operation = self.env['rma.operation'].search(
+                [('type', '=', 'supplier')], limit=1)
+        return operation
+
+    @api.model
     def _prepare_item(self, line):
+        operation = self._get_default_operation()
         return {
             'line_id': line.id,
             'product_id': line.product_id.id,
             'name': line.name,
             'product_qty': line.qty_to_supplier_rma,
             'uom_id': line.uom_id.id,
+            'operation_id': operation.id if operation else False,
         }
 
     @api.model
@@ -74,8 +88,10 @@ class RmaLineMakeSupplierRma(models.TransientModel):
 
     @api.model
     def _prepare_supplier_rma_line(self, rma, item):
-        operation = self.env['rma.operation'].search(
-            [('type', '=', 'supplier')], limit=1)
+        if item.operation_id:
+            operation = item.operation_id
+        else:
+            operation = self._get_default_operation()
         if not operation.in_route_id or not operation.out_route_id:
             route = self.env['stock.location.route'].search(
                 [('rma_selectable', '=', True)], limit=1)
@@ -167,3 +183,7 @@ class RmaLineMakeRmaOrderItem(models.TransientModel):
     uom_id = fields.Many2one('product.uom', string='UoM', readonly=True)
     product_qty = fields.Float(string='Quantity',
                                digits=dp.get_precision('Product UoS'))
+    operation_id = fields.Many2one(
+        comodel_name="rma.operation", string="Operation",
+        domain=[('type', '=', 'supplier')],
+    )

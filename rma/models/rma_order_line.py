@@ -48,8 +48,7 @@ class RmaOrderLine(models.Model):
     def _compute_in_shipment_count(self):
         for line in self:
             moves = line.mapped('move_ids').filtered(
-                lambda m: m.location_dest_id.usage == 'internal' and
-                m.state != 'cancel')
+                lambda m: m.location_dest_id.usage == 'internal')
             pickings = moves.mapped('picking_id')
             line.in_shipment_count = len(pickings)
 
@@ -57,8 +56,7 @@ class RmaOrderLine(models.Model):
     def _compute_out_shipment_count(self):
         for line in self:
             moves = line.mapped('move_ids').filtered(
-                lambda m: m.location_dest_id.usage != 'internal' and
-                m.state != 'cancel')
+                lambda m: m.location_dest_id.usage != 'internal')
             pickings = moves.mapped('picking_id')
             line.out_shipment_count = len(pickings)
 
@@ -86,9 +84,11 @@ class RmaOrderLine(models.Model):
         for rec in self:
             rec.qty_to_receive = 0.0
             if rec.receipt_policy == 'ordered':
-                rec.qty_to_receive = rec.product_qty - rec.qty_received
+                rec.qty_to_receive = \
+                    rec.product_qty - rec.qty_incoming - rec.qty_received
             elif rec.receipt_policy == 'delivered':
-                rec.qty_to_receive = rec.qty_delivered - rec.qty_received
+                rec.qty_to_receive = \
+                    rec.qty_delivered - rec.qty_incoming - rec.qty_received
 
     @api.multi
     @api.depends('move_ids', 'move_ids.state',
@@ -144,9 +144,13 @@ class RmaOrderLine(models.Model):
                  'receipt_policy', 'product_qty', 'type')
     def _compute_qty_supplier_rma(self):
         for rec in self:
-            qty = rec._get_supplier_rma_qty()
-            rec.qty_to_supplier_rma = rec.qty_to_receive - qty
-            rec.qty_in_supplier_rma = qty
+            if rec.customer_to_supplier:
+                supplier_rma_qty = rec._get_supplier_rma_qty()
+                rec.qty_to_supplier_rma = rec.product_qty - supplier_rma_qty
+                rec.qty_in_supplier_rma = supplier_rma_qty
+            else:
+                rec.qty_to_supplier_rma = 0.0
+                rec.qty_in_supplier_rma = 0.0
 
     @api.multi
     def _compute_procurement_count(self):

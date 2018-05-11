@@ -36,3 +36,10 @@ class StockMove(models.Model):
             if procurement.rma_line_id:
                 vals['rma_line_id'] = procurement.rma_line_id.id
         return super(StockMove, self).create(vals)
+
+    @api.model
+    def _prepare_picking_assign(self, move):
+        res = super(StockMove, self)._prepare_picking_assign(move)
+        if move.rma_line_id:
+            res['partner_id'] = move.rma_line_id.partner_id.id or False
+        return res
