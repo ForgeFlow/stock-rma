@@ -108,8 +108,9 @@ class RmaLineMakeSupplierRma(models.TransientModel):
             'partner_id': self.partner_id.id,
             'type': 'supplier',
             'origin': item.line_id.rma_id.name,
-            'delivery_address_id':
-                item.line_id.delivery_address_id.id,
+            'customer_address_id':
+                item.line_id.delivery_address_id.id or
+                item.line_id.partner_id.id,
             'product_id': item.line_id.product_id.id,
             'customer_rma_id': item.line_id.id,
             'product_qty': item.product_qty,
