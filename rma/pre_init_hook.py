@@ -119,8 +119,9 @@ def drop_indexes(cr):
 
 def pre_init_hook(cr):
     env = Environment(cr, SUPERUSER_ID, {})
-    openupgrade.copy_columns(env.cr, column_copies)
-    openupgrade.rename_columns(env.cr, column_renames)
-    openupgrade.rename_tables(env.cr, _table_renames)
-    assign_status(env.cr)
-    set_default_values(env.cr)
+    if not openupgrade.table_exists(env.cr, 'rma_order'):
+        openupgrade.copy_columns(env.cr, column_copies)
+        openupgrade.rename_columns(env.cr, column_renames)
+        openupgrade.rename_tables(env.cr, _table_renames)
+        assign_status(env.cr)
+        set_default_values(env.cr)

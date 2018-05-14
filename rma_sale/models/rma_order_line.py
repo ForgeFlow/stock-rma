@@ -27,7 +27,8 @@ class RmaOrderLine(models.Model):
     @api.depends('sale_line_ids', 'sale_type', 'sales_count',
                  'sale_line_ids.state')
     def _compute_qty_sold(self):
-        self.qty_sold = self._get_rma_sold_qty()
+        for rec in self:
+            rec.qty_sold = rec._get_rma_sold_qty()
 
     @api.multi
     def _compute_sales_count(self):
@@ -157,4 +158,3 @@ class RmaOrderLine(models.Model):
                     lambda p: p.state not in ('draft', 'sent', 'cancel')):
                 qty += sale_line.product_uom_qty
             return qty
-

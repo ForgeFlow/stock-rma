@@ -164,7 +164,8 @@ def assign_name(cr):
 def assign_partner(cr):
     cr.execute("""
         update rma_order_line set partner_id = ro.partner_id
-        from rma_order ro inner join rma_order_line rol on rol.rma_id = ro.id
+        from rma_order_line rol inner join rma_order ro on rol.rma_id = ro.id
+        where ro.partner_id is not null
     """)
 
 

@@ -12,7 +12,7 @@
     'author': "Eficent, Odoo Community Association (OCA)",
     'website': 'http://www.github.com/OCA/rma',
     'depends': ['stock', 'mail', 'procurement'],
-    'demo': ['demo/stock_demo.xml',
+    'demo': [#'demo/stock_demo.xml',
              ],
     'data': ['security/rma.xml',
              'security/ir.model.access.csv',
