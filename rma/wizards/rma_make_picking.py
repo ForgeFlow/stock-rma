@@ -81,6 +81,8 @@ class RmaMakePicking(models.TransientModel):
     def _get_address(self, item):
         if item.line_id.customer_to_supplier:
             delivery_address = item.line_id.supplier_address_id
+        elif item.line_id.supplier_to_customer:
+            delivery_address = item.line_id.customer_address_id
         elif item.line_id.delivery_address_id:
             delivery_address = item.line_id.delivery_address_id
         elif item.line_id.partner_id:
