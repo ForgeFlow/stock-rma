@@ -90,6 +90,13 @@
                                 <field name="procurement_count" widget="statinfo"
                                        string="Proc. Exceptions"/>
                             </button>
+                            <button type="object" name="action_view_rma_lines"
+                                    class="oe_stat_button"
+                                    icon="fa-link"
+                                    groups="stock.group_stock_user">
+                                <field name="rma_line_count" widget="statinfo"
+                                       string="Customer RMA"/>
+                            </button>
                         </div>
                         <div class="oe_title" name="title">
                         <h1>
@@ -139,21 +146,24 @@
                             <page name="description" string="Description">
                                 <field name="description" nolabel="1"/>
                             </page>
-                            <page name="route" string="Routes" groups="stock.group_adv_location">
+                            <page name="route" string="Routes">
                                 <group>
                                     <group>
                                         <group name="inbound" string="Inbound">
                                             <field name="in_warehouse_id"/>
                                             <field name="location_id"
                                                    domain="[('usage', '=', 'internal')]"/>
-                                            <field name="in_route_id"/>
-                                            <field name="supplier_to_customer"/>
+                                            <field name="in_route_id" groups="stock.group_adv_location"/>
                                         </group>
                                         <group name="outbound" string="Outbound">
                                             <field name="out_warehouse_id"/>
                                             <field name="delivery_address_id"
                                                    groups='rma.group_rma_delivery_invoice_address'/>
-                                            <field name="out_route_id"/>
+                                            <field name="out_route_id" groups="stock.group_adv_location"/>
+                                            <field name="supplier_to_customer"/>
+                                            <field name="customer_address_id"
+                                                   attrs="{'required':[('supplier_to_customer', '=', True)],
+                                                           'invisible':[('supplier_to_customer', '=', False)]}"/>
                                         </group>
                                     </group>
                                 </group>
@@ -199,10 +209,10 @@
         </record>
 
         <record id="view_rma_line_form" model="ir.ui.view">
-            <field name="name">rma.order.line.form</field>
+            <field name="name">rma.order.line.customer.form</field>
             <field name="model">rma.order.line</field>
             <field name="arch" type="xml">
-                <form string="Rma Line">
+                <form string="RMA Line">
                     <header>
                         <button name="action_rma_to_approve" type="object"
                             string="Request Approval"
@@ -237,17 +247,19 @@
                                 <field name="out_shipment_count" widget="statinfo"
                                        string="Deliveries"/>
                             </button>
-                            <button type="object"  name="action_view_invoice"
-                                    class="oe_stat_button"
-                                    icon="fa-pencil-square-o"
-                                    string="Origin Inv">
-                            </button>
                             <button type="object" name="action_view_procurements"
                                     class="oe_stat_button"
                                     icon="fa-warning"
                                     groups="stock.group_stock_user">
                                 <field name="procurement_count" widget="statinfo"
                                        string="Exceptions"/>
+                            </button>
+                            <button type="object" name="action_view_rma_lines"
+                                    class="oe_stat_button"
+                                    icon="fa-link"
+                                    groups="stock.group_stock_user">
+                                <field name="rma_line_count" widget="statinfo"
+                                       string="Supplier RMA"/>
                             </button>
                         </div>
                         <div class="oe_title" name="title">
@@ -306,7 +318,7 @@
                                             <field name="in_warehouse_id"/>
                                             <field name="location_id"
                                                    domain="[('usage', '=', 'internal')]"/>
-                                            <field name="in_route_id"/>
+                                            <field name="in_route_id" groups="stock.group_adv_location"/>
                                             <field name="customer_to_supplier"/>
                                             <field name="supplier_address_id"
                                                    attrs="{'required':[('customer_to_supplier', '=', True)],
@@ -316,7 +328,7 @@
                                             <field name="out_warehouse_id"/>
                                             <field name="delivery_address_id"
                                                    groups='rma.group_rma_delivery_invoice_address'/>
-                                            <field name="out_route_id"/>
+                                            <field name="out_route_id" groups="stock.group_adv_location"/>
                                         </group>
                                     </group>
                                 </group>

@@ -158,6 +158,13 @@ class RmaOrderLine(models.Model):
             rec.procurement_count = len(rec.procurement_ids.filtered(
                 lambda p: p.state == 'exception'))
 
+    @api.multi
+    def _compute_rma_line_count(self):
+        for rec in self.filtered(lambda r: r.type == 'customer'):
+            rec.rma_line_count = len(rec.supplier_rma_line_ids)
+        for rec in self.filtered(lambda r: r.type == 'supplier'):
+            rec.rma_line_count = len(rec.customer_rma_id)
+
     delivery_address_id = fields.Many2one(
         comodel_name='res.partner', string='Partner delivery address',
         default=_default_delivery_address,
@@ -313,11 +320,21 @@ class RmaOrderLine(models.Model):
         'rma.order.line', string='Customer RMA line', ondelete='cascade')
     supplier_rma_line_ids = fields.One2many(
         'rma.order.line', 'customer_rma_id')
+    rma_line_count = fields.Integer(
+        compute='_compute_rma_line_count',
+        string='# of RMA lines associated',
+    )
     supplier_address_id = fields.Many2one(
-        'res.partner', readonly=True,
+        comodel_name='res.partner', readonly=True,
         states={'draft': [('readonly', False)]},
         string='Supplier Address',
-        help="This address of the supplier in case of Customer RMA operation "
+        help="Address of the supplier in case of Customer RMA operation "
+             "dropship.")
+    customer_address_id = fields.Many2one(
+        comodel_name='res.partner', readonly=True,
+        states={'draft': [('readonly', False)]},
+        string='Customer Address',
+        help="Address of the customer in case of Supplier RMA operation "
              "dropship.")
     qty_to_receive = fields.Float(
         string='Qty To Receive',
@@ -600,4 +617,27 @@ class RmaOrderLine(models.Model):
             res = self.env.ref('procurement.procurement_form_view', False)
             result['views'] = [(res and res.id or False, 'form')]
             result['res_id'] = procurements[0]
+        return result
+
+    @api.multi
+    def action_view_rma_lines(self):
+        if self.type == 'customer':
+            # from customer we link to supplier rma
+            action = self.env.ref(
+                'rma.action_rma_supplier_lines')
+            rma_lines = self.supplier_rma_line_ids.ids
+            res = self.env.ref('rma.view_rma_line_supplier_form', False)
+        else:
+            # from supplier we link to customer rma
+            action = self.env.ref(
+                'rma.action_rma_customer_lines')
+            rma_lines = self.customer_rma_id.ids
+            res = self.env.ref('rma.view_rma_line_form', False)
+        result = action.read()[0]
+        # choose the view_mode accordingly
+        if len(rma_lines) != 1:
+            result['domain'] = rma_lines.ids
+        elif len(rma_lines) == 1:
+            result['views'] = [(res and res.id or False, 'form')]
+            result['res_id'] = rma_lines[0]
         return result

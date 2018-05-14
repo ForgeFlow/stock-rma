@@ -78,6 +78,8 @@ class RmaMakePicking(models.TransientModel):
     def _get_address(self, item):
         if item.line_id.customer_to_supplier:
             delivery_address = item.line_id.supplier_address_id
+        elif item.line_id.supplier_to_customer:
+            delivery_address = item.line_id.customer_address_id
         elif item.line_id.delivery_address_id:
             delivery_address = item.line_id.delivery_address_id
         elif item.line_id.partner_id:
@@ -106,8 +108,12 @@ class RmaMakePicking(models.TransientModel):
             warehouse = line.in_warehouse_id
             route = line.in_route_id
         else:
-            location = self._get_address_location(
-                delivery_address_id, line.type)
+            if line.supplier_to_customer:
+                location = self._get_address_location(
+                    delivery_address_id, 'customer')
+            else:
+                location = self._get_address_location(
+                    delivery_address_id, line.type)
             warehouse = line.out_warehouse_id
             route = line.out_route_id
         if not route:
