@@ -148,23 +148,21 @@
                             </page>
                             <page name="route" string="Routes">
                                 <group>
-                                    <group>
-                                        <group name="inbound" string="Inbound">
-                                            <field name="in_warehouse_id"/>
-                                            <field name="location_id"
-                                                   domain="[('usage', '=', 'internal')]"/>
-                                            <field name="in_route_id" groups="stock.group_adv_location"/>
-                                        </group>
-                                        <group name="outbound" string="Outbound">
-                                            <field name="out_warehouse_id"/>
-                                            <field name="delivery_address_id"
-                                                   groups='rma.group_rma_delivery_invoice_address'/>
-                                            <field name="out_route_id" groups="stock.group_adv_location"/>
-                                            <field name="supplier_to_customer"/>
-                                            <field name="customer_address_id"
-                                                   attrs="{'required':[('supplier_to_customer', '=', True)],
-                                                           'invisible':[('supplier_to_customer', '=', False)]}"/>
-                                        </group>
+                                    <group name="inbound" string="Inbound">
+                                        <field name="in_warehouse_id"/>
+                                        <field name="location_id"
+                                               domain="[('usage', '=', 'internal')]"/>
+                                        <field name="in_route_id" groups="stock.group_adv_location"/>
+                                    </group>
+                                    <group name="outbound" string="Outbound">
+                                        <field name="out_warehouse_id"/>
+                                        <field name="delivery_address_id"
+                                               groups='rma.group_rma_delivery_invoice_address'/>
+                                        <field name="out_route_id" groups="stock.group_adv_location"/>
+                                        <field name="supplier_to_customer"/>
+                                        <field name="customer_address_id"
+                                               attrs="{'required':[('supplier_to_customer', '=', True)],
+                                                       'invisible':[('supplier_to_customer', '=', False)]}"/>
                                     </group>
                                 </group>
                             </page>
@@ -317,48 +315,42 @@
                         </group>
                         <notebook>
                             <page name="route" string="Routes">
-                                <group>
-                                    <group>
-                                        <group name="inbound" string="Inbound">
-                                            <field name="in_warehouse_id"/>
-                                            <field name="location_id"
-                                                   domain="[('usage', '=', 'internal')]"/>
-                                            <field name="in_route_id" groups="stock.group_adv_location"/>
-                                            <field name="customer_to_supplier"/>
-                                            <field name="supplier_address_id"
-                                                   attrs="{'required':[('customer_to_supplier', '=', True)],
-                                                           'invisible':[('customer_to_supplier', '=', False)]}"/>
-                                        </group>
-                                        <group name="outbound" string="Outbound">
-                                            <field name="out_warehouse_id"/>
-                                            <field name="delivery_address_id"
-                                                   groups='rma.group_rma_delivery_invoice_address'/>
-                                            <field name="out_route_id" groups="stock.group_adv_location"/>
-                                        </group>
-                                    </group>
+                                <group name="inbound" string="Inbound">
+                                    <field name="in_warehouse_id"/>
+                                    <field name="location_id"
+                                           domain="[('usage', '=', 'internal')]"/>
+                                    <field name="in_route_id" groups="stock.group_adv_location"/>
+                                    <field name="customer_to_supplier"/>
+                                    <field name="supplier_address_id"
+                                           attrs="{'required':[('customer_to_supplier', '=', True)],
+                                                   'invisible':[('customer_to_supplier', '=', False)]}"/>
+                                </group>
+                                <group name="outbound" string="Outbound">
+                                    <field name="out_warehouse_id"/>
+                                    <field name="delivery_address_id"
+                                           groups='rma.group_rma_delivery_invoice_address'/>
+                                    <field name="out_route_id" groups="stock.group_adv_location"/>
                                 </group>
                             </page>
                             <page name="stock" string="Stock Moves">
                                 <field name="move_ids" nolabel="1" readonly="1"/>
                             </page>
                             <page name="quantities" string="Quantities">
-                                <group>
-                                    <group name="quantities" col="4" string="Quantities">
-                                        <group name="receive">
-                                            <field name="qty_to_receive"/>
-                                            <field name="qty_incoming"/>
-                                            <field name="qty_received"/>
-                                        </group>
-                                        <group name="deliver">
-                                            <field name="qty_to_deliver"/>
-                                            <field name="qty_outgoing"/>
-                                            <field name="qty_delivered"/>
-                                        </group>
-                                        <group name="supplier_rma"
-                                               attrs="{'invisible':[('customer_to_supplier','=',False)]}">
-                                            <field name="qty_to_supplier_rma"/>
-                                            <field name="qty_in_supplier_rma"/>
-                                        </group>
+                                <group name="quantities" col="4" string="Quantities">
+                                    <group name="receive">
+                                        <field name="qty_to_receive"/>
+                                        <field name="qty_incoming"/>
+                                        <field name="qty_received"/>
+                                    </group>
+                                    <group name="deliver">
+                                        <field name="qty_to_deliver"/>
+                                        <field name="qty_outgoing"/>
+                                        <field name="qty_delivered"/>
+                                    </group>
+                                    <group name="supplier_rma"
+                                           attrs="{'invisible':[('customer_to_supplier','=',False)]}">
+                                        <field name="qty_to_supplier_rma"/>
+                                        <field name="qty_in_supplier_rma"/>
                                     </group>
                                 </group>
                             </page>

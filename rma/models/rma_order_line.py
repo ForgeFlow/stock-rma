@@ -72,9 +72,8 @@ class RmaOrderLine(models.Model):
             for move in rec.move_ids.filtered(
                     lambda m: m.state in states and op(m.location_id.usage,
                                                        rec.type)):
-                qty += product_obj._compute_qty_obj(
-                    move.product_uom, move.product_uom_qty,
-                    rec.uom_id)
+                qty += product_obj._compute_quantity(
+                    move.product_uom_qty, rec.uom_id)
             return qty
 
     @api.multi
@@ -636,7 +635,7 @@ class RmaOrderLine(models.Model):
             res = self.env.ref('rma.view_rma_line_form', False)
         result = action.read()[0]
         # choose the view_mode accordingly
-        if len(rma_lines) != 1:
+        if rma_lines and len(rma_lines) != 1:
             result['domain'] = rma_lines.ids
         elif len(rma_lines) == 1:
             result['views'] = [(res and res.id or False, 'form')]
