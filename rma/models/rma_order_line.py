@@ -62,20 +62,22 @@ class RmaOrderLine(models.Model):
 
     @api.multi
     def _get_rma_move_qty(self, states, direction='in'):
-        for rec in self:
-            product_obj = self.env['product.uom']
-            qty = 0.0
-            if direction == 'in':
-                op = ops['=']
-            else:
-                op = ops['!=']
-            for move in rec.move_ids.filtered(
-                    lambda m: m.state in states and op(m.location_id.usage,
-                                                       rec.type)):
-                qty += product_obj._compute_qty_obj(
-                    move.product_uom, move.product_uom_qty,
-                    rec.uom_id)
-            return qty
+        self.ensure_one()
+        product_obj = self.env['product.uom']
+        qty = 0.0
+        if direction == 'in' and not self.supplier_to_customer:
+            op = ops['=']
+        elif direction == 'out' and self.supplier_to_customer:
+            op = ops['=']
+        else:
+            op = ops['!=']
+        for move in self.move_ids.filtered(
+                lambda m: m.state in states and op(m.location_id.usage,
+                                                   self.type)):
+            qty += product_obj._compute_qty_obj(
+                move.product_uom, move.product_uom_qty,
+                self.uom_id)
+        return qty
 
     @api.multi
     @api.depends('move_ids', 'move_ids.state', 'qty_received',
@@ -98,9 +100,11 @@ class RmaOrderLine(models.Model):
         for rec in self:
             rec.qty_to_deliver = 0.0
             if rec.delivery_policy == 'ordered':
-                rec.qty_to_deliver = rec.product_qty - rec.qty_delivered
+                rec.qty_to_deliver = \
+                    rec.product_qty - rec.qty_outgoing - rec.qty_delivered
             elif rec.delivery_policy == 'received':
-                rec.qty_to_deliver = rec.qty_received - rec.qty_delivered
+                rec.qty_to_deliver = \
+                    rec.qty_received - rec.qty_outgoing - rec.qty_delivered
 
     @api.multi
     @api.depends('move_ids', 'move_ids.state', 'type')
