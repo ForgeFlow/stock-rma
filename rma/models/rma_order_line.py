@@ -47,18 +47,26 @@ class RmaOrderLine(models.Model):
     @api.multi
     def _compute_in_shipment_count(self):
         for line in self:
-            moves = line.mapped('move_ids').filtered(
-                lambda m: m.location_dest_id.usage == 'internal')
-            pickings = moves.mapped('picking_id')
-            line.in_shipment_count = len(pickings)
+            picking_ids = []
+            for move in line.move_ids:
+                if move.location_dest_id.usage == 'internal':
+                    picking_ids.append(move.picking_id.id)
+                else:
+                    if line.customer_to_supplier:
+                        picking_ids.append(move.picking_id.id)
+            shipments = list(set(picking_ids))
+            line.in_shipment_count = len(shipments)
 
     @api.multi
     def _compute_out_shipment_count(self):
+        picking_ids = []
         for line in self:
-            moves = line.mapped('move_ids').filtered(
-                lambda m: m.location_dest_id.usage != 'internal')
-            pickings = moves.mapped('picking_id')
-            line.out_shipment_count = len(pickings)
+            for move in line.move_ids:
+                if move.location_dest_id.usage in ('supplier', 'customer'):
+                    if not line.customer_to_supplier:
+                        picking_ids.append(move.picking_id.id)
+            shipments = list(set(picking_ids))
+            line.out_shipment_count = len(shipments)
 
     @api.multi
     def _get_rma_move_qty(self, states, direction='in'):
@@ -571,6 +579,10 @@ class RmaOrderLine(models.Model):
             for move in line.move_ids:
                 if move.location_dest_id.usage == 'internal':
                     picking_ids.append(move.picking_id.id)
+                else:
+                    if line.customer_to_supplier:
+                        picking_ids.append(move.picking_id.id)
+
         shipments = list(set(picking_ids))
         # choose the view_mode accordingly
         if len(shipments) != 1:
@@ -590,7 +602,8 @@ class RmaOrderLine(models.Model):
         for line in self:
             for move in line.move_ids:
                 if move.location_dest_id.usage in ('supplier', 'customer'):
-                    picking_ids.append(move.picking_id.id)
+                    if not line.customer_to_supplier:
+                        picking_ids.append(move.picking_id.id)
         shipments = list(set(picking_ids))
         # choose the view_mode accordingly
         if len(shipments) != 1:
