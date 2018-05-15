@@ -68,6 +68,7 @@ class RmaAddStockMove(models.TransientModel):
                     "Please define a warehouse with a default RMA location"))
         data = {
             'partner_id': self.partner_id.id,
+            'type': self.rma_id.type,
             'reference_move_id': sm.id,
             'product_id': sm.product_id.id,
             'lot_id': lot and lot.id or False,
