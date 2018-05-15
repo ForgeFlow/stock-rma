@@ -13,19 +13,20 @@ class ProcurementOrder(models.Model):
         ondelete="set null",
     )
 
-    @api.model
+    @api.multi
     def _get_stock_move_values(self):
         res = super(ProcurementOrder, self)._get_stock_move_values()
-        if self.rma_line_id:
-            line = self.rma_line_id
-            res['rma_line_id'] = line.id
-            # Propagate partner_dest_id for proper drop-shipment reports.
-            if procurement.partner_dest_id:
-                res['partner_id'] = procurement.partner_dest_id.id
-            dest_loc = self.env["stock.location"].browse([
-                res["location_dest_id"]])[0]
-            if dest_loc.usage == "internal":
-                res["price_unit"] = line.price_unit
+        for procurement in self:
+            if self.rma_line_id:
+                line = self.rma_line_id
+                res['rma_line_id'] = line.id
+                # Propagate partner_dest_id for proper drop-shipment reports.
+                if procurement.partner_dest_id:
+                    res['partner_id'] = procurement.partner_dest_id.id
+                dest_loc = self.env["stock.location"].browse([
+                    res["location_dest_id"]])[0]
+                if dest_loc.usage == "internal":
+                    res["price_unit"] = line.price_unit
         return res
 
 
