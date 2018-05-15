@@ -48,7 +48,9 @@ class RmaOrderLine(models.Model):
     def _compute_in_shipment_count(self):
         for line in self:
             moves = line.mapped('move_ids').filtered(
-                lambda m: m.location_dest_id.usage == 'internal')
+                lambda m: m.location_dest_id.usage == 'internal' or
+                (m.location_dest_id.usage == 'supplier' and
+                 m.location_id.usage == 'customer'))
             pickings = moves.mapped('picking_id')
             line.in_shipment_count = len(pickings)
 
@@ -56,7 +58,9 @@ class RmaOrderLine(models.Model):
     def _compute_out_shipment_count(self):
         for line in self:
             moves = line.mapped('move_ids').filtered(
-                lambda m: m.location_dest_id.usage != 'internal')
+                lambda m: m.location_id.usage == 'internal' or
+                (m.location_dest_id.usage == 'customer' and
+                 m.location_id.usage == 'supplier'))
             pickings = moves.mapped('picking_id')
             line.out_shipment_count = len(pickings)
 
@@ -398,21 +402,21 @@ class RmaOrderLine(models.Model):
             operation = self.env['rma.operation'].search(
                 [('type', '=', self.type)], limit=1)
             if not operation:
-                raise ValidationError("Please define an operation first.")
+                raise ValidationError(_("Please define an operation first."))
 
         if not operation.in_route_id or not operation.out_route_id:
             route = self.env['stock.location.route'].search(
                 [('rma_selectable', '=', True)], limit=1)
             if not route:
-                raise ValidationError("Please define an RMA route.")
+                raise ValidationError(_("Please define an RMA route."))
 
         if not operation.in_warehouse_id or not operation.out_warehouse_id:
             warehouse = self.env['stock.warehouse'].search(
                 [('company_id', '=', self.company_id.id),
                  ('lot_rma_id', '!=', False)], limit=1)
             if not warehouse:
-                raise ValidationError(
-                    "Please define a warehouse with a default RMA location.")
+                raise ValidationError(_(
+                    "Please define a warehouse with a default RMA location."))
 
         data = {
             'product_id': sm.product_id.id,
@@ -570,40 +574,42 @@ class RmaOrderLine(models.Model):
     def action_view_in_shipments(self):
         action = self.env.ref('stock.action_picking_tree_all')
         result = action.read()[0]
-        picking_ids = []
+        shipments = self.env['stock.picking']
         for line in self:
-            for move in line.move_ids:
-                if move.location_dest_id.usage == 'internal':
-                    picking_ids.append(move.picking_id.id)
-        shipments = list(set(picking_ids))
+            moves = line.mapped('move_ids').filtered(
+                lambda m: m.location_dest_id.usage == 'internal' or
+                (m.location_dest_id.usage == 'supplier' and
+                 m.location_id.usage == 'customer'))
+            picking_ids = moves.mapped('picking_id')
+        shipments += picking_ids
         # choose the view_mode accordingly
         if len(shipments) != 1:
-            result['domain'] = "[('id', 'in', " + \
-                               str(shipments) + ")]"
+            result['domain'] = [('id', 'in', picking_ids.ids)]
         elif len(shipments) == 1:
             res = self.env.ref('stock.view_picking_form', False)
             result['views'] = [(res and res.id or False, 'form')]
-            result['res_id'] = shipments[0]
+            result['res_id'] = shipments[0].id
         return result
 
     @api.multi
     def action_view_out_shipments(self):
         action = self.env.ref('stock.action_picking_tree_all')
         result = action.read()[0]
-        picking_ids = []
+        shipments = self.env['stock.picking']
         for line in self:
-            for move in line.move_ids:
-                if move.location_dest_id.usage in ('supplier', 'customer'):
-                    picking_ids.append(move.picking_id.id)
-        shipments = list(set(picking_ids))
+            moves = line.mapped('move_ids').filtered(
+                lambda m: m.location_id.usage == 'internal' or
+                (m.location_dest_id.usage == 'customer' and
+                 m.location_id.usage == 'supplier'))
+            picking_ids = moves.mapped('picking_id')
+        shipments += picking_ids
         # choose the view_mode accordingly
         if len(shipments) != 1:
-            result['domain'] = "[('id', 'in', " + \
-                               str(shipments) + ")]"
+            result['domain'] = [('id', 'in', picking_ids.ids)]
         elif len(shipments) == 1:
             res = self.env.ref('stock.view_picking_form', False)
             result['views'] = [(res and res.id or False, 'form')]
-            result['res_id'] = shipments[0]
+            result['res_id'] = shipments[0].id
         return result
 
     @api.multi
@@ -640,7 +646,7 @@ class RmaOrderLine(models.Model):
         result = action.read()[0]
         # choose the view_mode accordingly
         if len(rma_lines) != 1:
-            result['domain'] = rma_lines.ids
+            result['domain'] = [('id', 'in', rma_lines)]
         elif len(rma_lines) == 1:
             result['views'] = [(res and res.id or False, 'form')]
             result['res_id'] = rma_lines[0]

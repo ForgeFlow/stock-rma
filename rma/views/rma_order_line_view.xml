@@ -93,7 +93,8 @@
                             <button type="object" name="action_view_rma_lines"
                                     class="oe_stat_button"
                                     icon="fa-link"
-                                    groups="stock.group_stock_user">
+                                    groups="stock.group_stock_user"
+                                    attrs="{'invisible':[('rma_line_count', '=', 0)]}">
                                 <field name="rma_line_count" widget="statinfo"
                                        string="Customer RMA"/>
                             </button>

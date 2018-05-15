@@ -91,9 +91,10 @@ Known issues and Roadmap
 
 * Picking operations report in customer RMA dropshipping case is showing
   "Vendor Address" while it should be "Customer Address".
-* Dropshipping always counted as a delivery on the smart buttons.
 * Uninstall hook.
 * Constraints instead of required fields on rma.order.line.
+* Tree view at lines page on supplier RMA groups. Clicking on a line open it
+  with customer RMA line view instead of supplier's.
 
 Bug Tracker
 ===========
