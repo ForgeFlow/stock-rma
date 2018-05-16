@@ -30,7 +30,7 @@
                     </group>
                 </group>
                 <field name="delivery_policy" position="after">
-                    <field name="sale_type"/>
+                    <field name="sale_policy"/>
                 </field>
                 <field name="origin" position="after">
                     <field name="sale_id"
@@ -65,7 +65,7 @@
                     </group>
                 </group>
                 <field name="delivery_policy" position="after">
-                    <field name="sale_type"/>
+                    <field name="sale_policy"/>
                 </field>
                 <notebook position="inside">
                     <page name="sale" string="Sale Lines">

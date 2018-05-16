@@ -7,7 +7,7 @@ from openerp import fields, models
 class RmaOperation(models.Model):
     _inherit = 'rma.operation'
 
-    sale_type = fields.Selection([
+    sale_policy = fields.Selection([
         ('no', 'Not required'), ('ordered', 'Based on Ordered Quantities'),
         ('received', 'Based on Received Quantities')],
         string="Sale Policy", default='no')

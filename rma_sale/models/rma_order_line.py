@@ -9,24 +9,24 @@ from openerp.addons import decimal_precision as dp
 class RmaOrderLine(models.Model):
     _inherit = "rma.order.line"
 
-    @api.depends('sale_line_ids', 'sale_type', 'sales_count',
-                 'sale_line_ids.state')
+    @api.depends('sale_line_ids', 'sale_policy', 'sales_count',
+                 'sale_line_ids.state', 'qty_received', 'product_qty')
     def _compute_qty_to_sell(self):
-        if self.sale_type == 'no':
-            self.qty_to_sell = 0.0
-        elif self.sale_type == 'ordered':
-            qty = self._get_rma_sold_qty()
-            self.qty_to_sell = self.product_qty - qty
-        elif self.sale_type == 'received':
-            qty = self._get_rma_sold_qty()
-            self.qty_to_sell = self.qty_received - qty
-        else:
-            self.qty_to_sell = 0.0
+        for rec in self:
+            if rec.sale_policy == 'ordered':
+                qty = rec._get_rma_sold_qty()
+                rec.qty_to_sell = rec.product_qty - qty
+            elif rec.sale_policy == 'received':
+                qty = rec._get_rma_sold_qty()
+                rec.qty_to_sell = rec.qty_received - qty
+            else:
+                rec.qty_to_sell = 0.0
 
-    @api.depends('sale_line_ids', 'sale_type', 'sales_count',
+    @api.depends('sale_line_ids', 'sale_policy', 'sales_count',
                  'sale_line_ids.state')
     def _compute_qty_sold(self):
-        self.qty_sold = self._get_rma_sold_qty()
+        for rec in self:
+            rec.qty_sold = rec._get_rma_sold_qty()
 
     @api.multi
     def _compute_sales_count(self):
@@ -57,12 +57,19 @@ class RmaOrderLine(models.Model):
         digits=dp.get_precision('Product Unit of Measure'),
         readonly=True, compute=_compute_qty_sold,
         store=True)
-    sale_type = fields.Selection(selection=[
+    sale_policy = fields.Selection(selection=[
         ('no', 'Not required'), ('ordered', 'Based on Ordered Quantities'),
         ('received', 'Based on Received Quantities')],
         string="Sale Policy", default='no', required=True)
     sales_count = fields.Integer(
         compute=_compute_sales_count, string='# of Sales')
+
+    @api.onchange('operation_id')
+    def _onchange_operation_id(self):
+        res = super(RmaOrderLine, self)._onchange_operation_id()
+        if self.operation_id:
+            self.sale_policy = self.operation_id.sale_policy or 'no'
+        return res
 
     @api.multi
     def _prepare_rma_line_from_sale_order_line(self, line):
