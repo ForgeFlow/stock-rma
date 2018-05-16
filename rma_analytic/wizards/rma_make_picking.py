@@ -6,7 +6,7 @@ from odoo import models, api
 
 
 class RmaMakePicking(models.TransientModel):
-    _name = 'rma_make_picking.wizard'
+    _inherit = 'rma_make_picking.wizard'
     _description = 'Wizard to create pickings from rma lines'
 
     @api.model
