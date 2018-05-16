@@ -152,27 +152,18 @@ class RmaLineMakeSupplierRma(models.TransientModel):
             rma_line_data = self._prepare_supplier_rma_line(rma, item)
             rma_line = rma_line_obj.create(rma_line_data)
         if rma:
-            return {
-                'name': _('Supplier RMA'),
-                'view_type': 'form',
-                'view_mode': 'form',
-                'res_model': 'rma.order',
-                'view_id': False,
-                'res_id': rma.id,
-                'context': {'supplier': True, 'customer': False},
-                'type': 'ir.actions.act_window'
-            }
+            action = self.env.ref('rma.action_rma_supplier')
+            result = action.read()[0]
+            res = self.env.ref('rma.view_rma_supplier_form', False)
+            result['views'] = [(res and res.id or False, 'form')]
+            result['res_id'] = rma.id
         else:
-            return {
-                'name': _('Supplier RMA Line'),
-                'view_type': 'form',
-                'view_mode': 'form',
-                'res_model': 'rma.order.line',
-                'view_id': False,
-                'res_id': rma_line.id,
-                'context': {'supplier': True, 'customer': False},
-                'type': 'ir.actions.act_window'
-            }
+            action = self.env.ref('rma.action_rma_supplier_lines')
+            result = action.read()[0]
+            res = self.env.ref('rma.view_rma_line_supplier_form', False)
+            result['views'] = [(res and res.id or False, 'form')]
+            result['res_id'] = rma_line.id
+        return result
 
 
 class RmaLineMakeRmaOrderItem(models.TransientModel):
