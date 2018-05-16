@@ -121,7 +121,10 @@ class RmaOrderLine(models.Model):
     @api.depends('move_ids', 'move_ids.state', 'type')
     def _compute_qty_received(self):
         for rec in self:
-            qty = rec._get_rma_move_qty('done', direction='in')
+            if rec.supplier_to_customer:
+                qty = rec._get_rma_move_qty('done', direction='out')
+            else:
+                qty = rec._get_rma_move_qty('done', direction='in')
             rec.qty_received = qty
 
     @api.multi
@@ -136,7 +139,10 @@ class RmaOrderLine(models.Model):
     @api.depends('move_ids', 'move_ids.state', 'type')
     def _compute_qty_delivered(self):
         for rec in self:
-            qty = rec._get_rma_move_qty('done', direction='out')
+            if rec.supplier_to_customer:
+                qty = rec._get_rma_move_qty('done', direction='in')
+            else:
+                qty = rec._get_rma_move_qty('done', direction='out')
             rec.qty_delivered = qty
 
     @api.model
