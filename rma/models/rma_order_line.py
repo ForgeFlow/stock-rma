@@ -241,7 +241,6 @@ class RmaOrderLine(models.Model):
         string='Ordered Qty', copy=False, default=1.0,
         digits=dp.get_precision('Product Unit of Measure'),
         readonly=True, states={'draft': [('readonly', False)]},
-        default=1.0,
     )
     uom_id = fields.Many2one(
         comodel_name='product.uom', string='Unit of Measure',
