@@ -17,6 +17,7 @@
         <field name="delivery_policy">no</field>
         <field name="type">customer</field>
         <field name="in_route_id" ref="rma.route_rma_customer"/>
+        <field name="out_route_id" ref="rma.route_rma_customer"/>
     </record>
 
     <record id="rma_operation_supplier_refund" model="rma.operation">
@@ -26,6 +27,7 @@
         <field name="receipt_policy">no</field>
         <field name="delivery_policy">no</field>
         <field name="type">supplier</field>
+        <field name="in_route_id" ref="rma.route_rma_supplier"/>
         <field name="out_route_id" ref="rma.route_rma_supplier"/>
     </record>
 
