@@ -177,9 +177,8 @@ class RmaOrderLine(models.Model):
     @api.onchange('operation_id')
     def _onchange_operation_id(self):
         result = super(RmaOrderLine, self)._onchange_operation_id()
-        if not self.operation_id:
-            return result
-        self.refund_policy = self.operation_id.refund_policy
+        if self.operation_id:
+            self.refund_policy = self.operation_id.refund_policy or 'no'
         return result
 
     @api.multi
