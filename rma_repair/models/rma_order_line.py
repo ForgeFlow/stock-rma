@@ -9,22 +9,22 @@ from openerp.addons import decimal_precision as dp
 class RmaOrderLine(models.Model):
     _inherit = "rma.order.line"
 
-    @api.depends('repair_ids', 'repair_type', 'repair_ids.state',
+    @api.depends('repair_ids', 'repair_policy', 'repair_ids.state',
                  'qty_to_receive')
     def _compute_qty_to_repair(self):
         for line in self:
-            if line.repair_type == 'no':
+            if line.repair_policy == 'no':
                 line.qty_to_repair = 0.0
-            elif line.repair_type == 'ordered':
+            elif line.repair_policy == 'ordered':
                 qty = line._get_rma_repaired_qty()
                 line.qty_to_repair = line.product_qty - qty
-            elif line.repair_type == 'received':
+            elif line.repair_policy == 'received':
                 qty = line._get_rma_repaired_qty()
                 line.qty_to_repair = line.qty_received - qty
             else:
                 line.qty_to_repair = 0.0
 
-    @api.depends('repair_ids', 'repair_type', 'repair_ids.state',
+    @api.depends('repair_ids', 'repair_policy', 'repair_ids.state',
                  'qty_to_receive')
     def _compute_qty_repaired(self):
         for line in self:
@@ -49,12 +49,19 @@ class RmaOrderLine(models.Model):
         digits=dp.get_precision('Product Unit of Measure'),
         readonly=True, compute=_compute_qty_repaired,
         store=True, help="Quantity repaired or being repaired.")
-    repair_type = fields.Selection(selection=[
+    repair_policy = fields.Selection(selection=[
         ('no', 'Not required'), ('ordered', 'Based on Ordered Quantities'),
         ('received', 'Based on Received Quantities')],
         string="Repair Policy", default='no', required=True)
     repair_count = fields.Integer(
         compute=_compute_repair_count, string='# of Repairs')
+
+    @api.onchange('operation_id')
+    def _onchange_operation_id(self):
+        res = super(RmaOrderLine, self)._onchange_operation_id()
+        if self.operation_id:
+            self.repair_policy = self.operation_id.repair_policy or 'no'
+        return res
 
     @api.multi
     def action_view_repair_order(self):

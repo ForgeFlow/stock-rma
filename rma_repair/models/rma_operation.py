@@ -8,7 +8,7 @@ from openerp import fields, models
 class RmaOperation(models.Model):
     _inherit = 'rma.operation'
 
-    repair_type = fields.Selection([
+    repair_policy = fields.Selection([
         ('no', 'Not required'), ('ordered', 'Based on Ordered Quantities'),
         ('received', 'Based on Received Quantities')],
         string="Repair Policy", default='no')

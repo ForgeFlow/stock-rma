@@ -7,7 +7,7 @@
         <field name="inherit_id" ref="rma.rma_operation_tree"/>
         <field name="arch" type="xml">
             <field name="delivery_policy" position="after">
-                <field name="repair_type"/>
+                <field name="repair_policy"/>
             </field>
         </field>
     </record>
@@ -18,7 +18,7 @@
         <field name="inherit_id" ref="rma.rma_operation_form"/>
         <field name="arch" type="xml">
             <field name="delivery_policy" position="after">
-                <field name="repair_type"/>
+                <field name="repair_policy"/>
             </field>
         </field>
     </record>
