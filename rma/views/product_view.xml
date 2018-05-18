@@ -10,8 +10,12 @@
                 <field name="type" position="after">
                     <group name="rma">
                         <field name="rma_approval_policy" groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"/>
-                        <field name="rma_customer_operation_id" groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"/>
-                        <field name="rma_supplier_operation_id" groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"/>
+                        <field name="rma_customer_operation_id"
+                               groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"
+                               domain="[('type','=','customer')]"/>
+                        <field name="rma_supplier_operation_id"
+                               groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"
+                               domain="[('type','=','supplier')]"/>
                     </group>
                 </field>
             </field>
@@ -25,8 +29,12 @@
                  <group name="inventory" position="inside">
                     <group name="rma" groups="rma.group_rma_customer_user,rma.group_rma_supplier_user">
                         <field name="rma_approval_policy"/>
-                        <field name="rma_customer_operation_id" groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"/>
-                        <field name="rma_supplier_operation_id" groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"/>
+                        <field name="rma_customer_operation_id"
+                               groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"
+                               domain="[('type','=','customer')]"/>
+                        <field name="rma_supplier_operation_id"
+                               groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"
+                               domain="[('type','=','supplier')]"/>
                     </group>
                 </group>
             </field>
