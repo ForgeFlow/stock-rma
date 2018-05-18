@@ -236,6 +236,7 @@ class RmaOrderLine(models.Model):
         string='Ordered Qty', copy=False,
         digits=dp.get_precision('Product Unit of Measure'),
         readonly=True, states={'draft': [('readonly', False)]},
+        default=1.0,
     )
     uom_id = fields.Many2one(
         comodel_name='product.uom', string='Unit of Measure',
@@ -518,16 +519,20 @@ class RmaOrderLine(models.Model):
         result = {}
         if not self.product_id:
             return result
-        self.product_qty = 1
         self.uom_id = self.product_id.uom_id.id
         self.price_unit = self.product_id.standard_price
+        if not self.type:
+            self.type = self._get_default_type()
         if self.type == 'customer':
             self.operation_id = self.product_id.rma_customer_operation_id or \
                 self.product_id.categ_id.rma_customer_operation_id
         else:
             self.operation_id = self.product_id.rma_supplier_operation_id or \
                 self.product_id.categ_id.rma_supplier_operation_id
-        return result
+        if self.lot_id.product_id != self.product_id:
+            self.lot_id = False
+        return {'domain': {
+            'lot_id': [('product_id', '=', self.product_id.id)]}}
 
     @api.onchange('operation_id')
     def _onchange_operation_id(self):
@@ -552,16 +557,6 @@ class RmaOrderLine(models.Model):
             self.receipt_policy = 'no'
         elif self.type == 'customer' and self.supplier_to_customer:
             self.delivery_policy = 'no'
-
-    @api.onchange('product_id')
-    def _onchange_product_id(self):
-        self.uom_id = self.product_id.uom_id
-        if self.lot_id.product_id != self.product_id:
-            self.lot_id = False
-        if self.product_id:
-            return {'domain': {
-                'lot_id': [('product_id', '=', self.product_id.id)]}}
-        return {'domain': {'lot_id': []}}
 
     @api.onchange("lot_id")
     def _onchange_lot_id(self):
