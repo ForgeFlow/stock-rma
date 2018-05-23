@@ -64,6 +64,21 @@ class RmaOrderLine(models.Model):
     sales_count = fields.Integer(
         compute=_compute_sales_count, string='# of Sales')
 
+    @api.onchange('product_id')
+    def _onchange_product_id(self):
+        res = super(RmaOrderLine, self)._onchange_product_id()
+        if res.get('domain') and self.product_id:
+            res['domain']['sale_line_id'] = [
+                ('product_id', '=', self.product_id.id)]
+        elif res.get('domain') and self.product_id:
+            res['domain']['sale_line_id'] = [()]
+        elif not res.get('domain') and self.product_id:
+            res['domain'] = {
+                'sale_line_id': [('product_id', '=', self.product_id.id)]}
+        else:
+            res['domain'] = {'sale_line_id': []}
+        return res
+
     @api.onchange('operation_id')
     def _onchange_operation_id(self):
         res = super(RmaOrderLine, self)._onchange_operation_id()
