@@ -93,12 +93,21 @@
         <record id="view_rma_rma_line_filter" model="ir.ui.view">
             <field name="name">rma.order.line.select</field>
             <field name="model">rma.order.line</field>
-            <field name="inherit_id" ref="rma.view_rma_line_form"/>
+            <field name="inherit_id" ref="rma.view_rma_rma_line_filter"/>
             <field name="arch" type="xml">
                 <field name="product_id" position="after">
                     <filter name="to_refund" string="To Refund" domain="[('qty_to_refund', '>', 0)]"
                                 context="{'group_by':'partner_id'}"/>
                 </field>
+                <group name="stock_quantities" position="after">
+                    <group name="account_quantities" groups="account.group_account_user">
+                        <filter name="to_refund" domain="[('state','!=', 'done'),('qty_to_refund','>',0.0)]" help="To Refund"/>
+                    </group>
+                </group>
+                <filter name="to_deliver" position="after">
+                    <filter name="group_to_refund" string="To Refund" domain="[('qty_to_refund', '>', 0)]"
+                            context="{'group_by':'partner_id'}"/>
+                </filter>
             </field>
         </record>
 
