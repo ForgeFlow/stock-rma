@@ -18,11 +18,7 @@
                 </div>
                 <group name="main_info" position="inside">
                     <field name="sale_line_id"
-                           context="{'rma': True}"
-                           options="{'no_create': True}"
-                           domain="['|',
-                                    ('order_id.partner_id', '=', partner_id),
-                                    ('order_id.partner_id', 'child_of', partner_id)]"/>
+                           options="{'no_create': True}"/>
                 </group>
                 <group name="quantities" position="inside">
                     <group>
@@ -31,7 +27,7 @@
                     </group>
                 </group>
                 <field name="delivery_policy" position="after">
-                    <field name="sale_type"/>
+                    <field name="sale_policy"/>
                 </field>
                 <field name="origin" position="after">
                     <field name="sale_id"
@@ -66,7 +62,7 @@
                     </group>
                 </group>
                 <field name="delivery_policy" position="after">
-                    <field name="sale_type"/>
+                    <field name="sale_policy"/>
                 </field>
                 <notebook position="inside">
                     <page name="sale" string="Sale Lines">
