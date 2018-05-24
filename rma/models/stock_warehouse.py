@@ -73,6 +73,7 @@ class StockWarehouse(models.Model):
                             'name': 'RMA',
                             'usage': 'internal',
                             'location_id': wh.lot_stock_id.id,
+                            'company_id': wh.company_id.id,
                         })
                     # RMA types
                     if not wh._rma_types_available():
