@@ -395,7 +395,16 @@
                     <field name="product_id"/>
                     <field name="lot_id"/>
                     <separator/>
-                    <filter domain="[('assigned_to','=',uid)]" help="My RMAs"/>
+                    <filter domain="[('assigned_to','=',uid)]" help="Assigned to Me"/>
+                    <separator/>
+                    <group name="stock_quantities" groups="stock.group_stock_user">
+                        <filter domain="[('state','!=', 'done'),('qty_to_receive','>',0.0)]" help="To Receive"/>
+                        <filter domain="[('state','!=', 'done'),('qty_to_deliver','>',0.0)]" help="To Deliver"/>
+                    </group>
+                    <separator/>
+                    <group name="statuses">
+                        <filter domain="[('state', '=', 'to_approve')]" help="To Approve"/>
+                    </group>
                     <group expand="0" string="Group By">
                         <filter name="status" string="State" domain="[]"
                                 context="{'group_by':'state'}"/>
