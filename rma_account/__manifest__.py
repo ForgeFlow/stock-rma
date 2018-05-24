@@ -17,6 +17,7 @@
         'views/rma_operation_view.xml',
         'views/rma_order_line_view.xml',
         'views/invoice_view.xml',
+        'views/rma_account_menu.xml',
         'wizards/rma_add_invoice.xml',
         'wizards/rma_refund.xml',
     ],
