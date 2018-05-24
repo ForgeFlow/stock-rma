@@ -9,23 +9,23 @@ from odoo.addons import decimal_precision as dp
 class RmaOrderLine(models.Model):
     _inherit = "rma.order.line"
 
-    @api.depends('sale_line_ids', 'sale_type', 'sales_count',
+    @api.depends('sale_line_ids', 'sale_policy', 'sales_count',
                  'sale_line_ids.state')
     @api.multi
     def _compute_qty_to_sell(self):
         for rec in self:
-            if rec.sale_type == 'no':
+            if rec.sale_policy == 'no':
                 rec.qty_to_sell = 0.0
-            elif rec.sale_type == 'ordered':
+            elif rec.sale_policy == 'ordered':
                 qty = self._get_rma_sold_qty()
                 rec.qty_to_sell = self.product_qty - qty
-            elif rec.sale_type == 'received':
+            elif rec.sale_policy == 'received':
                 qty = self._get_rma_sold_qty()
                 rec.qty_to_sell = self.qty_received - qty
             else:
                 rec.qty_to_sell = 0.0
 
-    @api.depends('sale_line_ids', 'sale_type', 'sales_count',
+    @api.depends('sale_line_ids', 'sale_policy', 'sales_count',
                  'sale_line_ids.state')
     def _compute_qty_sold(self):
         self.qty_sold = self._get_rma_sold_qty()
@@ -59,7 +59,7 @@ class RmaOrderLine(models.Model):
         digits=dp.get_precision('Product Unit of Measure'),
         readonly=True, compute=_compute_qty_sold,
         store=True)
-    sale_type = fields.Selection(selection=[
+    sale_policy = fields.Selection(selection=[
         ('no', 'Not required'), ('ordered', 'Based on Ordered Quantities'),
         ('received', 'Based on Received Quantities')],
         string="Sale Policy", default='no', required=True)
