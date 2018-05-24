@@ -66,6 +66,28 @@ class RmaOrderLine(models.Model):
     sales_count = fields.Integer(
         compute=_compute_sales_count, string='# of Sales')
 
+    @api.onchange('product_id', 'partner_id')
+    def _onchange_product_id(self):
+        """Domain for sale_line_id is computed here to make it dynamic."""
+        res = super(RmaOrderLine, self)._onchange_product_id()
+        if not res.get('domain'):
+            res['domain'] = {}
+        domain = [
+            '|',
+            ('order_id.partner_id', '=', self.partner_id.id),
+            ('order_id.partner_id', 'child_of', self.partner_id.id)]
+        if self.product_id:
+            domain.append(('product_id', '=', self.product_id.id))
+        res['domain']['sale_line_id'] = domain
+        return res
+
+    @api.onchange('operation_id')
+    def _onchange_operation_id(self):
+        res = super(RmaOrderLine, self)._onchange_operation_id()
+        if self.operation_id:
+            self.sale_policy = self.operation_id.sale_policy or 'no'
+        return res
+
     @api.multi
     def _prepare_rma_line_from_sale_order_line(self, line):
         self.ensure_one()
