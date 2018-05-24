@@ -209,9 +209,11 @@ class RmaOrderLine(models.Model):
     )
     assigned_to = fields.Many2one(
         comodel_name='res.users', track_visibility='onchange',
+        default=lambda self: self.env.uid,
     )
     requested_by = fields.Many2one(
         comodel_name='res.users', track_visibility='onchange',
+        default=lambda self: self.env.uid,
     )
     partner_id = fields.Many2one(
         comodel_name='res.partner', required=True, store=True,
@@ -230,7 +232,7 @@ class RmaOrderLine(models.Model):
     product_tracking = fields.Selection(related="product_id.tracking")
     lot_id = fields.Many2one(
         comodel_name="stock.production.lot", string="Lot/Serial Number",
-        readonly=True, states={"new": [("readonly", False)]},
+        readonly=True, states={"draft": [("readonly", False)]},
     )
     product_qty = fields.Float(
         string='Ordered Qty', copy=False,
@@ -481,7 +483,6 @@ class RmaOrderLine(models.Model):
         self.write({'state': 'to_approve'})
         for rec in self:
             if rec.product_id.rma_approval_policy == 'one_step':
-                rec.write({'assigned_to': self.env.uid})
                 rec.action_rma_approve()
         return True
 
@@ -531,8 +532,7 @@ class RmaOrderLine(models.Model):
                 self.product_id.categ_id.rma_supplier_operation_id
         if self.lot_id.product_id != self.product_id:
             self.lot_id = False
-        return {'domain': {
-            'lot_id': [('product_id', '=', self.product_id.id)]}}
+        return result
 
     @api.onchange('operation_id')
     def _onchange_operation_id(self):

@@ -110,6 +110,22 @@
                                    domain="[('supplier','=',True)]"
                                    string="Supplier"/>
                         </group>
+                        <group>
+                            <group name="product" string="Product">
+                                <field name="product_id"/>
+                                <newline/>
+                                <field name="product_tracking" invisible="1"/>
+                                <field name="lot_id"
+                                       groups="stock.group_production_lot"
+                                       attrs="{'required': [('product_tracking', 'in', ('serial', 'lot'))]}"
+                                       domain="[('product_id', '=', product_id)]"/>
+                            </group>
+                            <group name="product_qty" string="Quantity">
+                                <field name="product_qty"/>
+                                <field name="price_unit"/>
+                                <field name="uom_id" groups="product.group_uom"/>
+                            </group>
+                        </group>
                         <group name="main_info" string="Origin">
                             <field name="reference_move_id"
                                    options="{'no_create': True}"
@@ -118,20 +134,6 @@
                                             ('state', '=', 'done')]"/>
                         </group>
                         <group>
-                            <group name="product" string="Product">
-                                <field name="product_id"/>
-                                <newline/>
-                                <field name="product_tracking" invisible="1"/>
-                                <field name="lot_id"
-                                       groups="stock.group_production_lot"
-                                       attrs="{'required': [('product_tracking', 'in', ('serial', 'lot'))]}"/>
-                            </group>
-                            <group name="product_qty" string="Quantity">
-                                <field name="product_qty"/>
-                                <field name="price_unit"/>
-                                <field name="uom_id" groups="product.group_uom"/>
-                            </group>
-                            <newline/>
                             <group name="operation" string="Operation">
                                 <field name="operation_id"
                                        domain="[('type','=','supplier')]"/>
@@ -140,7 +142,7 @@
                             </group>
                             <group name="contact" string="Contact">
                                 <field name="requested_by" readonly="1"/>
-                                <field name="assigned_to" readonly="1"/>
+                                <field name="assigned_to"/>
                             </group>
                         </group>
                         <notebook>
@@ -279,6 +281,22 @@
                                 <field name="under_warranty"/>
                             </group>
                         </group>
+                        <group>
+                            <group name="product" string="Product">
+                                <field name="product_id"/>
+                                <newline/>
+                                <field name="product_tracking" invisible="1"/>
+                                <field name="lot_id"
+                                       groups="stock.group_production_lot"
+                                       attrs="{'required': [('product_tracking', 'in', ('serial', 'lot'))]}"
+                                       domain="[('product_id', '=', product_id)]"/>
+                            </group>
+                            <group name="product_qty" string="Quantity">
+                                <field name="product_qty"/>
+                                <field name="uom_id" groups="product.group_uom"/>
+                                <field name="price_unit"/>
+                            </group>
+                        </group>
                         <group name="main_info" string="Origin">
                             <field name="reference_move_id"
                                    options="{'no_create': True}"
@@ -287,20 +305,6 @@
                                             ('state', '=', 'done')]"/>
                         </group>
                         <group>
-                            <group name="product" string="Product">
-                                <field name="product_id"/>
-                                <newline/>
-                                <field name="product_tracking" invisible="1"/>
-                                <field name="lot_id"
-                                       groups="stock.group_production_lot"
-                                       attrs="{'required': [('product_tracking', 'in', ('serial', 'lot'))]}"/>
-                            </group>
-                            <group name="product_qty" string="Quantity">
-                                <field name="product_qty"/>
-                                <field name="uom_id" groups="product.group_uom"/>
-                                <field name="price_unit"/>
-                            </group>
-                            <newline/>
                             <group name="operation" string="Operation">
                                 <field name="operation_id" domain="[('type','=','customer')]"/>
                                 <field name="receipt_policy"/>
@@ -308,7 +312,7 @@
                             </group>
                             <group name="contact" string="Contact">
                                 <field name="requested_by" readonly="1"/>
-                                <field name="assigned_to" readonly="1"/>
+                                <field name="assigned_to"/>
                             </group>
                         </group>
                         <notebook>
