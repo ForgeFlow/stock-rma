@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
 
         <record id="view_rma_line_form" model="ir.ui.view">
             <field name="name">rma.order.line.form</field>
@@ -97,5 +96,17 @@
         </field>
     </record>
 
-    </data>
+    <record id="view_rma_rma_line_filter" model="ir.ui.view">
+        <field name="name">rma.order.line.select - rma_sale</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_rma_line_filter"/>
+        <field name="arch" type="xml">
+            <group name="stock_quantities" position="after">
+                <group name="sale_quantities" groups="base.group_sale_salesman">
+                    <filter domain="[('state','!=', 'done'),('qty_to_sell','>',0.0)]" help="To Sell"/>
+                </group>
+            </group>
+        </field>
+    </record>
+
 </odoo>
