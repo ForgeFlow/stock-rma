@@ -1,12 +1,20 @@
 # -*- coding: utf-8 -*-
-# Copyright 2017 Eficent Business and IT Consulting Services S.L.
+# Copyright 2017-18 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from openerp import api, models
+from openerp import api, fields, models
 
 
 class PurchaseOrderLine(models.Model):
     _inherit = "purchase.order.line"
+
+    # TODO: to be removed on migration to v10:
+    # This is needed because odoo misspelled `store` in v9 :facepalm:
+    state = fields.Selection(related='order_id.state', store=True)
+
+    rma_line_id = fields.Many2one(
+        comodel_name='rma.order.line', string='RMA',
+    )
 
     @api.model
     def name_search(self, name='', args=None, operator='ilike', limit=100):
@@ -26,3 +34,10 @@ class PurchaseOrderLine(models.Model):
         return super(PurchaseOrderLine, self)._name_search(
             name='', args=args, operator=operator, limit=limit,
             name_get_uid=name_get_uid)
+
+    @api.model
+    def create(self, vals):
+        rma_line_id = self.env.context.get('rma_line_id')
+        if rma_line_id:
+            vals['rma_line_id'] = rma_line_id
+        return super(PurchaseOrderLine, self).create(vals)
