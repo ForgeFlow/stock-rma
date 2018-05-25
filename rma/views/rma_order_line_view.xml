@@ -247,11 +247,6 @@
                                 <field name="out_shipment_count" widget="statinfo"
                                        string="Deliveries"/>
                             </button>
-                            <button type="object"  name="action_view_invoice"
-                                    class="oe_stat_button"
-                                    icon="fa-pencil-square-o"
-                                    string="Origin Inv">
-                            </button>
                             <button type="object" name="action_view_procurements"
                                     class="oe_stat_button"
                                     icon="fa-warning"
