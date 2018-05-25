@@ -7,6 +7,14 @@ from odoo import api, models
 class PurchaseOrderLine(models.Model):
     _inherit = "purchase.order.line"
 
+    # TODO: to be removed on migration to v10:
+    # This is needed because odoo misspelled `store` in v9 :facepalm:
+    state = fields.Selection(related='order_id.state', store=True)
+
+    rma_line_id = fields.Many2one(
+        comodel_name='rma.order.line', string='RMA',
+    )
+
     @api.model
     def name_search(self, name='', args=None, operator='ilike', limit=100):
         """Allows to search by PO reference."""
@@ -46,3 +54,10 @@ class PurchaseOrderLine(models.Model):
             return res
         else:
             return super(PurchaseOrderLine, self).name_get()
+
+    @api.model
+    def create(self, vals):
+        rma_line_id = self.env.context.get('rma_line_id')
+        if rma_line_id:
+            vals['rma_line_id'] = rma_line_id
+        return super(PurchaseOrderLine, self).create(vals)
