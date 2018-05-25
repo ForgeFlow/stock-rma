@@ -62,6 +62,42 @@
     </record>
     </data>
 
+    <record id="view_invoice_supplier_rma_form" model="ir.ui.view">
+        <field name="name">account.invoice.supplier.rma</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_supplier_form"/>
+        <field name="arch" type="xml">
+            <field name="reference" position="after">
+                 <field name="add_rma_line_id"
+                        context="{'rma': True}"
+                        domain="[('type', '=', 'supplier'),
+                                 ('partner_id', '=', partner_id)]"
+                        attrs="{'readonly': [('state','not in',['draft'])],
+                         'invisible': ['|', ('state', '=', 'done'),
+                          ('type', '=', 'in_invoice')]}" class="oe_edit_only"
+                        options="{'no_create': True}"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_invoice_customer_rma_form" model="ir.ui.view">
+        <field name="name">account.invoice.customer.rma</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_form"/>
+        <field name="arch" type="xml">
+            <field name="payment_term_id" position="after">
+                 <field name="add_rma_line_id"
+                        context="{'rma': True}"
+                        domain="[('type', '=', 'customer'),
+                                 ('partner_id', '=', partner_id)]"
+                        attrs="{'readonly': [('state','not in',['draft'])],
+                         'invisible': ['|', ('state', '=', 'done'),
+                          ('type', '=', 'out_invoice')]}" class="oe_edit_only"
+                        options="{'no_create': True}"/>
+            </field>
+        </field>
+    </record>
+
     <record id="action_invoice_line" model="ir.actions.act_window">
         <field name="name">Invoice Line</field>
         <field name="res_model">account.invoice.line</field>
