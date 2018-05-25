@@ -218,3 +218,16 @@ class RmaOrderLine(models.Model):
             result['views'] = [(res and res.id or False, 'form')]
             result['res_id'] = invoice_ids[0]
         return result
+
+    @api.multi
+    def name_get(self):
+        res = []
+        if self.env.context.get('rma'):
+            for rma in self:
+                res.append((rma.id, "%s %s qty:%s" % (
+                    rma.name,
+                    rma.product_id.name,
+                    rma.product_qty)))
+            return res
+        else:
+            return super(RmaOrderLine, self).name_get()
