@@ -63,15 +63,13 @@ class RmaLineMakeSupplierRma(models.TransientModel):
         lines = rma_line_obj.browse(rma_line_ids)
         for line in lines:
             items.append([0, 0, self._prepare_item(line)])
-        suppliers = lines.mapped('supplier_address_id')
-        if len(suppliers) == 0:
-            pass
-        elif len(suppliers) == 1:
-            res['partner_id'] = suppliers.id
-        else:
+        suppliers = lines.mapped(
+            lambda r: r.supplier_address_id.parent_id or r.supplier_address_id)
+        if len(suppliers) != 1:
             raise ValidationError(
-                _('Only RMA lines from the same supplier address can be '
+                _('Only RMA lines from the same supplier can be '
                   'processed at the same time'))
+        res['partner_id'] = suppliers.id
         res['item_ids'] = items
         return res
 
