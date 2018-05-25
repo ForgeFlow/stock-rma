@@ -10,25 +10,23 @@ class RmaOrderLine(models.Model):
     _inherit = "rma.order.line"
 
     @api.depends('sale_line_ids', 'sale_policy', 'sales_count',
-                 'sale_line_ids.state')
-    @api.multi
+                 'sale_line_ids.state', 'qty_received', 'product_qty')
     def _compute_qty_to_sell(self):
         for rec in self:
-            if rec.sale_policy == 'no':
-                rec.qty_to_sell = 0.0
-            elif rec.sale_policy == 'ordered':
-                qty = self._get_rma_sold_qty()
-                rec.qty_to_sell = self.product_qty - qty
+            if rec.sale_policy == 'ordered':
+                qty = rec._get_rma_sold_qty()
+                rec.qty_to_sell = rec.product_qty - qty
             elif rec.sale_policy == 'received':
-                qty = self._get_rma_sold_qty()
-                rec.qty_to_sell = self.qty_received - qty
+                qty = rec._get_rma_sold_qty()
+                rec.qty_to_sell = rec.qty_received - qty
             else:
                 rec.qty_to_sell = 0.0
 
     @api.depends('sale_line_ids', 'sale_policy', 'sales_count',
                  'sale_line_ids.state')
     def _compute_qty_sold(self):
-        self.qty_sold = self._get_rma_sold_qty()
+        for rec in self:
+            rec.qty_sold = rec._get_rma_sold_qty()
 
     @api.multi
     def _compute_sales_count(self):
