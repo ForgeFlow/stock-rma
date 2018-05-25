@@ -1,6 +1,28 @@
 <?xml version="1.0"?>
 <odoo>
 
+    <record id="action_rma_line_purchase" model="ir.actions.act_window">
+        <field name="name">Purchase Order</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_type">form</field>
+        <field name="target">current</field>
+        <field name="view_mode">form,tree</field>
+    </record>
+
+    <record id="view_rma_line_supplier_button_sale_form" model="ir.ui.view">
+        <field name="name">rma.order.line.supplier.form</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_line_supplier_button_form"/>
+        <field name="arch" type="xml">
+            <header position="inside">
+                <button name="%(action_rma_line_purchase)d" states="approved"
+                        string="Create Purchase Order" class="oe_highlight"
+                        context="{'rma_line_id': active_id, 'default_partner_id': partner_id}"
+                        type="action"/>
+            </header>
+        </field>
+    </record>
+
     <record id="view_rma_line_form" model="ir.ui.view">
         <field name="name">rma.order.line.supplier.form</field>
         <field name="model">rma.order.line</field>
@@ -13,6 +35,15 @@
                                 ('order_id.partner_id', '=', partner_id),
                                 ('order_id.partner_id', 'child_of', partner_id)]"/>
             </group>
+            <group name="quantities" position="inside">
+                <group>
+                    <field name="qty_to_purchase"/>
+                    <field name="qty_purchased"/>
+                </group>
+            </group>
+            <field name="delivery_policy" position="after">
+                <field name="purchase_policy"/>
+            </field>
             <field name="origin" position="after">
                 <field name="purchase_id"
                        attrs="{'invisible': [('purchase_order_line_id', '=', False)]}"/>
