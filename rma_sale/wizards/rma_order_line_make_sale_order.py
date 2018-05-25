@@ -30,7 +30,6 @@ class RmaLineMakeSaleOrder(models.TransientModel):
             'product_qty': line.qty_to_sell,
             'rma_id': line.rma_id.id,
             'out_warehouse_id': line.out_warehouse_id.id,
-            'out_route_id': line.out_route_id.id,
             'product_uom_id': line.uom_id.id,
         }
 
@@ -82,7 +81,6 @@ class RmaLineMakeSaleOrder(models.TransientModel):
             'order_id': so.id,
             'product_id': product.id,
             'product_uom': product.uom_po_id.id,
-            'route_id': item.out_route_id.id,
             'product_uom_qty': item.product_qty,
             'rma_line_id': item.line_id.id
         }
@@ -148,6 +146,3 @@ class RmaLineMakeSaleOrderItem(models.TransientModel):
     out_warehouse_id = fields.Many2one(
         comodel_name='stock.warehouse', string='Outbound Warehouse')
     free_of_charge = fields.Boolean(string='Free of Charge')
-    out_route_id = fields.Many2one(
-        comodel_name='stock.location.route', string='Outbound Route',
-        domain=[('rma_selectable', '=', True)])
