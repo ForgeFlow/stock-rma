@@ -18,6 +18,8 @@
              'data/rma_sequence.xml',
              'data/stock_data.xml',
              'data/rma_operation.xml',
+             'report/rma_report.xml',
+             'report/rma_report_templates.xml',
              'views/rma_order_view.xml',
              'views/rma_operation_view.xml',
              'views/rma_order_line_view.xml',
