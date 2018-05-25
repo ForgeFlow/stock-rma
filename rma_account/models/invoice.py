@@ -24,7 +24,7 @@ class AccountInvoice(models.Model):
         invoice_line = self.env['account.invoice.line']
         data = {
             'purchase_line_id': line.id,
-            'name': line.name + ': '+line.name,
+            'name': line.name,
             'origin': line.origin,
             'uom_id': line.uom_id.id,
             'product_id': line.product_id.id,
@@ -37,7 +37,7 @@ class AccountInvoice(models.Model):
             'quantity': qty,
             'discount': 0.0,
             'account_analytic_id': line.analytic_account_id.id,
-            'rma_line_ids': [(4, line.id)],
+            'rma_line_id': line.id,
         }
         return data
 
@@ -45,9 +45,6 @@ class AccountInvoice(models.Model):
     def on_change_add_rma_line_id(self):
         if not self.add_rma_line_id:
             return {}
-        if not self.partner_id:
-            self.partner_id = self.add_rma_line_id.partner_id.id
-
         new_line = self.env['account.invoice.line']
         if self.add_rma_line_id not in (
                 self.invoice_line_ids.mapped('rma_line_id')):

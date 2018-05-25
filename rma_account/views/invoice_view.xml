@@ -77,6 +77,9 @@
                           ('type', '=', 'in_invoice')]}" class="oe_edit_only"
                         options="{'no_create': True}"/>
             </field>
+            <xpath expr="//sheet/notebook/page/field[@name='invoice_line_ids']/tree" position="inside">
+                <field name="rma_line_id" invisible="1"/>
+            </xpath>
         </field>
     </record>
 
@@ -95,6 +98,9 @@
                           ('type', '=', 'out_invoice')]}" class="oe_edit_only"
                         options="{'no_create': True}"/>
             </field>
+            <xpath expr="//sheet/notebook/page/field[@name='invoice_line_ids']/tree" position="inside">
+                <field name="rma_line_id" invisible="1"/>
+            </xpath>
         </field>
     </record>
 
