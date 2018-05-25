@@ -3,18 +3,6 @@
      License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl-3.0) -->
 <odoo>
 
-    <menuitem id="menu_customer_rma_account"
-        name="Customer RMA"
-        groups="rma.group_rma_customer_user"
-        sequence="13"
-        parent="account.menu_finance"/>
-
-    <menuitem id="menu_supplier_rma_account"
-        name="Supplier RMA"
-        groups="rma.group_rma_supplier_user"
-        sequence="14"
-        parent="account.menu_finance"/>
-
     <record id="action_rma_account_customer_lines" model="ir.actions.act_window">
         <field name="name">Customer RMA</field>
         <field name="res_model">rma.order.line</field>
@@ -35,16 +23,16 @@
     </record>
 
     <menuitem id="menu_rma_line_account_customer"
-        name="RMA to refund"
+        name="Customer RMA to Refund"
         sequence="20"
-        parent="menu_customer_rma_account"
+        parent="account.menu_finance_receivables"
         groups="rma.group_rma_customer_user"
         action="action_rma_account_customer_lines"/>
 
     <menuitem id="menu_rma_line_account_supplier"
-        name="RMA to refund"
+        name="Supplier RMA to Refund"
         sequence="20"
-        parent="menu_supplier_rma_account"
+        parent="account.menu_finance_payables"
         groups="rma.group_rma_supplier_user"
         action="action_rma_supplier_lines"/>
 
