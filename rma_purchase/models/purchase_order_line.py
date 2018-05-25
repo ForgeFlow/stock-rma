@@ -32,9 +32,14 @@ class PurchaseOrderLine(models.Model):
         res = []
         if self.env.context.get('rma'):
             for purchase in self:
+                invoices = self.env['account.invoice.line'].search(
+                    [('purchase_line_id', '=', purchase.id)])
                 if purchase.order_id.name:
-                    res.append((purchase.id, "%s %s qty:%s" % (
+                    res.append((purchase.id, "%s %s %s qty:%s" % (
                         purchase.order_id.name,
+                        " ".join(str(x) for x in [
+                            inv.number for inv in invoices.mapped(
+                                'invoice_id')]),
                         purchase.product_id.name, purchase.product_qty)))
                 else:
                     res.append(
