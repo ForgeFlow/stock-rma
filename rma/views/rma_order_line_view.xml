@@ -159,10 +159,14 @@
                                     <group name="outbound" string="Outbound">
                                         <field name="out_warehouse_id"/>
                                         <field name="delivery_address_id"
+                                               context="{'show_address': 1}"
+                                               options="{'always_reload': 1}"
                                                groups='rma.group_rma_delivery_invoice_address'/>
                                         <field name="out_route_id" groups="stock.group_adv_location"/>
                                         <field name="supplier_to_customer"/>
                                         <field name="customer_address_id"
+                                               context="{'show_address': 1}"
+                                               options="{'always_reload': 1}"
                                                attrs="{'required':[('supplier_to_customer', '=', True)],
                                                        'invisible':[('supplier_to_customer', '=', False)]}"/>
                                     </group>
@@ -321,12 +325,16 @@
                                     <field name="in_route_id" groups="stock.group_adv_location"/>
                                     <field name="customer_to_supplier"/>
                                     <field name="supplier_address_id"
+                                           context="{'show_address': 1}"
+                                           options="{'always_reload': 1}"
                                            attrs="{'required':[('customer_to_supplier', '=', True)],
                                                    'invisible':[('customer_to_supplier', '=', False)]}"/>
                                 </group>
                                 <group name="outbound" string="Outbound">
                                     <field name="out_warehouse_id"/>
                                     <field name="delivery_address_id"
+                                           context="{'show_address': 1}"
+                                           options="{'always_reload': 1}"
                                            groups='rma.group_rma_delivery_invoice_address'/>
                                     <field name="out_route_id" groups="stock.group_adv_location"/>
                                 </group>
