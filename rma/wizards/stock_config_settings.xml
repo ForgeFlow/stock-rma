@@ -9,6 +9,7 @@
                 <xpath expr="//group[@name='shipping']" position="after">
                     <group string="Return Merchandise Authorization">
                         <field name="group_rma_delivery_address" widget="radio"/>
+                        <field name="group_rma_lines" widget="radio"/>
                     </group>
                 </xpath>
             </field>
