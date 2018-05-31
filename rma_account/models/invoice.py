@@ -126,16 +126,20 @@ class AccountInvoiceLine(models.Model):
         if self.env.context.get('rma'):
             for inv in self:
                 if inv.invoice_id.reference:
-                    res.append((inv.id, "%s %s %s %s qty:%s" % (
-                        inv.invoice_id.number or '',
-                        inv.origin or '',
-                        inv.invoice_id.reference or "",
-                        inv.product_id.name, inv.quantity)))
+                    res.append(
+                        (inv.id,
+                         "INV:%s | REF:%s | ORIG:%s | PART:%s | QTY:%s" % (
+                             inv.invoice_id.number or '',
+                             inv.origin or '',
+                             inv.invoice_id.reference or "",
+                             inv.product_id.name, inv.quantity)))
                 elif inv.invoice_id.number:
-                    res.append((inv.id, "%s %s %s qty:%s" % (
-                        inv.invoice_id.number or '',
-                        inv.origin or '',
-                        inv.product_id.name, inv.quantity)))
+                    res.append(
+                        (inv.id,
+                         "INV:%s | ORIG:%s | PART:%s | QTY:%s" % (
+                             inv.invoice_id.number or '',
+                             inv.origin or '',
+                             inv.product_id.name, inv.quantity)))
                 else:
                     res.append(super(AccountInvoiceLine, inv).name_get()[0])
             return res
