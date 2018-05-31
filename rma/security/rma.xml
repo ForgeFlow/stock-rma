@@ -40,10 +40,8 @@
         <field name="implied_ids" eval="[(4, ref('group_rma_manager'))]"/>
     </record>
     <record id="stock.group_stock_user" model="res.groups">
-        <field name="implied_ids" eval="[(4, ref('group_rma_customer_user'))]"/>
-    </record>
-    <record id="stock.group_stock_user" model="res.groups">
-        <field name="implied_ids" eval="[(4, ref('group_rma_supplier_user'))]"/>
+        <field name="implied_ids" eval="[(4, ref('group_rma_customer_user')),
+                                         (4, ref('group_rma_supplier_user'))]"/>
     </record>
 
 </odoo>
