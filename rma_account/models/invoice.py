@@ -100,6 +100,55 @@ class AccountInvoice(models.Model):
 class AccountInvoiceLine(models.Model):
     _inherit = "account.invoice.line"
 
+    @api.model
+    def name_search(self, name, args=None, operator='ilike', limit=100):
+        """Allows to search by Invoice number. This has to be done this way,
+        as Odoo adds extra args to name_search on _name_search method that
+        will make impossible to get the desired result."""
+        if not args:
+            args = []
+        lines = self.search(
+            [('invoice_id.number', operator, name)] + args, limit=limit,
+        )
+        res = lines.name_get()
+        if limit:
+            limit_rest = limit - len(lines)
+        else:
+            # limit can be 0 or None representing infinite
+            limit_rest = limit
+        if limit_rest or not limit:
+            args += [('id', 'not in', lines.ids)]
+            res += super(AccountInvoiceLine, self).name_search(
+                name, args=args, operator=operator, limit=limit_rest,
+            )
+        return res
+
+    @api.multi
+    def name_get(self):
+        res = []
+        if self.env.context.get('rma'):
+            for inv in self:
+                if inv.invoice_id.reference:
+                    res.append(
+                        (inv.id,
+                         "INV:%s | REF:%s | ORIG:%s | PART:%s | QTY:%s" % (
+                             inv.invoice_id.number or '',
+                             inv.origin or '',
+                             inv.invoice_id.reference or "",
+                             inv.product_id.name, inv.quantity)))
+                elif inv.invoice_id.number:
+                    res.append(
+                        (inv.id,
+                         "INV:%s | ORIG:%s | PART:%s | QTY:%s" % (
+                             inv.invoice_id.number or '',
+                             inv.origin or '',
+                             inv.product_id.name, inv.quantity)))
+                else:
+                    res.append(super(AccountInvoiceLine, inv).name_get()[0])
+            return res
+        else:
+            return super(AccountInvoiceLine, self).name_get()
+
     @api.multi
     def _compute_rma_count(self):
         for invl in self:
