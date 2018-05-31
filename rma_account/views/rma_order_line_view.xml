@@ -33,6 +33,8 @@
                 </page>
                 <field name="delivery_address_id" position="after">
                     <field name="invoice_address_id"
+                           domain="['|', ('parent_id', '=', partner_id),
+                                         ('id', '=', partner_id)]"
                            groups='rma.group_rma_delivery_invoice_address'/>
                 </field>
                 <group name="deliver" position="after">
@@ -78,6 +80,8 @@
                 </page>
                 <field name="delivery_address_id" position="after">
                     <field name="invoice_address_id"
+                           domain="['|', ('parent_id', '=', partner_id),
+                                         ('id', '=', partner_id)]"
                            groups='rma.group_rma_delivery_invoice_address'/>
                 </field>
                 <group name="supplier_rma" position="after">

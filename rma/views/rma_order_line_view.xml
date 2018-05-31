@@ -159,6 +159,8 @@
                                     <group name="outbound" string="Outbound">
                                         <field name="out_warehouse_id"/>
                                         <field name="delivery_address_id"
+                                               domain="['|', ('parent_id', '=', partner_id),
+                                                             ('id', '=', partner_id)]"
                                                context="{'show_address': 1}"
                                                options="{'always_reload': 1}"
                                                groups='rma.group_rma_delivery_invoice_address'/>
@@ -333,6 +335,8 @@
                                 <group name="outbound" string="Outbound">
                                     <field name="out_warehouse_id"/>
                                     <field name="delivery_address_id"
+                                           domain="['|', ('parent_id', '=', partner_id),
+                                                         ('id', '=', partner_id)]"
                                            context="{'show_address': 1}"
                                            options="{'always_reload': 1}"
                                            groups='rma.group_rma_delivery_invoice_address'/>
