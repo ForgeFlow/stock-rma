@@ -27,8 +27,8 @@ class TestRma(common.SavepointCase):
             'rma.rma_operation_supplier_replace')
         cls.product_id = cls.env.ref('product.product_product_4')
         cls.product_1 = cls.env.ref('product.product_product_25')
-        cls.product_2 = cls.env.ref('product.product_product_30')
-        cls.product_3 = cls.env.ref('product.product_product_33')
+        cls.product_2 = cls.env.ref('product.product_product_8')
+        cls.product_3 = cls.env.ref('product.product_product_9')
         cls.uom_unit = cls.env.ref('product.product_uom_unit')
         # assign an operation
         cls.product_1.write(
@@ -107,7 +107,7 @@ class TestRma(common.SavepointCase):
                      'active_ids': rma_id.id,
                      'active_model': 'rma.order',
                      }
-                ).create({})
+                ).new({})
                 data = wizard._prepare_rma_line_from_stock_move(move)
                 wizard.add_lines()
 
@@ -182,6 +182,15 @@ class TestRma(common.SavepointCase):
             'picking_id': picking_in.id
         }
         return res
+
+    def update_product_qty(self, product, qty=10.0):
+        up_wiz = self.udpate_qty.create({
+            'product_id': product.id,
+            'new_quantity': qty,
+            'location_id': self.stock_location.id,
+        })
+        up_wiz.change_product_qty()
+        return True
 
     def test_01_rma_order_line(self):
         picking_in = self._create_picking(self.env.ref('base.res_partner_2'))
@@ -378,6 +387,9 @@ class TestRma(common.SavepointCase):
         self.rma_customer_id.action_view_in_shipments()
         self.rma_customer_id.action_view_out_shipments()
         self.rma_customer_id.action_view_lines()
+        # Check counts:
+        self.assertEquals(self.rma_customer_id.out_shipment_count, 3)
+        self.assertEquals(self.rma_customer_id.in_shipment_count, 3)
 
     # DROPSHIP
     def test_03_dropship(self):
@@ -452,14 +464,10 @@ class TestRma(common.SavepointCase):
             line.action_rma_done()
             self.assertEquals(line.state, 'done', "Wrong State")
 
-    def update_product_qty(self, product, qty=10.0):
-        up_wiz = self.udpate_qty.create({
-            'product_id': product.id,
-            'new_quantity': qty,
-            'location_id': self.stock_location.id,
-        })
-        up_wiz.change_product_qty()
-        return True
+        # Check counts:
+        self.assertEquals(self.rma_droship_id.out_shipment_count, 0)
+        self.assertEquals(supplier_rma.out_shipment_count, 3)
+        self.assertEquals(supplier_rma.in_shipment_count, 0)
 
     # Supplier RMA
     def test_04_supplier_rma(self):
@@ -573,3 +581,7 @@ class TestRma(common.SavepointCase):
         for line in self.rma_supplier_id.rma_line_ids:
             line.action_rma_done()
             self.assertEquals(line.state, 'done', "Wrong State")
+
+        # Check counts:
+        self.assertEquals(self.rma_supplier_id.out_shipment_count, 3)
+        self.assertEquals(self.rma_supplier_id.in_shipment_count, 3)
