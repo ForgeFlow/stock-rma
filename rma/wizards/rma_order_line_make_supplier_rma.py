@@ -65,7 +65,7 @@ class RmaLineMakeSupplierRma(models.TransientModel):
             items.append([0, 0, self._prepare_item(line)])
         suppliers = lines.mapped(
             lambda r: r.supplier_address_id.parent_id or r.supplier_address_id)
-        if len(suppliers) != 1:
+        if len(suppliers) > 1:
             raise ValidationError(
                 _('Only RMA lines from the same supplier can be '
                   'processed at the same time'))
