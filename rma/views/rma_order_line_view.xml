@@ -404,6 +404,9 @@
                         <filter domain="[('state','!=', 'done'),('qty_to_receive','>',0.0)]" help="To Receive"/>
                         <filter domain="[('state','!=', 'done'),('qty_to_deliver','>',0.0)]" help="To Deliver"/>
                     </group>
+                    <group name="rma_supplier_quantities">
+                        <filter domain="[('state','!=', 'done'),('qty_to_supplier_rma','>',0.0)]" help="To Send to Supplier RMA"/>
+                    </group>
                     <group expand="0" string="Group By">
                         <filter name="status" string="State" domain="[]"
                                 context="{'group_by':'state'}"/>
