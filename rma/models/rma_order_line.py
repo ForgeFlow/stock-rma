@@ -209,14 +209,12 @@ class RmaOrderLine(models.Model):
     )
     assigned_to = fields.Many2one(
         comodel_name='res.users', track_visibility='onchange',
-        default=lambda self: self.env.uid,
     )
     requested_by = fields.Many2one(
         comodel_name='res.users', track_visibility='onchange',
-        default=lambda self: self.env.uid,
     )
     partner_id = fields.Many2one(
-        comodel_name='res.partner', required=True, store=True,
+        comodel_name='res.partner',
         track_visibility='onchange',
         string="Partner",
         readonly=True, states={'draft': [('readonly', False)]},
@@ -242,7 +240,6 @@ class RmaOrderLine(models.Model):
     )
     uom_id = fields.Many2one(
         comodel_name='product.uom', string='Unit of Measure',
-        required=True,
         readonly=True, states={'draft': [('readonly', False)]},
     )
     price_unit = fields.Monetary(
@@ -269,12 +266,10 @@ class RmaOrderLine(models.Model):
                                       copy=False)
     currency_id = fields.Many2one('res.currency', string="Currency")
     company_id = fields.Many2one(
-        comodel_name='res.company', string='Company', required=True,
-        default=lambda self: self.env.user.company_id)
+        comodel_name='res.company', string='Company')
     type = fields.Selection(
         selection=[('customer', 'Customer'), ('supplier', 'Supplier')],
-        string="Type", required=True, default=_get_default_type,
-        readonly=True,
+        string="Type",
     )
     customer_to_supplier = fields.Boolean(
         'The customer will send to the supplier',
@@ -287,45 +282,37 @@ class RmaOrderLine(models.Model):
     receipt_policy = fields.Selection([
         ('no', 'Not required'), ('ordered', 'Based on Ordered Quantities'),
         ('delivered', 'Based on Delivered Quantities')],
-        required=True, string="Receipts Policy",
+        string="Receipts Policy",
         readonly=True, states={'draft': [('readonly', False)]},
     )
     delivery_policy = fields.Selection([
         ('no', 'Not required'), ('ordered', 'Based on Ordered Quantities'),
-        ('received', 'Based on Received Quantities')], required=True,
+        ('received', 'Based on Received Quantities')],
         string="Delivery Policy",
         readonly=True, states={'draft': [('readonly', False)]},
     )
     in_route_id = fields.Many2one(
         'stock.location.route', string='Inbound Route',
-        required=True,
         domain=[('rma_selectable', '=', True)],
         readonly=True, states={'draft': [('readonly', False)]},
     )
     out_route_id = fields.Many2one(
         'stock.location.route', string='Outbound Route',
-        required=True,
         domain=[('rma_selectable', '=', True)],
         readonly=True, states={'draft': [('readonly', False)]},
     )
     in_warehouse_id = fields.Many2one(
         comodel_name='stock.warehouse',
         string='Inbound Warehouse',
-        required=True,
         readonly=True, states={'draft': [('readonly', False)]},
-        default=_default_warehouse_id,
     )
     out_warehouse_id = fields.Many2one(
         comodel_name='stock.warehouse', string='Outbound Warehouse',
-        required=True,
         readonly=True, states={'draft': [('readonly', False)]},
-        default=_default_warehouse_id,
     )
     location_id = fields.Many2one(
         comodel_name='stock.location', string='Send To This Company Location',
-        required=True,
         readonly=True, states={'draft': [('readonly', False)]},
-        default=_default_location_id,
     )
     customer_rma_id = fields.Many2one(
         'rma.order.line', string='Customer RMA line', ondelete='cascade')

@@ -47,14 +47,13 @@ class RmaOrder(models.Model):
         string='Group Number', index=True, copy=False)
     type = fields.Selection(
         [('customer', 'Customer'), ('supplier', 'Supplier')],
-        string="Type", required=True, default=_get_default_type, readonly=True)
+        string="Type")
     reference = fields.Char(string='Partner Reference',
                             help="The partner reference of this RMA order.")
     comment = fields.Text('Additional Information')
-    date_rma = fields.Datetime(string='Order Date', index=True,
-                               default=_default_date_rma)
+    date_rma = fields.Datetime(string='Order Date', index=True)
     partner_id = fields.Many2one(
-        comodel_name='res.partner', string='Partner', required=True)
+        comodel_name='res.partner', string='Partner')
     rma_line_ids = fields.One2many('rma.order.line', 'rma_id',
                                    string='RMA lines')
     in_shipment_count = fields.Integer(compute=_compute_in_shipment_count,
@@ -66,8 +65,7 @@ class RmaOrder(models.Model):
     supplier_line_count = fields.Integer(compute=_compute_supplier_line_count,
                                          string='# of Outgoing Shipments')
     company_id = fields.Many2one('res.company', string='Company',
-                                 required=True, default=lambda self:
-                                 self.env.user.company_id)
+                                 required=True)
 
     @api.constrains("partner_id", "rma_line_ids")
     def _check_partner_id(self):
