@@ -19,5 +19,5 @@
              "data/mrp_repair_sequence.xml",
              ],
     "installable": False,
-    "auto_install": True,
+    "auto_install": False,
 }
