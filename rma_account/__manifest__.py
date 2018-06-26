@@ -12,6 +12,7 @@
     'depends': ['account', 'rma'],
     'demo': ['demo/rma_operation.xml'],
     'data': [
+        'security/ir.model.access.csv',
         'views/rma_order_view.xml',
         'views/rma_operation_view.xml',
         'views/rma_order_line_view.xml',
@@ -21,5 +22,5 @@
         'wizards/rma_refund.xml',
     ],
     'installable': True,
-    'auto_install': True,
+    'auto_install': False,
 }

@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_account_invoice_customer_user,access_account_invoice,account.model_account_invoice,rma.group_rma_customer_user,1,0,0,0
+access_account_invoice_supplier_user,access_account_invoice,account.model_account_invoice,rma.group_rma_supplier_user,1,0,0,0
