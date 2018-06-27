@@ -10,20 +10,21 @@
 
         <record id="group_rma_customer_user" model="res.groups">
             <field name="name">RMA Customer User</field>
-            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]"/>
             <field name="category_id" ref="module_category_rma"/>
         </record>
 
         <record id="group_rma_supplier_user" model="res.groups">
             <field name="name">RMA Supplier User</field>
-            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]"/>
             <field name="category_id" ref="module_category_rma"/>
         </record>
 
         <record id="group_rma_manager" model="res.groups">
             <field name="name">RMA Manager</field>
             <field name="implied_ids"
-                   eval="[(4, ref('rma.group_rma_customer_user')), (4, ref('rma.group_rma_supplier_user'))]"/>
+                   eval="[(4, ref('rma.group_rma_customer_user')),
+                          (4, ref('rma.group_rma_supplier_user'))]"/>
             <field name="users" eval="[(4, ref('base.user_root'))]"/>
             <field name="category_id" ref="module_category_rma"/>
         </record>
@@ -32,6 +33,16 @@
             <field name="name">Addresses in RMA</field>
             <field name="category_id" ref="module_category_rma"/>
             <field name="users" eval="[(4, ref('base.user_root'))]"/>
+        </record>
+
+        <record id="stock.group_stock_manager" model="res.groups">
+            <field name="implied_ids" eval="[(4, ref('group_rma_manager'))]"/>
+        </record>
+
+        <record id="stock.group_stock_user" model="res.groups">
+            <field name="implied_ids"
+                   eval="[(4, ref('group_rma_customer_user')),
+                          (4, ref('group_rma_supplier_user'))]"/>
         </record>
 
     </data>
