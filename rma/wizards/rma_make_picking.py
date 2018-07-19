@@ -187,7 +187,7 @@ class RmaMakePicking(models.TransientModel):
 
     @api.model
     def _get_action(self, pickings, procurements):
-        if pickings:
+        if pickings and procurements:
             action = procurements.do_view_pickings()
         else:
             action = self.env.ref(
