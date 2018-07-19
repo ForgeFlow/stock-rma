@@ -519,13 +519,14 @@ class RmaOrderLine(models.Model):
             ('rma_line_id', 'in', self.ids)])
         picking_ids = moves.mapped('picking_id').filtered(
             lambda p: p.picking_type_code == 'incoming').ids
-        # choose the view_mode accordingly
-        if len(picking_ids) > 1:
-            result['domain'] = [('id', 'in', picking_ids)]
-        else:
-            res = self.env.ref('stock.view_picking_form', False)
-            result['views'] = [(res and res.id or False, 'form')]
-            result['res_id'] = picking_ids and picking_ids[0]
+        if picking_ids:
+            # choose the view_mode accordingly
+            if len(picking_ids) > 1:
+                result['domain'] = [('id', 'in', picking_ids)]
+            else:
+                res = self.env.ref('stock.view_picking_form', False)
+                result['views'] = [(res and res.id or False, 'form')]
+                result['res_id'] = picking_ids and picking_ids[0]
         return result
 
     @api.multi
@@ -536,11 +537,12 @@ class RmaOrderLine(models.Model):
             ('rma_line_id', 'in', self.ids)])
         picking_ids = moves.mapped('picking_id').filtered(
             lambda p: p.picking_type_code == 'outgoing').ids
-        # choose the view_mode accordingly
-        if len(picking_ids) > 1:
-            result['domain'] = [('id', 'in', picking_ids)]
-        else:
-            res = self.env.ref('stock.view_picking_form', False)
-            result['views'] = [(res and res.id or False, 'form')]
-            result['res_id'] = picking_ids and picking_ids[0]
+        if picking_ids:
+            # choose the view_mode accordingly
+            if len(picking_ids) > 1:
+                result['domain'] = [('id', 'in', picking_ids)]
+            else:
+                res = self.env.ref('stock.view_picking_form', False)
+                result['views'] = [(res and res.id or False, 'form')]
+                result['res_id'] = picking_ids and picking_ids[0]
         return result

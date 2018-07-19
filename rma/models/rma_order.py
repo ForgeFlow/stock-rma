@@ -109,9 +109,9 @@ class RmaOrder(models.Model):
                 for move in line.move_ids:
                     if move.picking_id.location_id == suppliers:
                         picking_ids.append(move.picking_id.id)
-        shipments = list(set(picking_ids))
-        # choose the view_mode accordingly
-        if shipments:
+        if picking_ids:
+            shipments = list(set(picking_ids))
+            # choose the view_mode accordingly
             if len(shipments) > 1:
                 result['domain'] = [('id', 'in', shipments)]
             else:
@@ -136,14 +136,15 @@ class RmaOrder(models.Model):
                 for move in line.move_ids:
                     if move.picking_id.location_id != suppliers:
                         picking_ids.append(move.picking_id.id)
-        shipments = list(set(picking_ids))
-        # choose the view_mode accordingly
-        if len(shipments) != 1:
-            result['domain'] = [('id', 'in', shipments)]
-        else:
-            res = self.env.ref('stock.view_picking_form', False)
-            result['views'] = [(res and res.id or False, 'form')]
-            result['res_id'] = shipments[0]
+        if picking_ids:
+            shipments = list(set(picking_ids))
+            # choose the view_mode accordingly
+            if len(shipments) != 1:
+                result['domain'] = [('id', 'in', shipments)]
+            else:
+                res = self.env.ref('stock.view_picking_form', False)
+                result['views'] = [(res and res.id or False, 'form')]
+                result['res_id'] = shipments[0]
         return result
 
     @api.multi
