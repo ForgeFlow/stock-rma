@@ -20,15 +20,15 @@ class RmaMakePicking(models.TransientModel):
             if procurement.purchase_id and \
                     procurement.purchase_id.id:
                 po_list.append(procurement.purchase_id.id)
-        if po_list:
-            if len(po_list):
-                action = self.env.ref('purchase.purchase_rfq')
-                result = action.read()[0]
-                result['domain'] = [('id', 'in', po_list)]
-                return result
-        action = super(RmaMakePicking, self)._get_action(
-            pickings, procurements)
-        return action
+        if len(po_list):
+            action = self.env.ref('purchase.purchase_rfq')
+            result = action.read()[0]
+            result['domain'] = [('id', 'in', po_list)]
+            return result
+        else:
+            action = super(RmaMakePicking, self)._get_action(pickings,
+                                                             procurements)
+            return action
 
 
 class RmaMakePickingItem(models.TransientModel):
