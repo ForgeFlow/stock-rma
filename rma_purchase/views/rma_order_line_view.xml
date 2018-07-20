@@ -35,12 +35,6 @@
                                 ('order_id.partner_id', '=', partner_id),
                                 ('order_id.partner_id', 'child_of', partner_id)]"/>
             </group>
-            <group name="quantities" position="inside">
-                <group>
-                    <field name="qty_to_purchase"/>
-                    <field name="qty_purchased"/>
-                </group>
-            </group>
             <field name="delivery_policy" position="after">
                 <field name="purchase_policy"/>
             </field>
