@@ -1,7 +1,8 @@
+# -*- coding: utf-8 -*-
 # Copyright 2017-18 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo import api, models
+from openerp import api, fields, models
 
 
 class PurchaseOrder(models.Model):
@@ -19,8 +20,10 @@ class PurchaseOrder(models.Model):
             })
             line.onchange_product_id()
             line.update({
-                'product_qty': rma_line.product_qty,
+                'product_qty': rma_line.qty_to_purchase,
                 'product_uom': rma_line.uom_id.id,
             })
             res.order_line = line
+            # TODO: maybe this line is not needed in v10:
+            res.date_planned = res._compute_date_planned()
         return res
