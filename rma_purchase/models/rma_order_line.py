@@ -3,6 +3,7 @@
 
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
+from odoo.addons import decimal_precision as dp
 
 
 class RmaOrderLine(models.Model):
@@ -11,29 +12,19 @@ class RmaOrderLine(models.Model):
     @api.multi
     def _compute_purchase_count(self):
         for rec in self:
-            purchase_list = []
-            for procurement_id in rec.procurement_ids:
-                if procurement_id.purchase_id and \
-                        procurement_id.purchase_id.id:
-                    purchase_list.append(procurement_id.purchase_id.id)
-            rec.purchase_count = (
-                len(list(set(purchase_list))) +
-                len(rec.manual_purchase_line_ids.mapped('order_id')))
+            rec.purchase_count = len(self.env['purchase.order'].search(
+                [('origin', 'ilike', rec.name)]).ids)
 
     @api.multi
     def _compute_purchase_order_lines(self):
         for rec in self:
             purchase_list = []
-            for purchase in self.env['purchase.order'].search(
-                    [('origin', 'ilike', rec.name)]):
-                for line in purchase.order_line:
-                    purchase_list.append(line.id)
+            for line in self.env['purchase.order.line'].search(
+                    [('rma_line_id', '=', rec.id)]):
+                purchase_list.append(line.id)
             rec.purchase_order_line_ids = [(6, 0, purchase_list)]
 
     @api.multi
-    @api.depends('procurement_ids.purchase_line_id',
-                 'manual_purchase_line_ids',
-                 'manual_purchase_line_ids.state', 'qty_delivered')
     def _compute_qty_purchase(self):
         for rec in self:
             rec.qty_purchased = rec._get_rma_purchased_qty()
@@ -78,12 +69,12 @@ class RmaOrderLine(models.Model):
     qty_to_purchase = fields.Float(
         string='Qty To Purchase', copy=False,
         digits=dp.get_precision('Product Unit of Measure'),
-        readonly=True, compute='_compute_qty_purchase', store=True,
+        readonly=True, compute='_compute_qty_purchase'
     )
     qty_purchased = fields.Float(
         string='Qty Purchased', copy=False,
         digits=dp.get_precision('Product Unit of Measure'),
-        readonly=True, compute='_compute_qty_purchase', store=True,
+        readonly=True, compute='_compute_qty_purchase'
     )
 
     @api.onchange('operation_id')
@@ -176,8 +167,7 @@ class RmaOrderLine(models.Model):
     def action_view_purchase_order(self):
         action = self.env.ref('purchase.purchase_rfq')
         result = action.read()[0]
-        orders = self.mapped('procurement_ids.purchase_id')
-        orders += self.mapped('manual_purchase_line_ids.order_id')
+        orders = self.mapped('purchase_order_line_ids.order_id')
         result['domain'] = [('id', 'in', orders.ids)]
         return result
 
@@ -187,13 +177,8 @@ class RmaOrderLine(models.Model):
         qty = 0.0
         if self.type == 'customer':
             return qty
-        uom_obj = self.env['product.uom']
-        for procurement_id in self.procurement_ids:
-            purchase_line = procurement_id.purchase_line_id
-            qty += purchase_line.product_qty
-
-        for line in self.manual_purchase_line_ids.filtered(
+        for line in self.purchase_order_line_ids.filtered(
                 lambda p: p.state not in ('draft', 'sent', 'cancel')):
-            qty += uom_obj._compute_qty(
-                self.uom_id.id, line.product_qty, line.product_uom.id)
+            qty += self.uom_id._compute_quantity(
+                line.product_qty, line.product_uom)
         return qty
