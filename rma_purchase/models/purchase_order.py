@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017-18 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from openerp import api, fields, models
+from odoo import api, models
 
 
 class PurchaseOrder(models.Model):
@@ -24,6 +23,4 @@ class PurchaseOrder(models.Model):
                 'product_uom': rma_line.uom_id.id,
             })
             res.order_line = line
-            # TODO: maybe this line is not needed in v10:
-            res.date_planned = res._compute_date_planned()
         return res

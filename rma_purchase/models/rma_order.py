@@ -12,9 +12,12 @@ class RmaOrder(models.Model):
     def _compute_po_count(self):
         for rec in self:
             po_count = 0
+            rma_line_po = []
             for line in rec.rma_line_ids:
-                po_count += len(self.env['purchase.order'].search(
-                    [('origin', '=', line.name)]).ids)
+                rma_line_po += self.env['purchase.order'].search(
+                    [('origin', '=', line.name)]).ids
+            if rma_line_po:
+                po_count = len(list(set(rma_line_po)))
             rec.po_count = po_count
 
     @api.multi
@@ -35,6 +38,9 @@ class RmaOrder(models.Model):
         result = action.read()[0]
         po_ids = self.env['purchase.order'].search(
             [('origin', '=', self.name)]).ids
+        for line in self.rma_line_ids:
+            po_ids += self.env['purchase.order'].search(
+                [('origin', '=', line.name)]).ids
         if not po_ids:
             raise ValidationError(_("No purchase order found!"))
         result['domain'] = [('id', 'in', po_ids)]
