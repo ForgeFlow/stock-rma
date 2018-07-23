@@ -20,18 +20,14 @@ class RmaOrder(models.Model):
     @api.multi
     def _compute_in_shipment_count(self):
         for rec in self:
-            rec.in_shipment_count = len(rec.rma_line_ids.mapped(
-                'move_ids').filtered(
-                lambda m: m.location_dest_id.usage == 'internal').mapped(
-                'picking_id'))
+            rec.in_shipment_count = sum(
+                set(rec.rma_line_ids.mapped('in_shipment_count')))
 
     @api.multi
     def _compute_out_shipment_count(self):
         for rec in self:
-            rec.out_shipment_count = len(rec.rma_line_ids.mapped(
-                'move_ids').filtered(
-                lambda m: m.location_id.usage == 'internal').mapped(
-                'picking_id'))
+            rec.out_shipment_count = sum(
+                set(rec.rma_line_ids.mapped('out_shipment_count')))
 
     @api.multi
     def _compute_supplier_line_count(self):

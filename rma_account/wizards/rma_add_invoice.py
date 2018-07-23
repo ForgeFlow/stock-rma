@@ -90,10 +90,6 @@ class RmaAddInvoice(models.TransientModel):
     def _get_rma_data(self):
         data = {
             'date_rma': fields.Datetime.now(),
-            'delivery_address_id':
-                self.invoice_line_ids[0].invoice_id.partner_id.id,
-            'invoice_address_id':
-                self.invoice_line_ids[0].invoice_id.partner_id.id
         }
         return data
 

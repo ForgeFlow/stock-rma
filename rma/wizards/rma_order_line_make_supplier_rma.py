@@ -79,7 +79,6 @@ class RmaLineMakeSupplierRma(models.TransientModel):
             raise ValidationError(_('Enter a supplier.'))
         return {
             'partner_id': self.partner_id.id,
-            'delivery_address_id': self.partner_id.id,
             'type': 'supplier',
             'company_id': company.id,
         }

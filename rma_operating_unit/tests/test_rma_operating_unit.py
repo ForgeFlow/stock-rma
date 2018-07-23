@@ -70,7 +70,6 @@ class TestRmaOperatingUnit(common.TransactionCase):
         rma_order = self.rma_model.sudo(uid).create({
             'operating_unit_id': operating_unit.id,
             'partner_id': self.partner.id,
-            'user_id': uid,
             })
         return rma_order
 

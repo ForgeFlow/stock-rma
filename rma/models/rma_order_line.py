@@ -63,7 +63,8 @@ class RmaOrderLine(models.Model):
         for line in self:
             for move in line.move_ids:
                 if move.location_dest_id.usage in ('supplier', 'customer'):
-                    if not line.customer_to_supplier:
+                    if (not line.customer_to_supplier or
+                            line.supplier_to_customer):
                         picking_ids.append(move.picking_id.id)
             shipments = list(set(picking_ids))
             line.out_shipment_count = len(shipments)
@@ -92,10 +93,10 @@ class RmaOrderLine(models.Model):
             rec.qty_to_receive = 0.0
             if rec.receipt_policy == 'ordered':
                 rec.qty_to_receive = \
-                    rec.product_qty - rec.qty_incoming - rec.qty_received
+                    rec.product_qty - rec.qty_received
             elif rec.receipt_policy == 'delivered':
                 rec.qty_to_receive = \
-                    rec.qty_delivered - rec.qty_incoming - rec.qty_received
+                    rec.qty_delivered - rec.qty_received
 
     @api.multi
     @api.depends('move_ids', 'move_ids.state',
@@ -113,8 +114,12 @@ class RmaOrderLine(models.Model):
     @api.depends('move_ids', 'move_ids.state', 'type')
     def _compute_qty_incoming(self):
         for rec in self:
-            qty = rec._get_rma_move_qty(
-                ('draft', 'confirmed', 'assigned'), direction='in')
+            if rec.supplier_to_customer:
+                qty = rec._get_rma_move_qty(
+                    ('draft', 'confirmed', 'assigned'), direction='out')
+            else:
+                qty = rec._get_rma_move_qty(
+                    ('draft', 'confirmed', 'assigned'), direction='in')
             rec.qty_incoming = qty
 
     @api.multi
@@ -131,8 +136,12 @@ class RmaOrderLine(models.Model):
     @api.depends('move_ids', 'move_ids.state', 'type')
     def _compute_qty_outgoing(self):
         for rec in self:
-            qty = rec._get_rma_move_qty(
-                ('draft', 'confirmed', 'assigned'), direction='out')
+            if rec.supplier_to_customer:
+                qty = rec._get_rma_move_qty(
+                    ('draft', 'confirmed', 'assigned'), direction='in')
+            else:
+                qty = rec._get_rma_move_qty(
+                    ('draft', 'confirmed', 'assigned'), direction='out')
             rec.qty_outgoing = qty
 
     @api.multi

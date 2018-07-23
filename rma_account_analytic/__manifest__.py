@@ -10,7 +10,7 @@
     "license": "LGPL-3",
     "website": "http://www.eficent.com",
     "category": "Analytic",
-    "depends": ["rma_account", "rma_analytic", "stock_analytic_account"],
+    "depends": ["rma_account", "rma_analytic"],
     "data": [
     ],
     'installable': True,
