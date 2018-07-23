@@ -69,8 +69,6 @@ class RmaOrder(models.Model):
 
         self.rma_line_ids += new_lines
         self.date_rma = fields.Datetime.now()
-        self.delivery_address_id = self.add_invoice_id.partner_id.id
-        self.invoice_address_id = self.add_invoice_id.partner_id.id
         self.add_invoice_id = False
         return {}
 

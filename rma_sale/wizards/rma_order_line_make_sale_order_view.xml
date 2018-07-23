@@ -14,7 +14,7 @@
                      <group>
                         <field name="sale_order_id"
                             domain="[('partner_id','=',partner_id)]"
-                            context="{'partner_id': partner_id}"/>/>
+                            context="{'partner_id': partner_id}"/>
                      </group>
                      <newline/>
                      <separator
