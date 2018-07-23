@@ -14,5 +14,5 @@ class RmaMakePicking(models.TransientModel):
         procurement_data = super(RmaMakePicking, self)._get_procurement_data(
             item, group, qty, picking_type)
         procurement_data.update(
-            analytic_account_id=item.line_id.analytic_account_id.id)
+            account_analytic_id=item.line_id.analytic_account_id.id)
         return procurement_data

@@ -10,8 +10,7 @@
     "license": "LGPL-3",
     "website": "http://www.eficent.com",
     "category": "Analytic",
-    "depends": ["rma", "analytic", "procurement_analytic",
-                'stock_analytic_account'],
+    "depends": ["rma", "procurement_analytic", "stock_analytic"],
     "data": [
         "views/rma_order_line_view.xml"
     ],
