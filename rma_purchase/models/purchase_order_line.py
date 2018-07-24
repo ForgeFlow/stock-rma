@@ -26,4 +26,3 @@ class PurchaseOrderLine(models.Model):
         return super(PurchaseOrderLine, self)._name_search(
             name='', args=args, operator=operator, limit=limit,
             name_get_uid=name_get_uid)
-
