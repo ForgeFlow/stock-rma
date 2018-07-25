@@ -70,8 +70,8 @@
                         domain="[('type', '=', 'supplier'),
                                  ('partner_id', '=', partner_id)]"
                         attrs="{'readonly': [('state','not in',['draft'])],
-                         'invisible': ['|', ('state', '=', 'done'),
-                          ('type', '=', 'in_invoice')]}" class="oe_edit_only"
+                         'invisible': ['|', ('state', '=', 'paid'),
+                          ('type', '=', 'out_invoice')]}" class="oe_edit_only"
                         options="{'no_create': True}"/>
             </field>
         </field>
@@ -88,8 +88,8 @@
                         domain="[('type', '=', 'customer'),
                                  ('partner_id', '=', partner_id)]"
                         attrs="{'readonly': [('state','not in',['draft'])],
-                         'invisible': ['|', ('state', '=', 'done'),
-                          ('type', '=', 'out_invoice')]}" class="oe_edit_only"
+                         'invisible': ['|', ('state', '=', 'paid'),
+                          ('type', '=', 'in_invoice')]}" class="oe_edit_only"
                         options="{'no_create': True}"/>
             </field>
         </field>
