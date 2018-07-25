@@ -35,7 +35,6 @@ class AccountInvoice(models.Model):
                 line.price_unit, self.currency_id, round=False),
             'quantity': qty,
             'discount': 0.0,
-            'account_analytic_id': line.analytic_account_id.id,
             'rma_line_ids': [(4, line.id)],
         }
         return data
