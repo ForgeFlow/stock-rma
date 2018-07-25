@@ -93,13 +93,14 @@ class RmaOrder(models.Model):
         result = action.read()[0]
         invoice_ids = self.mapped(
             'rma_line_ids.refund_line_ids.invoice_id').ids
-        # choose the view_mode accordingly
-        if len(invoice_ids) > 1:
-            result['domain'] = [('id', 'in', invoice_ids)]
-        else:
-            res = self.env.ref('account.invoice_supplier_form', False)
-            result['views'] = [(res and res.id or False, 'form')]
-            result['res_id'] = invoice_ids and invoice_ids[0]
+        if invoice_ids:
+            # choose the view_mode accordingly
+            if len(invoice_ids) > 1:
+                result['domain'] = [('id', 'in', invoice_ids)]
+            else:
+                res = self.env.ref('account.invoice_supplier_form', False)
+                result['views'] = [(res and res.id or False, 'form')]
+                result['res_id'] = invoice_ids[0]
         return result
 
     @api.multi
@@ -112,10 +113,11 @@ class RmaOrder(models.Model):
             res = self.env.ref('account.invoice_form', False)
         result = action.read()[0]
         invoice_ids = self.mapped('rma_line_ids.invoice_id').ids
-        # choose the view_mode accordingly
-        if len(invoice_ids) > 1:
-            result['domain'] = [('id', 'in', invoice_ids)]
-        else:
-            result['views'] = [(res and res.id or False, 'form')]
-            result['res_id'] = invoice_ids and invoice_ids[0]
+        if invoice_ids:
+            # choose the view_mode accordingly
+            if len(invoice_ids) > 1:
+                result['domain'] = [('id', 'in', invoice_ids)]
+            else:
+                result['views'] = [(res and res.id or False, 'form')]
+                result['res_id'] = invoice_ids[0]
         return result
