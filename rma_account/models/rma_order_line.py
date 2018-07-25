@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
-from odoo import _, api, fields, models
+
+from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError, UserError
 from odoo.addons import decimal_precision as dp
 
@@ -78,6 +78,21 @@ class RmaOrderLine(models.Model):
         string='Qty Refunded', copy=False,
         digits=dp.get_precision('Product Unit of Measure'),
         readonly=True, compute=_compute_qty_refunded, store=True)
+
+    @api.onchange('product_id')
+    def _onchange_product_id(self):
+        res = super(RmaOrderLine, self)._onchange_product_id()
+        if res.get('domain') and self.product_id:
+            res['domain']['invoice_line_id'] = [
+                ('product_id', '=', self.product_id.id)]
+        elif res.get('domain') and self.product_id:
+            res['domain']['invoice_line_id'] = [()]
+        elif not res.get('domain') and self.product_id:
+            res['domain'] = {
+                'invoice_line_id': [('product_id', '=', self.product_id.id)]}
+        else:
+            res['domain'] = {'invoice_line_id': []}
+        return res
 
     @api.multi
     def _prepare_rma_line_from_inv_line(self, line):
@@ -162,9 +177,8 @@ class RmaOrderLine(models.Model):
     @api.onchange('operation_id')
     def _onchange_operation_id(self):
         result = super(RmaOrderLine, self)._onchange_operation_id()
-        if not self.operation_id:
-            return result
-        self.refund_policy = self.operation_id.refund_policy
+        if self.operation_id:
+            self.refund_policy = self.operation_id.refund_policy or 'no'
         return result
 
     @api.multi
@@ -196,11 +210,25 @@ class RmaOrderLine(models.Model):
         action = self.env.ref('account.action_invoice_tree2')
         result = action.read()[0]
         invoice_ids = self.mapped('refund_line_ids.invoice_id').ids
-        # choose the view_mode accordingly
-        if len(invoice_ids) != 1:
-            result['domain'] = [('id', 'in', invoice_ids)]
-        elif len(invoice_ids) == 1:
-            res = self.env.ref('account.invoice_supplier_form', False)
-            result['views'] = [(res and res.id or False, 'form')]
-            result['res_id'] = invoice_ids[0]
+        if invoice_ids:
+            # choose the view_mode accordingly
+            if len(invoice_ids) > 1:
+                result['domain'] = [('id', 'in', invoice_ids)]
+            else:
+                res = self.env.ref('account.invoice_supplier_form', False)
+                result['views'] = [(res and res.id or False, 'form')]
+                result['res_id'] = invoice_ids[0]
         return result
+
+    @api.multi
+    def name_get(self):
+        res = []
+        if self.env.context.get('rma'):
+            for rma in self:
+                res.append((rma.id, "%s %s qty:%s" % (
+                    rma.name,
+                    rma.product_id.name,
+                    rma.product_qty)))
+            return res
+        else:
+            return super(RmaOrderLine, self).name_get()
