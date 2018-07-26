@@ -1,87 +1,90 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="rma_operation_tree" model="ir.ui.view">
-        <field name="name">rma.operation.tree</field>
-        <field name="model">rma.operation</field>
-        <field name="arch" type="xml">
-            <tree string="RMA Operations">
-                <field name="active" invisible="1"/>
-                <field name="code"/>
-                <field name="name"/>
-                <field name="receipt_policy"/>
-                <field name="delivery_policy"/>
-            </tree>
-        </field>
-    </record>
+    <data>
+        <record id="rma_operation_tree" model="ir.ui.view">
+            <field name="name">rma.operation.tree</field>
+            <field name="model">rma.operation</field>
+            <field name="arch" type="xml">
+                <tree string="RMA Operations">
+                    <field name="active" invisible="1"/>
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="receipt_policy"/>
+                    <field name="delivery_policy"/>
+                </tree>
+            </field>
+        </record>
 
-    <record id="rma_operation_form" model="ir.ui.view">
-        <field name="name">rma.operation.form</field>
-        <field name="model">rma.operation</field>
-        <field name="arch" type="xml">
-            <form string="RMA Operations">
-                <group colspan="4" col="2">
-                    <group name="description"
-                           string="Description">
-                        <field name="code"/>
-                        <field name="name"/>
-                        <field name="type"/>
-                        <field name="active"/>
+        <record id="rma_operation_form" model="ir.ui.view">
+            <field name="name">rma.operation.form</field>
+            <field name="model">rma.operation</field>
+            <field name="arch" type="xml">
+                <form string="RMA Operations">
+                    <group colspan="4" col="2">
+                        <group name="description"
+                               string="Description">
+                            <field name="code"/>
+                            <field name="name"/>
+                            <field name="type"/>
+                            <field name="active"/>
+                        </group>
+                        <group name="policies"
+                               string="Policies">
+                            <field name="receipt_policy"/>
+                            <field name="delivery_policy"/>
+                        </group>
+                        <group name="inbound" string="Inbound">
+                            <field name="in_route_id"/>
+                            <field name="in_warehouse_id"/>
+                            <field name="location_id"
+                                domain="[('usage', '=', 'internal')]"/>
+                            <field name="customer_to_supplier"
+                                   attrs="{'invisible':[('type', '=', 'supplier')]}"/>
+                        </group>
+                        <group name="outbound" string="Outbound">
+                            <field name="out_route_id"/>
+                            <field name="out_warehouse_id"/>
+                            <field name="supplier_to_customer"
+                                   attrs="{'invisible':[('type', '=', 'customer')]}"/>
+                        </group>
                     </group>
-                    <group name="policies"
-                           string="Policies">
-                        <field name="receipt_policy"/>
-                        <field name="delivery_policy"/>
-                    </group>
-                    <group name="inbound" string="Inbound">
-                        <field name="in_route_id"/>
-                        <field name="in_warehouse_id"/>
-                        <field name="location_id"
-                            domain="[('usage', '=', 'internal')]"/>
-                        <field name="customer_to_supplier"
-                               attrs="{'invisible':[('type', '=', 'supplier')]}"/>
-                        <field name="supplier_to_customer"
-                               attrs="{'invisible':[('type', '=', 'customer')]}"/>
-                    </group>
-                    <group name="outbound" string="Outbound">
-                        <field name="out_route_id"/>
-                        <field name="out_warehouse_id"/>
-                    </group>
-                </group>
-            </form>
-        </field>
-    </record>
+                </form>
+            </field>
+        </record>
 
-    <record id="action_rma_operation_customer" model="ir.actions.act_window">
-        <field name="name">Customer Operations</field>
-        <field name="res_model">rma.operation</field>
-        <field name="view_type">form</field>
-        <field name="view_mode">tree,form</field>
-        <field name="context">{'default_type': "customer"}</field>
-        <field name="domain">[('type','=', 'customer')]</field>
-        <field name="view_id" ref="rma_operation_tree"/>
-    </record>
+        <record id="action_rma_operation_customer" model="ir.actions.act_window">
+            <field name="name">Customer Operations</field>
+            <field name="res_model">rma.operation</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'default_type': "customer"}</field>
+            <field name="domain">[('type','=', 'customer')]</field>
+            <field name="view_id" ref="rma_operation_tree"/>
+        </record>
 
-    <record id="action_rma_operation_supplier" model="ir.actions.act_window">
-        <field name="name">Supplier Operations</field>
-        <field name="res_model">rma.operation</field>
-        <field name="view_type">form</field>
-        <field name="view_mode">tree,form</field>
-        <field name="context">{'default_type': "supplier"}</field>
-        <field name="domain">[('type','=', 'supplier')]</field>
-        <field name="view_id" ref="rma_operation_tree"/>
-    </record>
+        <record id="action_rma_operation_supplier" model="ir.actions.act_window">
+            <field name="name">Supplier Operations</field>
+            <field name="res_model">rma.operation</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'default_type': "supplier"}</field>
+            <field name="domain">[('type','=', 'supplier')]</field>
+            <field name="view_id" ref="rma_operation_tree"/>
+        </record>
 
-    <menuitem id="menu_rma_operation_customer"
-        name="Customer Operations"
-        groups="rma.group_rma_manager"
-        sequence="35"
-        parent="rma.menu_rma_config"
-        action="action_rma_operation_customer"/>
+        <menuitem id="menu_rma_operation_customer"
+            name="Customer Operations"
+            groups="rma.group_rma_manager"
+            sequence="35"
+            parent="rma.menu_rma_config"
+            action="action_rma_operation_customer"/>
 
-    <menuitem id="menu_rma_operation_supplier"
-        name="Supplier Operations"
-        groups="rma.group_rma_manager"
-        sequence="40"
-        parent="rma.menu_rma_config"
-        action="action_rma_operation_supplier"/>
+        <menuitem id="menu_rma_operation_supplier"
+            name="Supplier Operations"
+            groups="rma.group_rma_manager"
+            sequence="40"
+            parent="rma.menu_rma_config"
+            action="action_rma_operation_supplier"/>
+
+    </data>
 </odoo>
