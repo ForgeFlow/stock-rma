@@ -41,8 +41,6 @@ class RmaOrder(models.Model):
         for line in self.rma_line_ids:
             po_ids += self.env['purchase.order'].search(
                 [('origin', '=', line.name)]).ids
-        if not po_ids:
-            raise ValidationError(_("No purchase order found!"))
         result['domain'] = [('id', 'in', po_ids)]
         return result
 
@@ -52,7 +50,5 @@ class RmaOrder(models.Model):
         result = action.read()[0]
         po_ids = self.mapped(
             'rma_line_ids.purchase_order_line_id.order_id').ids
-        if not po_ids:
-            raise ValidationError(_("No purchase order found!"))
         result['domain'] = [('id', 'in', po_ids)]
         return result
