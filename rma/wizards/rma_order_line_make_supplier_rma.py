@@ -1,4 +1,4 @@
-# Copyright (C) 2017 Eficent Business and IT Consulting Services S.L.
+# Copyright 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 import odoo.addons.decimal_precision as dp
@@ -23,13 +23,27 @@ class RmaLineMakeSupplierRma(models.TransientModel):
     )
 
     @api.model
+    def _get_default_operation(self):
+        """Dropshipping is the most common use case of this wizard, thus
+        trying to default to a dropshipping operation first."""
+        operation = self.env['rma.operation'].search([
+            ('type', '=', 'supplier'),
+            ('supplier_to_customer', '=', True)], limit=1)
+        if not operation:
+            operation = self.env['rma.operation'].search(
+                [('type', '=', 'supplier')], limit=1)
+        return operation
+
+    @api.model
     def _prepare_item(self, line):
+        operation = self._get_default_operation()
         return {
             'line_id': line.id,
             'product_id': line.product_id.id,
             'name': line.name,
             'product_qty': line.qty_to_supplier_rma,
             'uom_id': line.uom_id.id,
+            'operation_id': operation.id if operation else False,
         }
 
     @api.model
@@ -48,15 +62,13 @@ class RmaLineMakeSupplierRma(models.TransientModel):
         lines = rma_line_obj.browse(rma_line_ids)
         for line in lines:
             items.append([0, 0, self._prepare_item(line)])
-        suppliers = lines.mapped('supplier_address_id')
-        if len(suppliers) == 0:
-            pass
-        elif len(suppliers) == 1:
-            res['partner_id'] = suppliers.id
-        else:
+        suppliers = lines.mapped(
+            lambda r: r.supplier_address_id.parent_id or r.supplier_address_id)
+        if len(suppliers) > 1:
             raise ValidationError(
-                _('Only RMA lines from the same supplier address can be '
+                _('Only RMA lines from the same supplier can be '
                   'processed at the same time'))
+        res['partner_id'] = suppliers.id
         res['item_ids'] = items
         return res
 
@@ -66,16 +78,17 @@ class RmaLineMakeSupplierRma(models.TransientModel):
             raise ValidationError(_('Enter a supplier.'))
         return {
             'partner_id': self.partner_id.id,
+            'delivery_address_id': self.partner_id.id,
             'type': 'supplier',
             'company_id': company.id,
         }
 
     @api.model
     def _prepare_supplier_rma_line(self, rma, item):
-        operation = item.line_id.product_id.rma_supplier_operation_id
-        if not operation:
-            operation = self.env['rma.operation'].search(
-                [('type', '=', 'supplier')], limit=1)
+        if item.operation_id:
+            operation = item.operation_id
+        else:
+            operation = self._get_default_operation()
         if not operation.in_route_id or not operation.out_route_id:
             route = self.env['stock.location.route'].search(
                 [('rma_selectable', '=', True)], limit=1)
@@ -92,12 +105,13 @@ class RmaLineMakeSupplierRma(models.TransientModel):
             'partner_id': self.partner_id.id,
             'type': 'supplier',
             'origin': item.line_id.rma_id.name,
-            'delivery_address_id':
-                item.line_id.delivery_address_id.id,
+            'customer_address_id':
+                item.line_id.delivery_address_id.id or
+                item.line_id.partner_id.id,
             'product_id': item.line_id.product_id.id,
             'customer_rma_id': item.line_id.id,
             'product_qty': item.product_qty,
-            'rma_id': rma.id,
+            'rma_id': rma.id if rma else False,
             'uom_id': item.line_id.uom_id.id,
             'operation_id': operation.id,
             'receipt_policy': operation.receipt_policy,
@@ -128,23 +142,34 @@ class RmaLineMakeSupplierRma(models.TransientModel):
 
             if self.supplier_rma_id:
                 rma = self.supplier_rma_id
-            if not rma:
+            if not rma and len(self.item_ids) > 1:
                 rma_data = self._prepare_supplier_rma(line.company_id)
                 rma = rma_obj.create(rma_data)
 
             rma_line_data = self._prepare_supplier_rma_line(rma, item)
-            rma_line_obj.create(rma_line_data)
-
-        return {
-            'name': _('Supplier RMA'),
-            'view_type': 'form',
-            'view_mode': 'form',
-            'res_model': 'rma.order',
-            'view_id': False,
-            'res_id': rma.id,
-            'context': {'supplier': True, 'customer': False},
-            'type': 'ir.actions.act_window'
-        }
+            rma_line = rma_line_obj.create(rma_line_data)
+        if rma:
+            return {
+                'name': _('Supplier RMA'),
+                'view_type': 'form',
+                'view_mode': 'form',
+                'res_model': 'rma.order',
+                'view_id': False,
+                'res_id': rma.id,
+                'context': {'supplier': True, 'customer': False},
+                'type': 'ir.actions.act_window'
+            }
+        else:
+            return {
+                'name': _('Supplier RMA Line'),
+                'view_type': 'form',
+                'view_mode': 'form',
+                'res_model': 'rma.order.line',
+                'view_id': False,
+                'res_id': rma_line.id,
+                'context': {'supplier': True, 'customer': False},
+                'type': 'ir.actions.act_window'
+            }
 
 
 class RmaLineMakeRmaOrderItem(models.TransientModel):
@@ -167,3 +192,7 @@ class RmaLineMakeRmaOrderItem(models.TransientModel):
     uom_id = fields.Many2one('product.uom', string='UoM', readonly=True)
     product_qty = fields.Float(string='Quantity',
                                digits=dp.get_precision('Product UoS'))
+    operation_id = fields.Many2one(
+        comodel_name="rma.operation", string="Operation",
+        domain=[('type', '=', 'supplier')],
+    )

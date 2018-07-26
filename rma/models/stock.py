@@ -34,3 +34,10 @@ class StockMove(models.Model):
             if group.rma_line_id:
                 vals['rma_line_id'] = group.rma_line_id.id
         return super(StockMove, self).create(vals)
+
+    def _action_assign(self):
+        res = super(StockMove, self)._action_assign()
+        for move in self:
+            if move.rma_line_id:
+                move.partner_id = move.rma_line_id.partner_id.id or False
+        return res

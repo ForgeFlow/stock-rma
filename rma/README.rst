@@ -86,6 +86,14 @@ Create an RMA:
    Order".
 #. Go back to the RMA. Set the RMA to done if not further action is required.
 
+Known issues and Roadmap
+========================
+
+* Picking operations report in customer RMA dropshipping case is showing
+  "Vendor Address" while it should be "Customer Address".
+* Dropshipping always counted as a delivery on the smart buttons.
+* Uninstall hook.
+* Constraints instead of required fields on rma.order.line.
 
 Bug Tracker
 ===========

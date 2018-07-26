@@ -29,6 +29,7 @@
                                    options="{'no_open': true}"/>
                               <field name="product_id"/>
                               <field name="name"/>
+                              <field name="operation_id"/>
                               <field name="product_qty"/>
                               <field name="uom_id"
                                      groups="product.group_uom"/>

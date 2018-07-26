@@ -188,7 +188,6 @@
     <record id="rule_rma_dropship_return" model="procurement.rule">
         <field name="name">Customer → Supplier</field>
         <field name="action">move</field>
-        <field name="warehouse_id" ref="stock.warehouse0"/>
         <field name="location_id" ref="stock.stock_location_suppliers"/>
         <field name="location_src_id" ref="stock.stock_location_customers"/>
         <field name="procure_method">make_to_stock</field>
@@ -200,7 +199,6 @@
     <record id="rule_rma_dropship" model="procurement.rule">
         <field name="name">Supplier → Customer</field>
         <field name="action">move</field>
-        <field name="warehouse_id" ref="stock.warehouse0"/>
         <field name="location_id" ref="stock.stock_location_customers"/>
         <field name="location_src_id" ref="stock.stock_location_suppliers"/>
         <field name="procure_method">make_to_stock</field>
