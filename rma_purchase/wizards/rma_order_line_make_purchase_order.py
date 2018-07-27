@@ -13,7 +13,7 @@ class RmaLineMakePurchaseOrder(models.TransientModel):
 
     partner_id = fields.Many2one(
         comodel_name='res.partner', string='Supplier', required=False,
-        domain=[('supplier', '=', True)])
+        domain=[('supplier', '=', True)], readonly=1)
     item_ids = fields.One2many(
         comodel_name='rma.order.line.make.purchase.order.item',
         inverse_name='wiz_id', string='Items')
@@ -49,9 +49,9 @@ class RmaLineMakePurchaseOrder(models.TransientModel):
         lines = rma_line_obj.browse(rma_line_ids)
         for line in lines:
             items.append([0, 0, self._prepare_item(line)])
-        customers = lines.mapped('partner_id')
-        if len(customers) == 1:
-            res['partner_id'] = customers.id
+        suppliers = lines.mapped('partner_id')
+        if len(suppliers) == 1:
+            res['partner_id'] = suppliers.id
         else:
             raise exceptions.Warning(
                 _('Only RMA lines from the same partner can be processed at '
