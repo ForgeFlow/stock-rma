@@ -12,14 +12,9 @@ class RmaOrderLine(models.Model):
     @api.multi
     def _compute_purchase_count(self):
         for rec in self:
-            purchase_list = []
-            for procurement_id in rec.procurement_ids:
-                if procurement_id.purchase_id and \
-                        procurement_id.purchase_id.id:
-                    purchase_list.append(procurement_id.purchase_id.id)
-            rec.purchase_count = (
-                len(list(set(purchase_list))) +
-                len(rec.manual_purchase_line_ids.mapped('order_id')))
+            purchase_line_count = self.env['purchase.order.line'].search(
+                [('rma_line_id', '=', rec.id)])
+            rec.purchase_count = len(purchase_line_count.mapped('order_id'))
 
     @api.multi
     @api.depends('procurement_ids.purchase_line_id')
