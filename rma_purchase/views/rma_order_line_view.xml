@@ -15,7 +15,7 @@
         <field name="inherit_id" ref="rma.view_rma_line_supplier_button_form"/>
         <field name="arch" type="xml">
             <header position="inside">
-                <button name="%(action_rma_line_purchase)d" states="approved"
+                <button name="%(action_rma_order_line_make_purchase_order)d" states="approved"
                         string="Create Purchase Order" class="oe_highlight"
                         context="{'rma_line_id': active_id, 'default_partner_id': partner_id}"
                         type="action"/>
