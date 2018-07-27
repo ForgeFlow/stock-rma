@@ -2,8 +2,8 @@
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl-3.0).
 
 import odoo.addons.decimal_precision as dp
-from odoo import _, api, exceptions, fields, models
-from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
+from odoo import fields, models, api, _, exceptions
+from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DF
 from datetime import datetime
 
 
@@ -12,8 +12,8 @@ class RmaLineMakePurchaseOrder(models.TransientModel):
     _description = "Make Purchases Order from RMA Line"
 
     partner_id = fields.Many2one(
-        comodel_name='res.partner', string='Customer', required=False,
-        domain=[('customer', '=', True)])
+        comodel_name='res.partner', string='Supplier', required=False,
+        domain=[('supplier', '=', True)])
     item_ids = fields.One2many(
         comodel_name='rma.order.line.make.purchase.order.item',
         inverse_name='wiz_id', string='Items')
@@ -69,7 +69,7 @@ class RmaLineMakePurchaseOrder(models.TransientModel):
             'origin': '',
             'partner_id': supplier.id,
             'company_id': item.line_id.company_id.id,
-            }
+        }
         return data
 
     @api.model
@@ -80,8 +80,7 @@ class RmaLineMakePurchaseOrder(models.TransientModel):
             'order_id': po.id,
             'product_id': product.id,
             'price_unit': item.line_id.price_unit,
-            'date_planned': datetime.today().strftime(
-                DEFAULT_SERVER_DATETIME_FORMAT),
+            'date_planned': datetime.today().strftime(DF),
             'product_uom': product.uom_po_id.id,
             'product_qty': item.product_qty,
             'rma_line_id': item.line_id.id
@@ -95,15 +94,13 @@ class RmaLineMakePurchaseOrder(models.TransientModel):
         res = []
         purchase_obj = self.env['purchase.order']
         po_line_obj = self.env['purchase.order.line']
-        purchase = False
 
         for item in self.item_ids:
             if item.product_qty <= 0.0:
                 raise exceptions.Warning(
                     _('Enter a positive quantity.'))
 
-            if self.purchase_order_id:
-                purchase = self.purchase_order_id
+            purchase = self.purchase_order_id
             if not purchase:
                 po_data = self._prepare_purchase_order(item)
                 purchase = purchase_obj.create(po_data)
