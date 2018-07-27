@@ -11,11 +11,12 @@
     'website': 'http://www.github.com/OCA/rma',
     'depends': ['rma_account', 'purchase'],
     'data': [
+        'wizards/rma_order_line_make_purchase_order_view.xml',
         'security/ir.model.access.csv',
         'views/rma_operation_view.xml',
         'views/rma_order_view.xml',
         'views/rma_order_line_view.xml',
-        'wizards/rma_add_purchase.xml'
+        'wizards/rma_add_purchase.xml',
     ],
     'installable': True,
     'auto_install': True,
