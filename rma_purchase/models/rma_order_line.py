@@ -12,8 +12,9 @@ class RmaOrderLine(models.Model):
     @api.multi
     def _compute_purchase_count(self):
         for rec in self:
-            rec.purchase_count = len(self.env['purchase.order'].search(
-                [('origin', 'ilike', rec.name)]).ids)
+            purchase_line_count = self.env['purchase.order.line'].search(
+                [('rma_line_id', '=', rec.id)])
+            rec.purchase_count = len(purchase_line_count.mapped('order_id'))
 
     @api.multi
     def _compute_purchase_order_lines(self):
