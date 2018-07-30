@@ -37,13 +37,13 @@
                      </field>
                  </group>
                  <newline/>
-                 <group colspan="2">
+                 <footer colspan="2">
                      <button name="make_supplier_rma"
                              string="Create/Update Supplier RMA"
                              type="object"
                              class="oe_highlight"/>
                      <button special="cancel" string="Cancel" class="oe_link"/>
-                 </group>
+                 </footer>
             </form>
         </field>
     </record>
