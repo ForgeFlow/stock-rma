@@ -12,7 +12,7 @@
     <record id="rma_operation_customer_refund" model="rma.operation">
         <field name="name">Refund before receive</field>
         <field name="code">RFC</field>
-        <field name="refund_policy">ordered</field>
+        <field name="refund_policy">received</field>
         <field name="receipt_policy">no</field>
         <field name="delivery_policy">no</field>
         <field name="type">customer</field>
@@ -23,7 +23,7 @@
     <record id="rma_operation_supplier_refund" model="rma.operation">
         <field name="name">Refund Before deliver</field>
         <field name="code">RFS</field>
-        <field name="refund_policy">ordered</field>
+        <field name="refund_policy">delivered</field>
         <field name="receipt_policy">no</field>
         <field name="delivery_policy">no</field>
         <field name="type">supplier</field>
