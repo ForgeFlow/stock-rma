@@ -91,10 +91,10 @@ class RmaOrderLine(models.Model):
             rec.qty_to_receive = 0.0
             if rec.receipt_policy == 'ordered':
                 rec.qty_to_receive = \
-                    rec.product_qty - rec.qty_incoming - rec.qty_received
+                    rec.product_qty - rec.qty_received
             elif rec.receipt_policy == 'delivered':
                 rec.qty_to_receive = \
-                    rec.qty_delivered - rec.qty_incoming - rec.qty_received
+                    rec.qty_delivered - rec.qty_received
 
     @api.multi
     @api.depends('move_ids', 'move_ids.state',
@@ -163,12 +163,6 @@ class RmaOrderLine(models.Model):
             else:
                 rec.qty_to_supplier_rma = 0.0
                 rec.qty_in_supplier_rma = 0.0
-
-    @api.multi
-    def _compute_procurement_count(self):
-        for rec in self:
-            rec.procurement_count = len(rec.procurement_ids.filtered(
-                lambda p: p.state == 'exception'))
 
     @api.multi
     def _compute_rma_line_count(self):
@@ -252,8 +246,6 @@ class RmaOrderLine(models.Model):
         string='Price Unit',
         readonly=True, states={'draft': [('readonly', False)]},
     )
-    procurement_count = fields.Integer(compute=_compute_procurement_count,
-                                       string='# of Procurements', copy=False)
     in_shipment_count = fields.Integer(compute=_compute_in_shipment_count,
                                        string='# of Shipments')
     out_shipment_count = fields.Integer(compute=_compute_out_shipment_count,
@@ -448,12 +440,12 @@ class RmaOrderLine(models.Model):
         sm = self.reference_move_id
         if not sm:
             return
-        if sm.lot_ids:
-            if len(sm.lot_ids) > 1:
+        if sm.move_line_ids.lot_id:
+            if len(sm.move_line_ids.lot_id) > 1:
                 raise UserError(_('To manage lots use RMA groups.'))
             else:
                 data = self._prepare_rma_line_from_stock_move(
-                    sm, lot=sm.lot_ids[0])
+                    sm, lot=sm.move_line_ids.lot_id[0])
                 self.update(data)
         else:
             data = self._prepare_rma_line_from_stock_move(
@@ -609,23 +601,6 @@ class RmaOrderLine(models.Model):
             res = self.env.ref('stock.view_picking_form', False)
             result['views'] = [(res and res.id or False, 'form')]
             result['res_id'] = shipments[0]
-        return result
-
-    @api.multi
-    def action_view_procurements(self):
-        action = self.env.ref(
-            'procurement.procurement_order_action_exceptions')
-        result = action.read()[0]
-        procurements = self.procurement_ids.filtered(
-            lambda p: p.state == 'exception').ids
-        # choose the view_mode accordingly
-        if len(procurements) != 1:
-            result['domain'] = "[('id', 'in', " + \
-                               str(procurements) + ")]"
-        elif len(procurements) == 1:
-            res = self.env.ref('procurement.procurement_form_view', False)
-            result['views'] = [(res and res.id or False, 'form')]
-            result['res_id'] = procurements[0]
         return result
 
     @api.multi
