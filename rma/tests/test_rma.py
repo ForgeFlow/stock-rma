@@ -163,9 +163,6 @@ class TestRma(common.SavepointCase):
 
         rma_id.partner_id.action_open_partner_rma()
         rma_id.partner_id._compute_rma_line_count()
-        # approve the RMA
-#        rma_id.action_rma_to_approve()
-#        rma_id.action_rma_approve()
         return rma_id
 
     @classmethod
