@@ -107,10 +107,14 @@ class TestRma(common.SavepointCase):
                      'active_ids': rma_id.id,
                      'active_model': 'rma.order',
                      }
-                ).create({'rma_id': rma_id.id,
-                          'partner_id': partner.id})
+                ).create({})
                 data = wizard._prepare_rma_line_from_stock_move(move)
                 wizard.add_lines()
+
+                for operation in move.product_id.rma_customer_operation_id:
+                    operation.in_route_id = False
+                move.product_id.categ_id.rma_customer_operation_id = False
+                move.product_id.rma_customer_operation_id = False
                 wizard._prepare_rma_line_from_stock_move(move)
 
             else:
@@ -119,8 +123,7 @@ class TestRma(common.SavepointCase):
                      'active_ids': rma_id.id,
                      'active_model': 'rma.order',
                      }
-                ).create({'rma_id': rma_id.id,
-                          'partner_id': partner.id})
+                ).create({})
                 data = wizard._prepare_rma_line_from_stock_move(move)
                 wizard.add_lines()
 
@@ -131,8 +134,14 @@ class TestRma(common.SavepointCase):
                      }
                 ).create({})
                 wizard.add_lines()
-                wizard.add_lines()
-                wizard._prepare_rma_line_from_stock_move(move)
+
+                wizard = cls.rma_add_stock_move.with_context(
+                    {'stock_move_id': move.id, 'supplier': True,
+                     'active_ids': rma_id.id,
+                     'active_model': 'rma.order',
+                     }
+                ).create({})
+                data = wizard._prepare_rma_line_from_stock_move(move)
                 for operation in move.product_id.rma_customer_operation_id:
                     operation.in_route_id = False
                 move.product_id.rma_customer_operation_id = False
@@ -141,7 +150,6 @@ class TestRma(common.SavepointCase):
             if dropship:
                 data.update(customer_to_supplier=dropship,
                             supplier_address_id=supplier_address_id.id)
-
             cls.line = cls.rma_line.create(data)
             # approve the RMA Line
             cls.line.action_rma_to_approve()
