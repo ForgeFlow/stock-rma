@@ -102,13 +102,6 @@
                                    domain="[('supplier','=',True)]"
                                    string="Supplier"/>
                         </group>
-                        <group name="main_info" string="Origin">
-                            <field name="reference_move_id"
-                                   options="{'no_create': True}"
-                                   domain="[('picking_id.partner_id', '=', partner_id),
-                                            ('location_id.usage', '=', 'supplier'),
-                                            ('state', '=', 'done')]"/>
-                        </group>
                         <group>
                             <group name="product" string="Product">
                                 <field name="product_id"/>
@@ -124,16 +117,24 @@
                                 <field name="price_unit"/>
                                 <field name="uom_id" groups="product.group_uom"/>
                             </group>
-                            <newline/>
+                        </group>
+                        <group name="main_info" string="Origin">
+                            <field name="reference_move_id"
+                                   options="{'no_create': True}"
+                                   domain="[('picking_id.partner_id', '=', partner_id),
+                                            ('location_id.usage', '=', 'supplier'),
+                                            ('state', '=', 'done')]"/>
+                        </group>
+                        <group>
+                            <group name="contact" string="Contact">
+                                <field name="requested_by" readonly="1"/>
+                                <field name="assigned_to"/>
+                            </group>
                             <group name="operation" string="Operation">
                                 <field name="operation_id"
                                        domain="[('type','=','supplier')]"/>
                                 <field name="receipt_policy"/>
                                 <field name="delivery_policy"/>
-                            </group>
-                            <group name="contact" string="Contact">
-                                <field name="requested_by" readonly="1"/>
-                                <field name="assigned_to"/>
                             </group>
                         </group>
                         <notebook>
@@ -274,13 +275,6 @@
                                 <field name="under_warranty"/>
                             </group>
                         </group>
-                        <group name="main_info" string="Origin">
-                            <field name="reference_move_id"
-                                   options="{'no_create': True}"
-                                   domain="[('picking_id.partner_id', '=', partner_id),
-                                            ('location_dest_id.usage', '=', 'customer'),
-                                            ('state', '=', 'done')]"/>
-                        </group>
                         <group>
                             <group name="product" string="Product">
                                 <field name="product_id"/>
@@ -295,15 +289,23 @@
                                 <field name="uom_id" groups="product.group_uom"/>
                                 <field name="price_unit"/>
                             </group>
-                            <newline/>
+                        </group>
+                        <group name="main_info" string="Origin">
+                            <field name="reference_move_id"
+                                   options="{'no_create': True}"
+                                   domain="[('picking_id.partner_id', '=', partner_id),
+                                            ('location_dest_id.usage', '=', 'customer'),
+                                            ('state', '=', 'done')]"/>
+                        </group>
+                        <group>
+                            <group name="contact" string="Contact">
+                                <field name="requested_by" readonly="1"/>
+                                <field name="assigned_to"/>
+                            </group>
                             <group name="operation" string="Operation">
                                 <field name="operation_id" domain="[('type','=','customer')]"/>
                                 <field name="receipt_policy"/>
                                 <field name="delivery_policy"/>
-                            </group>
-                            <group name="contact" string="Contact">
-                                <field name="requested_by" readonly="1"/>
-                                <field name="assigned_to"/>
                             </group>
                         </group>
                         <notebook>
