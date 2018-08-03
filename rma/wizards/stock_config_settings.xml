@@ -13,6 +13,7 @@
                             <div class="content-group">
                                 <div class="mt16">
                                     <field name="group_rma_delivery_address" class="o_light_label" widget="radio"/>
+                                    <field name="group_rma_lines" widget="radio"/>
                                 </div>
                             </div>
                         </div>

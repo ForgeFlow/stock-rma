@@ -277,14 +277,14 @@
         id="menu_rma_act_customer"
         sequence="50"
         parent="menu_customer_rma"
-        groups="rma.group_rma_customer_user"
+        groups="rma.group_rma_groups"
         action="action_rma_customer"/>
 
     <menuitem
         id="menu_rma_act_supplier"
         sequence="50"
         parent="menu_supplier_rma"
-        groups="rma.group_rma_supplier_user"
+        groups="rma.group_rma_groups"
         action="action_rma_supplier"/>
 
     <menuitem id="menu_rma_config"
