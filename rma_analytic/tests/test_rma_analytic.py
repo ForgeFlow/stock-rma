@@ -2,10 +2,10 @@
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo.tests import common
+from odoo.addons.rma.tests import test_rma
 
 
-class TestRmaAnalytic(common.SavepointCase):
+class TestRmaAnalytic(test_rma.TestRma):
 
     @classmethod
     def setUpClass(cls):
