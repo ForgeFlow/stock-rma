@@ -10,7 +10,7 @@
     'author': "Eficent, Odoo Community Association (OCA)",
     'website': 'http://www.github.com/OCA/rma',
     'depends': ['account', 'rma'],
-    'demo': ['demo/rma_operation.xml'],
+    'demo': ['data/rma_operation.xml'],
     'data': [
         'security/ir.model.access.csv',
         'views/rma_order_view.xml',
