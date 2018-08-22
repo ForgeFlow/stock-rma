@@ -13,8 +13,8 @@
                      <newline/>
                      <group>
                         <field name="sale_order_id"
-                            domain="[('partner_id','=',partner_id)]"
-                            context="{'partner_id': partner_id}"/>/>
+                            domain="[('partner_id','=', partner_id)]"
+                            context="{'partner_id': partner_id}"/>
                      </group>
                      <newline/>
                      <separator
@@ -38,13 +38,12 @@
                               </tree>
                          </field>
                      </group>
-                     <newline/>
-                     <group colspan="2">
+                     <footer colspan="2">
                          <button name="make_sale_order"
                                  string="Create Sales Quotation" type="object"
                                  class="oe_highlight"/>
                          <button special="cancel" string="Cancel" class="oe_link"/>
-                     </group>
+                     </footer>
                 </form>
             </field>
         </record>
@@ -60,16 +59,6 @@
             <field name="target">new</field>
         </record>
 
-        <record model="ir.values" id="rma_order_line_make_sale_order">
-            <field name="model_id" ref="model_rma_order_line" />
-            <field name="name">Create RFQ</field>
-            <field name="key2">client_action_multi</field>
-            <field name="value"
-                   eval="'ir.actions.act_window,' + str(ref('action_rma_order_line_make_sale_order'))" />
-            <field name="key">action</field>
-            <field name="model">rma.order.line</field>
-        </record>
-   
     </data>
 </openerp>
 
