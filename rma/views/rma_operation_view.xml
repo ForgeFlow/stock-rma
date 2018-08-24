@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="rma_operation_tree" model="ir.ui.view">
         <field name="name">rma.operation.tree</field>
@@ -39,12 +39,12 @@
                             domain="[('usage', '=', 'internal')]"/>
                         <field name="customer_to_supplier"
                                attrs="{'invisible':[('type', '=', 'supplier')]}"/>
-                        <field name="supplier_to_customer"
-                               attrs="{'invisible':[('type', '=', 'customer')]}"/>
                     </group>
                     <group name="outbound" string="Outbound">
                         <field name="out_route_id"/>
                         <field name="out_warehouse_id"/>
+                        <field name="supplier_to_customer"
+                               attrs="{'invisible':[('type', '=', 'customer')]}"/>
                     </group>
                 </group>
             </form>
@@ -84,4 +84,5 @@
         sequence="40"
         parent="rma.menu_rma_config"
         action="action_rma_operation_supplier"/>
+
 </odoo>

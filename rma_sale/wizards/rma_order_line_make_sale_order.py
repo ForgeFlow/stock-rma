@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
-# Copyright 2016 Eficent Business and IT Consulting Services S.L.
-# License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl-3.0).
+# Copyright 2017 Eficent Business and IT Consulting Services S.L.
+# License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 import odoo.addons.decimal_precision as dp
 from odoo import _, api, exceptions, fields, models
@@ -30,7 +29,6 @@ class RmaLineMakeSaleOrder(models.TransientModel):
             'product_qty': line.qty_to_sell,
             'rma_id': line.rma_id.id,
             'out_warehouse_id': line.out_warehouse_id.id,
-            'out_route_id': line.out_route_id.id,
             'product_uom_id': line.uom_id.id,
         }
 
@@ -82,7 +80,6 @@ class RmaLineMakeSaleOrder(models.TransientModel):
             'order_id': so.id,
             'product_id': product.id,
             'product_uom': product.uom_po_id.id,
-            'route_id': item.out_route_id.id,
             'product_uom_qty': item.product_qty,
             'rma_line_id': item.line_id.id
         }
@@ -131,23 +128,18 @@ class RmaLineMakeSaleOrderItem(models.TransientModel):
     _description = "RMA Line Make Sale Order Item"
 
     wiz_id = fields.Many2one(
-        comodel_name='rma.order.line.make.sale.order', string='Wizard',
-        required=True, readonly=True)
+        comodel_name='rma.order.line.make.sale.order', string='Wizard')
     line_id = fields.Many2one(
-        comodel_name='rma.order.line', string='RMA Line', required=True)
+        comodel_name='rma.order.line', string='RMA Line')
     rma_id = fields.Many2one(
-        comodel_name='rma.order', related='line_id.rma_id',
-        string='RMA Order', readonly=True)
+        comodel_name='rma.order', related='line_id.rma_id')
     product_id = fields.Many2one(
         comodel_name='product.product', string='Product')
-    name = fields.Char(string='Description', required=True, readonly=True)
+    name = fields.Char(string='Description')
     product_qty = fields.Float(
         string='Quantity to sell', digits=dp.get_precision('Product UoS'))
     product_uom_id = fields.Many2one(
-        comodel_name='product.uom', string='UoM', readonly=True)
+        comodel_name='product.uom', string='UoM')
     out_warehouse_id = fields.Many2one(
         comodel_name='stock.warehouse', string='Outbound Warehouse')
     free_of_charge = fields.Boolean(string='Free of Charge')
-    out_route_id = fields.Many2one(
-        comodel_name='stock.location.route', string='Outbound Route',
-        domain=[('rma_selectable', '=', True)])

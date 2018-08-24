@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
 
         <record id="view_rma_line_form" model="ir.ui.view">
             <field name="name">rma.order.line.form</field>
@@ -11,17 +10,15 @@
                     <button type="object"  name="action_view_sale_order"
                             class="oe_stat_button"
                             icon="fa-strikethrough"
-                            groups="base.group_sale_salesman">
+                            groups="sales_team.group_sale_salesman_all_leads">
                             <field name="sales_count" widget="statinfo"
                                    string="Sales Orders"/>
                     </button>
                 </div>
                 <group name="main_info" position="inside">
                     <field name="sale_line_id"
-                           options="{'no_create': True}"
-                           domain="['|',
-                                    ('order_id.partner_id', '=', partner_id),
-                                    ('order_id.partner_id', 'child_of', partner_id)]"/>
+                           context="{'rma': True}"
+                           options="{'no_create': True}"/>
                 </group>
                 <group name="quantities" position="inside">
                     <group>
@@ -30,7 +27,7 @@
                     </group>
                 </group>
                 <field name="delivery_policy" position="after">
-                    <field name="sale_type"/>
+                    <field name="sale_policy"/>
                 </field>
                 <field name="origin" position="after">
                     <field name="sale_id"
@@ -53,7 +50,7 @@
                     <button type="object"  name="action_view_sale_order"
                             class="oe_stat_button"
                             icon="fa-strikethrough"
-                            groups="base.group_sale_salesman">
+                            groups="sales_team.group_sale_salesman_all_leads">
                             <field name="sales_count" widget="statinfo"
                                    string="Sales Orders"/>
                     </button>
@@ -65,7 +62,7 @@
                     </group>
                 </group>
                 <field name="delivery_policy" position="after">
-                    <field name="sale_type"/>
+                    <field name="sale_policy"/>
                 </field>
                 <notebook position="inside">
                     <page name="sale" string="Sale Lines">
@@ -100,5 +97,17 @@
         </field>
     </record>
 
-    </data>
+    <record id="view_rma_rma_line_filter" model="ir.ui.view">
+        <field name="name">rma.order.line.select - rma_sale</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_rma_line_filter"/>
+        <field name="arch" type="xml">
+            <group name="stock_quantities" position="after">
+                <group name="sale_quantities" groups="base.group_sale_salesman">
+                    <filter domain="[('state','!=', 'done'),('qty_to_sell','>',0.0)]" help="To Sell"/>
+                </group>
+            </group>
+        </field>
+    </record>
+
 </odoo>
