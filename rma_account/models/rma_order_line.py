@@ -137,6 +137,7 @@ class RmaOrderLine(models.Model):
             'receipt_policy': operation.receipt_policy,
             'refund_policy': operation.refund_policy,
             'delivery_policy': operation.delivery_policy,
+            'currency_id': line.currency_id.id,
             'in_warehouse_id': operation.in_warehouse_id.id or warehouse.id,
             'out_warehouse_id': operation.out_warehouse_id.id or warehouse.id,
             'in_route_id': operation.in_route_id.id or route.id,
