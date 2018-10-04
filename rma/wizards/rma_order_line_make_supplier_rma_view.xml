@@ -50,7 +50,7 @@
 
     <record id="action_rma_order_line_make_supplier_rma"
             model="ir.actions.act_window">
-        <field name="name">Create Supplier RMA Group</field>
+        <field name="name">Create Supplier RMA</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">rma.order.line.make.supplier.rma</field>
         <field name="view_type">form</field>
@@ -68,7 +68,7 @@
         <header position="inside">
             <button name="%(action_rma_order_line_make_supplier_rma)d"
                     states="approved"
-                    string="Create Supplier RMA Group" class="oe_highlight"
+                    string="Create Supplier RMA" class="oe_highlight"
                     type="action"/>
         </header>
     </field>
