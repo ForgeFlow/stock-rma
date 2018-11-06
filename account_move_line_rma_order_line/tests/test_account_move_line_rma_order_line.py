@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # © 2017 Eficent Business and IT Consulting Services S.L. (www.eficent.com)
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
@@ -12,6 +11,7 @@ class TestAccountMoveLineRmaOrderLine(common.SavepointCase):
         super(TestAccountMoveLineRmaOrderLine, cls).setUpClass()
         cls.rma_model = cls.env['rma.order']
         cls.rma_line_model = cls.env['rma.order.line']
+        cls.rma_refund_wiz = cls.env['rma.refund']
         cls.rma_add_stock_move = cls.env['rma_add_stock_move']
         cls.rma_make_picking = cls.env['rma_make_picking.wizard']
         cls.invoice_model = cls.env['account.invoice']
@@ -44,7 +44,7 @@ class TestAccountMoveLineRmaOrderLine(common.SavepointCase):
         name = 'Goods Received Not Invoiced'
         code = 'grni'
         cls.account_grni = cls._create_account(
-            acc_type, name, code,cls.company)
+            acc_type, name, code, cls.company)
 
         # Create account for Cost of Goods Sold
         acc_type = cls._create_account_type('expense', 'other')
@@ -169,12 +169,14 @@ class TestAccountMoveLineRmaOrderLine(common.SavepointCase):
                 'company_id': cls.env.ref('base.main_company').id
             })
         for move in moves:
-            wizard = cls.rma_add_stock_move.with_context(
+            wizard = cls.rma_add_stock_move.new(
                 {'stock_move_id': move.id, 'customer': True,
                  'active_ids': rma_id.id,
+                 'rma_id': rma_id.id,
+                 'partner_id': move.partner_id.id,
                  'active_model': 'rma.order',
                  }
-            ).create({})
+            )
             data = wizard._prepare_rma_line_from_stock_move(move)
             wizard.add_lines()
 
@@ -226,28 +228,34 @@ class TestAccountMoveLineRmaOrderLine(common.SavepointCase):
             'active_model': 'rma.order.line',
             'picking_type': 'incoming',
         }).create({})
-        procurements = wizard._create_picking()
-        group_ids = set([proc.group_id.id for proc in procurements if
-                         proc.group_id])
-        domain = [('group_id', 'in', list(group_ids))]
-        picking = self.stock_picking_model.search(domain)
-        picking.action_assign()
-        picking.do_transfer()
+        operation = self.env['rma.operation'].search(
+            [('type', '=', 'customer'),
+             ('refund_policy', '=', 'received')], limit=1)
+        rma_line.operation_id = operation.id
+        rma_line.refund_policy = 'received'
 
-        expected_balance = 1.0
-        self._check_account_balance(self.account_inventory.id,
+        wizard._create_picking()
+        res = rma_line.action_view_in_shipments()
+        picking = self.env['stock.picking'].browse(res['res_id'])
+        picking.move_lines.write({'quantity_done': 1.0})
+        picking.button_validate()
+        # decreasing cogs
+        expected_balance = -1.0
+        self._check_account_balance(self.account_cogs.id,
                                     rma_line=rma_line,
                                     expected_balance=expected_balance)
-
-        invoice = self.invoice_model.create({
-            'partner_id': self.partner1.id,
-            'rma_id': rma.id,
-            'account_id': rma.partner_id.property_account_payable_id.id,
+        make_refund = self.rma_refund_wiz.with_context({
+            'customer': True,
+            'active_ids': rma_line.ids,
+            'active_model': 'rma.order.line',
+        }).create({
+            'description': 'Test refund',
         })
-        invoice.signal_workflow('invoice_open')
-
-        for aml in invoice.move_id.line_ids:
+        make_refund.invoice_refund()
+        rma_line.refund_line_ids.invoice_id.invoice_validate()
+        for aml in rma_line.refund_line_ids.invoice_id.move_id.line_ids:
             if aml.product_id == rma_line.product_id and aml.invoice_id:
-                self.assertEqual(aml.rma_line_id, rma_line,
-                                'Rma Order line has not been copied '
-                                'from the invoice to the account move line.')
+                self.assertEqual(
+                    aml.rma_line_id, rma_line,
+                    'Rma Order line has not been copied from the invoice to '
+                    'the account move line.')
