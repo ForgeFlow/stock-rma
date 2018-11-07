@@ -35,3 +35,4 @@ class RmaAddStockMove(models.TransientModel):
                 raise ValidationError(_(
                     "Please define a warehouse with a default RMA location"))
             res.update(warehouse_id=warehouse.id)
+        return res
