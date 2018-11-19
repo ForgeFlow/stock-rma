@@ -141,9 +141,9 @@
         <field name="rma_selectable" eval="True"/>
     </record>
 
-    <record id="rule_rma_customer_in_pull" model="procurement.rule">
+    <record id="rule_rma_customer_in_pull" model="stock.rule">
         <field name="name">Customer → RMA</field>
-        <field name="action">move</field>
+        <field name="action">pull</field>
         <field name="warehouse_id" ref="stock.warehouse0"/>
         <field name="location_src_id" ref="stock.stock_location_customers"/>
         <field name="location_id" ref="rma.location_rma"/>
@@ -152,9 +152,9 @@
         <field name="picking_type_id" ref="rma.picking_type_rma_cust_in"/>
     </record>
 
-    <record id="rule_rma_customer_out_pull" model="procurement.rule">
+    <record id="rule_rma_customer_out_pull" model="stock.rule">
         <field name="name">RMA → Customer</field>
-        <field name="action">move</field>
+        <field name="action">pull</field>
         <field name="warehouse_id" ref="stock.warehouse0"/>
         <field name="location_src_id" ref="rma.location_rma"/>
         <field name="location_id" ref="stock.stock_location_customers"/>
@@ -163,9 +163,9 @@
         <field name="picking_type_id" ref="rma.picking_type_rma_cust_out"/>
     </record>
 
-    <record id="rule_rma_supplier_out_pull" model="procurement.rule">
+    <record id="rule_rma_supplier_out_pull" model="stock.rule">
         <field name="name">RMA → Supplier</field>
-        <field name="action">move</field>
+        <field name="action">pull</field>
         <field name="warehouse_id" ref="stock.warehouse0"/>
         <field name="location_id" ref="stock.stock_location_suppliers"/>
         <field name="location_src_id" ref="rma.location_rma"/>
@@ -174,9 +174,9 @@
         <field name="picking_type_id" ref="rma.picking_type_rma_sup_out"/>
     </record>
 
-    <record id="rule_rma_supplier_in_pull" model="procurement.rule">
+    <record id="rule_rma_supplier_in_pull" model="stock.rule">
         <field name="name">Supplier → RMA</field>
-        <field name="action">move</field>
+        <field name="action">pull</field>
         <field name="warehouse_id" ref="stock.warehouse0"/>
         <field name="location_id" ref="rma.location_rma"/>
         <field name="location_src_id" ref="stock.stock_location_suppliers"/>
@@ -185,9 +185,9 @@
         <field name="picking_type_id" ref="rma.picking_type_rma_sup_in"/>
     </record>
 
-    <record id="rule_rma_dropship_return" model="procurement.rule">
+    <record id="rule_rma_dropship_return" model="stock.rule">
         <field name="name">Customer → Supplier</field>
-        <field name="action">move</field>
+        <field name="action">pull</field>
         <field name="location_id" ref="stock.stock_location_suppliers"/>
         <field name="location_src_id" ref="stock.stock_location_customers"/>
         <field name="procure_method">make_to_stock</field>
@@ -196,9 +196,9 @@
                ref="rma.picking_type_rma_dropship_return"/>
     </record>
 
-    <record id="rule_rma_dropship" model="procurement.rule">
+    <record id="rule_rma_dropship" model="stock.rule">
         <field name="name">Supplier → Customer</field>
-        <field name="action">move</field>
+        <field name="action">pull</field>
         <field name="location_id" ref="stock.stock_location_customers"/>
         <field name="location_src_id" ref="stock.stock_location_suppliers"/>
         <field name="procure_method">make_to_stock</field>

@@ -32,7 +32,7 @@
                               <field name="operation_id"/>
                               <field name="product_qty"/>
                               <field name="uom_id"
-                                     groups="product.group_uom"/>
+                                     groups="uom.group_uom"/>
                           </tree>
                      </field>
                  </group>

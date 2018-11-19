@@ -72,7 +72,7 @@
                             <td><span t-field="doc.product_id"/></td>
                             <td class="text-right">
                                 <span t-field="doc.product_qty"/>
-                                <span t-field="doc.uom_id" groups="product.group_uom"/>
+                                <span t-field="doc.uom_id" groups="uom.group_uom"/>
                             </td>
                             <td class="text-right">
                                 <span t-field="doc.price_unit" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
