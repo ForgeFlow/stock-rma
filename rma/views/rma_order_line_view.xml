@@ -15,7 +15,7 @@
                     <field name="origin"/>
                     <field name="operation_id"/>
                     <field name="supplier_address_id"/>
-                    <field name="uom_id" groups="product.group_uom"/>
+                    <field name="uom_id" groups="uom.group_uom"/>
                     <field name="product_qty"/>
                     <field name="price_unit"/>
                     <field name="state"/>
@@ -36,7 +36,7 @@
                     <field name="rma_id"/>
                     <field name="origin"/>
                     <field name="operation_id" domain="[('type','=','supplier')]"/>
-                    <field name="uom_id" groups="product.group_uom"/>
+                    <field name="uom_id" groups="uom.group_uom"/>
                     <field name="product_qty"/>
                     <field name="price_unit"/>
                     <field name="state"/>
@@ -115,7 +115,7 @@
                             <group name="product_qty" string="Quantity">
                                 <field name="product_qty"/>
                                 <field name="price_unit"/>
-                                <field name="uom_id" groups="product.group_uom"/>
+                                <field name="uom_id" groups="uom.group_uom"/>
                             </group>
                         </group>
                         <group name="main_info" string="Origin">
@@ -286,7 +286,7 @@
                             </group>
                             <group name="product_qty" string="Quantity">
                                 <field name="product_qty"/>
-                                <field name="uom_id" groups="product.group_uom"/>
+                                <field name="uom_id" groups="uom.group_uom"/>
                                 <field name="price_unit"/>
                             </group>
                         </group>
@@ -388,14 +388,14 @@
                     <field name="product_id"/>
                     <field name="lot_id"/>
                     <separator/>
-                    <filter domain="[('assigned_to','=',uid)]" help="My RMAs"/>
+                    <filter name="assigned_to" domain="[('assigned_to','=',uid)]" help="My RMAs"/>
                     <separator/>
                     <group name="stock_quantities" groups="stock.group_stock_user">
-                        <filter domain="[('state','!=', 'done'),('qty_to_receive','>',0.0)]" help="To Receive"/>
-                        <filter domain="[('state','!=', 'done'),('qty_to_deliver','>',0.0)]" help="To Deliver"/>
+                        <filter name="to_receive" domain="[('state','!=', 'done'),('qty_to_receive','>',0.0)]" help="To Receive"/>
+                        <filter name="to_deliver" domain="[('state','!=', 'done'),('qty_to_deliver','>',0.0)]" help="To Deliver"/>
                     </group>
                     <group name="rma_supplier_quantities">
-                        <filter domain="[('state','!=', 'done'),('qty_to_supplier_rma','>',0.0)]" help="To Send to Supplier RMA"/>
+                        <filter name="to_send_to_supplier" domain="[('state','!=', 'done'),('qty_to_supplier_rma','>',0.0)]" help="To Send to Supplier RMA"/>
                     </group>
                     <group expand="0" string="Group By">
                         <filter name="status" string="State" domain="[]"
