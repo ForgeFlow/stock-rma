@@ -1,7 +1,7 @@
 # Copyright 2017-18 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from openerp.tests import common
+from odoo.tests import common
 
 
 class TestRmaAccount(common.SingleTransactionCase):
@@ -194,6 +194,7 @@ class TestRmaAccount(common.SingleTransactionCase):
         })
         make_refund.invoice_refund()
         rma.refund_line_ids.invoice_id.invoice_validate()
+        rma._compute_refund_count()
         self.assertEqual(rma.refund_count, 1)
         self.assertEqual(rma.qty_to_refund, 0.0)
         self.assertEqual(rma.qty_refunded, 15.0)
