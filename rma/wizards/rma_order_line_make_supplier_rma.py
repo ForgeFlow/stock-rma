@@ -189,7 +189,7 @@ class RmaLineMakeRmaOrderItem(models.TransientModel):
     product_id = fields.Many2one('product.product',
                                  related='line_id.product_id', readony=True)
     name = fields.Char(related='line_id.name', readonly=True)
-    uom_id = fields.Many2one('product.uom', string='UoM', readonly=True)
+    uom_id = fields.Many2one('uom.uom', string='UoM', readonly=True)
     product_qty = fields.Float(string='Quantity',
                                digits=dp.get_precision('Product UoS'))
     operation_id = fields.Many2one(
