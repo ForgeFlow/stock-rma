@@ -61,7 +61,7 @@
     </record>
 
     <!--Routes-->
-    <record id="route_rma_customer" model='stock.location.route'>
+    <record id="route_rma_customer" model="stock.location.route">
         <field name="name">RMA Customer</field>
         <field name="sequence">10</field>
         <field name="sale_selectable" eval="False"/>
@@ -71,7 +71,7 @@
         <field name="rma_selectable" eval="True"/>
     </record>
 
-    <record id="route_rma_supplier" model='stock.location.route'>
+    <record id="route_rma_supplier" model="stock.location.route">
         <field name="name">RMA Supplier</field>
         <field name="sequence">10</field>
         <field name="sale_selectable" eval="False"/>
@@ -81,7 +81,7 @@
         <field name="rma_selectable" eval="True"/>
     </record>
 
-    <record id="route_rma_dropship" model='stock.location.route'>
+    <record id="route_rma_dropship" model="stock.location.route">
         <field name="name">RMA Dropship</field>
         <field name="sequence">10</field>
         <field name="sale_selectable" eval="False"/>
@@ -92,9 +92,9 @@
     </record>
 
     <!--Dropship rules-->
-    <record id="rule_rma_dropship_return" model="procurement.rule">
+    <record id="rule_rma_dropship_return" model="stock.rule">
         <field name="name">Customer → Supplier</field>
-        <field name="action">move</field>
+        <field name="action">pull</field>
         <field name="warehouse_id" ref="stock.warehouse0"/>
         <field name="location_id" ref="stock.stock_location_suppliers"/>
         <field name="location_src_id" ref="stock.stock_location_customers"/>
@@ -104,9 +104,9 @@
                ref="rma.picking_type_rma_dropship_return"/>
     </record>
 
-    <record id="rule_rma_dropship" model="procurement.rule">
+    <record id="rule_rma_dropship" model="stock.rule">
         <field name="name">Supplier → Customer</field>
-        <field name="action">move</field>
+        <field name="action">pull</field>
         <field name="warehouse_id" ref="stock.warehouse0"/>
         <field name="location_id" ref="stock.stock_location_customers"/>
         <field name="location_src_id" ref="stock.stock_location_suppliers"/>
@@ -117,8 +117,8 @@
     </record>
 
     <!-- Enable the RMA in warehouse0 -->
-    <record id='stock.warehouse0' model='stock.warehouse'>
-        <field name='rma_in_this_wh' eval='True'/>
+    <record id="stock.warehouse0" model="stock.warehouse">
+        <field name="rma_in_this_wh" eval="True"/>
     </record>
 
 </odoo>
