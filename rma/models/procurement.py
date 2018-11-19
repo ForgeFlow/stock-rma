@@ -5,7 +5,7 @@ from odoo import fields, models
 
 
 class ProcurementRule(models.Model):
-    _inherit = 'procurement.rule'
+    _inherit = 'stock.rule'
 
     rma_line_id = fields.Many2one(
         comodel_name='rma.order.line', string='RMA line',
