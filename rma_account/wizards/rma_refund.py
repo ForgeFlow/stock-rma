@@ -112,7 +112,7 @@ class RmaRefund(models.TransientModel):
             account = accounts['stock_input']
         if not account:
             raise ValidationError(_(
-                "Accounts are not configure for this product."))
+                "Accounts are not configured for this product."))
         values = {
             'name': item.line_id.name or item.rma_id.name,
             'origin': item.line_id.name or item.rma_id.name,
@@ -202,7 +202,7 @@ class RmaRefundItem(models.TransientModel):
     qty_to_refund = fields.Float(
         string='Quantity To Refund',
         digits=dp.get_precision('Product Unit of Measure'))
-    uom_id = fields.Many2one('product.uom', string='Unit of Measure',
+    uom_id = fields.Many2one('uom.uom', string='Unit of Measure',
                              readonly=True)
     refund_policy = fields.Selection(selection=[
         ('no', 'Not required'), ('ordered', 'Based on Ordered Quantities'),
