@@ -3,13 +3,13 @@
 
 {
     'name': 'RMA Account',
-    'version': '11.0.1.0.0',
+    'version': '12.0.1.0.0',
     'license': 'LGPL-3',
     'category': 'RMA',
     'summary': 'Integrates RMA with Invoice Processing',
     'author': "Eficent, Odoo Community Association (OCA)",
     'website': 'http://www.github.com/OCA/rma',
-    'depends': ['account', 'rma'],
+    'depends': ['stock_account', 'rma'],
     'demo': ['data/rma_operation.xml'],
     'data': [
         'security/ir.model.access.csv',
