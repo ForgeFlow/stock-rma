@@ -70,7 +70,7 @@ class RmaOrderLine(models.Model):
     @api.multi
     def _get_rma_move_qty(self, states, direction='in'):
         for rec in self:
-            product_obj = self.env['product.uom']
+            product_obj = self.env['uom.uom']
             qty = 0.0
             if direction == 'in':
                 op = ops['=']
@@ -238,7 +238,7 @@ class RmaOrderLine(models.Model):
         readonly=True, states={'draft': [('readonly', False)]},
     )
     uom_id = fields.Many2one(
-        comodel_name='product.uom', string='Unit of Measure',
+        comodel_name='uom.uom', string='Unit of Measure',
         required=True,
         readonly=True, states={'draft': [('readonly', False)]},
     )
