@@ -254,5 +254,5 @@ class RmaMakePickingItem(models.TransientModel):
     qty_to_deliver = fields.Float(
         string='Quantity To Deliver',
         digits=dp.get_precision('Product Unit of Measure'))
-    uom_id = fields.Many2one('product.uom', string='Unit of Measure',
+    uom_id = fields.Many2one('uom.uom', string='Unit of Measure',
                              readonly=True)

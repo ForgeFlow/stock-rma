@@ -92,7 +92,7 @@
                                 <field name="product_id"/>
                                 <field name="lot_id" groups="stock.group_production_lot"/>
                                 <field name="name"/>
-                                <field name="uom_id" groups="product.group_uom"/>
+                                <field name="uom_id" groups="uom.group_uom"/>
                                 <field name="operation_id"/>
                                 <field name="product_qty"/>
                                 <field name="price_unit"/>
@@ -180,7 +180,7 @@
                                 <field name="product_id"/>
                                 <field name="lot_id" groups="stock.group_production_lot"/>
                                 <field name="name"/>
-                                <field name="uom_id" groups="product.group_uom"/>
+                                <field name="uom_id" groups="uom.group_uom"/>
                                 <field name="operation_id"/>
                                 <field name="product_qty"/>
                                 <field name="origin"/>

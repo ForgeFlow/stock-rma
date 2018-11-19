@@ -33,16 +33,16 @@ class StockWarehouse(models.Model):
              "for this warehouse.",
     )
     rma_customer_in_pull_id = fields.Many2one(
-        comodel_name='procurement.rule', string="RMA Customer In Rule",
+        comodel_name='stock.rule', string="RMA Customer In Rule",
     )
     rma_customer_out_pull_id = fields.Many2one(
-        comodel_name='procurement.rule', string="RMA Customer Out Rule",
+        comodel_name='stock.rule', string="RMA Customer Out Rule",
     )
     rma_supplier_in_pull_id = fields.Many2one(
-        comodel_name='procurement.rule', string="RMA Supplier In Rule",
+        comodel_name='stock.rule', string="RMA Supplier In Rule",
     )
     rma_supplier_out_pull_id = fields.Many2one(
-        comodel_name='procurement.rule', string="RMA Supplier Out Rule",
+        comodel_name='stock.rule', string="RMA Supplier Out Rule",
     )
 
     @api.multi
@@ -176,8 +176,10 @@ class StockWarehouse(models.Model):
         customer_loc, supplier_loc = self._get_partner_locations()
         # TODO: company_id?
         rma_rules['rma_customer_in'] = {
-            'name': self._format_rulename(self, customer_loc, self.lot_rma_id),
-            'action': 'move',
+            'name': self._format_rulename(self,
+                                          customer_loc,
+                                          self.lot_rma_id.name),
+            'action': 'pull',
             'warehouse_id': self.id,
             'location_src_id': customer_loc.id,
             'location_id': self.lot_rma_id.id,
@@ -187,8 +189,10 @@ class StockWarehouse(models.Model):
             'active': True,
         }
         rma_rules['rma_customer_out'] = {
-            'name': self._format_rulename(self, self.lot_rma_id, customer_loc),
-            'action': 'move',
+            'name': self._format_rulename(self,
+                                          self.lot_rma_id,
+                                          customer_loc.name),
+            'action': 'pull',
             'warehouse_id': self.id,
             'location_src_id': self.lot_rma_id.id,
             'location_id': customer_loc.id,
@@ -198,8 +202,10 @@ class StockWarehouse(models.Model):
             'active': True,
         }
         rma_rules['rma_supplier_in'] = {
-            'name': self._format_rulename(self, supplier_loc, self.lot_rma_id),
-            'action': 'move',
+            'name': self._format_rulename(self,
+                                          supplier_loc,
+                                          self.lot_rma_id.name),
+            'action': 'pull',
             'warehouse_id': self.id,
             'location_src_id': supplier_loc.id,
             'location_id': self.lot_rma_id.id,
@@ -209,8 +215,10 @@ class StockWarehouse(models.Model):
             'active': True,
         }
         rma_rules['rma_supplier_out'] = {
-            'name': self._format_rulename(self, self.lot_rma_id, supplier_loc),
-            'action': 'move',
+            'name': self._format_rulename(self,
+                                          self.lot_rma_id,
+                                          supplier_loc.name),
+            'action': 'pull',
             'warehouse_id': self.id,
             'location_src_id': self.lot_rma_id.id,
             'location_id': supplier_loc.id,
@@ -222,7 +230,7 @@ class StockWarehouse(models.Model):
         return rma_rules
 
     def _create_or_update_rma_pull(self):
-        rule_obj = self.env['procurement.rule']
+        rule_obj = self.env['stock.rule']
         for wh in self:
             rules_dict = wh.get_rma_rules_dict()
             if wh.rma_customer_in_pull_id:

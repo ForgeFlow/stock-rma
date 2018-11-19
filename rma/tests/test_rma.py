@@ -1,8 +1,8 @@
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from openerp.tests import common
-from openerp.exceptions import ValidationError
+from odoo.tests import common
+from odoo.exceptions import ValidationError
 
 
 class TestRma(common.SavepointCase):
@@ -27,9 +27,9 @@ class TestRma(common.SavepointCase):
             'rma.rma_operation_ds_replace')
         cls.product_id = cls.env.ref('product.product_product_4')
         cls.product_1 = cls.env.ref('product.product_product_25')
-        cls.product_2 = cls.env.ref('product.product_product_17')
+        cls.product_2 = cls.env.ref('product.product_product_22')
         cls.product_3 = cls.env.ref('product.product_product_20')
-        cls.uom_unit = cls.env.ref('product.product_uom_unit')
+        cls.uom_unit = cls.env.ref('uom.product_uom_unit')
         # assign an operation
         cls.product_1.write(
             {'rma_customer_operation_id': cls.rma_cust_replace_op_id.id,
@@ -48,7 +48,7 @@ class TestRma(common.SavepointCase):
             'stock.stock_location_customers')
         cls.supplier_location = cls.env.ref(
             'stock.stock_location_suppliers')
-        cls.product_uom_id = cls.env.ref('product.product_uom_unit')
+        cls.product_uom_id = cls.env.ref('uom.product_uom_unit')
         # Customer RMA:
         products2move = [(cls.product_1, 3), (cls.product_2, 5),
                          (cls.product_3, 2)]
