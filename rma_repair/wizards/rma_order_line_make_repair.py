@@ -147,7 +147,7 @@ class RmaLineMakeRepairItem(models.TransientModel):
     @api.model
     def _prepare_repair_order(self, rma_line):
         location_dest = (self.location_dest_id if not self.to_refurbish else
-                         self.product_id.property_stock_refurbish)
+                         rma_line.product_id.property_stock_refurbish)
         refurbish_location_dest_id = (self.location_dest_id.id if
                                       self.to_refurbish else False)
         return {

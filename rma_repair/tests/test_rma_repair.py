@@ -117,15 +117,14 @@ class TestRmaRepair(common.SingleTransactionCase):
 
     def test_02_rma_repair_operation(self):
         """Test RMA quantities using repair operations."""
-        # Received sale_policy:
+        # Received repair_type:
         rma_1 = self.rma_group_customer.rma_line_ids.filtered(
             lambda r: r.product_id == self.product_1)
         self.assertEquals(rma_1.operation_id.repair_type, 'received',
                           "Incorrect Repair operation")
         self.assertEquals(rma_1.qty_to_repair, 0.0,
                           "Quantity to repair should be 0.0")
-        # TODO: receive and check qty_to_sell is 20.0
-        # Ordered sale_policy:
+        # Ordered repair_type:
         rma_2 = self.rma_group_customer.rma_line_ids.filtered(
             lambda r: r.product_id == self.product_2)
         self.assertEquals(rma_2.operation_id.repair_type, 'ordered',

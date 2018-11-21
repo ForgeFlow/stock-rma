@@ -74,7 +74,7 @@ class RmaOrderLine(models.Model):
         qty = 0.0
         for repair in self.repair_ids.filtered(
                 lambda p: p.state != 'cancel'):
-            repair_qty = self.env['product.uom']._compute_quantity(
+            repair_qty = self.uom_id._compute_quantity(
                 repair.product_qty,
                 repair.product_uom,
             )

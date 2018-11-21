@@ -28,12 +28,12 @@
                      </field>
                  </group>
                  <newline/>
-                 <group colspan="2">
+                 <footer>
                      <button name="make_repair_order"
                              string="Create Repair Orders" type="object"
                              class="oe_highlight"/>
                      <button special="cancel" string="Cancel" class="oe_link"/>
-                 </group>
+                 </footer>
             </form>
         </field>
     </record>
