@@ -1,1 +1,2 @@
-manufacture https://github.com/OCA/manufacture
+# Until merged
+manufacture https://github.com/Eficent/manufacture 11.0-mig-mrp_repair_refurbish
