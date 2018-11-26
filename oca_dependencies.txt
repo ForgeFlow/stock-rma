@@ -1,0 +1,1 @@
+manufacture https://github.com/OCA/manufacture 11.0
