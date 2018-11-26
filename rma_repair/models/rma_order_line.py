@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from openerp import api, fields, models
-from openerp.addons import decimal_precision as dp
+from odoo import api, fields, models
+from odoo.addons import decimal_precision as dp
 
 
 class RmaOrderLine(models.Model):
@@ -75,8 +74,7 @@ class RmaOrderLine(models.Model):
         qty = 0.0
         for repair in self.repair_ids.filtered(
                 lambda p: p.state != 'cancel'):
-            repair_qty = self.env['product.uom']._compute_qty_obj(
-                self.uom_id,
+            repair_qty = self.uom_id._compute_quantity(
                 repair.product_qty,
                 repair.product_uom,
             )

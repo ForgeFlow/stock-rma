@@ -28,12 +28,12 @@
                      </field>
                  </group>
                  <newline/>
-                 <group colspan="2">
+                 <footer>
                      <button name="make_repair_order"
                              string="Create Repair Orders" type="object"
                              class="oe_highlight"/>
                      <button special="cancel" string="Cancel" class="oe_link"/>
-                 </group>
+                 </footer>
             </form>
         </field>
     </record>
@@ -46,16 +46,7 @@
         <field name="view_type">form</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
-    </record>
-
-    <record model="ir.values" id="rma_order_line_make_repair_multi">
-        <field name="model_id" ref="model_rma_order_line" />
-        <field name="name">Create Repairs</field>
-        <field name="key2">client_action_multi</field>
-        <field name="value"
-               eval="'ir.actions.act_window,' + str(ref('action_rma_order_line_make_repair'))" />
-        <field name="key">action</field>
-        <field name="model">rma.order.line</field>
+        <field name="binding_model_id" ref="rma_repair.model_rma_order_line"/>
     </record>
 
 </odoo>

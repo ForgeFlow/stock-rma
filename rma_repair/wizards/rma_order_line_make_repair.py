@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl-3.0).
 
-import openerp.addons.decimal_precision as dp
-from openerp import _, api, fields, models
-from openerp.exceptions import ValidationError
+import odoo.addons.decimal_precision as dp
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class RmaLineMakeRepair(models.TransientModel):
@@ -24,7 +23,6 @@ class RmaLineMakeRepair(models.TransientModel):
             to_refurbish = refurbish_product_id = False
         return {
             'line_id': line.id,
-            'rma_line_id': line.id,
             'product_id': line.product_id.id,
             'product_qty': line.qty_to_repair,
             'rma_id': line.rma_id.id,
@@ -96,11 +94,11 @@ class RmaLineMakeRepairItem(models.TransientModel):
 
     wiz_id = fields.Many2one(
         comodel_name='rma.order.line.make.repair', string='Wizard',
-        ondelete='cascade', readonly=True,
+        ondelete='cascade',
     )
     line_id = fields.Many2one(
         comodel_name='rma.order.line', string='RMA',
-        required=True, readonly=True,
+        required=True,
     )
     rma_id = fields.Many2one(
         comodel_name='rma.order', related='line_id.rma_id',
@@ -149,15 +147,15 @@ class RmaLineMakeRepairItem(models.TransientModel):
     @api.model
     def _prepare_repair_order(self, rma_line):
         location_dest = (self.location_dest_id if not self.to_refurbish else
-                         self.product_id.property_stock_refurbish)
+                         rma_line.product_id.property_stock_refurbish)
         refurbish_location_dest_id = (self.location_dest_id.id if
                                       self.to_refurbish else False)
         return {
-            'product_id': self.product_id.id,
-            'partner_id': self.partner_id.id,
+            'product_id': rma_line.product_id.id,
+            'partner_id': rma_line.partner_id.id,
             'product_qty': self.product_qty,
-            'rma_line_id': self.line_id.id,
-            'product_uom': self.product_id.uom_po_id.id,
+            'rma_line_id': rma_line.id,
+            'product_uom': rma_line.product_id.uom_po_id.id,
             'company_id': rma_line.company_id.id,
             'location_id': self.location_id.id,
             'location_dest_id': location_dest.id,
