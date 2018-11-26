@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 {
     "name": "RMA Repair",
-    "version": "9.0.1.0.0",
+    "version": "11.0.1.0.0",
     "license": "LGPL-3",
     "category": "RMA",
     "summary": "Links RMA with Repairs.",
@@ -18,6 +17,6 @@
              "views/rma_order_line_view.xml",
              "data/mrp_repair_sequence.xml",
              ],
-    "installable": False,
+    "installable": True,
     "auto_install": True,
 }
