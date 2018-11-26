@@ -1,2 +1,0 @@
-# Until merge
-manufacture https://github.com/Eficent/manufacture 11.0-mig-quality_control_issue

@@ -19,13 +19,14 @@ class TestRmaQualityControlIssue(common.SingleTransactionCase):
         cls.res_users = cls.env['res.users']
         cls.company = cls.env.ref('base.main_company')
 
+        cls.rma_qc_issue_item = cls.env[
+            'qc.issue.make.supplier.rma.item']
+        cls.rma_qc_issue = cls.env['qc.issue.make.supplier.rma']
+
         cls.rma_route_cust = cls.env.ref('rma.route_rma_customer')
 
-        # Create User and Group
-        cls.group_user = cls.env.ref(
-            'base.group_user')
-        cls.user = cls._create_user('no_bi_user', cls.group_user,
-                                    cls.company)
+        # Root User
+        cls.admin_user = cls.env.ref('base.user_root')
 
         # Create customer
         cls.supplier1 = cls.partner.create({'name': 'Supplier 1'})
@@ -43,54 +44,47 @@ class TestRmaQualityControlIssue(common.SingleTransactionCase):
         })
 
     @classmethod
-    def _create_user(self, login, groups, company):
-        """Create a user."""
-        user = self.res_users.create({
-            'name': login,
-            'login': login,
-            'password': 'demo',
-            'email': 'example@yourcompany.com',
-            'company_id': company.id,
-            'groups_id': [(6, 0, groups.ids)]
-        })
-        return user
-
-    @classmethod
     def _create_qc_issue(self):
-        qc_issue_id = self.env['qc.issue'].create({
-            'product_id': self.product_1.id,
-            'product_qty': 1.0,
-            'inspector_id': self.user.id,
-            'product_uom': self.product_1.uom_id.id,
-        })
+        qc_issue_id = \
+            self.qc_issue_obj.sudo(self.admin_user.id).create({
+                'product_id': self.product_1.id,
+                'product_qty': 1.0,
+                'inspector_id': self.admin_user.id,
+                'product_uom': self.product_1.uom_id.id,
+            })
+
         qc_issue_id._compute_rma_line_count()
         qc_issue_id.action_view_rma_lines_supplier()
         qc_issue_id.action_view_rma_lines_customer()
         return qc_issue_id
 
-    def test_01_add_from_sale_order(self):
+    def test_01_add_from_qc_issue(self):
         """Test wizard to create RMA from QC Issue."""
-        self.rma_qc_issue_item = self.env[
-            'qc.issue.make.supplier.rma.item']
-        self.rma_qc_issue = self.env['qc.issue.make.supplier.rma']
 
-        qc_issue = self.rma_qc_issue.with_context({
+        # Create the QC Issue
+        qc_issue = self._create_qc_issue()
+
+        # Wizard to create Supplier RMA from QC Issue
+        wiz = self.rma_qc_issue.with_context({
             'active_ids': self.rma_group.rma_line_ids.ids,
             'active_model': 'qc.issue',
-            'active_id': 1
+            'active_id': qc_issue.id,
         }).create({
             'partner_id': self.supplier1.id,
-            'supplier_rma_id': self.rma_group.id,
-            'use_group': True,
+            'use_group': False,
             'item_ids': [(0, 0, {
-                'issue_id': self._create_qc_issue().id,
+                'issue_id': qc_issue.id,
                 'product_id': self.product_1.id,
                 'name': 'Test RMA Refund',
                 'product_qty': 1.0,
                 'uom_id': self.product_1.uom_id.id
             })]})
         self.rma_qc_issue.with_context({
-            'active_ids': self._create_qc_issue().ids,
+            'active_ids': qc_issue.ids,
             'active_model': 'qc.issue'
-        }).default_get([str(qc_issue.id)])
-        qc_issue.make_supplier_rma()
+        }).default_get([str(wiz.id)])
+        wiz.make_supplier_rma()
+
+        # Check if RMA Supplier count has increased in QC Issue
+        self.assertEqual(qc_issue.rma_line_count_supplier, 1,
+                         'The count for rma supplier should be equal to 1')
