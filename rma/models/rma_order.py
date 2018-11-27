@@ -8,7 +8,7 @@ from datetime import datetime
 
 class RmaOrder(models.Model):
     _name = "rma.order"
-    _inherit = ['mail.thread']
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
     @api.model
     def _get_default_type(self):
