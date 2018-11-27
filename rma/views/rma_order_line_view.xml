@@ -202,6 +202,7 @@
                     </sheet>
                 <div class="oe_chatter">
                     <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="activity_ids" widget="mail_activity"/>
                     <field name="message_ids" widget="mail_thread"/>
                 </div>
                 </form>
@@ -374,6 +375,7 @@
                     </sheet>
                 <div class="oe_chatter">
                     <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="activity_ids" widget="mail_activity"/>
                     <field name="message_ids" widget="mail_thread"/>
                 </div>
                 </form>
@@ -393,7 +395,17 @@
                     <field name="product_id"/>
                     <field name="lot_id"/>
                     <separator/>
-                    <filter name="assigned_to" domain="[('assigned_to','=',uid)]" help="My RMAs"/>
+                    <filter string="My Activities" name="activities_my"
+                        domain="[('activity_ids.user_id', '=', uid)]"/>
+                    <separator/>
+                    <filter string="Late Activities" name="activities_overdue"
+                        domain="[('activity_ids.date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"
+                        help="Show all records which has next action date is before today"/>
+                    <filter string="Today Activities" name="activities_today"
+                        domain="[('activity_ids.date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                    <filter string="Future Activities" name="activities_upcoming_all"
+                        domain="[('activity_ids.date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))]"/>
+                    <filter domain="[('assigned_to','=',uid)]" help="My RMAs"/>
                     <separator/>
                     <group name="stock_quantities" groups="stock.group_stock_user">
                         <filter name="to_receive" domain="[('state','!=', 'done'),('qty_to_receive','>',0.0)]" help="To Receive"/>
@@ -424,7 +436,7 @@
             <field name="name">Customer RMA</field>
             <field name="res_model">rma.order.line</field>
             <field name="domain">[('type','=', 'customer')]</field>
-            <field name="context">{"search_default_assigned_to":uid}</field>
+            <field name="context">{'customer':1}</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="view_rma_line_tree"/>
@@ -434,7 +446,7 @@
             <field name="name">Supplier RMA</field>
             <field name="res_model">rma.order.line</field>
             <field name="domain">[('type','=', 'supplier')]</field>
-            <field name="context">{"search_default_assigned_to":uid, "supplier":1}</field>
+            <field name="context">{"supplier":1}</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="view_rma_line_supplier_tree"/>

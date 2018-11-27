@@ -8,8 +8,8 @@ from datetime import datetime
 
 class RmaOrder(models.Model):
     _name = "rma.order"
-    _description = 'RMA Group'
-    _inherit = ['mail.thread']
+    _description = "RMA Order"
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
     @api.model
     def _get_default_type(self):
