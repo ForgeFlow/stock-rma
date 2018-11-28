@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl-3.0).
 
-import openerp.addons.decimal_precision as dp
-from openerp import api, fields, models, _
-from openerp.exceptions import ValidationError
+import odoo.addons.decimal_precision as dp
+from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError
 
 
 class QcIssueMakeSupplierRma(models.TransientModel):
@@ -189,6 +188,6 @@ class QcIssueMakeSupplierRmaItem(models.TransientModel):
         readonly=True, related='issue_id.lot_id',
     )
     name = fields.Char(related='issue_id.name', readonly=True)
-    uom_id = fields.Many2one('product.uom', string='UoM', readonly=True)
+    uom_id = fields.Many2one('product.uom', string='UoM')
     product_qty = fields.Float(string='Quantity to RMA',
                                digits=dp.get_precision('Product UoS'))
