@@ -220,7 +220,7 @@
                     <filter name="partner" string="Partner" domain="[]"
                             context="{'group_by':'partner_id'}"/>
                     <filter name="rma_date" string="RMA Date" domain="[]"
-                            context="{'group_by':'rma_date'}"/>
+                            context="{'group_by':'date_rma'}"/>
                 </group>
            </search>
         </field>
