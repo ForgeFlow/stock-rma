@@ -620,7 +620,7 @@ class RmaOrderLine(models.Model):
         result = action.read()[0]
         # choose the view_mode accordingly
         if rma_lines and len(rma_lines) != 1:
-            result['domain'] = rma_lines.ids
+            result['domain'] = [('id', 'in', rma_lines)]
         elif len(rma_lines) == 1:
             result['views'] = [(res and res.id or False, 'form')]
             result['res_id'] = rma_lines[0]
