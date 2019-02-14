@@ -154,7 +154,7 @@ class RmaLineMakeSupplierRma(models.TransientModel):
                 'view_type': 'form',
                 'view_mode': 'form',
                 'res_model': 'rma.order',
-                'view_id': False,
+                'view_id': self.env.ref('rma.view_rma_supplier_form').id,
                 'res_id': rma.id,
                 'context': {'supplier': True, 'customer': False},
                 'type': 'ir.actions.act_window'
@@ -165,7 +165,7 @@ class RmaLineMakeSupplierRma(models.TransientModel):
                 'view_type': 'form',
                 'view_mode': 'form',
                 'res_model': 'rma.order.line',
-                'view_id': False,
+                'view_id': self.env.ref('rma.view_rma_line_supplier_form').id,
                 'res_id': rma_line.id,
                 'context': {'supplier': True, 'customer': False},
                 'type': 'ir.actions.act_window'

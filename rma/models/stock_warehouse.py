@@ -176,7 +176,7 @@ class StockWarehouse(models.Model):
         customer_loc, supplier_loc = self._get_partner_locations()
         # TODO: company_id?
         rma_rules['rma_customer_in'] = {
-            'name': self._format_rulename(self, customer_loc, self.lot_rma_id),
+            'name': self._format_rulename(customer_loc, self.lot_rma_id, ''),
             'action': 'move',
             'warehouse_id': self.id,
             'location_src_id': customer_loc.id,
@@ -187,7 +187,7 @@ class StockWarehouse(models.Model):
             'active': True,
         }
         rma_rules['rma_customer_out'] = {
-            'name': self._format_rulename(self, self.lot_rma_id, customer_loc),
+            'name': self._format_rulename(self.lot_rma_id, customer_loc, ''),
             'action': 'move',
             'warehouse_id': self.id,
             'location_src_id': self.lot_rma_id.id,
@@ -198,7 +198,7 @@ class StockWarehouse(models.Model):
             'active': True,
         }
         rma_rules['rma_supplier_in'] = {
-            'name': self._format_rulename(self, supplier_loc, self.lot_rma_id),
+            'name': self._format_rulename(supplier_loc, self.lot_rma_id, ''),
             'action': 'move',
             'warehouse_id': self.id,
             'location_src_id': supplier_loc.id,
@@ -209,7 +209,7 @@ class StockWarehouse(models.Model):
             'active': True,
         }
         rma_rules['rma_supplier_out'] = {
-            'name': self._format_rulename(self, self.lot_rma_id, supplier_loc),
+            'name': self._format_rulename(self.lot_rma_id, supplier_loc, ''),
             'action': 'move',
             'warehouse_id': self.id,
             'location_src_id': self.lot_rma_id.id,
