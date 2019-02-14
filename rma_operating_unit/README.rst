@@ -25,7 +25,7 @@ Contributors
 ------------
 
 * Aaron Henriquez <ahenriquez@eficent.com>
-
+* Beñat Jimenez <benat.jimenez@eficent.com>
 
 Maintainer
 ----------
