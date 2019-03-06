@@ -8,7 +8,7 @@ from odoo import api, models
 class StockMove(models.Model):
     _inherit = "stock.move"
 
-    @api.model
+    @api.multi
     def _prepare_account_move_line(self, qty, cost,
                                    credit_account_id, debit_account_id):
         res = super(StockMove, self)._prepare_account_move_line(
