@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+<odoo>
+    <record id="view_rma_line_supplier_form" model="ir.ui.view">
+        <field name="name">rma.order.line.supplier.form</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_line_supplier_form"/>
+        <field name="arch" type="xml">
+            <button name="action_view_out_shipments" position="after">
+                 <button type="object"  name="action_view_refunds"
+                            class="oe_stat_button"
+                            icon="fa-pencil-square-o"
+                            groups="account.group_account_user">
+                        <field name="refund_count" widget="statinfo"
+                               string="Refunds"/>
+                    </button>
+            </button>
+            <group name="main_info" position="inside">
+                <field name="invoice_line_id"
+                       options="{'no_create': True}"
+                       context="{'rma': True}"
+                       domain="['|',
+                                ('invoice_id.partner_id', '=', partner_id),
+                                ('invoice_id.partner_id', 'child_of', partner_id)]"/>
+            </group>
+            <field name="operation_id" position="after">
+                <field name="refund_policy"/>
+            </field>
+            <page name="stock" position="after">
+                <page name="refunds" string="Refunds">
+                    <field name="refund_line_ids" nolabel="1"/>
+                </page>
+            </page>
+            <field name="delivery_address_id" position="after">
+                <field name="invoice_address_id"
+                       groups='rma.group_rma_delivery_invoice_address'/>
+            </field>
+            <group name="deliver" position="after">
+                <group name="refund">
+                    <field name="qty_to_refund"/>
+                    <field name="qty_refunded"/>
+                </group>
+            </group>
+        </field>
+    </record>
+
+    <record id="view_rma_line_form" model="ir.ui.view">
+        <field name="name">rma.order.line.form</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_line_form"/>
+        <field name="arch" type="xml">
+            <button name="action_view_out_shipments" position="after">
+                 <button type="object"  name="action_view_refunds"
+                            class="oe_stat_button"
+                            icon="fa-pencil-square-o"
+                            groups="account.group_account_user">
+                        <field name="refund_count" widget="statinfo"
+                               string="Refunds"/>
+                    </button>
+            </button>
+            <group name="main_info" position="inside">
+                <field name="invoice_line_id"
+                       options="{'no_create': True}"
+                       context="{'rma': True}"
+                       domain="['|',
+                                ('invoice_id.partner_id', '=', partner_id),
+                                ('invoice_id.partner_id', 'child_of', partner_id)]"/>
+            </group>
+            <field name="operation_id" position="after">
+                <field name="refund_policy"/>
+            </field>
+            <page name="stock" position="after">
+                <page name="refunds" string="Refunds">
+                    <field name="refund_line_ids" nolabel="1"/>
+                </page>
+            </page>
+            <field name="delivery_address_id" position="after">
+                <field name="invoice_address_id"
+                       groups='rma.group_rma_delivery_invoice_address'/>
+            </field>
+            <group name="supplier_rma" position="after">
+                <group name="refund">
+                    <field name="qty_to_refund"/>
+                    <field name="qty_refunded"/>
+                </group>
+            </group>
+        </field>
+    </record>
+
+    <record id="view_rma_rma_line_filter" model="ir.ui.view">
+        <field name="name">rma.order.line.select</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_rma_line_filter"/>
+        <field name="arch" type="xml">
+            <field name="product_id" position="after">
+                <filter name="to_refund" string="To Refund" domain="[('qty_to_refund', '>', 0)]"
+context="{'group_by':'partner_id'}"/>
+            </field>
+        </field>
+    </record>
+</odoo>

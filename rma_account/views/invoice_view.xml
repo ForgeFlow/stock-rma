@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<odoo>
+    <record id="invoice_form" model="ir.ui.view">
+        <field name="name">account.invoice.form</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_form"/>
+        <field name="arch" type="xml">
+            <field name="number" position="before">
+                <div class="oe_button_box" attrs="{'invisible': [('rma_count', '=', 0)]}">
+                    <button type="object"  name="action_view_rma_customer"
+                            class="oe_stat_button"
+                            icon="fa-eject"
+                            groups="rma.group_rma_customer_user,rma.group_rma_supplier_user">
+                        <field name="rma_count" widget="statinfo"
+                               string="RMA"/>
+                    </button>
+                </div>
+            </field>
+        </field>
+    </record>
+
+    <record id="invoice_supplier_form" model="ir.ui.view">
+        <field name="name">account.invoice.supplier.form</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_supplier_form"/>
+        <field name="arch" type="xml">
+            <field name="number" position="before">
+                <div class="oe_button_box" attrs="{'invisible': [('rma_count', '=', 0)]}">
+                    <button type="object"  name="action_view_rma_supplier"
+                            class="oe_stat_button"
+                            icon="fa-eject"
+                            groups="rma.group_rma_customer_user,rma.group_rma_supplier_user">
+                        <field name="rma_count" widget="statinfo"
+                               string="RMA"/>
+                    </button>
+                </div>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_invoice_line_form" model="ir.ui.view">
+        <field name="name">rma.invoice.line.form</field>
+        <field name="model">account.invoice.line</field>
+        <field name="inherit_id" ref="account.view_invoice_line_form"/>
+        <field eval="16" name="priority"/>
+        <field name="arch" type="xml">
+            <data>
+                <field name="name" position="after">
+                    <field name="rma_line_count" invisible="1"/>
+                    <field name="rma_line_id"
+                           string="RMA line originated"/>
+                    <notebook attrs="{'invisible': [('rma_line_count', '=', 0)]}">
+                        <page string="RMA Lines">
+                            <field name="rma_line_ids"/>
+                        </page>
+                    </notebook>
+                </field>
+            </data>
+        </field>
+    </record>
+
+    <record id="view_invoice_supplier_rma_form" model="ir.ui.view">
+        <field name="name">account.invoice.supplier.rma</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_supplier_form"/>
+        <field name="arch" type="xml">
+            <field name="reference" position="after">
+                 <field name="add_rma_line_id"
+                        context="{'rma': True}"
+                        domain="[('type', '=', 'supplier'),
+                                 ('partner_id', '=', partner_id)]"
+                        attrs="{'readonly': [('state','not in',['draft'])],
+                         'invisible': ['|', ('state', '=', 'paid'),
+                          ('type', '=', 'out_invoice')]}" class="oe_edit_only"
+                        options="{'no_create': True}"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_invoice_customer_rma_form" model="ir.ui.view">
+        <field name="name">account.invoice.customer.rma</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_form"/>
+        <field name="arch" type="xml">
+            <field name="payment_term_id" position="after">
+                 <field name="add_rma_line_id"
+                        context="{'rma': True}"
+                        domain="[('type', '=', 'customer'),
+                                 ('partner_id', '=', partner_id)]"
+                        attrs="{'readonly': [('state','not in',['draft'])],
+                         'invisible': ['|', ('state', '=', 'paid'),
+                          ('type', '=', 'in_invoice')]}" class="oe_edit_only"
+                        options="{'no_create': True}"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="action_invoice_line" model="ir.actions.act_window">
+        <field name="name">Invoice Line</field>
+        <field name="res_model">account.invoice.line</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="account.view_invoice_line_form"/>
+    </record>
+</odoo>
