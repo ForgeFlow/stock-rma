@@ -3,19 +3,22 @@
 
 {
     "name": "RMA Repair",
-    "version": "11.0.1.0.0",
+    "version": "12.0.1.0.0",
     "license": "LGPL-3",
     "category": "RMA",
     "summary": "Links RMA with Repairs.",
     "author": "Eficent, Odoo Community Association (OCA)",
     "website": "http://www.github.com/OCA/rma",
-    "depends": ["rma_account", "mrp_repair_refurbish"],
+    "depends": [
+        "rma_account",
+        "repair_refurbish"
+    ],
     "data": ["views/rma_order_view.xml",
              "views/rma_operation_view.xml",
-             "views/mrp_repair_view.xml",
+             "views/repair_view.xml",
              "wizards/rma_order_line_make_repair_view.xml",
              "views/rma_order_line_view.xml",
-             "data/mrp_repair_sequence.xml",
+             "data/repair_sequence.xml",
              ],
     "installable": True,
     "auto_install": True,

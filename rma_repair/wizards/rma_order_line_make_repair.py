@@ -57,7 +57,7 @@ class RmaLineMakeRepair(models.TransientModel):
     @api.multi
     def make_repair_order(self):
         res = []
-        repair_obj = self.env['mrp.repair']
+        repair_obj = self.env['repair.order']
         for item in self.item_ids:
             rma_line = item.line_id
             data = item._prepare_repair_order(rma_line)
@@ -68,7 +68,7 @@ class RmaLineMakeRepair(models.TransientModel):
             'name': _('Repairs'),
             'view_type': 'form',
             'view_mode': 'tree,form',
-            'res_model': 'mrp.repair',
+            'res_model': 'repair.order',
             'view_id': False,
             'context': False,
             'type': 'ir.actions.act_window'
@@ -102,7 +102,7 @@ class RmaLineMakeRepairItem(models.TransientModel):
     )
     rma_id = fields.Many2one(
         comodel_name='rma.order', related='line_id.rma_id',
-        string='RMA Order', readonly=True,
+        string='RMA Order',
     )
     product_id = fields.Many2one(
         comodel_name='product.product', string='Product', readonly=True,
@@ -111,7 +111,7 @@ class RmaLineMakeRepairItem(models.TransientModel):
         string='Quantity to repair', digits=dp.get_precision('Product UoS'),
     )
     product_uom_id = fields.Many2one(
-        comodel_name='product.uom', string='UoM', readonly=True,
+        comodel_name='uom.uom', string='UoM', readonly=True,
     )
     out_route_id = fields.Many2one(
         comodel_name='stock.location.route', string='Outbound Route',
