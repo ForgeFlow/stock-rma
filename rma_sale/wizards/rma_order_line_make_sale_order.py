@@ -132,14 +132,14 @@ class RmaLineMakeSaleOrderItem(models.TransientModel):
     line_id = fields.Many2one(
         comodel_name='rma.order.line', string='RMA Line')
     rma_id = fields.Many2one(
-        comodel_name='rma.order', related='line_id.rma_id')
+        comodel_name='rma.order', related='line_id.rma_id', readonly=False)
     product_id = fields.Many2one(
         comodel_name='product.product', string='Product')
     name = fields.Char(string='Description')
     product_qty = fields.Float(
         string='Quantity to sell', digits=dp.get_precision('Product UoS'))
     product_uom_id = fields.Many2one(
-        comodel_name='product.uom', string='UoM')
+        comodel_name='uom.uom', string='UoM')
     out_warehouse_id = fields.Many2one(
         comodel_name='stock.warehouse', string='Outbound Warehouse')
     free_of_charge = fields.Boolean(string='Free of Charge')
