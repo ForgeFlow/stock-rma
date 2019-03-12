@@ -21,7 +21,7 @@
                         <field name="product"/>
                         <field name="name"/>
                         <field name="product_qty"/>
-                        <field name="uom_id" groups="product.group_uom"/>
+                        <field name="uom_id" groups="uom.group_uom"/>
                         <field name="qty_to_refund" readonly="0"/>
                     </tree>
                 </field>
