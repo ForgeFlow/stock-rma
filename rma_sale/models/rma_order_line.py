@@ -27,7 +27,7 @@ class RmaOrderLine(models.Model):
         for rec in self:
             rec.qty_sold = rec._get_rma_sold_qty()
 
-    @api.multi
+    @api.depends('sale_line_ids', 'sale_line_ids.order_id')
     def _compute_sales_count(self):
         for line in self:
             sales = line.mapped('sale_line_ids.order_id')
@@ -40,7 +40,6 @@ class RmaOrderLine(models.Model):
     )
     sale_id = fields.Many2one(
         string="Source Sales Order", related='sale_line_id.order_id',
-        readonly=True,
     )
     sale_line_ids = fields.One2many(
         comodel_name='sale.order.line', inverse_name='rma_line_id',
@@ -49,12 +48,12 @@ class RmaOrderLine(models.Model):
     qty_to_sell = fields.Float(
         string='Qty To Sell', copy=False,
         digits=dp.get_precision('Product Unit of Measure'),
-        readonly=True, compute=_compute_qty_to_sell,
+        readonly=True, compute='_compute_qty_to_sell',
         store=True)
     qty_sold = fields.Float(
         string='Qty Sold', copy=False,
         digits=dp.get_precision('Product Unit of Measure'),
-        readonly=True, compute=_compute_qty_sold,
+        readonly=True, compute='_compute_qty_sold',
         store=True)
     sale_policy = fields.Selection(selection=[
         ('no', 'Not required'), ('ordered', 'Based on Ordered Quantities'),
@@ -62,7 +61,7 @@ class RmaOrderLine(models.Model):
         string="Sale Policy", default='no', required=True,
         readonly=True, states={'draft': [('readonly', False)]})
     sales_count = fields.Integer(
-        compute=_compute_sales_count, string='# of Sales')
+        compute='_compute_sales_count', string='# of Sales')
 
     @api.onchange('product_id', 'partner_id')
     def _onchange_product_id(self):

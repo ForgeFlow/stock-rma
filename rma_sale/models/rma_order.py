@@ -6,14 +6,15 @@ from odoo import api, fields, models
 class RmaOrder(models.Model):
     _inherit = "rma.order"
 
-    @api.multi
+    @api.depends('rma_line_ids', 'rma_line_ids.sale_line_id',
+                 'rma_line_ids.sale_line_id.order_id')
     def _compute_sales_count(self):
         for rma in self:
             sales = rma.mapped('rma_line_ids.sale_line_id.order_id')
             rma.sale_count = len(sales)
 
     sale_count = fields.Integer(
-        compute=_compute_sales_count, string='# of Sales')
+        compute='_compute_sales_count', string='# of Sales')
 
     @api.model
     def _get_line_domain(self, rma_id, line):
