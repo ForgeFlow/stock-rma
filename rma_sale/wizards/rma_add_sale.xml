@@ -32,7 +32,7 @@
                         <field name="qty_delivered"/>
                         <field name="qty_invoiced"/>
                         <field name="qty_to_invoice"/>
-                        <field name="product_uom" string="Unit of Measure" groups="product.group_uom"/>
+                        <field name="product_uom" string="Unit of Measure" groups="uom.group_uom"/>
                         <field name="price_subtotal" sum="Total" widget="monetary"/>
                     </tree>
 
