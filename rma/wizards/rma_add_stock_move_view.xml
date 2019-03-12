@@ -20,8 +20,8 @@
                         <field name="product_uom" string="Unit of Measure" groups="uom.group_uom"/>
                         <field name="product_packaging" domain="[('product_id','=',product_id)]" groups="product.group_stock_packaging"/>
                         <field name="picking_id"/>
-                        <field name="location_id" groups="stock.group_locations"/>
-                        <field name="location_dest_id" groups="stock.group_locations"/>
+                        <field name="location_id" groups="stock.group_stock_multi_locations"/>
+                        <field name="location_dest_id" groups="stock.group_stock_multi_locations"/>
                         <field name="create_date" groups="base.group_no_one"/>
                         <field name="date" string="Date" groups="base.group_no_one"/>
                         <field name="date_expected" string="Date Expected"/>
