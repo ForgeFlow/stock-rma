@@ -4,12 +4,12 @@
 from odoo import fields, models
 
 
-class MrpRepair(models.Model):
-    _inherit = "mrp.repair"
+class RepairOrder(models.Model):
+    _inherit = "repair.order"
 
     rma_line_id = fields.Many2one(
         comodel_name='rma.order.line', string='RMA', ondelete='restrict',
     )
     under_warranty = fields.Boolean(
-        related='rma_line_id.under_warranty',
+        related='rma_line_id.under_warranty', readonly=False,
     )
