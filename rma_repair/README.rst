@@ -10,7 +10,7 @@ This module allows you to create repairs from one or more RMA lines.
 Installation
 ============
 
-This module depends on ``mrp_repair_refurbish`` which is available at
+This module depends on ``repair_refurbish`` which is available at
 `OCA/manufacture <https://github.com/OCA/manufacture>`_.
 
 Usage

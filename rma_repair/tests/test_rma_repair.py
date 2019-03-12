@@ -149,6 +149,7 @@ class TestRmaRepair(common.SingleTransactionCase):
         })
         make_repair.make_repair_order()
         rma.repair_ids.action_repair_confirm()
+        import pdb; pdb.set_trace()
         self.assertEqual(rma.repair_count, 1)
         self.assertEqual(rma.qty_to_repair, 0.0)
         self.assertEqual(rma.qty_repaired, 15.0)
