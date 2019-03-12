@@ -29,41 +29,41 @@ class RmaOrderLine(models.Model):
         for line in self:
             line.qty_repaired = line._get_rma_repaired_qty()
 
-    @api.multi
+    @api.depends('repair_ids')
     def _compute_repair_count(self):
         for line in self:
             line.repair_count = len(line.repair_ids)
 
     repair_ids = fields.One2many(
-        comodel_name='mrp.repair', inverse_name='rma_line_id',
+        comodel_name='repair.order', inverse_name='rma_line_id',
         string='Repair Orders', readonly=True,
         states={'draft': [('readonly', False)]}, copy=False)
     qty_to_repair = fields.Float(
         string='Qty To Repair', copy=False,
         digits=dp.get_precision('Product Unit of Measure'),
-        readonly=True, compute=_compute_qty_to_repair,
+        readonly=True, compute='_compute_qty_to_repair',
         store=True)
     qty_repaired = fields.Float(
         string='Qty Repaired', copy=False,
         digits=dp.get_precision('Product Unit of Measure'),
-        readonly=True, compute=_compute_qty_repaired,
+        readonly=True, compute='_compute_qty_repaired',
         store=True, help="Quantity repaired or being repaired.")
     repair_type = fields.Selection(selection=[
         ('no', 'Not required'), ('ordered', 'Based on Ordered Quantities'),
         ('received', 'Based on Received Quantities')],
         string="Repair Policy", default='no', required=True)
     repair_count = fields.Integer(
-        compute=_compute_repair_count, string='# of Repairs')
+        compute='_compute_repair_count', string='# of Repairs')
 
     @api.multi
     def action_view_repair_order(self):
-        action = self.env.ref('mrp_repair.action_repair_order_tree')
+        action = self.env.ref('repair.action_repair_order_tree')
         result = action.read()[0]
         repair_ids = self.repair_ids.ids
         if len(repair_ids) != 1:
             result['domain'] = [('id', 'in', repair_ids)]
         elif len(repair_ids) == 1:
-            res = self.env.ref('mrp_repair.view_repair_order_form', False)
+            res = self.env.ref('repair.view_repair_order_form', False)
             result['views'] = [(res and res.id or False, 'form')]
             result['res_id'] = repair_ids[0]
         return result
