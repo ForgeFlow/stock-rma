@@ -45,12 +45,12 @@ class RmaOperation(models.Model):
     in_route_id = fields.Many2one(
         comodel_name='stock.location.route', string='Inbound Route',
         domain=[('rma_selectable', '=', True)],
-        default=_default_routes,
+        default=lambda self: self._default_routes(),
     )
     out_route_id = fields.Many2one(
         comodel_name='stock.location.route', string='Outbound Route',
         domain=[('rma_selectable', '=', True)],
-        default=_default_routes,
+        default=lambda self: self._default_routes(),
     )
     customer_to_supplier = fields.Boolean(
         string='The customer will send to the supplier',
@@ -60,10 +60,12 @@ class RmaOperation(models.Model):
     )
     in_warehouse_id = fields.Many2one(
         comodel_name='stock.warehouse', string='Inbound Warehouse',
-        default=_default_warehouse_id)
+        default=lambda self: self._default_warehouse_id(),
+    )
     out_warehouse_id = fields.Many2one(
         comodel_name='stock.warehouse', string='Outbound Warehouse',
-        default=_default_warehouse_id)
+        default=lambda self: self._default_warehouse_id(),
+    )
     location_id = fields.Many2one(
         'stock.location', 'Send To This Company Location')
     type = fields.Selection([
