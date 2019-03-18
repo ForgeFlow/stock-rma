@@ -273,13 +273,13 @@ class RmaOrderLine(models.Model):
     receipt_policy = fields.Selection([
         ('no', 'Not required'), ('ordered', 'Based on Ordered Quantities'),
         ('delivered', 'Based on Delivered Quantities')],
-        required=True, string="Receipts Policy",
+        required=True, string="Receipts Policy", default='no',
         readonly=True, states={'draft': [('readonly', False)]},
     )
     delivery_policy = fields.Selection([
         ('no', 'Not required'), ('ordered', 'Based on Ordered Quantities'),
         ('received', 'Based on Received Quantities')], required=True,
-        string="Delivery Policy",
+        string="Delivery Policy", default='no',
         readonly=True, states={'draft': [('readonly', False)]},
     )
     in_route_id = fields.Many2one(
