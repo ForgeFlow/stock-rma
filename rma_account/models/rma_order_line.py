@@ -48,7 +48,7 @@ class RmaOrderLine(models.Model):
         help="Invoice address for current rma order.",
     )
     refund_count = fields.Integer(
-        compute=_compute_refund_count, string='# of Refunds', default=0)
+        compute='_compute_refund_count', string='# of Refunds', default=0)
     invoice_line_id = fields.Many2one(
         comodel_name='account.invoice.line',
         string='Originating Invoice Line',
@@ -73,11 +73,11 @@ class RmaOrderLine(models.Model):
     qty_to_refund = fields.Float(
         string='Qty To Refund', copy=False,
         digits=dp.get_precision('Product Unit of Measure'), readonly=True,
-        compute=_compute_qty_to_refund, store=True)
+        compute='_compute_qty_to_refund', store=True)
     qty_refunded = fields.Float(
         string='Qty Refunded', copy=False,
         digits=dp.get_precision('Product Unit of Measure'),
-        readonly=True, compute=_compute_qty_refunded, store=True)
+        readonly=True, compute='_compute_qty_refunded', store=True)
 
     @api.onchange('product_id')
     def _onchange_product_id(self):
