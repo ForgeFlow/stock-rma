@@ -25,9 +25,9 @@ class RmaOrder(models.Model):
         ondelete='set null', readonly=True,
     )
     invoice_refund_count = fields.Integer(
-        compute=_compute_invoice_refund_count, string='# of Refunds')
+        compute='_compute_invoice_refund_count', string='# of Refunds')
     invoice_count = fields.Integer(
-        compute=_compute_invoice_count, string='# of Invoices')
+        compute='_compute_invoice_count', string='# of Invoices')
 
     def _prepare_rma_line_from_inv_line(self, line):
         if self.type == 'customer':
