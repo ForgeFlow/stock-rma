@@ -63,7 +63,8 @@ class RmaRefund(models.TransientModel):
     )
     date = fields.Date(string='Accounting Date')
     description = fields.Char(
-        string='Reason', required=True, default=_get_reason,
+        string='Reason', required=True,
+        default=lambda self: self._get_reason(),
     )
     item_ids = fields.One2many(
         comodel_name='rma.refund.item',
