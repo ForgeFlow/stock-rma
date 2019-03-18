@@ -114,6 +114,7 @@ Contributors
 * Aaron Henriquez <ahenriquez@eficent.com>
 * Lois Rilo <lois.rilo@eficent.com>
 * Bhavesh Odedra <bodedra@opensourceintegrators.com>
+* Akim Juillerat <akim.juillerat@camptocamp.com>
 
 Maintainer
 ----------

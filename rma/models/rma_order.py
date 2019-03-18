@@ -50,12 +50,15 @@ class RmaOrder(models.Model):
         string='Group Number', index=True, copy=False)
     type = fields.Selection(
         [('customer', 'Customer'), ('supplier', 'Supplier')],
-        string="Type", required=True, default=_get_default_type, readonly=True)
+        string="Type", required=True,
+        default=lambda self: self._get_default_type(),
+        readonly=True
+    )
     reference = fields.Char(string='Partner Reference',
                             help="The partner reference of this RMA order.")
     comment = fields.Text('Additional Information')
     date_rma = fields.Datetime(string='Order Date', index=True,
-                               default=_default_date_rma)
+                               default=lambda self: self._default_date_rma(),)
     partner_id = fields.Many2one(
         comodel_name='res.partner', string='Partner', required=True)
     rma_line_ids = fields.One2many('rma.order.line', 'rma_id',
