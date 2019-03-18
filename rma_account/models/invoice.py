@@ -58,7 +58,7 @@ class AccountInvoice(models.Model):
         return {}
 
     rma_count = fields.Integer(
-        compute=_compute_rma_count, string='# of RMA')
+        compute='_compute_rma_count', string='# of RMA')
 
     add_rma_line_id = fields.Many2one(
         comodel_name='rma.order.line',
@@ -156,7 +156,7 @@ class AccountInvoiceLine(models.Model):
             invl.rma_line_count = len(rma_lines)
 
     rma_line_count = fields.Integer(
-        compute=_compute_rma_count, string='# of RMA')
+        compute='_compute_rma_count', string='# of RMA')
     rma_line_ids = fields.One2many(
         comodel_name='rma.order.line', inverse_name='invoice_line_id',
         string="RMA", readonly=True,
