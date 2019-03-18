@@ -63,14 +63,16 @@ class RmaOrder(models.Model):
         comodel_name='res.partner', string='Partner', required=True)
     rma_line_ids = fields.One2many('rma.order.line', 'rma_id',
                                    string='RMA lines')
-    in_shipment_count = fields.Integer(compute=_compute_in_shipment_count,
+    in_shipment_count = fields.Integer(compute='_compute_in_shipment_count',
                                        string='# of Invoices')
-    out_shipment_count = fields.Integer(compute=_compute_out_shipment_count,
+    out_shipment_count = fields.Integer(compute='_compute_out_shipment_count',
                                         string='# of Outgoing Shipments')
-    line_count = fields.Integer(compute=_compute_line_count,
+    line_count = fields.Integer(compute='_compute_line_count',
                                 string='# of Outgoing Shipments')
-    supplier_line_count = fields.Integer(compute=_compute_supplier_line_count,
-                                         string='# of Outgoing Shipments')
+    supplier_line_count = fields.Integer(
+        compute='_compute_supplier_line_count',
+        string='# of Outgoing Shipments'
+    )
     company_id = fields.Many2one('res.company', string='Company',
                                  required=True, default=lambda self:
                                  self.env.user.company_id)
