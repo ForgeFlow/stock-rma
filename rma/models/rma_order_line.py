@@ -167,7 +167,7 @@ class RmaOrderLine(models.Model):
 
     delivery_address_id = fields.Many2one(
         comodel_name='res.partner', string='Partner delivery address',
-        default=_default_delivery_address,
+        default=lambda self: self._default_delivery_address(),
         readonly=True, states={'draft': [('readonly', False)]},
         help="This address will be used to deliver repaired or replacement "
              "products.",
@@ -258,7 +258,8 @@ class RmaOrderLine(models.Model):
         default=lambda self: self.env.user.company_id)
     type = fields.Selection(
         selection=[('customer', 'Customer'), ('supplier', 'Supplier')],
-        string="Type", required=True, default=_get_default_type,
+        string="Type", required=True,
+        default=lambda self: self._get_default_type(),
         readonly=True,
     )
     customer_to_supplier = fields.Boolean(
@@ -298,19 +299,19 @@ class RmaOrderLine(models.Model):
         string='Inbound Warehouse',
         required=True,
         readonly=True, states={'draft': [('readonly', False)]},
-        default=_default_warehouse_id,
+        default=lambda self: self._default_warehouse_id(),
     )
     out_warehouse_id = fields.Many2one(
         comodel_name='stock.warehouse', string='Outbound Warehouse',
         required=True,
         readonly=True, states={'draft': [('readonly', False)]},
-        default=_default_warehouse_id,
+        default=lambda self: self._default_warehouse_id(),
     )
     location_id = fields.Many2one(
         comodel_name='stock.location', string='Send To This Company Location',
         required=True,
         readonly=True, states={'draft': [('readonly', False)]},
-        default=_default_location_id,
+        default=lambda self: self._default_location_id(),
     )
     customer_rma_id = fields.Many2one(
         'rma.order.line', string='Customer RMA line', ondelete='cascade')
