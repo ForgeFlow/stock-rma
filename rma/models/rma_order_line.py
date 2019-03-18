@@ -240,9 +240,9 @@ class RmaOrderLine(models.Model):
         string='Price Unit',
         readonly=True, states={'draft': [('readonly', False)]},
     )
-    in_shipment_count = fields.Integer(compute=_compute_in_shipment_count,
+    in_shipment_count = fields.Integer(compute='_compute_in_shipment_count',
                                        string='# of Shipments')
-    out_shipment_count = fields.Integer(compute=_compute_out_shipment_count,
+    out_shipment_count = fields.Integer(compute='_compute_out_shipment_count',
                                         string='# of Deliveries')
     move_ids = fields.One2many('stock.move', 'rma_line_id',
                                string='Stock Moves', readonly=True,
@@ -336,40 +336,40 @@ class RmaOrderLine(models.Model):
     qty_to_receive = fields.Float(
         string='Qty To Receive',
         digits=dp.get_precision('Product Unit of Measure'),
-        compute=_compute_qty_to_receive, store=True)
+        compute='_compute_qty_to_receive', store=True)
     qty_incoming = fields.Float(
         string='Incoming Qty', copy=False,
         readonly=True, digits=dp.get_precision('Product Unit of Measure'),
-        compute=_compute_qty_incoming, store=True)
+        compute='_compute_qty_incoming', store=True)
     qty_received = fields.Float(
         string='Qty Received', copy=False,
         digits=dp.get_precision('Product Unit of Measure'),
-        compute=_compute_qty_received,
+        compute='_compute_qty_received',
         store=True)
     qty_to_deliver = fields.Float(
         string='Qty To Deliver', copy=False,
         digits=dp.get_precision('Product Unit of Measure'),
-        readonly=True, compute=_compute_qty_to_deliver,
+        readonly=True, compute='_compute_qty_to_deliver',
         store=True)
     qty_outgoing = fields.Float(
         string='Outgoing Qty', copy=False,
         readonly=True, digits=dp.get_precision('Product Unit of Measure'),
-        compute=_compute_qty_outgoing,
+        compute='_compute_qty_outgoing',
         store=True)
     qty_delivered = fields.Float(
         string='Qty Delivered', copy=False,
         digits=dp.get_precision('Product Unit of Measure'),
-        readonly=True, compute=_compute_qty_delivered,
+        readonly=True, compute='_compute_qty_delivered',
         store=True)
     qty_to_supplier_rma = fields.Float(
         string='Qty to send to Supplier RMA',
         digits=dp.get_precision('Product Unit of Measure'),
-        readonly=True, compute=_compute_qty_supplier_rma,
+        readonly=True, compute='_compute_qty_supplier_rma',
         store=True)
     qty_in_supplier_rma = fields.Float(
         string='Qty in Supplier RMA',
         digits=dp.get_precision('Product Unit of Measure'),
-        readonly=True, compute=_compute_qty_supplier_rma,
+        readonly=True, compute='_compute_qty_supplier_rma',
         store=True)
     under_warranty = fields.Boolean(
         string="Under Warranty?",
