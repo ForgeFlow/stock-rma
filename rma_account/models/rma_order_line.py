@@ -43,7 +43,7 @@ class RmaOrderLine(models.Model):
 
     invoice_address_id = fields.Many2one(
         'res.partner', string='Partner invoice address',
-        default=_default_invoice_address,
+        default=lambda self: self._default_invoice_address(),
         readonly=True, states={'draft': [('readonly', False)]},
         help="Invoice address for current rma order.",
     )
