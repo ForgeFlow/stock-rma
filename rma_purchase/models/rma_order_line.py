@@ -78,6 +78,22 @@ class RmaOrderLine(models.Model):
         readonly=True, compute='_compute_qty_purchase'
     )
 
+    @api.onchange('product_id', 'partner_id')
+    def _onchange_product_id(self):
+        """Domain for purchase_order_line_id is computed here to make
+        it dynamic."""
+        res = super(RmaOrderLine, self)._onchange_product_id()
+        if not res.get('domain'):
+            res['domain'] = {}
+        domain = [
+            '|',
+            ('order_id.partner_id', '=', self.partner_id.id),
+            ('order_id.partner_id', 'child_of', self.partner_id.id)]
+        if self.product_id:
+            domain.append(('product_id', '=', self.product_id.id))
+        res['domain']['purchase_order_line_id'] = domain
+        return res
+
     @api.onchange('operation_id')
     def _onchange_operation_id(self):
         res = super(RmaOrderLine, self)._onchange_operation_id()
@@ -122,8 +138,9 @@ class RmaOrderLine(models.Model):
             'uom_id': line.product_uom.id,
             'operation_id': operation.id,
             'product_qty': line.product_qty,
-            'price_unit': line.currency_id.compute(
-                line.price_unit, line.currency_id, round=False),
+            'price_unit': line.currency_id._convert(
+                line.price_unit, line.currency_id,
+                self.env.user.company_id, fields.Date.today(), round=False),
             'in_route_id': operation.in_route_id.id or route,
             'out_route_id': operation.out_route_id.id or route,
             'receipt_policy': operation.receipt_policy,
