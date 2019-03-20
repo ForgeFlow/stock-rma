@@ -29,7 +29,7 @@
                         <field name="product_id"/>
                         <field name="price_unit"/>
                         <field name="product_qty"/>
-                        <field name="product_uom" groups="product.group_uom"/>
+                        <field name="product_uom" groups="uom.group_uom"/>
                         <field name="price_subtotal" widget="monetary"/>
                         <field name="date_planned"  widget="date"/>
                     </tree>

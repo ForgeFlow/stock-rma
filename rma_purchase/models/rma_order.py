@@ -20,6 +20,7 @@ class RmaOrder(models.Model):
             rec.po_count = po_count
 
     @api.multi
+    @api.depends('rma_line_ids')
     def _compute_origin_po_count(self):
         for rma in self:
             purchases = rma.mapped(
