@@ -70,8 +70,9 @@ class RmaAddPurchase(models.TransientModel):
             'uom_id': line.product_uom.id,
             'operation_id': operation.id,
             'product_qty': line.product_qty,
-            'price_unit': line.currency_id.compute(
-                line.price_unit, line.currency_id, round=False),
+            'price_unit': line.currency_id._convert(
+                line.price_unit, line.currency_id,
+                self.env.user.company_id, fields.Date.today(), round=False),
             'rma_id': self.rma_id.id,
             'in_route_id': operation.in_route_id.id or route,
             'out_route_id': operation.out_route_id.id or route,

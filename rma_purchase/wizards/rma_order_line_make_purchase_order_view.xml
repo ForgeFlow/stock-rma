@@ -30,7 +30,7 @@
                               <field name="name"/>
                               <field name="product_qty"/>
                               <field name="product_uom_id"
-                                     groups="product.group_uom"/>
+                                     groups="uom.group_uom"/>
                               <field name="free_of_charge"/>
                           </tree>
                      </field>
