@@ -1,65 +1,64 @@
 # Copyright 2017-18 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from openerp.tests import common
-from openerp.fields import Datetime
+from odoo.tests import common
+from odoo.fields import Datetime
 
 
-class TestRmaPurchase(common.SingleTransactionCase):
+class TestRmaPurchase(common.TransactionCase):
 
-    @classmethod
-    def setUpClass(cls):
-        super(TestRmaPurchase, cls).setUpClass()
+    def setUp(self):
+        super(TestRmaPurchase, self).setUp()
 
-        cls.rma_obj = cls.env['rma.order']
-        cls.rma_line_obj = cls.env['rma.order.line']
-        cls.rma_op_obj = cls.env['rma.operation']
-        cls.rma_add_purchase_wiz = cls.env['rma_add_purchase']
-        cls.po_obj = cls.env['purchase.order']
-        cls.pol_obj = cls.env['purchase.order.line']
-        cls.product_obj = cls.env['product.product']
-        cls.partner_obj = cls.env['res.partner']
+        self.rma_obj = self.env['rma.order']
+        self.rma_line_obj = self.env['rma.order.line']
+        self.rma_op_obj = self.env['rma.operation']
+        self.rma_add_purchase_wiz = self.env['rma_add_purchase']
+        self.po_obj = self.env['purchase.order']
+        self.pol_obj = self.env['purchase.order.line']
+        self.product_obj = self.env['product.product']
+        self.partner_obj = self.env['res.partner']
 
-        cls.rma_route_cust = cls.env.ref('rma.route_rma_customer')
+        self.rma_route_cust = self.env.ref('rma.route_rma_customer')
 
         # Create supplier
-        supplier1 = cls.partner_obj.create({'name': 'Supplier 1'})
+        supplier1 = self.partner_obj.create({'name': 'Supplier 1'})
 
         # Create products
-        cls.product_1 = cls.product_obj.create({
+        self.product_1 = self.product_obj.create({
             'name': 'Test Product 1',
             'type': 'product',
         })
-        cls.product_2 = cls.product_obj.create({
+        self.product_2 = self.product_obj.create({
             'name': 'Test Product 2',
             'type': 'product',
         })
 
         # Create PO:
-        cls.po = cls.po_obj.create({
+        self.po = self.po_obj.create({
             'partner_id': supplier1.id,
         })
-        cls.pol_1 = cls.pol_obj.create({
-            'name': cls.product_1.name,
-            'order_id': cls.po.id,
-            'product_id': cls.product_1.id,
+        self.pol_1 = self.pol_obj.create({
+            'name': self.product_1.name,
+            'order_id': self.po.id,
+            'product_id': self.product_1.id,
             'product_qty': 20.0,
-            'product_uom': cls.product_1.uom_id.id,
+            'product_uom': self.product_1.uom_id.id,
             'price_unit': 100.0,
             'date_planned': Datetime.now(),
         })
-        cls.pol_2 = cls.pol_obj.create({
-            'name': cls.product_2.name,
-            'order_id': cls.po.id,
-            'product_id': cls.product_2.id,
+        self.pol_2 = self.pol_obj.create({
+            'name': self.product_2.name,
+            'order_id': self.po.id,
+            'product_id': self.product_2.id,
             'product_qty': 18.0,
-            'product_uom': cls.product_2.uom_id.id,
+            'product_uom': self.product_2.uom_id.id,
             'price_unit': 150.0,
             'date_planned': Datetime.now(),
         })
 
         # Create RMA group:
-        cls.rma_group = cls.rma_obj.create({
+        self.rma_group = self.rma_obj.create({
             'partner_id': supplier1.id,
             'type': 'supplier',
         })

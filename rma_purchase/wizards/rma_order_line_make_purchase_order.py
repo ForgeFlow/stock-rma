@@ -139,5 +139,5 @@ class RmaLineMakePurchaseOrderItem(models.TransientModel):
         string='Quantity to purchase',
         digits=dp.get_precision('Product Unit of Measure'),)
     product_uom_id = fields.Many2one(
-        comodel_name='product.uom', string='UoM')
+        comodel_name='uom.uom', string='UoM')
     free_of_charge = fields.Boolean(string='Free of Charge')

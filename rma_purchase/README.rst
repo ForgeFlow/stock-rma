@@ -39,6 +39,7 @@ Contributors
 * Aaron Henriquez <ahenriquez@eficent.com>
 * Lois Rilo <lois.rilo@eficent.com>
 * Bhavesh Odedra <bodedra@opensourceintegrators.com>
+* Serpent Consulting Services Pvt. Ltd. <support@serpentcs.com>
 
 Maintainer
 ----------
