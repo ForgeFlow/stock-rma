@@ -205,5 +205,6 @@ class RmaRefundItem(models.TransientModel):
                              readonly=True)
     refund_policy = fields.Selection(selection=[
         ('no', 'Not required'), ('ordered', 'Based on Ordered Quantities'),
+        ('delivered', 'Based on Delivered Quantities'),
         ('received', 'Based on Received Quantities')],
         string="Refund Policy")
