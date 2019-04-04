@@ -28,14 +28,14 @@ def set_policies(cr):
     openupgrade.logged_query(cr, query)
 
 
-
 def link_refunds(cr):
     query = """
         update account_invoice_line ail
-        set rma_line_id = rma_order_line.id
+        set rma_line_id = rol.id
         from rma_order ro
-        where rma_order_line.%s = ro.id
-        and rma_order_line.%s = ail.id
+        inner join rma_order_line rol on rol.rma_id = ro.id
+        where rol.%s = ro.id
+        and rol.%s = ail.id
     """ % (openupgrade.get_legacy_name('claim_id'),
            openupgrade.get_legacy_name('refund_line_id'))
     openupgrade.logged_query(cr, query)
