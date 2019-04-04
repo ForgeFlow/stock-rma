@@ -165,7 +165,12 @@ def assign_partner(cr):
     cr.execute("""
         update rma_order_line set partner_id = ro.partner_id
         from rma_order_line rol inner join rma_order ro on rol.rma_id = ro.id
-        where ro.partner_id is not null
+        where ro.partner_id is not null;
+        update rma_order_line rol set name = ro.name
+        from rma_order ro where rol.rma_id = ro.id AND ro.partner_id is not null;
+
+        update rma_order_line rol set partner_id = ro.partner_id
+        from rma_order ro where rol.rma_id = ro.id AND ro.partner_id is not null;
     """)
 
 
