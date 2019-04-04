@@ -30,6 +30,10 @@ def set_policies(cr):
 
 def link_refunds(cr):
     query = """
+    update account_invoice_line ail set rma_line_id = null;
+    """
+    openupgrade.logged_query(cr, query)
+    query = """
         update account_invoice_line ail
         set rma_line_id = rol.id
         from rma_order ro
