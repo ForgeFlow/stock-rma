@@ -13,3 +13,15 @@ class RmaAddPurchase(models.TransientModel):
         data = super(RmaAddPurchase, self)._prepare_rma_line_from_po_line(line)
         data.update(analytic_account_id=line.analytic_account_id.id)
         return data
+
+
+class RmaLineMakePurchaseOrder(models.TransientModel):
+    _inherit = "rma.order.line.make.purchase.order"
+    _description = "Make Purchases Order from RMA Line"
+
+
+    @api.model
+    def _prepare_purchase_order_line(self, po, item):
+        res = super(RmaLineMakePurchaseOrder, self)._prepare_purchase_order_line(po, line)
+        res['analytic_account_id'] = item.analytic_account_id.id
+        return vals
