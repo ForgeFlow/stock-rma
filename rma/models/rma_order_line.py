@@ -396,7 +396,8 @@ class RmaOrderLine(models.Model):
         string="Under Warranty?",
         readonly=True, states={'draft': [('readonly', False)]},
     )
-
+    create_date = fields.Datetime(string='Creation Date', readonly=True, index=True,
+                                  help="Date on which RMA order is created.")
     @api.multi
     def _prepare_rma_line_from_stock_move(self, sm, lot=False):
         if not self.type:
