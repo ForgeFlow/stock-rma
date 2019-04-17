@@ -22,7 +22,6 @@ class RmaAddStockMove(models.TransientModel):
         rma = rma_obj.browse(rma_id)
         res['rma_id'] = rma.id
         res['partner_id'] = rma.partner_id.id
-        res['picking_id'] = False
         res['move_ids'] = False
         return res
 
