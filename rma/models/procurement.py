@@ -10,7 +10,7 @@ class ProcurementOrder(models.Model):
 
     rma_line_id = fields.Many2one(
         comodel_name='rma.order.line', string='RMA line',
-        ondelete="set null",
+        ondelete="set null", copy=False
     )
 
     @api.multi
@@ -35,9 +35,9 @@ class ProcurementGroup(models.Model):
 
     rma_id = fields.Many2one(
         comodel_name='rma.order', string='RMA',
-        ondelete="set null",
+        ondelete="set null", copy=False
     )
     rma_line_id = fields.Many2one(
         comodel_name='rma.order.line', string='RMA line',
-        ondelete="set null",
+        ondelete="set null", copy=False,
     )

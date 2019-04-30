@@ -13,6 +13,7 @@ ops = {'=': operator.eq,
 class RmaOrderLine(models.Model):
     _name = "rma.order.line"
     _inherit = ['mail.thread']
+    _order = 'create_date desc, id desc'
 
     @api.model
     def _get_default_type(self):
@@ -191,14 +192,17 @@ class RmaOrderLine(models.Model):
     rma_id = fields.Many2one(
         comodel_name='rma.order', string='RMA Group',
         track_visibility='onchange', readonly=True,
+        copy=False
     )
     name = fields.Char(
         string='Reference', required=True, default='/',
         readonly=True, states={'draft': [('readonly', False)]},
+        copy=False,
         help='Add here the supplier RMA #. Otherwise an internal code is'
              ' assigned.',
     )
     description = fields.Text(string='Description')
+    conditions = fields.Html(string='Terms and conditions')
     origin = fields.Char(
         string='Source Document',
         readonly=True, states={'draft': [('readonly', False)]},
@@ -252,7 +256,7 @@ class RmaOrderLine(models.Model):
         required=True,
         readonly=True, states={'draft': [('readonly', False)]},
     )
-    price_unit = fields.Monetary(
+    price_unit = fields.Float(
         string='Price Unit',
         readonly=True, states={'draft': [('readonly', False)]},
     )
@@ -335,7 +339,8 @@ class RmaOrderLine(models.Model):
         default=_default_location_id,
     )
     customer_rma_id = fields.Many2one(
-        'rma.order.line', string='Customer RMA line', ondelete='cascade')
+        'rma.order.line', string='Customer RMA line', ondelete='cascade',
+        copy=False)
     supplier_rma_line_ids = fields.One2many(
         'rma.order.line', 'customer_rma_id')
     rma_line_count = fields.Integer(
@@ -642,18 +647,19 @@ class RmaOrderLine(models.Model):
             # from customer we link to supplier rma
             action = self.env.ref(
                 'rma.action_rma_supplier_lines')
-            rma_lines = self.supplier_rma_line_ids.ids
+            rma_lines = self.supplier_rma_line_ids
             res = self.env.ref('rma.view_rma_line_supplier_form', False)
         else:
             # from supplier we link to customer rma
             action = self.env.ref(
                 'rma.action_rma_customer_lines')
-            rma_lines = self.customer_rma_id.ids
+            rma_lines = self.customer_rma_id
             res = self.env.ref('rma.view_rma_line_form', False)
         result = action.read()[0]
         # choose the view_mode accordingly
         if rma_lines and len(rma_lines) != 1:
-            result['domain'] = rma_lines.ids
+            result['domain'] = "[('id', 'in', " + \
+                               str(rma_lines.ids) + ")]"
         elif len(rma_lines) == 1:
             result['views'] = [(res and res.id or False, 'form')]
             result['res_id'] = rma_lines[0]

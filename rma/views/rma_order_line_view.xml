@@ -198,6 +198,7 @@
                             </page>
                             <page name="other" string="Other Info">
                                 <group name="general" string="General">
+                                    <field name="conditions"/>
                                     <field name="rma_id"/>
                                     <field name="origin"/>
 
@@ -371,6 +372,7 @@
                             </page>
                             <page name="other" string="Other Info">
                                 <group name="general" string="General">
+                                    <field name="conditions"/>
                                     <field name="rma_id"/>
                                     <field name="origin"/>
                                 </group>

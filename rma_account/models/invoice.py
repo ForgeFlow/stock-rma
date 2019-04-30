@@ -156,11 +156,12 @@ class AccountInvoiceLine(models.Model):
         compute=_compute_rma_count, string='# of RMA')
     rma_line_ids = fields.One2many(
         comodel_name='rma.order.line', inverse_name='invoice_line_id',
-        string="RMA", readonly=True,
+        string="RMA", readonly=True, copy=False,
         help="This will contain the RMA lines for the invoice line")
 
     rma_line_id = fields.Many2one(
         comodel_name='rma.order.line',
         string="RMA line refund",
+        copy=False,
         ondelete="set null",
         help="This will contain the rma line that originated the refund line")

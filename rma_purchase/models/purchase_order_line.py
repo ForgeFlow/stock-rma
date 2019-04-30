@@ -13,7 +13,7 @@ class PurchaseOrderLine(models.Model):
     state = fields.Selection(related='order_id.state', store=True)
 
     rma_line_id = fields.Many2one(
-        comodel_name='rma.order.line', string='RMA',
+        comodel_name='rma.order.line', string='RMA', copy=False
     )
 
     @api.model

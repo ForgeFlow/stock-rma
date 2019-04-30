@@ -84,6 +84,10 @@
                     <strong><p>Description</p></strong>
                     <span t-field="doc.description"></span>
                 </div>
+                <div>
+                    <strong><p>Term and Conditions</p></strong>
+                    <span t-field="doc.conditions"></span>
+                </div>
             </div>
         </t>
     </template>
