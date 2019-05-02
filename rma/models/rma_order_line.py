@@ -662,5 +662,5 @@ class RmaOrderLine(models.Model):
                                str(rma_lines.ids) + ")]"
         elif len(rma_lines) == 1:
             result['views'] = [(res and res.id or False, 'form')]
-            result['res_id'] = rma_lines[0]
+            result['res_id'] = rma_lines.id
         return result
