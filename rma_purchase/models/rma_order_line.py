@@ -191,6 +191,6 @@ class RmaOrderLine(models.Model):
 
         for line in self.manual_purchase_line_ids.filtered(
                 lambda p: p.state not in ('draft', 'sent', 'cancel')):
-            qty += uom_obj._compute_qty(
+            qty += uom_obj._compute_quantity(
                 self.uom_id.id, line.product_qty, line.product_uom.id)
         return qty
