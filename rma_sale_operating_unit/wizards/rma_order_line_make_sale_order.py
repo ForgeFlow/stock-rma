@@ -10,8 +10,10 @@ class RmaLineMakeSaleOrder(models.TransientModel):
 
     @api.model
     def _prepare_sale_order(self, line):
-        res = super(
+        sale_line = super(
             RmaLineMakeSaleOrder, self)._prepare_sale_order(line)
-        res.update(
-            project_id=line.analytic_account_id.id)
-        return res
+        sale_line.update(operating_unit_id=line.operating_unit_id.id)
+        team = self.env['crm.team'].search(
+            [('operating_unit_id', '=', line.operating_unit_id.id)], limit=1)
+        sale_line.update(team_id=team.id)
+        return sale_line
