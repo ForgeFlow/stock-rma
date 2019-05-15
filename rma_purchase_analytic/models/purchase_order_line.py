@@ -8,10 +8,10 @@ from odoo import _, api, exceptions, models
 class PurchaseOrderLine(models.Model):
     _inherit = "purchase.order.line"
 
-    @api.constrains('analytic_account_id')
+    @api.constrains('account_analytic_id')
     def check_analytic(self):
-        for line in self:
-            if (line.analytic_account_id !=
+        for line in self.filtered(lambda p: p.rma_line_id):
+            if (line.account_analytic_id !=
                     line.rma_line_id.analytic_account_id):
                 raise exceptions.ValidationError(
                     _("The analytic account in the PO line it's not the same"
