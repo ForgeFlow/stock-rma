@@ -170,14 +170,6 @@ class RmaMakePicking(models.TransientModel):
                 raise ValidationError(
                     _('RMA %s is not approved') %
                     line.name)
-            if line.receipt_policy == 'no' and picking_type == \
-                    'incoming':
-                raise ValidationError(
-                    _('No shipments needed for this operation'))
-            if line.delivery_policy == 'no' and picking_type == \
-                    'outgoing':
-                raise ValidationError(
-                    _('No deliveries needed for this operation'))
             procurement = self._create_procurement(item, picking_type)
             procurement_list.append(procurement)
         procurements = self.env['procurement.order'].browse(procurement_list)
