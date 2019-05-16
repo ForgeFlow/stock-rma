@@ -167,7 +167,7 @@ class RmaOrderLine(models.Model):
 
     delivery_address_id = fields.Many2one(
         comodel_name='res.partner', string='Partner delivery address',
-        default=_default_delivery_address,
+        default=lambda self: self._default_delivery_address(),
         readonly=True, states={'draft': [('readonly', False)]},
         help="This address will be used to deliver repaired or replacement "
              "products.",
@@ -240,9 +240,9 @@ class RmaOrderLine(models.Model):
         string='Price Unit',
         readonly=True, states={'draft': [('readonly', False)]},
     )
-    in_shipment_count = fields.Integer(compute=_compute_in_shipment_count,
+    in_shipment_count = fields.Integer(compute='_compute_in_shipment_count',
                                        string='# of Shipments')
-    out_shipment_count = fields.Integer(compute=_compute_out_shipment_count,
+    out_shipment_count = fields.Integer(compute='_compute_out_shipment_count',
                                         string='# of Deliveries')
     move_ids = fields.One2many('stock.move', 'rma_line_id',
                                string='Stock Moves', readonly=True,
@@ -258,7 +258,8 @@ class RmaOrderLine(models.Model):
         default=lambda self: self.env.user.company_id)
     type = fields.Selection(
         selection=[('customer', 'Customer'), ('supplier', 'Supplier')],
-        string="Type", required=True, default=_get_default_type,
+        string="Type", required=True,
+        default=lambda self: self._get_default_type(),
         readonly=True,
     )
     customer_to_supplier = fields.Boolean(
@@ -272,13 +273,13 @@ class RmaOrderLine(models.Model):
     receipt_policy = fields.Selection([
         ('no', 'Not required'), ('ordered', 'Based on Ordered Quantities'),
         ('delivered', 'Based on Delivered Quantities')],
-        required=True, string="Receipts Policy",
+        required=True, string="Receipts Policy", default='no',
         readonly=True, states={'draft': [('readonly', False)]},
     )
     delivery_policy = fields.Selection([
         ('no', 'Not required'), ('ordered', 'Based on Ordered Quantities'),
         ('received', 'Based on Received Quantities')], required=True,
-        string="Delivery Policy",
+        string="Delivery Policy", default='no',
         readonly=True, states={'draft': [('readonly', False)]},
     )
     in_route_id = fields.Many2one(
@@ -298,19 +299,19 @@ class RmaOrderLine(models.Model):
         string='Inbound Warehouse',
         required=True,
         readonly=True, states={'draft': [('readonly', False)]},
-        default=_default_warehouse_id,
+        default=lambda self: self._default_warehouse_id(),
     )
     out_warehouse_id = fields.Many2one(
         comodel_name='stock.warehouse', string='Outbound Warehouse',
         required=True,
         readonly=True, states={'draft': [('readonly', False)]},
-        default=_default_warehouse_id,
+        default=lambda self: self._default_warehouse_id(),
     )
     location_id = fields.Many2one(
         comodel_name='stock.location', string='Send To This Company Location',
         required=True,
         readonly=True, states={'draft': [('readonly', False)]},
-        default=_default_location_id,
+        default=lambda self: self._default_location_id(),
     )
     customer_rma_id = fields.Many2one(
         'rma.order.line', string='Customer RMA line', ondelete='cascade')
@@ -335,40 +336,40 @@ class RmaOrderLine(models.Model):
     qty_to_receive = fields.Float(
         string='Qty To Receive',
         digits=dp.get_precision('Product Unit of Measure'),
-        compute=_compute_qty_to_receive, store=True)
+        compute='_compute_qty_to_receive', store=True)
     qty_incoming = fields.Float(
         string='Incoming Qty', copy=False,
         readonly=True, digits=dp.get_precision('Product Unit of Measure'),
-        compute=_compute_qty_incoming, store=True)
+        compute='_compute_qty_incoming', store=True)
     qty_received = fields.Float(
         string='Qty Received', copy=False,
         digits=dp.get_precision('Product Unit of Measure'),
-        compute=_compute_qty_received,
+        compute='_compute_qty_received',
         store=True)
     qty_to_deliver = fields.Float(
         string='Qty To Deliver', copy=False,
         digits=dp.get_precision('Product Unit of Measure'),
-        readonly=True, compute=_compute_qty_to_deliver,
+        readonly=True, compute='_compute_qty_to_deliver',
         store=True)
     qty_outgoing = fields.Float(
         string='Outgoing Qty', copy=False,
         readonly=True, digits=dp.get_precision('Product Unit of Measure'),
-        compute=_compute_qty_outgoing,
+        compute='_compute_qty_outgoing',
         store=True)
     qty_delivered = fields.Float(
         string='Qty Delivered', copy=False,
         digits=dp.get_precision('Product Unit of Measure'),
-        readonly=True, compute=_compute_qty_delivered,
+        readonly=True, compute='_compute_qty_delivered',
         store=True)
     qty_to_supplier_rma = fields.Float(
         string='Qty to send to Supplier RMA',
         digits=dp.get_precision('Product Unit of Measure'),
-        readonly=True, compute=_compute_qty_supplier_rma,
+        readonly=True, compute='_compute_qty_supplier_rma',
         store=True)
     qty_in_supplier_rma = fields.Float(
         string='Qty in Supplier RMA',
         digits=dp.get_precision('Product Unit of Measure'),
-        readonly=True, compute=_compute_qty_supplier_rma,
+        readonly=True, compute='_compute_qty_supplier_rma',
         store=True)
     under_warranty = fields.Boolean(
         string="Under Warranty?",
