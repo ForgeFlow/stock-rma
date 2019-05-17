@@ -216,6 +216,13 @@ class RmaMakePicking(models.TransientModel):
                 [('origin', '=', procurement)]).ids
             if len(pickings) > 1:
                 action['domain'] = [('id', 'in', pickings)]
+            # In RMA Group the pickings are grouped and the origin is removed,
+            # so the pickings field will be empty.
+            if not pickings:
+                pickings = self.env['stock.picking'].search([(
+                    'group_id.name', '=', self.item_ids.rma_id.name
+                )]).ids
+                action['domain'] = [('id', 'in', pickings)]
             else:
                 form = self.env.ref('stock.view_picking_form', False)
                 action['views'] = [(form and form.id or False, 'form')]
