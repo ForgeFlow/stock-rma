@@ -11,7 +11,7 @@ class RmaOrder(models.Model):
     def _compute_repair_count(self):
         for rma in self:
             repairs = rma.mapped('rma_line_ids.repair_ids')
-            rma.rma_count = len(repairs)
+            rma.repair_count = len(repairs)
 
     repair_count = fields.Integer(
         compute='_compute_repair_count', string='# of Repairs')
