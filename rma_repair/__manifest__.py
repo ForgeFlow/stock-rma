@@ -8,7 +8,7 @@
     "category": "RMA",
     "summary": "Links RMA with Repairs.",
     "author": "Eficent, Odoo Community Association (OCA)",
-    "website": "http://www.github.com/OCA/rma",
+    "website": "https://github.com/Eficent/stock-rma",
     "depends": [
         "rma_account",
         "repair_refurbish"
