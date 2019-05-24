@@ -8,7 +8,7 @@
     'category': 'RMA',
     'summary': 'Links RMA with Sales Orders',
     'author': "Eficent, Odoo Community Association (OCA)",
-    'website': 'http://www.github.com/OCA/rma',
+    'website': 'https://github.com/Eficent/stock-rma',
     'depends': ['rma_account', 'sale_stock'],
     'data': [
         'data/rma_operation.xml',
