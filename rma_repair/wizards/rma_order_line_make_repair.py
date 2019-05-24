@@ -150,6 +150,7 @@ class RmaLineMakeRepairItem(models.TransientModel):
                          rma_line.product_id.property_stock_refurbish)
         refurbish_location_dest_id = (self.location_dest_id.id if
                                       self.to_refurbish else False)
+        addr = rma_line.partner_id.address_get(['delivery', 'invoice'])
         return {
             'product_id': rma_line.product_id.id,
             'partner_id': rma_line.partner_id.id,
@@ -163,5 +164,7 @@ class RmaLineMakeRepairItem(models.TransientModel):
             'refurbish_product_id': self.refurbish_product_id.id,
             'to_refurbish': self.to_refurbish,
             'invoice_method': self.invoice_method,
-            'partner_invoice_id': rma_line.invoice_address_id.id,
+            'address_id': addr['delivery'],
+            'partner_invoice_id': addr['invoice'],
+            'lot_id': rma_line.lot_id.id,
         }
