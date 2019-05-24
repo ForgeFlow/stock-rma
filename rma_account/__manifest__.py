@@ -8,7 +8,7 @@
     'category': 'RMA',
     'summary': 'Integrates RMA with Invoice Processing',
     'author': "Eficent, Odoo Community Association (OCA)",
-    'website': 'http://www.github.com/OCA/rma',
+    'website': 'https://github.com/Eficent/stock-rma',
     'depends': ['stock_account', 'rma'],
     'demo': ['data/rma_operation.xml'],
     'data': [
