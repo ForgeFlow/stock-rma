@@ -4,7 +4,7 @@
 from odoo import fields, models
 
 
-class ProcurementRule(models.Model):
+class StockRule(models.Model):
     _inherit = 'stock.rule'
 
     rma_line_id = fields.Many2one(
@@ -14,13 +14,12 @@ class ProcurementRule(models.Model):
 
     def _get_stock_move_values(self, product_id, product_qty, product_uom,
                                location_id, name, origin, values, group_id):
-        res = super(ProcurementRule, self)._get_stock_move_values(product_id,
-                                                                  product_qty,
-                                                                  product_uom,
-                                                                  location_id,
-                                                                  name, origin,
-                                                                  values,
-                                                                  group_id)
+        res = super(StockRule, self)._get_stock_move_values(product_id,
+                                                            product_qty,
+                                                            product_uom,
+                                                            location_id,
+                                                            name, origin,
+                                                            values, group_id)
         if 'rma_line_id' in values:
             line = self.env['rma.order.line'].browse(values.get('rma_line_id'))
             res['rma_line_id'] = line.id
