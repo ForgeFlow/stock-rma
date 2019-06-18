@@ -75,3 +75,7 @@ class RmaOperation(models.Model):
         comodel_name='rma.order.line', inverse_name='operation_id',
         string='RMA lines',
     )
+    company_id = fields.Many2one(
+        comodel_name='res.company', string='Company', required=True,
+        default=lambda self: self.env.user.company_id
+    )
