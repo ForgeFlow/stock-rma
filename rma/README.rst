@@ -115,6 +115,7 @@ Contributors
 * Lois Rilo <lois.rilo@eficent.com>
 * Bhavesh Odedra <bodedra@opensourceintegrators.com>
 * Akim Juillerat <akim.juillerat@camptocamp.com>
+* Alexandre Fayolle <alexandre.fayolle@camptocamp.com>
 
 Maintainer
 ----------
