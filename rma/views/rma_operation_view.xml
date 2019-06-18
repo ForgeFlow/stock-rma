@@ -26,6 +26,7 @@
                         <field name="name"/>
                         <field name="type"/>
                         <field name="active"/>
+                        <field name="company_id" groups="base.group_multi_company"/>
                     </group>
                     <group name="policies"
                            string="Policies">
