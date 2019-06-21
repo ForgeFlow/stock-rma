@@ -110,6 +110,7 @@ Contributors
 * Aaron Henriquez <ahenriquez@eficent.com>
 * Lois Rilo <lois.rilo@eficent.com>
 * Bhavesh Odedra <bodedra@opensourceintegrators.com>
+* Alexandre Fayolle <alexandre.fayolle@camptocamp.com>
 
 Maintainer
 ----------
