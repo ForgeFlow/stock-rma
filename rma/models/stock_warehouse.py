@@ -174,13 +174,13 @@ class StockWarehouse(models.Model):
         self.ensure_one()
         rma_rules = dict()
         customer_loc, supplier_loc = self._get_partner_locations()
-        # TODO: company_id?
         rma_rules['rma_customer_in'] = {
             'name': self._format_rulename(self,
                                           customer_loc,
                                           self.lot_rma_id.name),
             'action': 'pull',
             'warehouse_id': self.id,
+            'company_id': self.company_id.id,
             'location_src_id': customer_loc.id,
             'location_id': self.lot_rma_id.id,
             'procure_method': 'make_to_stock',
@@ -194,6 +194,7 @@ class StockWarehouse(models.Model):
                                           customer_loc.name),
             'action': 'pull',
             'warehouse_id': self.id,
+            'company_id': self.company_id.id,
             'location_src_id': self.lot_rma_id.id,
             'location_id': customer_loc.id,
             'procure_method': 'make_to_stock',
@@ -207,6 +208,7 @@ class StockWarehouse(models.Model):
                                           self.lot_rma_id.name),
             'action': 'pull',
             'warehouse_id': self.id,
+            'company_id': self.company_id.id,
             'location_src_id': supplier_loc.id,
             'location_id': self.lot_rma_id.id,
             'procure_method': 'make_to_stock',
@@ -220,6 +222,7 @@ class StockWarehouse(models.Model):
                                           supplier_loc.name),
             'action': 'pull',
             'warehouse_id': self.id,
+            'company_id': self.company_id.id,
             'location_src_id': self.lot_rma_id.id,
             'location_id': supplier_loc.id,
             'procure_method': 'make_to_stock',
