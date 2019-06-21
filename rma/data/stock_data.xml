@@ -113,6 +113,7 @@
 
     <record id="route_rma_customer" model='stock.location.route'>
         <field name="name">RMA Customer</field>
+        <field name="company_id" eval="0"/>
         <field name="sequence">10</field>
         <field name="sale_selectable" eval="False"/>
         <field name="product_selectable" eval="False"/>
@@ -123,6 +124,7 @@
 
     <record id="route_rma_supplier" model='stock.location.route'>
         <field name="name">RMA Supplier</field>
+        <field name="company_id" eval="0"/>
         <field name="sequence">10</field>
         <field name="sale_selectable" eval="False"/>
         <field name="product_selectable" eval="False"/>
@@ -133,6 +135,7 @@
 
     <record id="route_rma_dropship" model='stock.location.route'>
         <field name="name">RMA Dropship</field>
+        <field name="company_id" eval="0"/>
         <field name="sequence">10</field>
         <field name="sale_selectable" eval="False"/>
         <field name="product_selectable" eval="False"/>
