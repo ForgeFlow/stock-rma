@@ -579,6 +579,16 @@ class RmaOrderLine(models.Model):
             self.product_id = product
             self.uom_id = product.uom_id
 
+    @api.onchange("in_warehouse_id")
+    def _onchange_in_warehouse_id(self):
+        if self.in_warehouse_id and self._get_default_type() == 'customer':
+            self.location_id = self.in_warehouse_id.lot_rma_id
+
+    @api.onchange("out_warehouse_id")
+    def _onchange_out_warehouse_id(self):
+        if self.out_warehouse_id and self._get_default_type() == 'supplier':
+            self.location_id = self.out_warehouse_id.lot_rma_id
+
     @api.multi
     def action_view_in_shipments(self):
         action = self.env.ref('stock.action_picking_tree_all')
