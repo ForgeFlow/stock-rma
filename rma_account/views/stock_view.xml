@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <record id="view_location_form_inherit" model="ir.ui.view">
+        <field name="name">stock.location.form.inherit</field>
+        <field name="model">stock.location</field>
+        <field name="inherit_id" ref="stock_account.view_location_form_inherit"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group/group[3]" position="attributes">
+                <attribute name="attrs">{'invisible':[('usage','not in',('inventory','production', 'rma'))]}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

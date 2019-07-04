@@ -9,7 +9,7 @@
     'summary': 'Integrates RMA with Invoice Processing',
     'author': "Eficent, Odoo Community Association (OCA)",
     'website': 'http://www.github.com/OCA/rma',
-    'depends': ['account', 'rma'],
+    'depends': ['stock_account', 'rma'],
     'demo': ['data/rma_operation.xml'],
     'data': [
         'security/ir.model.access.csv',
@@ -18,6 +18,7 @@
         'views/rma_order_line_view.xml',
         'views/invoice_view.xml',
         'views/rma_account_menu.xml',
+        'views/stock_view.xml',
         'wizards/rma_add_invoice.xml',
         'wizards/rma_refund.xml',
     ],

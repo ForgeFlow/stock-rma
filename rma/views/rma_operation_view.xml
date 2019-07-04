@@ -44,7 +44,7 @@
                             <field name="in_route_id"/>
                             <field name="in_warehouse_id"/>
                             <field name="location_id"
-                                   domain="[('usage', '=', 'internal')]"/>
+                                   domain="[('usage', 'in', ('internal', 'rma'))]"/>
                             <field name="customer_to_supplier"
                                    attrs="{'invisible':[('type', '=', 'supplier')]}"/>
                         </group>
