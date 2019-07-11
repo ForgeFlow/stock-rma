@@ -55,6 +55,11 @@ class RmaOrderLine(models.Model):
     repair_count = fields.Integer(
         compute='_compute_repair_count', string='# of Repairs')
 
+    delivery_policy = fields.Selection(selection_add=[
+        ('repair', 'Based on Repair Quantities')])
+    qty_to_deliver = fields.Float(
+        compute='_compute_qty_to_deliver')
+
     @api.multi
     def action_view_repair_order(self):
         action = self.env.ref('repair.action_repair_order_tree')
@@ -80,3 +85,21 @@ class RmaOrderLine(models.Model):
             )
             qty += repair_qty
         return qty
+
+    @api.onchange('operation_id')
+    def _onchange_operation_id(self):
+        result = super(RmaOrderLine, self)._onchange_operation_id()
+        if self.operation_id:
+            self.repair_type = self.operation_id.repair_type or 'no'
+        return result
+
+    @api.multi
+    @api.depends('move_ids', 'move_ids.state',
+                 'delivery_policy', 'product_qty', 'type', 'qty_delivered',
+                 'qty_received', 'repair_ids', 'repair_type',
+                 'repair_ids.state')
+    def _compute_qty_to_deliver(self):
+        res = super(RmaOrderLine, self)._compute_qty_to_deliver()
+        for rec in self.filtered(lambda l: l.delivery_policy == 'repair'):
+            rec.qty_to_deliver = rec.qty_repaired - rec.qty_delivered
+        return res
