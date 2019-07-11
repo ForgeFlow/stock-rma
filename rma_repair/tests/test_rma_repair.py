@@ -50,7 +50,16 @@ class TestRmaRepair(common.SingleTransactionCase):
             'in_route_id': cls.rma_route_cust.id,
             'out_route_id': cls.rma_route_cust.id,
         })
-
+        cls.operation_3 = cls.rma_op.create({
+            'code': 'TEST',
+            'name': 'Deliver after repair',
+            'type': 'customer',
+            'receipt_policy': 'ordered',
+            'repair_type': 'ordered',
+            'delivery_policy': 'repair',
+            'in_route_id': cls.rma_route_cust.id,
+            'out_route_id': cls.rma_route_cust.id,
+        })
         # Create products
         cls.product_1 = cls.product_obj.create({
             'name': 'Test Product 1',
@@ -64,7 +73,12 @@ class TestRmaRepair(common.SingleTransactionCase):
             'list_price': 150.0,
             'rma_customer_operation_id': cls.operation_2.id,
         })
-
+        cls.product_3 = cls.product_obj.create({
+            'name': 'Test Product 3',
+            'type': 'product',
+            'list_price': 1.0,
+            'rma_customer_operation_id': cls.operation_3.id,
+        })
         # Create Invoices:
         customer_account = cls.acc_obj.search(
             [('user_type_id', '=', receivable_type.id)], limit=1).id
@@ -90,6 +104,24 @@ class TestRmaRepair(common.SingleTransactionCase):
             'invoice_id': cls.inv_customer.id,
             'uom_id': cls.product_2.uom_id.id,
             'account_id': customer_account,
+        })
+        cls.inv_customer2 = cls.inv_obj.create({
+            'partner_id': customer1.id,
+            'account_id': customer_account,
+            'type': 'out_invoice',
+        })
+        cls.inv_line_3 = cls.invl_obj.create({
+            'name': cls.product_3.name,
+            'product_id': cls.product_3.id,
+            'quantity': 1.0,
+            'price_unit': 1000.0,
+            'invoice_id': cls.inv_customer2.id,
+            'uom_id': cls.product_3.uom_id.id,
+            'account_id': customer_account,
+        })
+        cls.rma_group_customer_2 = cls.rma_obj.create({
+            'partner_id': customer1.id,
+            'type': 'customer',
         })
 
     def test_01_add_from_invoice_customer(self):
@@ -152,3 +184,32 @@ class TestRmaRepair(common.SingleTransactionCase):
         self.assertEqual(rma.repair_count, 1)
         self.assertEqual(rma.qty_to_repair, 0.0)
         self.assertEqual(rma.qty_repaired, 15.0)
+
+    def test_04_deliver_after_repair(self):
+        """Only deliver after repair"""
+        add_inv = self.rma_add_invoice_wiz.with_context({
+            'customer': True,
+            'active_ids': self.rma_group_customer_2.id,
+            'active_model': 'rma.order',
+        }).create({
+            'invoice_line_ids':
+                [(6, 0, self.inv_customer2.invoice_line_ids.ids)],
+        })
+        add_inv.add_lines()
+        rma = self.rma_group_customer_2.rma_line_ids.filtered(
+            lambda r: r.product_id == self.product_3)
+        rma.operation_id = self.operation_3.id
+        rma._onchange_operation_id()
+        rma.action_rma_to_approve()
+        rma.action_rma_approve()
+        self.assertEqual(rma.qty_to_deliver, 0.0)
+        make_repair = self.rma_make_repair_wiz.with_context({
+            'customer': True,
+            'active_ids': rma.ids,
+            'active_model': 'rma.order.line',
+        }).create({
+            'description': 'Test deliver',
+        })
+        make_repair.make_repair_order()
+        rma.repair_ids.action_repair_confirm()
+        self.assertEqual(rma.qty_to_deliver, 1.0)
