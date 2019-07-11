@@ -11,3 +11,5 @@ class RmaOperation(models.Model):
         ('no', 'Not required'), ('ordered', 'Based on Ordered Quantities'),
         ('received', 'Based on Received Quantities')],
         string="Repair Policy", default='no')
+    delivery_policy = fields.Selection(selection_add=[
+        ('repair', 'Based on Repair Quantities')])
