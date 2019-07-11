@@ -180,7 +180,7 @@ class RmaOrderLine(models.Model):
         string='Reference', required=True, default='/',
         readonly=True, states={'draft': [('readonly', False)]},
         help='Add here the supplier RMA #. Otherwise an internal code is'
-             ' assigned.',
+             ' assigned.', copy=False
     )
     description = fields.Text(string='Description')
     origin = fields.Char(
