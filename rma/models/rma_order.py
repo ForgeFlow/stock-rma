@@ -19,18 +19,28 @@ class RmaOrder(models.Model):
     @api.multi
     def _compute_in_shipment_count(self):
         for rec in self:
-            rec.in_shipment_count = len(
-                rec.rma_line_ids.mapped('move_ids').filtered(
-                    lambda m: m.location_dest_id.usage == 'internal').mapped(
-                    'picking_id'))
+            picking_ids = []
+            for line in rec.rma_line_ids:
+                for move in line.move_ids:
+                    if move.location_dest_id.usage == 'internal':
+                        picking_ids.append(move.picking_id.id)
+                    else:
+                        if line.customer_to_supplier:
+                            picking_ids.append(move.picking_id.id)
+                shipments = list(set(picking_ids))
+                line.in_shipment_count = len(shipments)
 
     @api.multi
     def _compute_out_shipment_count(self):
+        picking_ids = []
         for rec in self:
-            rec.out_shipment_count = len(
-                rec.rma_line_ids.mapped('move_ids').filtered(
-                    lambda m: m.location_id.usage == 'internal').mapped(
-                    'picking_id'))
+            for line in rec.rma_line_ids:
+                for move in line.move_ids:
+                    if move.location_dest_id.usage in ('supplier', 'customer'):
+                        if not line.customer_to_supplier:
+                            picking_ids.append(move.picking_id.id)
+                shipments = list(set(picking_ids))
+                line.out_shipment_count = len(shipments)
 
     @api.multi
     def _compute_supplier_line_count(self):
@@ -103,16 +113,12 @@ class RmaOrder(models.Model):
         action = self.env.ref('stock.action_picking_tree_all')
         result = action.read()[0]
         picking_ids = []
-        suppliers = self.env.ref('stock.stock_location_suppliers')
-        customers = self.env.ref('stock.stock_location_customers')
         for line in self.rma_line_ids:
-            if line.type == 'customer':
-                for move in line.move_ids:
-                    if move.picking_id.location_id == customers:
-                        picking_ids.append(move.picking_id.id)
-            else:
-                for move in line.move_ids:
-                    if move.picking_id.location_id == suppliers:
+            for move in line.move_ids:
+                if move.location_dest_id.usage == 'internal':
+                    picking_ids.append(move.picking_id.id)
+                else:
+                    if line.customer_to_supplier:
                         picking_ids.append(move.picking_id.id)
         if picking_ids:
             shipments = list(set(picking_ids))
@@ -130,16 +136,10 @@ class RmaOrder(models.Model):
         action = self.env.ref('stock.action_picking_tree_all')
         result = action.read()[0]
         picking_ids = []
-        suppliers = self.env.ref('stock.stock_location_suppliers')
-        customers = self.env.ref('stock.stock_location_customers')
         for line in self.rma_line_ids:
-            if line.type == 'customer':
-                for move in line.move_ids:
-                    if move.picking_id.location_id != customers:
-                        picking_ids.append(move.picking_id.id)
-            else:
-                for move in line.move_ids:
-                    if move.picking_id.location_id != suppliers:
+            for move in line.move_ids:
+                if move.location_dest_id.usage in ('supplier', 'customer'):
+                    if not line.customer_to_supplier:
                         picking_ids.append(move.picking_id.id)
         if picking_ids:
             shipments = list(set(picking_ids))
