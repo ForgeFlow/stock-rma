@@ -34,6 +34,8 @@ class RmaOrderLine(models.Model):
                 qty = res.product_qty - res.qty_refunded
             elif res.refund_policy == 'received':
                 qty = res.qty_received - res.qty_refunded
+            elif res.refund_policy == 'delivered':
+                qty = res.qty_delivered - res.qty_refunded
             res.qty_to_refund = qty
 
     @api.multi
@@ -66,6 +68,7 @@ class RmaOrderLine(models.Model):
                                  index=True, readonly=True)
     refund_policy = fields.Selection([
         ('no', 'No refund'), ('ordered', 'Based on Ordered Quantities'),
+        ('delivered', 'Based on Delivered Quantities'),
         ('received', 'Based on Received Quantities')], string="Refund Policy",
         required=True, default='no',
         readonly=True, states={'draft': [('readonly', False)]},
