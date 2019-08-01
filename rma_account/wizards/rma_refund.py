@@ -8,6 +8,7 @@ import odoo.addons.decimal_precision as dp
 
 class RmaRefund(models.TransientModel):
     _name = "rma.refund"
+    _description = "Wizard for RMA Refund"
 
     @api.model
     def _get_reason(self):
