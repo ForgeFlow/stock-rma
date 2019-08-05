@@ -4,7 +4,7 @@
 {
     "name": "Account Move Line Rma Order Line",
     "summary": "Introduces the rma order line to the journal items",
-    "version": "11.0.1.0.0",
+    "version": "12.0.1.0.0",
     "author": "Eficent, "
               "Odoo Community Association (OCA)",
     "website": "http://www.github.com/OCA/account-financial-tools",
