@@ -194,7 +194,6 @@ class TestRmaAccount(common.SingleTransactionCase):
         })
         make_refund.invoice_refund()
         rma.refund_line_ids.invoice_id.action_invoice_open()
-        rma.refund_line_ids.invoice_id.invoice_validate()
         rma._compute_refund_count()
         self.assertEqual(rma.refund_count, 1)
         self.assertEqual(rma.qty_to_refund, 0.0)
