@@ -60,7 +60,7 @@ class TestAccountMoveLineRmaOrderLine(common.SavepointCase):
             acc_type, name, code, cls.company)
         # Create Product
         cls.product = cls._create_product()
-        cls.product_uom_id = cls.env.ref('product.product_uom_unit')
+        cls.product_uom_id = cls.env.ref('uom.product_uom_unit')
         # Create users
         cls.rma_user = cls._create_user(
             'rma_user', [cls.group_rma_user,
@@ -252,7 +252,7 @@ class TestAccountMoveLineRmaOrderLine(common.SavepointCase):
             'description': 'Test refund',
         })
         make_refund.invoice_refund()
-        rma_line.refund_line_ids.invoice_id.invoice_validate()
+        rma_line.refund_line_ids.invoice_id.action_invoice_open()
         for aml in rma_line.refund_line_ids.invoice_id.move_id.line_ids:
             if aml.product_id == rma_line.product_id and aml.invoice_id:
                 self.assertEqual(
