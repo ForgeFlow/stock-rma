@@ -10,15 +10,7 @@ class TestRmaKanban(common.TransactionCase):
 
         self.rma_obj = self.env['rma.order']
         self.rma_line_obj = self.env['rma.order.line']
-        self.rma_op_obj = self.env['rma.operation']
         self.kanban_stage_model = self.env['base.kanban.stage']
-        self.kanban_abstract_model = self.env['base.kanban.abstract']
-        self.product_obj = self.env['product.product']
-        self.partner_obj = self.env['res.partner']
-
-        self.rma_route_cust = self.env.ref('rma.route_rma_customer')
-        self.cust_refund_op = self.env.ref(
-            'rma_account.rma_operation_customer_refund')
 
         # Create partners
         customer1 = self.partner_obj.create({'name': 'Customer 1'})
