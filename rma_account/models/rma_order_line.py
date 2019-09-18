@@ -82,19 +82,19 @@ class RmaOrderLine(models.Model):
         digits=dp.get_precision('Product Unit of Measure'),
         readonly=True, compute='_compute_qty_refunded', store=True)
 
-    @api.onchange('product_id')
+    @api.onchange('product_id', 'partner_id')
     def _onchange_product_id(self):
+        """Domain for sale_line_id is computed here to make it dynamic."""
         res = super(RmaOrderLine, self)._onchange_product_id()
-        if res.get('domain') and self.product_id:
-            res['domain']['invoice_line_id'] = [
-                ('product_id', '=', self.product_id.id)]
-        elif res.get('domain') and self.product_id:
-            res['domain']['invoice_line_id'] = [()]
-        elif not res.get('domain') and self.product_id:
-            res['domain'] = {
-                'invoice_line_id': [('product_id', '=', self.product_id.id)]}
-        else:
-            res['domain'] = {'invoice_line_id': []}
+        if not res.get('domain'):
+            res['domain'] = {}
+        domain = [
+            '|',
+            ('invoice_id.partner_id', '=', self.partner_id.id),
+            ('invoice_id.partner_id', 'child_of', self.partner_id.id)]
+        if self.product_id:
+            domain.append(('product_id', '=', self.product_id.id))
+        res['domain']['invoice_line_id'] = domain
         return res
 
     @api.multi
