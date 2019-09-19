@@ -15,10 +15,12 @@ class RmaOrderLine(models.Model):
             if line.repair_type == 'no':
                 line.qty_to_repair = 0.0
             elif line.repair_type == 'ordered':
-                qty = line._get_rma_repaired_qty()
+                qty = line._get_rma_repaired_qty() + \
+                    line._get_rma_under_repair_qty()
                 line.qty_to_repair = line.product_qty - qty
             elif line.repair_type == 'received':
-                qty = line._get_rma_repaired_qty()
+                qty = line._get_rma_repaired_qty() + \
+                    line._get_rma_under_repair_qty()
                 line.qty_to_repair = line.qty_received - qty
             else:
                 line.qty_to_repair = 0.0
@@ -28,6 +30,12 @@ class RmaOrderLine(models.Model):
     def _compute_qty_repaired(self):
         for line in self:
             line.qty_repaired = line._get_rma_repaired_qty()
+
+    @api.depends('repair_ids', 'repair_type', 'repair_ids.state',
+                 'qty_to_receive')
+    def _compute_qty_under_repair(self):
+        for line in self:
+            line.qty_under_repair = line._get_rma_under_repair_qty()
 
     @api.depends('repair_ids')
     def _compute_repair_count(self):
@@ -43,6 +51,11 @@ class RmaOrderLine(models.Model):
         digits=dp.get_precision('Product Unit of Measure'),
         readonly=True, compute='_compute_qty_to_repair',
         store=True)
+    qty_under_repair = fields.Float(
+        string='Qty Under Repair', copy=False,
+        digits=dp.get_precision('Product Unit of Measure'),
+        readonly=True, compute='_compute_qty_under_repair',
+        store=True)
     qty_repaired = fields.Float(
         string='Qty Repaired', copy=False,
         digits=dp.get_precision('Product Unit of Measure'),
@@ -57,8 +70,23 @@ class RmaOrderLine(models.Model):
 
     delivery_policy = fields.Selection(selection_add=[
         ('repair', 'Based on Repair Quantities')])
+    qty_to_pay = fields.Float(
+        compute='_compute_qty_to_pay')
     qty_to_deliver = fields.Float(
         compute='_compute_qty_to_deliver')
+
+    @api.multi
+    @api.depends('delivery_policy', 'product_qty', 'type', 'repair_ids',
+                 'repair_ids.state', 'repair_ids.invoice_method',
+                 'repair_type', 'repair_ids.invoice_status')
+    def _compute_qty_to_pay(self):
+        for rec in self.filtered(lambda l: l.delivery_policy == 'repair'):
+            qty_to_pay = 0.0
+            for repair in rec.repair_ids.filtered(
+                    lambda r: r.invoice_method != 'none'
+                    and r.invoice_status != 'paid'):
+                qty_to_pay += repair.product_qty
+            rec.qty_to_pay = qty_to_pay
 
     @api.multi
     def action_view_repair_order(self):
@@ -78,7 +106,20 @@ class RmaOrderLine(models.Model):
         self.ensure_one()
         qty = 0.0
         for repair in self.repair_ids.filtered(
-                lambda p: p.state != 'cancel'):
+                lambda p: p.state == 'done'):
+            repair_qty = self.uom_id._compute_quantity(
+                repair.product_qty,
+                repair.product_uom,
+            )
+            qty += repair_qty
+        return qty
+
+    @api.multi
+    def _get_rma_under_repair_qty(self):
+        self.ensure_one()
+        qty = 0.0
+        for repair in self.repair_ids.filtered(
+                lambda p: p.state not in ('draft', 'cancel', 'done')):
             repair_qty = self.uom_id._compute_quantity(
                 repair.product_qty,
                 repair.product_uom,
@@ -97,9 +138,10 @@ class RmaOrderLine(models.Model):
     @api.depends('move_ids', 'move_ids.state',
                  'delivery_policy', 'product_qty', 'type', 'qty_delivered',
                  'qty_received', 'repair_ids', 'repair_type',
-                 'repair_ids.state')
+                 'repair_ids.state', 'qty_to_pay', 'repair_ids.invoice_status')
     def _compute_qty_to_deliver(self):
         res = super(RmaOrderLine, self)._compute_qty_to_deliver()
         for rec in self.filtered(lambda l: l.delivery_policy == 'repair'):
-            rec.qty_to_deliver = rec.qty_repaired - rec.qty_delivered
+            rec.qty_to_deliver = rec.qty_repaired - rec.qty_delivered - \
+                rec.qty_to_pay
         return res
