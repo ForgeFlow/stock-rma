@@ -15,6 +15,7 @@ class TestRmaRepair(common.SingleTransactionCase):
         cls.rma_op = cls.env['rma.operation']
         cls.rma_add_invoice_wiz = cls.env['rma_add_invoice']
         cls.rma_make_repair_wiz = cls.env['rma.order.line.make.repair']
+        cls.repair_line_obj = cls.env['repair.line']
         cls.acc_obj = cls.env['account.account']
         cls.inv_obj = cls.env['account.invoice']
         cls.invl_obj = cls.env['account.invoice.line']
@@ -123,6 +124,15 @@ class TestRmaRepair(common.SingleTransactionCase):
             'partner_id': customer1.id,
             'type': 'customer',
         })
+        cls.bank_journal = cls.env['account.journal'].search(
+            [('type', '=', 'bank')], limit=1)
+        cls.material = cls.product_obj.create({
+            'name': 'Materials',
+            'type': 'product',
+        })
+
+        cls.material.product_tmpl_id.standard_price = 10
+        cls.stock_location = cls.env.ref('stock.stock_location_stock')
 
     def test_01_add_from_invoice_customer(self):
         """Test wizard to create RMA from a customer invoice."""
@@ -183,7 +193,8 @@ class TestRmaRepair(common.SingleTransactionCase):
         rma.repair_ids.action_repair_confirm()
         self.assertEqual(rma.repair_count, 1)
         self.assertEqual(rma.qty_to_repair, 0.0)
-        self.assertEqual(rma.qty_repaired, 15.0)
+        self.assertEqual(rma.qty_repaired, 0.0)
+        self.assertEqual(rma.qty_under_repair, 15.0)
 
     def test_04_deliver_after_repair(self):
         """Only deliver after repair"""
@@ -211,5 +222,28 @@ class TestRmaRepair(common.SingleTransactionCase):
             'description': 'Test deliver',
         })
         make_repair.make_repair_order()
-        rma.repair_ids.action_repair_confirm()
+        repair = rma.repair_ids
+        line = self.repair_line_obj.create({
+            'name': 'consume stuff to repair',
+            'repair_id': repair.id,
+            'type': 'add',
+            'product_id': self.material.id,
+            'product_uom': self.material.uom_id.id,
+            'product_uom_qty': 1.0,
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.stock_location.id,
+            'price_unit': 10.0
+        })
+        line.onchange_product_id()
+        repair.invoice_method = 'after_repair'
+        repair.action_repair_confirm()
+        repair.action_repair_start()
+        repair.action_repair_end()
+        repair.action_repair_invoice_create()
+        self.assertEqual(rma.qty_repaired, 1.0)
+        repair.invoice_id.action_invoice_open()
+        self.assertEqual(rma.qty_to_deliver, 0.0)
+        repair.invoice_id.pay_and_reconcile(self.bank_journal, 200.0)
+        self.assertEqual(repair.invoice_status, 'paid')
+        self.assertEqual(rma.qty_to_pay, 0.0)
         self.assertEqual(rma.qty_to_deliver, 1.0)
