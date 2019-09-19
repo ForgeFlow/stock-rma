@@ -18,6 +18,8 @@
             <group name="quantities" position="inside">
                 <group>
                     <field name="qty_to_repair"/>
+                    <field name="qty_under_repair"/>
+                    <field name="qty_to_pay"/>
                     <field name="qty_repaired"/>
                 </group>
             </group>
