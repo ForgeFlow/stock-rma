@@ -154,6 +154,8 @@ class RmaLineMakeRepairItem(models.TransientModel):
         return {
             'product_id': rma_line.product_id.id,
             'partner_id': rma_line.partner_id.id,
+            'pricelist_id': rma_line.partner_id.property_product_pricelist.id
+            or False,
             'product_qty': self.product_qty,
             'rma_line_id': rma_line.id,
             'product_uom': rma_line.product_id.uom_po_id.id,
