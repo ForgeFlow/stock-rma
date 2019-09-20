@@ -183,6 +183,7 @@ class RmaOrderLine(models.Model):
              ' assigned.', copy=False
     )
     description = fields.Text(string='Description')
+    conditions = fields.Html(string='Terms and conditions')
     origin = fields.Char(
         string='Source Document',
         readonly=True, states={'draft': [('readonly', False)]},
