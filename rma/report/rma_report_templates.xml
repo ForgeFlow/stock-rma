@@ -80,9 +80,13 @@
                         </tr>
                     </tbody>
                 </table>
-                <div t-if="doc.type=='supplier' and doc.description">
+                <div t-if="doc.description">
                     <strong><p>Description</p></strong>
                     <span t-field="doc.description"></span>
+                </div>
+                <div t-if="doc.conditions">
+                    <strong><p>Term and conditions</p></strong>
+                    <span t-field="doc.conditions"></span>
                 </div>
             </div>
         </t>

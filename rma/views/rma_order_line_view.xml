@@ -11,7 +11,7 @@
                     <field name="partner_id"/>
                     <field name="product_id"/>
                     <field name="lot_id" groups="stock.group_production_lot"/>
-                    <field name="rma_id"/>
+                    <field name="rma_id" groups="rma.group_rma_groups"/>
                     <field name="origin"/>
                     <field name="operation_id"/>
                     <field name="supplier_address_id"/>
@@ -33,7 +33,7 @@
                     <field name="partner_id"/>
                     <field name="product_id"/>
                     <field name="lot_id" groups="stock.group_production_lot"/>
-                    <field name="rma_id"/>
+                    <field name="rma_id" groups="rma.group_rma_groups"/>
                     <field name="origin"/>
                     <field name="operation_id" domain="[('type','=','supplier')]"/>
                     <field name="uom_id" groups="uom.group_uom"/>
@@ -188,7 +188,8 @@
                             </page>
                             <page name="other" string="Other Info">
                                 <group name="general" string="General">
-                                    <field name="rma_id"/>
+                                    <field name="conditions"/>
+                                    <field name="rma_id" groups="rma.group_rma_groups"/>
                                     <field name="origin"/>
 
                                 </group>
@@ -309,6 +310,9 @@
                             </group>
                         </group>
                         <notebook>
+                            <page name="description" string="Description">
+                                <field name="description" nolabel="1"/>
+                            </page>
                             <page name="route" string="Routes">
                                 <group name="inbound" string="Inbound">
                                     <field name="in_warehouse_id"/>
@@ -357,7 +361,8 @@
                             </page>
                             <page name="other" string="Other Info">
                                 <group name="general" string="General">
-                                    <field name="rma_id"/>
+                                    <field name="conditions"/>
+                                    <field name="rma_id" groups="rma.group_rma_groups"/>
                                     <field name="origin"/>
                                 </group>
                                 <group name="company" string="Company"
@@ -381,7 +386,7 @@
             <field name="arch" type="xml">
                 <search string="Search RMA line">
                     <field name="name"/>
-                    <field name="rma_id"/>
+                    <field name="rma_id" groups="rma.group_rma_groups"/>
                     <field name="partner_id"/>
                     <field name="requested_by"/>
                     <field name="assigned_to"/>
