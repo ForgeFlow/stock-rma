@@ -9,6 +9,7 @@ class TestRmaKanban(common.TransactionCase):
         super(TestRmaKanban, self).setUp()
 
         self.rma_obj = self.env['rma.order']
+        self.partner_obj = self.env['res.partner']
         self.rma_line_obj = self.env['rma.order.line']
         self.kanban_stage_model = self.env['base.kanban.stage']
 
