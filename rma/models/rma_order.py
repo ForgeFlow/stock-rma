@@ -81,7 +81,7 @@ class RmaOrder(models.Model):
                                 string='# of Outgoing Shipments')
     supplier_line_count = fields.Integer(
         compute='_compute_supplier_line_count',
-        string='# of Outgoing Shipments'
+        string='# of Supplier RMAs'
     )
     company_id = fields.Many2one('res.company', string='Company',
                                  required=True, default=lambda self:
