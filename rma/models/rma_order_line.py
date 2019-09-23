@@ -228,7 +228,7 @@ class RmaOrderLine(models.Model):
         readonly=True, states={"draft": [("readonly", False)]},
     )
     product_qty = fields.Float(
-        string='Ordered Qty', copy=False, default=1.0,
+        string='Return Qty', copy=False, default=1.0,
         digits=dp.get_precision('Product Unit of Measure'),
         readonly=True, states={'draft': [('readonly', False)]},
     )
