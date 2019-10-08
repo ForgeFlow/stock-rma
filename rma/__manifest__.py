@@ -3,7 +3,7 @@
 
 {
     'name': 'RMA (Return Merchandise Authorization)',
-    'version': '11.0.2.1.0',
+    'version': '12.0.2.3.0',
     'license': 'LGPL-3',
     'category': 'RMA',
     'summary': 'Introduces the return merchandise authorization (RMA) process '
