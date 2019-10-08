@@ -8,6 +8,7 @@ from datetime import datetime
 
 class RmaOrder(models.Model):
     _name = "rma.order"
+    _description = 'RMA Group'
     _inherit = ['mail.thread']
 
     @api.model
