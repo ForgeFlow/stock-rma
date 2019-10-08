@@ -9,23 +9,22 @@
         <field name="mode">primary</field>
         <field name="arch" type="xml">
             <xpath expr="//div[@name='card_body']">
-                <div>
-                    <strong>
-                        <field name="partner_id"/>
-                    </strong><br/>
+                <div name="main">
+                    <strong>Partner</strong>:<field name="partner_id"/>
+                    <br/>
+                    <t t-if="origin">
+                        <br></br>
+                        <strong>Origin</strong>: <field name="origin"/>
+                    </t>
                     <t t-if="record.create_date.raw_value and record.create_date.raw_value &lt; (new Date())" t-set="red">oe_kanban_text_red</t>
                     <span t-attf-class="#{red || ''}">
-                        Date - <field name="create_date"/>
+                        <strong>Date</strong>: <field name="create_date"/>
                     </span>
                     <span name="product">
                         <br></br>
-                        Product - <field name="product_id"/>
+                        <strong>Product</strong>: <field name="product_id"/>
                         <br></br>
-                        <field name="product_qty"/> <field name="uom_id"/>
-                        <t t-if="origin">
-                            <br></br>
-                            origin - <field name="origin"/>
-                        </t>
+                        <strong>QTY</strong>:<field name="product_qty"/> <field name="uom_id"/>
                     </span>
                     <br/>
                     <span style='background-color:#EBEC6D' name="operation">
@@ -49,10 +48,12 @@
 
     <record id="rma.action_rma_customer_lines" model="ir.actions.act_window">
         <field name="view_mode">kanban,tree,form</field>
+        <field name="view_id" ref="rma_kanban_stage.rma_order_line_kanban"/>
     </record>
 
     <record id="rma.action_rma_supplier_lines" model="ir.actions.act_window">
         <field name="view_mode">kanban,tree,form</field>
+        <field name="view_id" ref="rma_kanban_stage.rma_order_line_kanban"/>
     </record>
 
 </odoo>
