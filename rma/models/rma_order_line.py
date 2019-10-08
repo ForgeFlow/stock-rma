@@ -11,6 +11,7 @@ ops = {'=': operator.eq,
 
 class RmaOrderLine(models.Model):
     _name = "rma.order.line"
+    _description = 'RMA'
     _inherit = ['mail.thread']
 
     @api.model
