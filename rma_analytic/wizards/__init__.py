@@ -4,3 +4,5 @@
 
 from . import rma_add_stock_move
 from . import rma_make_picking
+from . import rma_add_invoice
+from . import rma_refund
