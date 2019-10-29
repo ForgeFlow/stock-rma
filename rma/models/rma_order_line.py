@@ -626,5 +626,5 @@ class RmaOrderLine(models.Model):
     @api.constrains("partner_id", "rma_id")
     def _check_partner_id(self):
         if self.rma_id and self.partner_id != self.rma_id.partner_id:
-            raise UserError(_(
+            raise ValidationError(_(
                 "Group partner and RMA's partner must be the same."))
