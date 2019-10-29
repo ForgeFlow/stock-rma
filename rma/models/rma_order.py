@@ -88,16 +88,6 @@ class RmaOrder(models.Model):
                                  required=True, default=lambda self:
                                  self.env.user.company_id)
 
-    @api.constrains("partner_id", "rma_line_ids")
-    def _check_partner_id(self):
-        if self.rma_line_ids and self.partner_id != self.mapped(
-                "rma_line_ids.partner_id"):
-            raise UserError(_(
-                "Group partner and RMA's partner must be the same."))
-        if len(self.mapped("rma_line_ids.partner_id")) > 1:
-            raise UserError(_(
-                "All grouped RMA's should have same partner."))
-
     @api.model
     def create(self, vals):
         if (self.env.context.get('supplier') or
