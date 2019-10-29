@@ -20,5 +20,4 @@
         'views/rma_order_line_view.xml',
     ],
     'installable': True,
-    'auto_install': True,
 }
