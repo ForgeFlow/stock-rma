@@ -75,12 +75,12 @@ class TestRma(common.SavepointCase):
             })
 
     @classmethod
-    def _create_rma_from_move(cls, products2move, type, partner, dropship,
+    def _create_rma_from_move(cls, products2move, rtype, partner, dropship,
                               supplier_address_id=None):
         picking_in = cls._create_picking(partner)
 
         moves = []
-        if type == 'customer':
+        if rtype == 'customer':
             for item in products2move:
                 move_values = cls._prepare_move(
                     item[0], item[1], cls.stock_location,
@@ -96,12 +96,12 @@ class TestRma(common.SavepointCase):
         rma_id = cls.rma.create(
             {
                 'reference': '0001',
-                'type': type,
+                'type': rtype,
                 'partner_id': partner.id,
                 'company_id': cls.env.ref('base.main_company').id
             })
         for move in moves:
-            if type == 'customer':
+            if rtype == 'customer':
                 wizard = cls.rma_add_stock_move.with_context(
                     {'stock_move_id': move.id, 'customer': True,
                      'active_ids': rma_id.id,

@@ -58,8 +58,8 @@ class StockWarehouse(models.Model):
     def _rma_types_available(self):
         self.ensure_one()
         rma_types = self._get_rma_types()
-        for type in rma_types:
-            if not type:
+        for rtype in rma_types:
+            if not rtype:
                 return False
         return True
 
@@ -80,16 +80,16 @@ class StockWarehouse(models.Model):
                     if not wh._rma_types_available():
                         wh._create_rma_picking_types()
                     else:
-                        for type in wh._get_rma_types():
-                            if type:
-                                type.active = True
+                        for rtype in wh._get_rma_types():
+                            if rtype:
+                                rtype.active = True
                     # RMA rules:
                     wh._create_or_update_rma_pull()
             else:
                 for wh in self:
-                    for type in wh._get_rma_types():
-                        if type:
-                            type.active = False
+                    for rtype in wh._get_rma_types():
+                        if rtype:
+                            rtype.active = False
                 # Unlink rules:
                 self.mapped('rma_customer_in_pull_id').unlink()
                 self.mapped('rma_customer_out_pull_id').unlink()

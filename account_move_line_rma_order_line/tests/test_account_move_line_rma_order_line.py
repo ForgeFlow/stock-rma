@@ -88,10 +88,10 @@ class TestAccountMoveLineRmaOrderLine(common.SavepointCase):
         return user.id
 
     @classmethod
-    def _create_account_type(cls, name, type):
+    def _create_account_type(cls, name, atype):
         acc_type = cls.acc_type_model.create({
             'name': name,
-            'type': type
+            'type': atype
         })
         return acc_type
 
