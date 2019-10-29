@@ -676,3 +676,9 @@ class RmaOrderLine(models.Model):
             result['views'] = [(res and res.id or False, 'form')]
             result['res_id'] = rma_lines.id
         return result
+
+    @api.constrains("partner_id", "rma_id")
+    def _check_partner_id(self):
+        if self.rma_id and self.partner_id != self.rma_id.partner_id:
+            raise ValidationError(_(
+                "Group partner and RMA's partner must be the same."))
