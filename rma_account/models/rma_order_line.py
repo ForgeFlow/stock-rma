@@ -164,7 +164,7 @@ class RmaOrderLine(models.Model):
     def _check_invoice_partner(self):
         for rec in self:
             if (rec.invoice_line_id and
-                    rec.invoice_line_id.invoice_id.partner_id !=
+                    rec.invoice_line_id.invoice_id.commercial_partner_id !=
                     rec.partner_id):
                 raise ValidationError(_(
                     "RMA customer and originating invoice line customer "
