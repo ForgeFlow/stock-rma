@@ -228,6 +228,8 @@ class TestRmaAnalytic(test_rma.TestRma):
                     ).id,
                     "type": "customer",
                     "invoice_line_id": cls.inv_line_1.id,
+                    "delivery_policy": "no",
+                    "receipt_policy": "ordered",
                     "uom_id": cls.product_1.uom_id.id,
                 }
             )
