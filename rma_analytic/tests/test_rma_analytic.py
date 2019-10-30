@@ -6,6 +6,7 @@ from odoo.addons.rma.tests import test_rma
 
 
 class TestRmaAnalytic(test_rma.TestRma):
+
     @classmethod
     def setUpClass(cls):
         super(TestRmaAnalytic, cls).setUpClass()
@@ -103,81 +104,79 @@ class TestRmaAnalytic(test_rma.TestRma):
             data = wizard._prepare_rma_line_from_stock_move(move)
             wizard.add_lines()
 
-            for (
-                operation
-            ) in move.product_id.rma_customer_operation_id:
-                operation.in_route_id = False
+            if move.product_id.rma_customer_operation_id:
+                move.product_id.rma_customer_operation_id.in_route_id = False
             move.product_id.categ_id.rma_customer_operation_id = False
             move.product_id.rma_customer_operation_id = False
             wizard._prepare_rma_line_from_stock_move(move)
             cls.line = cls.rma_line_model.create(data)
         return rma_id
 
-    def test_analytic(cls):
-        for line in cls.rma_ana_id.rma_line_ids:
+    def test_analytic(self):
+        for line in self.rma_ana_id.rma_line_ids:
             for move in line.move_ids:
-                cls.assertEqual(
+                self.assertEqual(
                     line.analytic_account_id,
                     move.analytic_account_id,
                     "the analytic account is not propagated",
                 )
 
-    def test_invoice_analytic(cls):
+    def test_invoice_analytic(self):
         """Test wizard to create RMA from a customer invoice."""
         rma_line = (
-            cls.env["rma.order.line"]
+            self.env["rma.order.line"]
             .with_context(customer=True)
             .new(
                 {
-                    "partner_id": cls.partner_id.id,
-                    "product_id": cls.product_1.id,
-                    "operation_id": cls.env.ref(
+                    "partner_id": self.partner_id.id,
+                    "product_id": self.product_1.id,
+                    "operation_id": self.env.ref(
                         "rma.rma_operation_customer_replace"
                     ).id,
-                    "in_route_id": cls.env.ref(
+                    "in_route_id": self.env.ref(
                         "rma.route_rma_customer"
                     ),
-                    "out_route_id": cls.env.ref(
+                    "out_route_id": self.env.ref(
                         "rma.route_rma_customer"
                     ),
-                    "in_warehouse_id": cls.env.ref(
+                    "in_warehouse_id": self.env.ref(
                         "stock.warehouse0"
                     ),
-                    "out_warehouse_id": cls.env.ref(
+                    "out_warehouse_id": self.env.ref(
                         "stock.warehouse0"
                     ),
-                    "location_id": cls.env.ref(
+                    "location_id": self.env.ref(
                         "stock.stock_location_stock"
                     ),
                     "type": "customer",
-                    "invoice_line_id": cls.inv_line_1.id,
-                    "uom_id": cls.product_1.uom_id.id,
+                    "invoice_line_id": self.inv_line_1.id,
+                    "uom_id": self.product_1.uom_id.id,
                 }
             )
         )
         rma_line._onchange_invoice_line_id()
-        cls.assertEqual(
+        self.assertEqual(
             rma_line.analytic_account_id,
-            cls.inv_line_1.account_analytic_id,
+            self.inv_line_1.account_analytic_id,
         )
 
-    def test_invoice_analytic02(cls):
-        cls.product_1.rma_customer_operation_id = cls.env.ref(
+    def test_invoice_analytic02(self):
+        self.product_1.rma_customer_operation_id = self.env.ref(
             "rma.rma_operation_customer_replace"
         ).id
         rma_order = (
-            cls.env["rma.order"]
+            self.env["rma.order"]
             .with_context(customer=True)
             .create(
                 {
                     "name": "RMA",
-                    "partner_id": cls.partner_id.id,
+                    "partner_id": self.partner_id.id,
                     "type": "customer",
                     "rma_line_ids": [],
                 }
             )
         )
-        add_inv = cls.rma_add_invoice_wiz.with_context(
+        add_inv = self.rma_add_invoice_wiz.with_context(
             {
                 "customer": True,
                 "active_ids": [rma_order.id],
@@ -186,58 +185,58 @@ class TestRmaAnalytic(test_rma.TestRma):
         ).create(
             {
                 "invoice_line_ids": [
-                    (6, 0, cls.inv_customer.invoice_line_ids.ids)
+                    (6, 0, self.inv_customer.invoice_line_ids.ids)
                 ]
             }
         )
         add_inv.add_lines()
 
-        cls.assertEqual(
+        self.assertEqual(
             rma_order.mapped("rma_line_ids.analytic_account_id"),
-            cls.inv_line_1.account_analytic_id,
+            self.inv_line_1.account_analytic_id,
         )
 
-    def test_refund_analytic(cls):
-        cls.product_1.rma_customer_operation_id = cls.env.ref(
+    def test_refund_analytic(self):
+        self.product_1.rma_customer_operation_id = self.env.ref(
             "rma_account.rma_operation_customer_refund"
         ).id
         rma_line = (
-            cls.env["rma.order.line"]
+            self.env["rma.order.line"]
             .with_context(customer=True)
             .create(
                 {
-                    "partner_id": cls.partner_id.id,
-                    "product_id": cls.product_1.id,
-                    "operation_id": cls.env.ref(
+                    "partner_id": self.partner_id.id,
+                    "product_id": self.product_1.id,
+                    "operation_id": self.env.ref(
                         "rma_account.rma_operation_customer_refund"
                     ).id,
-                    "in_route_id": cls.env.ref(
+                    "in_route_id": self.env.ref(
                         "rma.route_rma_customer"
                     ).id,
-                    "out_route_id": cls.env.ref(
+                    "out_route_id": self.env.ref(
                         "rma.route_rma_customer"
                     ).id,
-                    "in_warehouse_id": cls.env.ref(
+                    "in_warehouse_id": self.env.ref(
                         "stock.warehouse0"
                     ).id,
-                    "out_warehouse_id": cls.env.ref(
+                    "out_warehouse_id": self.env.ref(
                         "stock.warehouse0"
                     ).id,
-                    "location_id": cls.env.ref(
+                    "location_id": self.env.ref(
                         "stock.stock_location_stock"
                     ).id,
                     "type": "customer",
-                    "invoice_line_id": cls.inv_line_1.id,
+                    "invoice_line_id": self.inv_line_1.id,
                     "delivery_policy": "no",
                     "receipt_policy": "ordered",
-                    "uom_id": cls.product_1.uom_id.id,
+                    "uom_id": self.product_1.uom_id.id,
                 }
             )
         )
         rma_line._onchange_invoice_line_id()
         rma_line.action_rma_to_approve()
         rma_line.action_rma_approve()
-        make_refund = cls.rma_refund_wiz.with_context(
+        make_refund = self.rma_refund_wiz.with_context(
             {
                 "customer": True,
                 "active_ids": rma_line.ids,
@@ -245,7 +244,7 @@ class TestRmaAnalytic(test_rma.TestRma):
             }
         ).create({"description": "Test refund"})
         make_refund.invoice_refund()
-        cls.assertEqual(
+        self.assertEqual(
             rma_line.mapped("analytic_account_id"),
             rma_line.mapped("refund_line_ids.account_analytic_id"),
         )
