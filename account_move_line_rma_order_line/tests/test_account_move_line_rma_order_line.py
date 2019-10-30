@@ -180,8 +180,8 @@ class TestAccountMoveLineRmaOrderLine(common.SavepointCase):
             data = wizard._prepare_rma_line_from_stock_move(move)
             wizard.add_lines()
 
-            for operation in move.product_id.rma_customer_operation_id:
-                operation.in_route_id = False
+            if move.product_id.rma_customer_operation_id:
+                move.product_id.rma_customer_operation_id.in_route_id = False
             move.product_id.categ_id.rma_customer_operation_id = False
             move.product_id.rma_customer_operation_id = False
             wizard._prepare_rma_line_from_stock_move(move)
