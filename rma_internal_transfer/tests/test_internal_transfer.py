@@ -67,7 +67,7 @@ class TestRmaInternalTransfer(common.SavepointCase):
         return res
 
     @classmethod
-    def _create_rma_from_move(cls, products2move, type, partner, dropship,
+    def _create_rma_from_move(cls, products2move, r_type, partner, dropship,
                               supplier_address_id=None):
         picking_in = cls._create_picking(partner)
 
@@ -82,12 +82,13 @@ class TestRmaInternalTransfer(common.SavepointCase):
         rma_id = cls.rma.create(
             {
                 'reference': '0001',
-                'type': type,
+                'type': r_type,
                 'partner_id': partner.id,
                 'company_id': cls.env.ref('base.main_company').id
             })
         for move in moves:
-            if type == 'customer':
+            data = {}
+            if r_type == 'customer':
                 wizard = cls.rma_add_stock_move.new(
                     {'stock_move_id': move.id, 'customer': True,
                      'active_ids': rma_id.id,
@@ -107,8 +108,9 @@ class TestRmaInternalTransfer(common.SavepointCase):
                     _prepare_rma_line_from_stock_move(move)
                 wizard.add_lines()
 
-                for operation in move.product_id.rma_customer_operation_id:
-                    operation.in_route_id = False
+                if move.product_id.rma_customer_operation_id:
+                    move.product_id.rma_customer_operation_id.in_route_id = \
+                        False
                 move.product_id.categ_id.rma_customer_operation_id = False
                 move.product_id.rma_customer_operation_id = False
                 wizard._prepare_rma_line_from_stock_move(move)
@@ -118,15 +120,15 @@ class TestRmaInternalTransfer(common.SavepointCase):
             cls.line.action_rma_approve()
         return rma_id
 
-    def test_0_internal_transfer(cls):
-        wizard = cls.rma_make_picking.with_context({
-            'active_ids': cls.rma_customer_id.rma_line_ids.ids,
+    def test_0_internal_transfer(self):
+        wizard = self.rma_make_picking.with_context({
+            'active_ids': self.rma_customer_id.rma_line_ids.ids,
             'active_model': 'rma.order.line',
             'picking_type': 'internal',
-            'active_id': cls.rma_customer_id.id
+            'active_id': self.rma_customer_id.id
         }).create({})
 
         wizard.action_create_picking()
-        res = cls.rma_customer_id.rma_line_ids.action_view_in_shipments()
-        cls.assertTrue('res_id' in res,
-                       "Incorrect number of pickings created")
+        res = self.rma_customer_id.rma_line_ids.action_view_in_shipments()
+        self.assertTrue('res_id' in res,
+                        "Incorrect number of pickings created")
