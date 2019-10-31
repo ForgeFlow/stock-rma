@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<!-- Copyright 2018 Eficent Business and IT Consulting Services S.L.
+     License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl-3.0) -->
+<odoo>
+    <record id="view_rma_line_tree" model="ir.ui.view">
+        <field name="name">rma.order.line.tree</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_line_tree"/>
+        <field name="arch" type="xml">
+            <field name="state" position="after">
+                <field name="analytic_account_id" groups="analytic.group_analytic_accounting"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_rma_line_supplier_tree" model="ir.ui.view">
+        <field name="name">rma.order.line.supplier.tree</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_line_supplier_tree"/>
+        <field name="arch" type="xml">
+            <field name="state" position="after">
+                <field name="analytic_account_id" groups="analytic.group_analytic_accounting"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_rma_line_supplier_form" model="ir.ui.view">
+        <field name="name">rma.order.line.supplier.form</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_line_supplier_form"/>
+        <field name="arch" type="xml">
+            <group name="main_info" position="inside">
+                <field name="analytic_account_id" groups="analytic.group_analytic_accounting"/>
+            </group>
+        </field>
+    </record>
+
+    <record id="view_rma_line_form" model="ir.ui.view">
+        <field name="name">rma.order.line.form</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_line_form"/>
+        <field name="arch" type="xml">
+            <group name="main_info" position="inside">
+                <field name="analytic_account_id" groups="analytic.group_analytic_accounting"/>
+            </group>
+        </field>
+    </record>
+</odoo>
