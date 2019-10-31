@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+
+<odoo>
+
+    <record id="view_rma_picking_internal" model="ir.ui.view">
+        <field name="name">Internal Transfer</field>
+        <field name="model">rma_internal_transfer.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Select lines for transfer" name="lines">
+                <separator string="Select lines for picking"/>
+                <group name="main">
+                    <group name="locations">
+                        <field name="picking_type_id"/>
+                        <field name="location_id"/>
+                        <field name="location_dest_id"/>
+                    </group>
+                </group>
+                <field name="item_ids">
+                    <tree string="RMA Lines" editable="bottom" create="false">
+                        <field name="rma_id" groups="rma.group_rma_groups"/>
+                        <field name="product_id"/>
+                        <field name="product_qty"/>
+                        <field name="uom_id" groups="uom.group_uom"/>
+                    </tree>
+                </field>
+                <footer>
+                    <button
+                            string="Confirm"
+                            name="action_create_picking" type="object"
+                            class="oe_highlight"/>
+                    or
+                    <button name="action_cancel"
+                            string="Cancel" class="oe_link" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_rma_picking_internal" model="ir.actions.act_window">
+        <field name="name">Create Internal Transfer</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">rma_internal_transfer.wizard</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="view_rma_picking_internal"/>
+        <field name="groups_id" eval="[(4, ref('stock.group_stock_user'))]"/>
+        <field name="context">{'picking_type': 'internal'}</field>
+        <field name="binding_model_id" ref="rma.model_rma_order_line"/>
+    </record>
+
+    <record id="view_rma_line_button_form" model="ir.ui.view">
+        <field name="name">rma.order.line.form</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_line_form"/>
+        <field name="arch" type="xml">
+            <button name="%(rma.action_rma_picking_out)d" position="after">
+                <button name="%(action_rma_picking_internal)d" states="approved"
+                        string="Internal Transfer" class="oe_highlight"
+                        type="action"/>
+            </button>
+        </field>
+    </record>
+
+    <record id="view_rma_line_supplier_button_form" model="ir.ui.view">
+        <field name="name">rma.order.line.supplier.form</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_line_supplier_button_form"/>
+        <field name="arch" type="xml">
+            <button name="%(rma.action_rma_picking_out)d" position="after">
+                <button name="%(action_rma_picking_internal)d" states="approved"
+                        string="Internal Transfer" class="oe_highlight"
+                        type="action"/>
+            </button>
+        </field>
+    </record>
+
+</odoo>
