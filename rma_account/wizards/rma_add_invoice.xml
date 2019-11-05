@@ -14,7 +14,7 @@
                 </group>
                 <separator string="Select Invoices lines to add"/>
                 <field name="invoice_line_ids"
-                       domain="[('invoice_id.partner_id', '=', partner_id),
+                       domain="[('invoice_id.commercial_partner_id', 'child_of', partner_id),
                        ('invoice_id.type', '=', 'out_invoice')]">
                     <tree string="Invoice Lines">
                         <field name="invoice_id"/>
