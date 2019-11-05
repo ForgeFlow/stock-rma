@@ -1,5 +1,5 @@
-.. image:: https://img.shields.io/badge/license-LGPLv3-blue.svg
-   :target: https://www.gnu.org/licenses/lgpl.html
+.. image:: https://img.shields.io/badge/license-LGPL--3-blue.png
+   :target: https://www.gnu.org/licenses/lgpl
    :alt: License: LGPL-3
 
 ==========================
@@ -19,7 +19,7 @@ Usage
 =====
 
 * Add the analytic information in the rma line or let the system fill it
-  from origin
+  from origin.
 
 
 Contributors
