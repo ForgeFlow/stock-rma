@@ -23,5 +23,4 @@
         'wizards/rma_refund.xml',
     ],
     'installable': True,
-    'auto_install': True,
 }
