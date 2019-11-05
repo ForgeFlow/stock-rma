@@ -4,7 +4,7 @@
 
 {
     "name": "Operating Unit in RMA Groups",
-    "version": "10.0.1.0.0",
+    "version": "11.0.1.0.0",
     "author": "Eficent",
     "license": "LGPL-3",
     "website": "http://www.eficent.com",
