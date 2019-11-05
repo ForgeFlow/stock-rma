@@ -7,7 +7,7 @@
                 <div class="oe_structure"/>
                 <div class="row">
                     <div class="col-xs-6">
-                        <t t-if="(doc.customer_to_supplier==False and doc.type=='customer') or (doc.supplier_to_customer==False and doc.type=='supplier')">
+                        <t t-if="((doc.customer_to_supplier==False and doc.type=='customer') or (doc.supplier_to_customer==False and doc.type=='supplier')) and doc.in_warehouse_id.partner_id">
                             <strong>Shipping address:</strong>
                             <div class="mt8">
                                 <div t-field="doc.in_warehouse_id.partner_id"
