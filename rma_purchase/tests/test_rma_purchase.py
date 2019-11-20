@@ -2,8 +2,8 @@
 # Copyright 2017-18 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from openerp.tests import common
-from openerp.fields import Datetime
+from odoo.tests import common
+from odoo.fields import Datetime
 
 
 class TestRmaPurchase(common.SingleTransactionCase):

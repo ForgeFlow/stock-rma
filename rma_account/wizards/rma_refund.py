@@ -4,7 +4,7 @@
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
-from odoo.tools.safe_eval import safe_eval as eval
+from odoo.tools.safe_eval import safe_eval as seval
 import odoo.addons.decimal_precision as dp
 
 
@@ -98,7 +98,7 @@ class RmaRefund(models.TransientModel):
             new_invoice.type in ['out_refund', 'out_invoice']) \
             else 'action_invoice_tree2'
         result = self.env.ref('account.%s' % action).read()[0]
-        invoice_domain = eval(result['domain'])
+        invoice_domain = seval(result['domain'])
         invoice_domain.append(('id', '=', new_invoice.id))
         result['domain'] = invoice_domain
         return result

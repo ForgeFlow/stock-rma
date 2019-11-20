@@ -92,10 +92,10 @@ class RmaMakePicking(models.TransientModel):
         return delivery_address
 
     @api.model
-    def _get_address_location(self, delivery_address_id, type):
-        if type == 'supplier':
+    def _get_address_location(self, delivery_address_id, rtype):
+        if rtype == 'supplier':
             return delivery_address_id.property_stock_supplier
-        elif type == 'customer':
+        elif rtype == 'customer':
             return delivery_address_id.property_stock_customer
 
     @api.model
