@@ -1,5 +1,5 @@
-.. image:: https://img.shields.io/badge/license-LGPLv3-blue.svg
-   :target: https://www.gnu.org/licenses/lgpl.html
+.. image:: https://img.shields.io/badge/license-LGPL--3-blue.png
+   :target: https://www.gnu.org/licenses/lgpl
    :alt: License: LGPL-3
 
 =================================
@@ -8,12 +8,12 @@ RMA Purchase with Operating Units
 
 This module introduces the following features:
 
-* Adds the operating unit to the quotation
+* Adds the operating unit to the quotation.
 
 Usage
 =====
 
-* No changes
+* No changes.
 
 
 Contributors
