@@ -23,7 +23,6 @@ class RmaLineMakeSaleOrder(models.TransientModel):
     def _prepare_item(self, line):
         return {
             'line_id': line.id,
-            'rma_line_id': line.id,
             'product_id': line.product_id.id,
             'name': line.product_id.name,
             'product_qty': line.qty_to_sell,
@@ -59,13 +58,13 @@ class RmaLineMakeSaleOrder(models.TransientModel):
         return res
 
     @api.model
-    def _prepare_sale_order(self, out_warehouse, company):
+    def _prepare_sale_order(self, out_warehouse, company, item):
         if not self.partner_id:
             raise exceptions.Warning(
                 _('Enter a customer.'))
         customer = self.partner_id
         data = {
-            'origin': '',
+            'origin': item.line_id.name,
             'partner_id': customer.id,
             'warehouse_id': out_warehouse.id,
             'company_id': company.id,
@@ -103,24 +102,20 @@ class RmaLineMakeSaleOrder(models.TransientModel):
             if self.sale_order_id:
                 sale = self.sale_order_id
             if not sale:
-                po_data = self._prepare_sale_order(line.out_warehouse_id,
-                                                   line.company_id)
+                po_data = self._prepare_sale_order(
+                    line.out_warehouse_id,
+                    line.company_id,
+                    item)
                 sale = sale_obj.create(po_data)
 
             so_line_data = self._prepare_sale_order_line(sale, item)
             so_line_obj.create(so_line_data)
             res.append(sale.id)
 
-        return {
-            'domain': "[('id','in', ["+','.join(map(str, res))+"])]",
-            'name': _('Quotations'),
-            'view_type': 'form',
-            'view_mode': 'tree,form',
-            'res_model': 'sale.order',
-            'view_id': False,
-            'context': False,
-            'type': 'ir.actions.act_window'
-        }
+        action = self.env.ref('sale.action_orders')
+        result = action.read()[0]
+        result['domain'] = "[('id','in', ["+','.join(map(str, res))+"])]"
+        return result
 
 
 class RmaLineMakeSaleOrderItem(models.TransientModel):
