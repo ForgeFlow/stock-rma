@@ -10,8 +10,8 @@ class RmaAddSale(models.TransientModel):
     _description = 'Wizard to add rma lines from SO lines'
 
     @api.model
-    def default_get(self, fields):
-        res = super(RmaAddSale, self).default_get(fields)
+    def default_get(self, fields_list):
+        res = super(RmaAddSale, self).default_get(fields_list)
         rma_obj = self.env['rma.order']
         rma_id = self.env.context['active_ids'] or []
         active_model = self.env.context['active_model']
