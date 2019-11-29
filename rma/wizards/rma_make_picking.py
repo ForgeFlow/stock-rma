@@ -26,13 +26,13 @@ class RmaMakePicking(models.TransientModel):
         return values
 
     @api.model
-    def default_get(self, fields):
+    def default_get(self, fields_list):
         """Default values for wizard, if there is more than one supplier on
         lines the supplier field is empty otherwise is the unique line
         supplier.
         """
         context = self._context.copy()
-        res = super(RmaMakePicking, self).default_get(fields)
+        res = super(RmaMakePicking, self).default_get(fields_list)
         rma_line_obj = self.env['rma.order.line']
         rma_line_ids = self.env.context['active_ids'] or []
         active_model = self.env.context['active_model']
