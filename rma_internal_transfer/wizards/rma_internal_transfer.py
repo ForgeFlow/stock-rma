@@ -51,8 +51,8 @@ class RmaMakePicking(models.TransientModel):
 
         types = self.env['stock.picking.type'].search(
             [('code', '=', 'internal'),
-             ('warehouse_id.company_id', '=',
-              line.in_warehouse_id.id)])[:1]
+             ('warehouse_id', 'in',
+              lines.mapped('in_warehouse_id').ids)])[:1]
         if not types:
             raise ValidationError(_('Please define an internal picking type '
                                     'for this warehouse'))
