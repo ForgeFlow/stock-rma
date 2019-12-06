@@ -9,5 +9,13 @@
             file="rma.report_rma_order_line"
             name="rma.report_rma_order_line"
         />
+        <report 
+            id="rma_order_report"
+            string="RMA Group"
+            model="rma.order"
+            report_type="qweb-pdf"
+            file="rma.report_rma_order"
+            name="rma.report_rma_order"
+        />
     </data>
 </odoo>
