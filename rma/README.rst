@@ -113,6 +113,7 @@ Contributors
 * Jordi Ballester Alomar <jordi.ballester@eficent.com>
 * Aaron Henriquez <ahenriquez@eficent.com>
 * Lois Rilo <lois.rilo@eficent.com>
+* Chafique Delli <chafique.delli@akretion.com>
 
 Maintainer
 ----------
