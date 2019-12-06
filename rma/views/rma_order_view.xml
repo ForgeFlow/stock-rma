@@ -78,9 +78,26 @@
                     />
                 </group>
                 <group name="info">
-                    <field name="reference"/>
-                    <field name="date_rma"/>
-                </group>
+                    <group>
+                            <field name="reference"/>
+                            <field name="date_rma" attrs="{'readonly':[('state', '!=', 'draft')]}"/>
+                        </group>
+                        <group name="contact" string="Contact">
+                            <field name="requested_by" readonly="1"/>
+                            <field name="assigned_to" attrs="{'readonly':[('state', '!=', 'draft')]}"/>
+                        </group>
+                    </group>
+                    <group name="inbound_route" string="Inbound">
+                        <field name="in_warehouse_id" attrs="{'readonly':[('state', '!=', 'draft')]}"/>
+                        <field name="customer_to_supplier" attrs="{'readonly':[('state', '!=', 'draft')]}"/>
+                        <field name="state" invisible="True"/>
+                        <field name="supplier_address_id"
+                               context="{'show_address': 1}"
+                               options="{'always_reload': 1}"
+                               attrs="{'required':[('customer_to_supplier', '=', True)],
+                                       'invisible':[('customer_to_supplier', '=', False)],
+                                       'readonly':[('state', '!=', 'draft')]}"/>
+                    </group>
                 <notebook colspan="4">
                     <page string="RMA Lines" name="lines">
                         <field name="rma_line_ids" context="{'default_rma_id': active_id,
@@ -155,14 +172,34 @@
                     </h1>
                 </div>
                 <group name="partner">
+                    <field name="state" invisible="1"/>
                     <field name="partner_id"
                            domain="[('supplier','=',True)]"
-                           string="Supplier"/>
+                           string="Supplier"
+                           attrs="{'readonly':[('state', '!=', 'draft')]}"/>
                 </group>
                 <group>
                     <group col="4">
                         <field name="reference"/>
-                        <field name="date_rma"/>
+                            <field name="date_rma" attrs="{'readonly':[('state', '!=', 'draft')]}"/>
+                        </group>
+                        <group name="contact" string="Contact">
+                            <field name="requested_by" readonly="1"/>
+                            <field name="assigned_to" attrs="{'readonly':[('state', '!=', 'draft')]}"/>
+                        </group>
+                    </group>
+                    <group name="route">
+                        <group name="inbound_route" string="Inbound">
+                            <field name="in_warehouse_id" attrs="{'readonly':[('state', '!=', 'draft')]}"/>
+                        </group>
+                        <group name="outbound_route" string="Outbound">
+                            <field name="supplier_to_customer" attrs="{'readonly':[('state', '!=', 'draft')]}"/>
+                            <field name="customer_address_id"
+                                   context="{'show_address': 1}"
+                                   options="{'always_reload': 1}"
+                                   attrs="{'required':[('supplier_to_customer', '=', True)],
+                                           'invisible':[('supplier_to_customer', '=', False)],
+                                           'readonly':[('state', '!=', 'draft')]}"/>
                     </group>
                 </group>
                 <notebook colspan="4">
@@ -292,4 +329,5 @@
         groups="rma.group_rma_manager"
         sequence="30"
         parent="stock.menu_stock_config_settings"/>
+
 </odoo>
