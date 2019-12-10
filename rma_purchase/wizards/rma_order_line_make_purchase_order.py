@@ -34,9 +34,9 @@ class RmaLineMakePurchaseOrder(models.TransientModel):
         }
 
     @api.model
-    def default_get(self, fields):
+    def default_get(self, fields_list):
         res = super(RmaLineMakePurchaseOrder, self).default_get(
-            fields)
+            fields_list)
         rma_line_obj = self.env['rma.order.line']
         rma_line_ids = self.env.context['active_ids'] or []
         active_model = self.env.context['active_model']
@@ -109,16 +109,10 @@ class RmaLineMakePurchaseOrder(models.TransientModel):
             po_line_obj.create(po_line_data)
             res.append(purchase.id)
 
-        return {
-            'domain': "[('id','in', ["+','.join(map(str, res))+"])]",
-            'name': _('Request for Quotation'),
-            'view_type': 'form',
-            'view_mode': 'tree,form',
-            'res_model': 'purchase.order',
-            'view_id': False,
-            'context': False,
-            'type': 'ir.actions.act_window'
-        }
+        action = self.env.ref('purchase.purchase_rfq')
+        result = action.read()[0]
+        result['domain'] = "[('id','in', ["+','.join(map(str, res))+"])]"
+        return result
 
 
 class RmaLineMakePurchaseOrderItem(models.TransientModel):
