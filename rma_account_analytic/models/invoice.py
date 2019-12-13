@@ -5,7 +5,7 @@
 from odoo import _, api, exceptions, models
 
 
-class AccountInvocieLine(models.Model):
+class AccountInvoiceLine(models.Model):
     _inherit = "account.invoice.line"
 
     @api.constrains('analytic_account_id')

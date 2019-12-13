@@ -30,7 +30,6 @@ class RmaLineMakeSaleOrder(models.TransientModel):
             'product_qty': line.qty_to_sell,
             'rma_id': line.rma_id.id,
             'out_warehouse_id': line.out_warehouse_id.id,
-            'out_route_id': line.out_route_id.id,
             'product_uom_id': line.uom_id.id,
         }
 
@@ -61,7 +60,9 @@ class RmaLineMakeSaleOrder(models.TransientModel):
         return res
 
     @api.model
-    def _prepare_sale_order(self, out_warehouse, company):
+    def _prepare_sale_order(self, line):
+        out_warehouse = line.out_warehouse_id
+        company = line.company_id
         if not self.partner_id:
             raise exceptions.Warning(
                 _('Enter a customer.'))
@@ -81,8 +82,8 @@ class RmaLineMakeSaleOrder(models.TransientModel):
             'name': product.name,
             'order_id': so.id,
             'product_id': product.id,
+            'route_id': item.line_id.out_route_id.id,
             'product_uom': product.uom_po_id.id,
-            'route_id': item.out_route_id.id,
             'product_uom_qty': item.product_qty,
             'rma_line_id': item.line_id.id
         }
@@ -106,8 +107,7 @@ class RmaLineMakeSaleOrder(models.TransientModel):
             if self.sale_order_id:
                 sale = self.sale_order_id
             if not sale:
-                po_data = self._prepare_sale_order(line.out_warehouse_id,
-                                                   line.company_id)
+                po_data = self._prepare_sale_order(line)
                 sale = sale_obj.create(po_data)
 
             so_line_data = self._prepare_sale_order_line(sale, item)
@@ -148,6 +148,3 @@ class RmaLineMakeSaleOrderItem(models.TransientModel):
     out_warehouse_id = fields.Many2one(
         comodel_name='stock.warehouse', string='Outbound Warehouse')
     free_of_charge = fields.Boolean(string='Free of Charge')
-    out_route_id = fields.Many2one(
-        comodel_name='stock.location.route', string='Outbound Route',
-        domain=[('rma_selectable', '=', True)])

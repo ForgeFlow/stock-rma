@@ -13,6 +13,7 @@ ops = {'=': operator.eq,
 class RmaOrderLine(models.Model):
     _name = "rma.order.line"
     _inherit = ['mail.thread']
+    _order = 'create_date desc, id desc'
 
     @api.model
     def _get_default_type(self):
@@ -47,18 +48,27 @@ class RmaOrderLine(models.Model):
     @api.multi
     def _compute_in_shipment_count(self):
         for line in self:
-            moves = line.mapped('move_ids').filtered(
-                lambda m: m.location_dest_id.usage == 'internal')
-            pickings = moves.mapped('picking_id')
-            line.in_shipment_count = len(pickings)
+            picking_ids = []
+            for move in line.move_ids:
+                if move.location_dest_id.usage == 'internal':
+                    picking_ids.append(move.picking_id.id)
+                else:
+                    if line.customer_to_supplier:
+                        picking_ids.append(move.picking_id.id)
+            shipments = list(set(picking_ids))
+            line.in_shipment_count = len(shipments)
 
     @api.multi
     def _compute_out_shipment_count(self):
+        picking_ids = []
         for line in self:
-            moves = line.mapped('move_ids').filtered(
-                lambda m: m.location_dest_id.usage != 'internal')
-            pickings = moves.mapped('picking_id')
-            line.out_shipment_count = len(pickings)
+            for move in line.move_ids:
+                if move.location_dest_id.usage in ('supplier', 'customer'):
+                    if (not line.customer_to_supplier or
+                            line.supplier_to_customer):
+                        picking_ids.append(move.picking_id.id)
+            shipments = list(set(picking_ids))
+            line.out_shipment_count = len(shipments)
 
     @api.multi
     def _get_rma_move_qty(self, states, direction='in'):
@@ -72,9 +82,8 @@ class RmaOrderLine(models.Model):
             for move in rec.move_ids.filtered(
                     lambda m: m.state in states and op(m.location_id.usage,
                                                        rec.type)):
-                qty += product_obj._compute_qty_obj(
-                    move.product_uom, move.product_uom_qty,
-                    rec.uom_id)
+                qty += product_obj._compute_quantity(
+                    move.product_uom_qty, rec.uom_id)
             return qty
 
     @api.multi
@@ -85,10 +94,10 @@ class RmaOrderLine(models.Model):
             rec.qty_to_receive = 0.0
             if rec.receipt_policy == 'ordered':
                 rec.qty_to_receive = \
-                    rec.product_qty - rec.qty_incoming -rec.qty_received
+                    rec.product_qty - rec.qty_received
             elif rec.receipt_policy == 'delivered':
                 rec.qty_to_receive = \
-                    rec.qty_delivered - rec.qty_incoming - rec.qty_received
+                    rec.qty_delivered - rec.qty_received
 
     @api.multi
     @api.depends('move_ids', 'move_ids.state',
@@ -106,8 +115,12 @@ class RmaOrderLine(models.Model):
     @api.depends('move_ids', 'move_ids.state', 'type')
     def _compute_qty_incoming(self):
         for rec in self:
-            qty = rec._get_rma_move_qty(
-                ('draft', 'confirmed', 'assigned'), direction='in')
+            if rec.supplier_to_customer:
+                qty = rec._get_rma_move_qty(
+                    ('draft', 'confirmed', 'assigned'), direction='out')
+            else:
+                qty = rec._get_rma_move_qty(
+                    ('draft', 'confirmed', 'assigned'), direction='in')
             rec.qty_incoming = qty
 
     @api.multi
@@ -121,8 +134,12 @@ class RmaOrderLine(models.Model):
     @api.depends('move_ids', 'move_ids.state', 'type')
     def _compute_qty_outgoing(self):
         for rec in self:
-            qty = rec._get_rma_move_qty(
-                ('draft', 'confirmed', 'assigned'), direction='out')
+            if rec.supplier_to_customer:
+                qty = rec._get_rma_move_qty(
+                    ('draft', 'confirmed', 'assigned'), direction='in')
+            else:
+                qty = rec._get_rma_move_qty(
+                    ('draft', 'confirmed', 'assigned'), direction='out')
             rec.qty_outgoing = qty
 
     @api.multi
@@ -158,6 +175,13 @@ class RmaOrderLine(models.Model):
             rec.procurement_count = len(rec.procurement_ids.filtered(
                 lambda p: p.state == 'exception'))
 
+    @api.multi
+    def _compute_rma_line_count(self):
+        for rec in self.filtered(lambda r: r.type == 'customer'):
+            rec.rma_line_count = len(rec.supplier_rma_line_ids)
+        for rec in self.filtered(lambda r: r.type == 'supplier'):
+            rec.rma_line_count = len(rec.customer_rma_id)
+
     delivery_address_id = fields.Many2one(
         comodel_name='res.partner', string='Partner delivery address',
         default=_default_delivery_address,
@@ -168,14 +192,17 @@ class RmaOrderLine(models.Model):
     rma_id = fields.Many2one(
         comodel_name='rma.order', string='RMA Group',
         track_visibility='onchange', readonly=True,
+        copy=False
     )
     name = fields.Char(
         string='Reference', required=True, default='/',
         readonly=True, states={'draft': [('readonly', False)]},
+        copy=False,
         help='Add here the supplier RMA #. Otherwise an internal code is'
              ' assigned.',
     )
     description = fields.Text(string='Description')
+    conditions = fields.Html(string='Terms and conditions')
     origin = fields.Char(
         string='Source Document',
         readonly=True, states={'draft': [('readonly', False)]},
@@ -194,9 +221,11 @@ class RmaOrderLine(models.Model):
     )
     assigned_to = fields.Many2one(
         comodel_name='res.users', track_visibility='onchange',
+        default=lambda self: self.env.uid,
     )
     requested_by = fields.Many2one(
         comodel_name='res.users', track_visibility='onchange',
+        default=lambda self: self.env.uid,
     )
     partner_id = fields.Many2one(
         comodel_name='res.partner', required=True, store=True,
@@ -227,7 +256,7 @@ class RmaOrderLine(models.Model):
         required=True,
         readonly=True, states={'draft': [('readonly', False)]},
     )
-    price_unit = fields.Monetary(
+    price_unit = fields.Float(
         string='Price Unit',
         readonly=True, states={'draft': [('readonly', False)]},
     )
@@ -310,14 +339,25 @@ class RmaOrderLine(models.Model):
         default=_default_location_id,
     )
     customer_rma_id = fields.Many2one(
-        'rma.order.line', string='Customer RMA line', ondelete='cascade')
+        'rma.order.line', string='Customer RMA line', ondelete='cascade',
+        copy=False)
     supplier_rma_line_ids = fields.One2many(
         'rma.order.line', 'customer_rma_id')
+    rma_line_count = fields.Integer(
+        compute='_compute_rma_line_count',
+        string='# of RMA lines associated',
+    )
     supplier_address_id = fields.Many2one(
-        'res.partner', readonly=True,
+        comodel_name='res.partner', readonly=True,
         states={'draft': [('readonly', False)]},
         string='Supplier Address',
-        help="This address of the supplier in case of Customer RMA operation "
+        help="Address of the supplier in case of Customer RMA operation "
+             "dropship.")
+    customer_address_id = fields.Many2one(
+        comodel_name='res.partner', readonly=True,
+        states={'draft': [('readonly', False)]},
+        string='Customer Address',
+        help="Address of the customer in case of Supplier RMA operation "
              "dropship.")
     qty_to_receive = fields.Float(
         string='Qty To Receive',
@@ -361,6 +401,9 @@ class RmaOrderLine(models.Model):
         string="Under Warranty?",
         readonly=True, states={'draft': [('readonly', False)]},
     )
+    create_date = fields.Datetime(string='Creation Date', readonly=True,
+                                  index=True,
+                                  help="Date on which RMA order is created.")
 
     @api.multi
     def _prepare_rma_line_from_stock_move(self, sm, lot=False):
@@ -377,13 +420,13 @@ class RmaOrderLine(models.Model):
             operation = self.env['rma.operation'].search(
                 [('type', '=', self.type)], limit=1)
             if not operation:
-                raise ValidationError("Please define an operation first.")
+                raise ValidationError(_("Please define an operation first."))
 
         if not operation.in_route_id or not operation.out_route_id:
             route = self.env['stock.location.route'].search(
                 [('rma_selectable', '=', True)], limit=1)
             if not route:
-                raise ValidationError("Please define an RMA route.")
+                raise ValidationError(_("Please define an RMA route."))
 
         if not operation.in_warehouse_id or not operation.out_warehouse_id:
             warehouse = self.env['stock.warehouse'].search(
@@ -391,7 +434,8 @@ class RmaOrderLine(models.Model):
                  ('lot_rma_id', '!=', False)], limit=1)
             if not warehouse:
                 raise ValidationError(
-                    "Please define a warehouse with a default RMA location.")
+                    _("Please define a warehouse with a default RMA "
+                      "location."))
 
         data = {
             'product_id': sm.product_id.id,
@@ -455,7 +499,6 @@ class RmaOrderLine(models.Model):
         self.write({'state': 'to_approve'})
         for rec in self:
             if rec.product_id.rma_approval_policy == 'one_step':
-                rec.write({'assigned_to': self.env.uid})
                 rec.action_rma_approve()
         return True
 
@@ -493,15 +536,18 @@ class RmaOrderLine(models.Model):
         result = {}
         if not self.product_id:
             return result
-        self.product_qty = 1
         self.uom_id = self.product_id.uom_id.id
         self.price_unit = self.product_id.standard_price
+        if not self.type:
+            self.type = self._get_default_type()
         if self.type == 'customer':
             self.operation_id = self.product_id.rma_customer_operation_id or \
                 self.product_id.categ_id.rma_customer_operation_id
         else:
             self.operation_id = self.product_id.rma_supplier_operation_id or \
                 self.product_id.categ_id.rma_supplier_operation_id
+        if self.lot_id.product_id != self.product_id:
+            self.lot_id = False
         return result
 
     @api.onchange('operation_id')
@@ -528,22 +574,22 @@ class RmaOrderLine(models.Model):
         elif self.type == 'customer' and self.supplier_to_customer:
             self.delivery_policy = 'no'
 
-    @api.onchange('product_id')
-    def _onchange_product_id(self):
-        self.uom_id = self.product_id.uom_id
-        if self.lot_id.product_id != self.product_id:
-            self.lot_id = False
-        if self.product_id:
-            return {'domain': {
-                'lot_id': [('product_id', '=', self.product_id.id)]}}
-        return {'domain': {'lot_id': []}}
-
     @api.onchange("lot_id")
     def _onchange_lot_id(self):
         product = self.lot_id.product_id
         if product:
             self.product_id = product
             self.uom_id = product.uom_id
+
+    @api.onchange("in_warehouse_id")
+    def _onchange_in_warehouse_id(self):
+        if self.in_warehouse_id and self._get_default_type() == 'customer':
+            self.location_id = self.in_warehouse_id.lot_rma_id
+
+    @api.onchange("out_warehouse_id")
+    def _onchange_out_warehouse_id(self):
+        if self.out_warehouse_id and self._get_default_type() == 'supplier':
+            self.location_id = self.out_warehouse_id.lot_rma_id
 
     @api.multi
     def action_view_in_shipments(self):
@@ -554,6 +600,10 @@ class RmaOrderLine(models.Model):
             for move in line.move_ids:
                 if move.location_dest_id.usage == 'internal':
                     picking_ids.append(move.picking_id.id)
+                else:
+                    if line.customer_to_supplier:
+                        picking_ids.append(move.picking_id.id)
+
         shipments = list(set(picking_ids))
         # choose the view_mode accordingly
         if len(shipments) != 1:
@@ -573,7 +623,8 @@ class RmaOrderLine(models.Model):
         for line in self:
             for move in line.move_ids:
                 if move.location_dest_id.usage in ('supplier', 'customer'):
-                    picking_ids.append(move.picking_id.id)
+                    if not line.customer_to_supplier:
+                        picking_ids.append(move.picking_id.id)
         shipments = list(set(picking_ids))
         # choose the view_mode accordingly
         if len(shipments) != 1:
@@ -601,3 +652,33 @@ class RmaOrderLine(models.Model):
             result['views'] = [(res and res.id or False, 'form')]
             result['res_id'] = procurements[0]
         return result
+
+    @api.multi
+    def action_view_rma_lines(self):
+        if self.type == 'customer':
+            # from customer we link to supplier rma
+            action = self.env.ref(
+                'rma.action_rma_supplier_lines')
+            rma_lines = self.supplier_rma_line_ids
+            res = self.env.ref('rma.view_rma_line_supplier_form', False)
+        else:
+            # from supplier we link to customer rma
+            action = self.env.ref(
+                'rma.action_rma_customer_lines')
+            rma_lines = self.customer_rma_id
+            res = self.env.ref('rma.view_rma_line_form', False)
+        result = action.read()[0]
+        # choose the view_mode accordingly
+        if rma_lines and len(rma_lines) != 1:
+            result['domain'] = "[('id', 'in', " + \
+                               str(rma_lines.ids) + ")]"
+        elif len(rma_lines) == 1:
+            result['views'] = [(res and res.id or False, 'form')]
+            result['res_id'] = rma_lines.id
+        return result
+
+    @api.constrains("partner_id", "rma_id")
+    def _check_partner_id(self):
+        if self.rma_id and self.partner_id != self.rma_id.partner_id:
+            raise ValidationError(_(
+                "Group partner and RMA's partner must be the same."))

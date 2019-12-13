@@ -33,9 +33,13 @@ class SaleOrderLine(models.Model):
         if self.env.context.get('rma'):
             for sale in self:
                 if sale.order_id.name:
-                    res.append((sale.id, "%s %s qty:%s" % (
-                        sale.order_id.name,
-                        sale.product_id.name, sale.product_uom_qty)))
+                    res.append(
+                        (sale.id, "SO:%s | INV: %s, | PART:%s | QTY:%s" % (
+                            sale.order_id.name,
+                            " ".join(str(x) for x in [
+                                inv.number
+                                for inv in sale.order_id.invoice_ids]),
+                            sale.product_id.name, sale.product_uom_qty)))
                 else:
                     res.append(super(SaleOrderLine, sale).name_get()[0])
             return res
@@ -43,7 +47,8 @@ class SaleOrderLine(models.Model):
             return super(SaleOrderLine, self).name_get()
 
     rma_line_id = fields.Many2one(
-        comodel_name='rma.order.line', string='RMA', ondelete='restrict')
+        comodel_name='rma.order.line', string='RMA', ondelete='restrict',
+        copy=False)
 
     @api.multi
     def _prepare_order_line_procurement(self, group_id=False):

@@ -26,7 +26,7 @@ class StockMove(models.Model):
     _inherit = "stock.move"
 
     rma_line_id = fields.Many2one('rma.order.line', string='RMA line',
-                                  ondelete='restrict')
+                                  ondelete='restrict', copy=False)
 
     @api.model
     def create(self, vals):
@@ -37,9 +37,8 @@ class StockMove(models.Model):
                 vals['rma_line_id'] = procurement.rma_line_id.id
         return super(StockMove, self).create(vals)
 
-    @api.model
-    def _prepare_picking_assign(self, move):
-        res = super(StockMove, self)._prepare_picking_assign(move)
-        if move.rma_line_id:
-            res['partner_id'] = move.rma_line_id.partner_id.id or False
+    def _get_new_picking_values(self):
+        res = super(StockMove, self)._get_new_picking_values()
+        if self.rma_line_id:
+            res['partner_id'] = self.rma_line_id.partner_id.id or False
         return res

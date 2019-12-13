@@ -4,7 +4,7 @@
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
-from odoo.tools.safe_eval import safe_eval as eval
+from odoo.tools.safe_eval import safe_eval as seval
 import odoo.addons.decimal_precision as dp
 
 
@@ -19,16 +19,17 @@ class RmaRefund(models.TransientModel):
 
     @api.returns('rma.order.line')
     def _prepare_item(self, line):
-        values = {'product_id': line.product_id.id,
-                  'name': line.name,
-                  'product_qty': line.product_qty,
-                  'uom_id': line.uom_id.id,
-                  'qty_to_refund': line.qty_to_refund,
-                  'refund_policy': line.refund_policy,
-                  'invoice_address_id': line.invoice_address_id.id,
-                  'line_id': line.id,
-                  'rma_id': line.rma_id.id,
-                  'wiz_id': self.env.context['active_id']}
+        values = {
+            'product_id': line.product_id.id,
+            'name': line.name,
+            'product_qty': line.product_qty,
+            'uom_id': line.uom_id.id,
+            'qty_to_refund': line.qty_to_refund,
+            'refund_policy': line.refund_policy,
+            'invoice_address_id': line.invoice_address_id.id,
+            'line_id': line.id,
+            'rma_id': line.rma_id.id,
+        }
         return values
 
     @api.model
@@ -97,7 +98,7 @@ class RmaRefund(models.TransientModel):
             new_invoice.type in ['out_refund', 'out_invoice']) \
             else 'action_invoice_tree2'
         result = self.env.ref('account.%s' % action).read()[0]
-        invoice_domain = eval(result['domain'])
+        invoice_domain = seval(result['domain'])
         invoice_domain.append(('id', '=', new_invoice.id))
         result['domain'] = invoice_domain
         return result
@@ -204,5 +205,6 @@ class RmaRefundItem(models.TransientModel):
                              readonly=True)
     refund_policy = fields.Selection(selection=[
         ('no', 'Not required'), ('ordered', 'Based on Ordered Quantities'),
+        ('delivered', 'Based on Delivered Quantities'),
         ('received', 'Based on Received Quantities')],
         string="Refund Policy")

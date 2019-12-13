@@ -10,7 +10,7 @@
     "license": "LGPL-3",
     "website": "http://www.eficent.com",
     "category": "Operating Units",
-    "depends": ["rma", "operating_unit"],
+    "depends": ["rma", "stock_operating_unit"],
     "data": [
         "security/rma_security.xml",
         "views/rma_order_view.xml",

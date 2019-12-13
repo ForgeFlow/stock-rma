@@ -23,7 +23,6 @@ class RmaAddStockMove(models.TransientModel):
         rma = rma_obj.browse(rma_id)
         res['rma_id'] = rma.id
         res['partner_id'] = rma.partner_id.id
-        res['picking_id'] = False
         res['move_ids'] = False
         return res
 
@@ -44,9 +43,11 @@ class RmaAddStockMove(models.TransientModel):
         if self.env.context.get('customer'):
             operation = sm.product_id.rma_customer_operation_id or \
                 sm.product_id.categ_id.rma_customer_operation_id
+            rma_type = 'customer'
         else:
             operation = sm.product_id.rma_supplier_operation_id or \
                 sm.product_id.categ_id.rma_supplier_operation_id
+            rma_type = 'supplier'
         if not operation:
             operation = self.env['rma.operation'].search(
                 [('type', '=', self.rma_id.type)], limit=1)
@@ -73,6 +74,7 @@ class RmaAddStockMove(models.TransientModel):
             'lot_id': lot and lot.id or False,
             'origin': sm.picking_id.name or sm.name,
             'uom_id': sm.product_uom.id,
+            'type': rma_type,
             'operation_id': operation.id,
             'product_qty': sm.product_uom_qty,
             'delivery_address_id': sm.picking_id.partner_id.id,

@@ -6,7 +6,7 @@ from odoo import models, api
 
 
 class RmaMakePicking(models.TransientModel):
-    _name = 'rma_make_picking.wizard'
+    _inherit = 'rma_make_picking.wizard'
     _description = 'Wizard to create pickings from rma lines'
 
     @api.model
@@ -14,5 +14,5 @@ class RmaMakePicking(models.TransientModel):
         procurement_data = super(RmaMakePicking, self)._get_procurement_data(
             item, group, qty, picking_type)
         procurement_data.update(
-            analytic_account_id=item.line_id.analytic_account_id.id)
+            account_analytic_id=item.line_id.analytic_account_id.id)
         return procurement_data

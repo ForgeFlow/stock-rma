@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright 2016 Eficent Business and IT Consulting Services S.L.
      License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl-3.0) -->
-<openerp>
+<odoo>
     <data>
         <record id="view_rma_order_line_make_sale_order" model="ir.ui.view">
             <field name="name">RMA Line Make Sale Order</field>
@@ -14,7 +14,7 @@
                      <group>
                         <field name="sale_order_id"
                             domain="[('partner_id','=',partner_id)]"
-                            context="{'partner_id': partner_id}"/>/>
+                            context="{'partner_id': partner_id}"/>
                      </group>
                      <newline/>
                      <separator
@@ -39,12 +39,12 @@
                          </field>
                      </group>
                      <newline/>
-                     <group colspan="2">
+                     <footer>
                          <button name="make_sale_order"
                                  string="Create Sales Quotation" type="object"
                                  class="oe_highlight"/>
                          <button special="cancel" string="Cancel" class="oe_link"/>
-                     </group>
+                     </footer>
                 </form>
             </field>
         </record>
@@ -71,5 +71,5 @@
         </record>
    
     </data>
-</openerp>
+</odoo>
 

@@ -13,5 +13,11 @@ class StockConfigSettings(models.TransientModel):
             "(Example: services companies)"),
         (1, 'Display 3 fields on rma: partner, invoice address, delivery '
             'address')
-        ], "Addresses",
-        implied_group='rma.group_rma_delivery_invoice_address')
+        ], "Addresses", implied_group='rma.group_rma_delivery_invoice_address')
+
+    group_rma_lines = fields.Selection([
+        (0, "Do not group RMA lines"),
+        (1, 'Group RMA lines in one RMA group')
+        ], "Grouping",
+        implied_group='rma.group_rma_groups',
+        )

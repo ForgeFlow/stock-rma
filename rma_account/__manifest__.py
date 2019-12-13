@@ -4,7 +4,7 @@
 
 {
     'name': 'RMA Account',
-    'version': '9.0.1.0.0',
+    'version': '10.0.2.0.0',
     'license': 'LGPL-3',
     'category': 'RMA',
     'summary': 'Integrates RMA with Invoice Processing',
@@ -18,9 +18,9 @@
         'views/rma_operation_view.xml',
         'views/rma_order_line_view.xml',
         'views/invoice_view.xml',
+        'views/rma_account_menu.xml',
         'wizards/rma_add_invoice.xml',
         'wizards/rma_refund.xml',
     ],
     'installable': True,
-    'auto_install': True,
 }

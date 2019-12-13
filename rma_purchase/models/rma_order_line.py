@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# © 2017 Eficent Business and IT Consulting Services S.L.
+# Copyright 2017-18 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
@@ -12,12 +12,9 @@ class RmaOrderLine(models.Model):
     @api.multi
     def _compute_purchase_count(self):
         for rec in self:
-            purchase_list = []
-            for procurement_id in rec.procurement_ids:
-                if procurement_id.purchase_id and \
-                        procurement_id.purchase_id.id:
-                    purchase_list.append(procurement_id.purchase_id.id)
-            rec.purchase_count = len(list(set(purchase_list)))
+            purchase_line_count = self.env['purchase.order.line'].search(
+                [('rma_line_id', '=', rec.id)])
+            rec.purchase_count = len(purchase_line_count.mapped('order_id'))
 
     @api.multi
     @api.depends('procurement_ids.purchase_line_id')
@@ -31,10 +28,18 @@ class RmaOrderLine(models.Model):
             rec.purchase_order_line_ids = [(6, 0, purchase_list)]
 
     @api.multi
-    @api.depends('procurement_ids.purchase_line_id')
-    def _compute_qty_purchased(self):
+    @api.depends('procurement_ids.purchase_line_id',
+                 'manual_purchase_line_ids',
+                 'manual_purchase_line_ids.state', 'qty_delivered')
+    def _compute_qty_purchase(self):
         for rec in self:
             rec.qty_purchased = rec._get_rma_purchased_qty()
+            if rec.purchase_policy == 'ordered':
+                rec.qty_to_purchase = rec.product_qty - rec.qty_purchased
+            elif rec.purchase_policy == 'delivered':
+                rec.qty_to_purchase = rec.qty_delivered - rec.qty_purchased
+            else:
+                rec.qty_to_purchase = 0.0
 
     purchase_count = fields.Integer(
         compute='_compute_purchase_count', string='# of Purchases',
@@ -55,11 +60,35 @@ class RmaOrderLine(models.Model):
         column1='rma_order_line_id', column2='purchase_order_line_id',
         string='Purchase Order Lines', compute='_compute_purchase_order_lines',
     )
+    purchase_policy = fields.Selection(
+        selection=[('no', 'Not required'),
+                   ('ordered', 'Based on Ordered Quantities'),
+                   ('delivered', 'Based on Delivered Quantities')],
+        string="Purchase Policy", default='no',
+        required=True,
+    )
+    manual_purchase_line_ids = fields.One2many(
+        comodel_name='purchase.order.line',
+        inverse_name='rma_line_id',
+        string='Manual Purchase Order Lines',
+        readonly=True, copy=False)
+    qty_to_purchase = fields.Float(
+        string='Qty To Purchase', copy=False,
+        digits=dp.get_precision('Product Unit of Measure'),
+        readonly=True, compute='_compute_qty_purchase', store=True,
+    )
     qty_purchased = fields.Float(
         string='Qty Purchased', copy=False,
         digits=dp.get_precision('Product Unit of Measure'),
-        readonly=True, compute='_compute_qty_purchased', store=True,
+        readonly=True, compute='_compute_qty_purchase', store=True,
     )
+
+    @api.onchange('operation_id')
+    def _onchange_operation_id(self):
+        res = super(RmaOrderLine, self)._onchange_operation_id()
+        if self.operation_id:
+            self.purchase_policy = self.operation_id.purchase_policy or 'no'
+        return res
 
     @api.multi
     def _prepare_rma_line_from_po_line(self, line):
@@ -144,20 +173,24 @@ class RmaOrderLine(models.Model):
     def action_view_purchase_order(self):
         action = self.env.ref('purchase.purchase_rfq')
         result = action.read()[0]
-        order_ids = []
-        for procurement_id in self.procurement_ids:
-            order_ids.append(procurement_id.purchase_id.id)
-        result['domain'] = [('id', 'in', order_ids)]
+        orders = self.mapped('procurement_ids.purchase_id')
+        orders += self.mapped('manual_purchase_line_ids.order_id')
+        result['domain'] = [('id', 'in', orders.ids)]
         return result
 
     @api.multi
     def _get_rma_purchased_qty(self):
         self.ensure_one()
         qty = 0.0
+        if self.type == 'customer':
+            return qty
+        uom_obj = self.env['product.uom']
         for procurement_id in self.procurement_ids:
             purchase_line = procurement_id.purchase_line_id
-            if self.type == 'supplier':
-                qty += purchase_line.product_qty
-            else:
-                qty = 0.0
+            qty += purchase_line.product_qty
+
+        for line in self.manual_purchase_line_ids.filtered(
+                lambda p: p.state not in ('draft', 'sent', 'cancel')):
+            qty += uom_obj._compute_quantity(
+                self.uom_id.id, line.product_qty, line.product_uom.id)
         return qty

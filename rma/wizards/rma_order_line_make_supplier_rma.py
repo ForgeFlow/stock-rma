@@ -63,15 +63,13 @@ class RmaLineMakeSupplierRma(models.TransientModel):
         lines = rma_line_obj.browse(rma_line_ids)
         for line in lines:
             items.append([0, 0, self._prepare_item(line)])
-        suppliers = lines.mapped('supplier_address_id')
-        if len(suppliers) == 0:
-            pass
-        elif len(suppliers) == 1:
-            res['partner_id'] = suppliers.id
-        else:
+        suppliers = lines.mapped(
+            lambda r: r.supplier_address_id.parent_id or r.supplier_address_id)
+        if len(suppliers) > 1:
             raise ValidationError(
-                _('Only RMA lines from the same supplier address can be '
+                _('Only RMA lines from the same supplier can be '
                   'processed at the same time'))
+        res['partner_id'] = suppliers.id
         res['item_ids'] = items
         return res
 
@@ -81,7 +79,6 @@ class RmaLineMakeSupplierRma(models.TransientModel):
             raise ValidationError(_('Enter a supplier.'))
         return {
             'partner_id': self.partner_id.id,
-            'delivery_address_id': self.partner_id.id,
             'type': 'supplier',
             'company_id': company.id,
         }
@@ -108,8 +105,9 @@ class RmaLineMakeSupplierRma(models.TransientModel):
             'partner_id': self.partner_id.id,
             'type': 'supplier',
             'origin': item.line_id.rma_id.name,
-            'delivery_address_id':
-                item.line_id.delivery_address_id.id,
+            'customer_address_id':
+                item.line_id.delivery_address_id.id or
+                item.line_id.partner_id.id,
             'product_id': item.line_id.product_id.id,
             'customer_rma_id': item.line_id.id,
             'product_qty': item.product_qty,
@@ -151,27 +149,18 @@ class RmaLineMakeSupplierRma(models.TransientModel):
             rma_line_data = self._prepare_supplier_rma_line(rma, item)
             rma_line = rma_line_obj.create(rma_line_data)
         if rma:
-            return {
-                'name': _('Supplier RMA'),
-                'view_type': 'form',
-                'view_mode': 'form',
-                'res_model': 'rma.order',
-                'view_id': False,
-                'res_id': rma.id,
-                'context': {'supplier': True, 'customer': False},
-                'type': 'ir.actions.act_window'
-            }
+            action = self.env.ref('rma.action_rma_supplier')
+            result = action.read()[0]
+            res = self.env.ref('rma.view_rma_supplier_form', False)
+            result['views'] = [(res and res.id or False, 'form')]
+            result['res_id'] = rma.id
         else:
-            return {
-                'name': _('Supplier RMA Line'),
-                'view_type': 'form',
-                'view_mode': 'form',
-                'res_model': 'rma.order.line',
-                'view_id': False,
-                'res_id': rma_line.id,
-                'context': {'supplier': True, 'customer': False},
-                'type': 'ir.actions.act_window'
-            }
+            action = self.env.ref('rma.action_rma_supplier_lines')
+            result = action.read()[0]
+            res = self.env.ref('rma.view_rma_line_supplier_form', False)
+            result['views'] = [(res and res.id or False, 'form')]
+            result['res_id'] = rma_line.id
+        return result
 
 
 class RmaLineMakeRmaOrderItem(models.TransientModel):

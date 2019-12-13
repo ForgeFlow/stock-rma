@@ -2,8 +2,7 @@
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo import api, fields, models, _
-from odoo.exceptions import UserError
+from odoo import api, fields, models
 from datetime import datetime
 
 
@@ -20,18 +19,14 @@ class RmaOrder(models.Model):
     @api.multi
     def _compute_in_shipment_count(self):
         for rec in self:
-            rec.in_shipment_count = len(rec.rma_line_ids.mapped(
-                'move_ids').filtered(
-                lambda m: m.location_dest_id.usage == 'internal').mapped(
-                'picking_id'))
+            rec.in_shipment_count = sum(
+                set(rec.rma_line_ids.mapped('in_shipment_count')))
 
     @api.multi
     def _compute_out_shipment_count(self):
         for rec in self:
-            rec.out_shipment_count = len(rec.rma_line_ids.mapped(
-                'move_ids').filtered(
-                lambda m: m.location_id.usage == 'internal').mapped(
-                'picking_id'))
+            rec.out_shipment_count = sum(
+                set(rec.rma_line_ids.mapped('out_shipment_count')))
 
     @api.multi
     def _compute_supplier_line_count(self):
@@ -72,16 +67,6 @@ class RmaOrder(models.Model):
     company_id = fields.Many2one('res.company', string='Company',
                                  required=True, default=lambda self:
                                  self.env.user.company_id)
-
-    @api.constrains("partner_id", "rma_line_ids")
-    def _check_partner_id(self):
-        if self.rma_line_ids and self.partner_id != self.mapped(
-                "rma_line_ids.partner_id"):
-            raise UserError(_(
-                "Group partner and RMA's partner must be the same."))
-        if len(self.mapped("rma_line_ids.partner_id")) > 1:
-            raise UserError(_(
-                "All grouped RMA's should have same partner."))
 
     @api.model
     def create(self, vals):
