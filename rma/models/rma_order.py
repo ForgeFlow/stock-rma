@@ -1,7 +1,8 @@
 # Copyright (C) 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
+from odoo.exceptions import UserError
 from datetime import datetime
 
 
@@ -52,9 +53,37 @@ class RmaOrder(models.Model):
         for rec in self:
             rec.line_count = len(rec._get_valid_lines())
 
+    @api.depends('rma_line_ids', 'rma_line_ids.state')
+    @api.multi
+    def _compute_state(self):
+        for rec in self:
+            rma_line_done = self.env['rma.order.line'].search_count(
+                [('id', 'in', rec.rma_line_ids.ids), ('state', '=', 'done')])
+            rma_line_approved = self.env['rma.order.line'].search_count(
+                [('id', 'in', rec.rma_line_ids.ids),
+                    ('state', '=', 'approved')])
+            rma_line_to_approve = self.env['rma.order.line'].search_count(
+                [('id', 'in', rec.rma_line_ids.ids),
+                    ('state', '=', 'to_approve')])
+            if rma_line_done != 0:
+                state = 'done'
+            elif rma_line_approved != 0:
+                state = 'approved'
+            elif rma_line_to_approve != 0:
+                state = 'to_approve'
+            else:
+                state = 'draft'
+            rec.state = state
+
     @api.model
     def _default_date_rma(self):
         return datetime.now()
+
+    @api.model
+    def _default_warehouse_id(self):
+        warehouse = self.env['stock.warehouse'].search(
+            [('company_id', '=', self.env.user.company_id.id)], limit=1)
+        return warehouse
 
     name = fields.Char(
         string='Group Number', index=True, copy=False)
@@ -86,6 +115,54 @@ class RmaOrder(models.Model):
     company_id = fields.Many2one('res.company', string='Company',
                                  required=True, default=lambda self:
                                  self.env.user.company_id)
+    assigned_to = fields.Many2one(
+        comodel_name='res.users', track_visibility='onchange',
+        default=lambda self: self.env.uid,
+    )
+    requested_by = fields.Many2one(
+        comodel_name='res.users', track_visibility='onchange',
+        default=lambda self: self.env.uid,
+    )
+    in_warehouse_id = fields.Many2one(
+        comodel_name='stock.warehouse',
+        string='Inbound Warehouse',
+        required=True,
+        default=_default_warehouse_id,
+    )
+    customer_to_supplier = fields.Boolean(
+        'The customer will send to the supplier',
+    )
+    supplier_to_customer = fields.Boolean(
+        'The supplier will send to the customer',
+    )
+    supplier_address_id = fields.Many2one(
+        comodel_name='res.partner',
+        string='Supplier Address',
+        help="Address of the supplier in case of Customer RMA operation "
+             "dropship.")
+    customer_address_id = fields.Many2one(
+        comodel_name='res.partner',
+        string='Customer Address',
+        help="Address of the customer in case of Supplier RMA operation "
+             "dropship.")
+    state = fields.Selection(
+        compute=_compute_state,
+        selection=[('draft', 'Draft'),
+                   ('to_approve', 'To Approve'),
+                   ('approved', 'Approved'),
+                   ('done', 'Done')],
+        string='State', default='draft', store=True
+    )
+
+    @api.constrains("partner_id", "rma_line_ids")
+    def _check_partner_id(self):
+        if self.rma_line_ids and self.partner_id != self.mapped(
+                "rma_line_ids.partner_id"):
+            raise UserError(_(
+                "Group partner and RMA's partner must be the same."))
+        if len(self.mapped("rma_line_ids.partner_id")) > 1:
+            raise UserError(_(
+                "All grouped RMA's should have same partner."))
 
     @api.model
     def create(self, vals):
@@ -183,3 +260,24 @@ class RmaOrder(models.Model):
                 result['views'] = [(res and res.id or False, 'form')]
                 result['res_id'] = related_lines[0]
         return result
+
+    @api.onchange('in_warehouse_id')
+    def _onchange_in_warehouse_id(self):
+        if self.in_warehouse_id and self.rma_line_ids:
+            self.rma_line_ids.write(
+                {'in_warehouse_id': self.in_warehouse_id.id,
+                 'location_id': self.in_warehouse_id.lot_rma_id.id})
+
+    @api.onchange('customer_to_supplier', 'supplier_address_id')
+    def _onchange_customer_to_supplier(self):
+        if self.type == 'customer' and self.rma_line_ids:
+            self.rma_line_ids.write(
+                {'customer_to_supplier': self.customer_to_supplier,
+                 'supplier_address_id': self.supplier_address_id.id})
+
+    @api.onchange('supplier_to_customer', 'customer_address_id')
+    def _onchange_supplier_to_customer(self):
+        if self.type == 'supplier' and self.rma_line_ids:
+            self.rma_line_ids.write(
+                {'supplier_to_customer': self.supplier_to_customer,
+                 'customer_address_id': self.customer_address_id.id})
