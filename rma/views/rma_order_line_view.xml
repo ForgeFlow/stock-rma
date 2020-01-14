@@ -97,10 +97,17 @@
                                    invisible="context.get('hide_title',False)"/>
                         </h1>
                         </div>
-                        <group name="partner">
-                            <field name="partner_id"
-                                   domain="[('supplier','=',True)]"
-                                   string="Supplier"/>
+                        <group>
+                            <group name="partner">
+                                <field name="partner_id"
+                                    context="{'res_partner_search_mode': 'supplier'}"
+                                    string="Supplier"/>
+                                <field name="delivery_address_id"
+                                   domain="['|', ('parent_id', '=', partner_id),('id', '=', partner_id)]"
+                                   context="{'show_address': 1}"
+                                   options="{'always_reload': 1}"
+                                   groups='rma.group_rma_delivery_invoice_address'/>
+                            </group>
                         </group>
                         <group>
                             <group name="product" string="Product">
@@ -126,21 +133,21 @@
                                             ('state', '=', 'done')]"/>
                         </group>
                         <group>
-                            <group name="contact" string="Contact">
-                                <field name="requested_by" readonly="1"/>
-                                <field name="assigned_to"/>
-                            </group>
                             <group name="operation" string="Operation">
                                 <field name="operation_id"
                                        domain="[('type','=','supplier')]"/>
                                 <field name="receipt_policy"/>
                                 <field name="delivery_policy"/>
                             </group>
+                            <group name="description" string="Description">
+                                <field name="description" nolabel="1"/>
+                            </group>
+                            <group name="contact" string="Contact">
+                                <field name="requested_by" readonly="1"/>
+                                <field name="assigned_to"/>
+                            </group>
                         </group>
                         <notebook>
-                            <page name="description" string="Description">
-                                <field name="description" nolabel="1"/>
-                            </page>
                             <page name="route" string="Routes">
                                 <group>
                                     <group name="inbound" string="Inbound">
@@ -151,12 +158,6 @@
                                     </group>
                                     <group name="outbound" string="Outbound">
                                         <field name="out_warehouse_id"/>
-                                        <field name="delivery_address_id"
-                                               domain="['|', ('parent_id', '=', partner_id),
-                                                             ('id', '=', partner_id)]"
-                                               context="{'show_address': 1}"
-                                               options="{'always_reload': 1}"
-                                               groups='rma.group_rma_delivery_invoice_address'/>
                                         <field name="out_route_id" groups="stock.group_adv_location"/>
                                         <field name="supplier_to_customer"/>
                                         <field name="customer_address_id"
@@ -269,10 +270,14 @@
                         <group name="partner">
                             <group name="partner">
                                 <field name="partner_id"
-                                   domain="[('customer','=',True)]"
+                                   context="{'res_partner_search_mode': 'customer'}"
                                    string="Customer"/>
-                            </group>
-                            <group name="warranty">
+                                <field name="delivery_address_id"
+                                           domain="['|', ('parent_id', '=', partner_id),
+                                                         ('id', '=', partner_id)]"
+                                           context="{'show_address': 1}"
+                                           options="{'always_reload': 1}"
+                                           groups='rma.group_rma_delivery_invoice_address'/>
                                 <field name="under_warranty"/>
                             </group>
                         </group>
@@ -299,20 +304,22 @@
                                             ('state', '=', 'done')]"/>
                         </group>
                         <group>
-                            <group name="contact" string="Contact">
-                                <field name="requested_by" readonly="1"/>
-                                <field name="assigned_to"/>
-                            </group>
                             <group name="operation" string="Operation">
                                 <field name="operation_id" domain="[('type','=','customer')]"/>
                                 <field name="receipt_policy"/>
                                 <field name="delivery_policy"/>
                             </group>
+                            <group name="description" string="Description">
+                                    <field name="description" nolabel="1"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group name="contact" string="Contact">
+                                <field name="requested_by" readonly="1"/>
+                                <field name="assigned_to"/>
+                            </group>
                         </group>
                         <notebook>
-                            <page name="description" string="Description">
-                                <field name="description" nolabel="1"/>
-                            </page>
                             <page name="route" string="Routes">
                                 <group name="inbound" string="Inbound">
                                     <field name="in_warehouse_id"/>
@@ -328,12 +335,6 @@
                                 </group>
                                 <group name="outbound" string="Outbound">
                                     <field name="out_warehouse_id"/>
-                                    <field name="delivery_address_id"
-                                           domain="['|', ('parent_id', '=', partner_id),
-                                                         ('id', '=', partner_id)]"
-                                           context="{'show_address': 1}"
-                                           options="{'always_reload': 1}"
-                                           groups='rma.group_rma_delivery_invoice_address'/>
                                     <field name="out_route_id" groups="stock.group_adv_location"/>
                                 </group>
                             </page>
@@ -425,7 +426,6 @@
             <field name="res_model">rma.order.line</field>
             <field name="domain">[('type','=', 'customer')]</field>
             <field name="context">{"search_default_assigned_to":uid}</field>
-            <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="view_rma_line_tree"/>
         </record>
@@ -435,7 +435,6 @@
             <field name="res_model">rma.order.line</field>
             <field name="domain">[('type','=', 'supplier')]</field>
             <field name="context">{"search_default_assigned_to":uid, "supplier":1}</field>
-            <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="view_rma_line_supplier_tree"/>
         </record>

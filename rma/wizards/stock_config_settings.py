@@ -1,4 +1,4 @@
-# Copyright (C) 2017 Eficent Business and IT Consulting Services S.L.
+# Copyright (C) 2017 ForgeFlow
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from odoo import fields, models
@@ -7,25 +7,14 @@ from odoo import fields, models
 class StockConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
-    group_rma_delivery_address = fields.Selection(
-        [
-            (
-                0,
-                "Invoicing and shipping addresses are always the same "
-                "(Example: services companies)",
-            ),
-            (
-                1,
-                "Display 3 fields on rma: partner, invoice address, delivery "
-                "address",
-            ),
-        ],
-        "Addresses",
+    group_rma_delivery_address = fields.Boolean(
+        related="company_id.group_rma_delivery_address",
         implied_group="rma.group_rma_delivery_invoice_address",
+        readonly=False,
     )
 
-    group_rma_lines = fields.Selection(
-        [(0, "Do not group RMA lines"), (1, "Group RMA lines in one RMA group")],
-        "Grouping",
+    group_rma_lines = fields.Boolean(
+        related="company_id.group_rma_lines",
+        readonly=False,
         implied_group="rma.group_rma_groups",
     )
