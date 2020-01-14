@@ -13,14 +13,13 @@ class ResPartner(models.Model):
             rec.rma_line_count = len(rec.rma_line_ids)
 
     rma_line_ids = fields.One2many(
-        comodel_name="rma.order.line", string="RMAs",
-        inverse_name="partner_id",
+        comodel_name="rma.order.line", string="RMAs", inverse_name="partner_id"
     )
     rma_line_count = fields.Integer(compute="_compute_rma_line_count")
 
     @api.multi
     def action_open_partner_rma(self):
-        action = self.env.ref('rma.action_rma_customer_lines')
+        action = self.env.ref("rma.action_rma_customer_lines")
         result = action.read()[0]
-        result['context'] = {'search_default_partner_id': self.id}
+        result["context"] = {"search_default_partner_id": self.id}
         return result

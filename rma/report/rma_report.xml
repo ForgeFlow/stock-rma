@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <report 
+        <report
             id="rma_order_line_report"
             string="RMA"
             model="rma.order.line"
@@ -9,7 +9,7 @@
             file="rma.report_rma_order_line"
             name="rma.report_rma_order_line"
         />
-        <report 
+        <report
             id="rma_order_report"
             string="RMA Group"
             model="rma.order"
