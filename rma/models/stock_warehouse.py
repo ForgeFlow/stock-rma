@@ -41,7 +41,6 @@ class StockWarehouse(models.Model):
         comodel_name="stock.rule", string="RMA Supplier Out Rule"
     )
 
-    @api.multi
     def _get_rma_types(self):
         return [
             self.rma_cust_out_type_id,
@@ -50,7 +49,6 @@ class StockWarehouse(models.Model):
             self.rma_sup_in_type_id,
         ]
 
-    @api.multi
     def _rma_types_available(self):
         self.ensure_one()
         rma_types = self._get_rma_types()
@@ -59,7 +57,6 @@ class StockWarehouse(models.Model):
                 return False
         return True
 
-    @api.multi
     def write(self, vals):
         if "rma_in_this_wh" in vals:
             if vals.get("rma_in_this_wh"):
@@ -174,7 +171,6 @@ class StockWarehouse(models.Model):
             )
         return True
 
-    @api.multi
     def get_rma_rules_dict(self):
         self.ensure_one()
         rma_rules = dict()

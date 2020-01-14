@@ -18,7 +18,6 @@ class RmaOrder(models.Model):
             return "supplier"
         return "customer"
 
-    @api.multi
     def _compute_in_shipment_count(self):
         for rec in self:
             picking_ids = []
@@ -32,7 +31,6 @@ class RmaOrder(models.Model):
                 shipments = list(set(picking_ids))
                 line.in_shipment_count = len(shipments)
 
-    @api.multi
     def _compute_out_shipment_count(self):
         picking_ids = []
         for rec in self:
@@ -44,19 +42,16 @@ class RmaOrder(models.Model):
                 shipments = list(set(picking_ids))
                 line.out_shipment_count = len(shipments)
 
-    @api.multi
     def _compute_supplier_line_count(self):
         self.supplier_line_count = len(
             self.rma_line_ids.filtered(lambda r: r.supplier_rma_line_ids)
         )
 
-    @api.multi
     def _compute_line_count(self):
         for rec in self:
             rec.line_count = len(rec._get_valid_lines())
 
     @api.depends("rma_line_ids", "rma_line_ids.state")
-    @api.multi
     def _compute_state(self):
         for rec in self:
             rma_line_done = self.env["rma.order.line"].search_count(
@@ -115,7 +110,7 @@ class RmaOrder(models.Model):
         compute="_compute_out_shipment_count", string="# of Outgoing Shipments"
     )
     line_count = fields.Integer(
-        compute="_compute_line_count", string="# of Outgoing Shipments"
+        compute="_compute_line_count", string="# of RMA lines"
     )
     supplier_line_count = fields.Integer(
         compute="_compute_supplier_line_count", string="# of Supplier RMAs"
@@ -184,7 +179,6 @@ class RmaOrder(models.Model):
             vals["name"] = self.env["ir.sequence"].next_by_code("rma.order.customer")
         return super(RmaOrder, self).create(vals)
 
-    @api.multi
     def action_view_in_shipments(self):
         action = self.env.ref("stock.action_picking_tree_all")
         result = action.read()[0]
@@ -207,7 +201,6 @@ class RmaOrder(models.Model):
                 result["res_id"] = shipments[0]
         return result
 
-    @api.multi
     def action_view_out_shipments(self):
         action = self.env.ref("stock.action_picking_tree_all")
         result = action.read()[0]
@@ -228,14 +221,12 @@ class RmaOrder(models.Model):
                 result["res_id"] = shipments[0]
         return result
 
-    @api.multi
     def _get_valid_lines(self):
         """:return: A recordset of rma lines.
         """
         self.ensure_one()
         return self.rma_line_ids
 
-    @api.multi
     def action_view_lines(self):
         if self.type == "customer":
             action = self.env.ref("rma.action_rma_customer_lines")
@@ -254,7 +245,6 @@ class RmaOrder(models.Model):
         result["context"] = {}
         return result
 
-    @api.multi
     def action_view_supplier_lines(self):
         action = self.env.ref("rma.action_rma_supplier_lines")
         result = action.read()[0]

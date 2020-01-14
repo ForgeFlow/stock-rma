@@ -4,8 +4,6 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
-import odoo.addons.decimal_precision as dp
-
 
 class RmaLineMakeSupplierRma(models.TransientModel):
     _name = "rma.order.line.make.supplier.rma"
@@ -142,7 +140,6 @@ class RmaLineMakeSupplierRma(models.TransientModel):
         }
         return data
 
-    @api.multi
     def make_supplier_rma(self):
         self = self.with_context(supplier=True, customer=False)
         rma_obj = self.env["rma.order"]
@@ -165,7 +162,6 @@ class RmaLineMakeSupplierRma(models.TransientModel):
         if rma:
             return {
                 "name": _("Supplier RMA"),
-                "view_type": "form",
                 "view_mode": "form",
                 "res_model": "rma.order",
                 "view_id": False,
@@ -176,7 +172,6 @@ class RmaLineMakeSupplierRma(models.TransientModel):
         else:
             return {
                 "name": _("Supplier RMA Line"),
-                "view_type": "form",
                 "view_mode": "form",
                 "res_model": "rma.order.line",
                 "view_id": False,
@@ -209,7 +204,7 @@ class RmaLineMakeRmaOrderItem(models.TransientModel):
     name = fields.Char(related="line_id.name", readonly=True)
     uom_id = fields.Many2one("uom.uom", string="UoM", readonly=True)
     product_qty = fields.Float(
-        string="Quantity", digits=dp.get_precision("Product UoS")
+        string="Quantity", digits="Product UoS"
     )
     operation_id = fields.Many2one(
         comodel_name="rma.operation",

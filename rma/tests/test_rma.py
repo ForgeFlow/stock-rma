@@ -122,17 +122,14 @@ class TestRma(common.SavepointCase):
             if type == "customer":
                 wizard = cls.rma_add_stock_move.new(
                     {
-                        "stock_move_id": move.id,
-                        "customer": True,
-                        "active_ids": rma_id.id,
+                        "move_ids": [(4, move.id)],
                         "rma_id": rma_id.id,
-                        "partner_id": move.partner_id.id,
-                        "active_model": "rma.order",
+                        "partner_id": move.partner_id.id
                     }
                 )
                 wizard.with_context(
                     {
-                        "stock_move_id": move.id,
+                        "move_ids": [(4, move.id)],
                         "customer": True,
                         "active_ids": rma_id.id,
                         "partner_id": move.partner_id.id,
@@ -153,17 +150,14 @@ class TestRma(common.SavepointCase):
             else:
                 wizard = cls.rma_add_stock_move.new(
                     {
-                        "stock_move_id": move.id,
-                        "supplier": True,
-                        "active_ids": rma_id.id,
+                        "move_ids": [(4, move.id)],
                         "rma_id": rma_id.id,
                         "partner_id": move.partner_id.id,
-                        "active_model": "rma.order",
                     }
                 )
                 wizard.with_context(
                     {
-                        "stock_move_id": move.id,
+                        "move_ids": [(4, move.id)],
                         "supplier": True,
                         "active_ids": rma_id.id,
                         "partner_id": move.partner_id.id,
@@ -285,6 +279,7 @@ class TestRma(common.SavepointCase):
         self.rma_customer_id.action_view_supplier_lines()
 
     def test_02_customer_rma(self):
+        self.rma_customer_id.rma_line_ids.action_rma_to_approve()
         wizard = self.rma_make_picking.with_context(
             {
                 "active_ids": self.rma_customer_id.rma_line_ids.ids,
@@ -460,6 +455,7 @@ class TestRma(common.SavepointCase):
 
     # Supplier RMA
     def test_04_supplier_rma(self):
+        self.rma_supplier_id.rma_line_ids.action_rma_to_approve()
         wizard = self.rma_make_picking.with_context(
             {
                 "active_ids": self.rma_supplier_id.rma_line_ids.ids,

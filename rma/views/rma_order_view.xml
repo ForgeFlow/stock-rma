@@ -266,7 +266,6 @@
     <record id="action_rma_customer" model="ir.actions.act_window">
         <field name="name">Customer RMA Group</field>
         <field name="res_model">rma.order</field>
-        <field name="view_type">form</field>
         <field name="domain">[('type','=', 'customer')]</field>
         <field name="context">{'customer':1}</field>
         <field name="view_mode">tree,form</field>
@@ -276,7 +275,6 @@
     <record id="action_rma_supplier" model="ir.actions.act_window">
         <field name="name">Supplier RMA Group</field>
         <field name="res_model">rma.order</field>
-        <field name="view_type">form</field>
         <field name="domain">[('type','=', 'supplier')]</field>
         <field name="context">{'supplier':1}</field>
         <field name="view_mode">tree,form</field>

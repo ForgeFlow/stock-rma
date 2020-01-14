@@ -106,7 +106,6 @@ class RmaAddStockMove(models.TransientModel):
             existing_move_lines.append(rma_line.reference_move_id)
         return existing_move_lines
 
-    @api.multi
     def add_lines(self):
         rma_line_obj = self.env["rma.order.line"]
         existing_stock_moves = self._get_existing_stock_moves()

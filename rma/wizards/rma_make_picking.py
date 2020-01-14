@@ -7,8 +7,6 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FORMAT
 
-import odoo.addons.decimal_precision as dp
-
 
 class RmaMakePicking(models.TransientModel):
     _name = "rma_make_picking.wizard"
@@ -151,23 +149,27 @@ class RmaMakePicking(models.TransientModel):
             qty = item.qty_to_deliver
         values = self._get_procurement_data(item, group, qty, picking_type)
         # create picking
+        procurements = []
         try:
-            self.env["procurement.group"].run(
-                item.line_id.product_id,
-                qty,
-                item.line_id.product_id.product_tmpl_id.uom_id,
-                values.get("location_id"),
-                values.get("origin"),
-                values.get("origin"),
-                values,
+            procurements.append(
+                self.env["procurement.group"].Procurement(
+                    item.line_id.product_id,
+                    qty,
+                    item.line_id.product_id.product_tmpl_id.uom_id,
+                    values.get("location_id"),
+                    values.get("origin"),
+                    values.get("origin"),
+                    self.env.company,
+                    values,
+                )
             )
+            self.env["procurement.group"].run(procurements)
         except UserError as error:
             errors.append(error.name)
         if errors:
             raise UserError("\n".join(errors))
         return values.get("origin")
 
-    @api.multi
     def _create_picking(self):
         """Method called when the user clicks on create picking"""
         picking_type = self.env.context.get("picking_type")
@@ -199,7 +201,6 @@ class RmaMakePicking(models.TransientModel):
                     action["domain"] = [("id", "in", procurements.ids)]
         return action
 
-    @api.multi
     def action_create_picking(self):
         procurement = self._create_picking()
         action = self.env.ref("stock.do_view_pickings")
@@ -216,7 +217,6 @@ class RmaMakePicking(models.TransientModel):
                 action["res_id"] = pickings and pickings[0]
         return action
 
-    @api.multi
     def action_cancel(self):
         return {"type": "ir.actions.act_window_close"}
 
@@ -237,13 +237,13 @@ class RmaMakePickingItem(models.TransientModel):
         related="line_id.product_qty",
         string="Quantity Ordered",
         copy=False,
-        digits=dp.get_precision("Product Unit of Measure"),
+        digits="Product Unit of Measure",
         readonly=True,
     )
     qty_to_receive = fields.Float(
-        string="Quantity to Receive", digits=dp.get_precision("Product Unit of Measure")
+        string="Quantity to Receive", digits="Product Unit of Measure"
     )
     qty_to_deliver = fields.Float(
-        string="Quantity To Deliver", digits=dp.get_precision("Product Unit of Measure")
+        string="Quantity To Deliver", digits="Product Unit of Measure"
     )
     uom_id = fields.Many2one("uom.uom", string="Unit of Measure", readonly=True)
