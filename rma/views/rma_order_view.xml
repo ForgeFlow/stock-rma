@@ -67,26 +67,24 @@
                 </div>
                 <div class="oe_title" name="title">
                     <h1>
-                        <field name="name"/>
+                        <field name="name" readonly="1"/>
                     </h1>
                 </div>
-                <group name="partner">
-                    <field name="partner_id"
-                           domain="[('customer','=',True)]"
-                           string="Customer"
-                           colspan="4"
-                    />
-                </group>
-                <group name="info">
-                    <group>
-                            <field name="reference"/>
-                            <field name="date_rma" attrs="{'readonly':[('state', '!=', 'draft')]}"/>
-                        </group>
-                        <group name="contact" string="Contact">
-                            <field name="requested_by" readonly="1"/>
-                            <field name="assigned_to" attrs="{'readonly':[('state', '!=', 'draft')]}"/>
-                        </group>
+                <group>
+                    <group name="info">
+                        <field name="partner_id"
+                               context="{'res_partner_search_mode': 'customer'}"
+                               string="Customer"
+                               colspan="4"
+                        />
+                        <field name="date_rma" attrs="{'readonly':[('state', '!=', 'draft')]}"/>
                     </group>
+                    <group name="comments">
+                        <field name="comment"/>
+                        <field name="type" readonly="1" invisible="1"/>
+                    </group>
+                </group>
+                <group>
                     <group name="inbound_route" string="Inbound">
                         <field name="in_warehouse_id" attrs="{'readonly':[('state', '!=', 'draft')]}"/>
                         <field name="customer_to_supplier" attrs="{'readonly':[('state', '!=', 'draft')]}"/>
@@ -98,6 +96,15 @@
                                        'invisible':[('customer_to_supplier', '=', False)],
                                        'readonly':[('state', '!=', 'draft')]}"/>
                     </group>
+                </group>
+                <group>
+                    <group name="contact" string="Contact">
+                        <field name="requested_by" readonly="1"/>
+                        <field name="assigned_to" attrs="{'readonly':[('state', '!=', 'draft')]}"/>
+                        <field name="company_id"
+                               groups="base.group_multi_company"/>
+                    </group>
+                </group>
                 <notebook colspan="4">
                     <page string="RMA Lines" name="lines">
                         <field name="rma_line_ids" context="{'default_rma_id': active_id,
@@ -115,16 +122,6 @@
                                 <field name="price_unit"/>
                             </tree>
                         </field>
-                    </page>
-                    <page name="other_info" string="Other Info">
-                        <group name="company">
-                            <field name="company_id"
-                                   groups="base.group_multi_company"/>
-                        </group>
-                        <group name="comments">
-                            <field name="comment"/>
-                            <field name="type" readonly="1"/>
-                        </group>
                     </page>
                 </notebook>
             </sheet>
@@ -168,38 +165,44 @@
                 </div>
                 <div class="oe_title" name="title">
                     <h1>
-                        <field name="name"/>
+                        <field name="name" readonly="1"/>
                     </h1>
                 </div>
-                <group name="partner">
-                    <field name="state" invisible="1"/>
-                    <field name="partner_id"
-                           domain="[('supplier','=',True)]"
-                           string="Supplier"
-                           attrs="{'readonly':[('state', '!=', 'draft')]}"/>
+                <group>
+                    <group name="partner">
+                        <field name="state" invisible="1"/>
+                        <field name="partner_id"
+                               context="{'res_partner_search_mode': 'supplier'}"
+                               string="Supplier"
+                               attrs="{'readonly':[('state', '!=', 'draft')]}"/>
+                        <field name="reference"/>
+                        <field name="date_rma" attrs="{'readonly':[('state', '!=', 'draft')]}"/>
+                    </group>
+                    <group>
+                        <field name="comment"/>
+                        <field name="type" readonly="1" invisible="1"/>
+                    </group>
+                </group>
+                <group name="route">
+                    <group name="inbound_route" string="Inbound">
+                        <field name="in_warehouse_id" attrs="{'readonly':[('state', '!=', 'draft')]}"/>
+                    </group>
+                    <group name="outbound_route" string="Outbound">
+                        <field name="supplier_to_customer" attrs="{'readonly':[('state', '!=', 'draft')]}"/>
+                        <field name="customer_address_id"
+                               context="{'show_address': 1}"
+                               options="{'always_reload': 1}"
+                               attrs="{'required':[('supplier_to_customer', '=', True)],
+                                       'invisible':[('supplier_to_customer', '=', False)],
+                                       'readonly':[('state', '!=', 'draft')]}"/>
+                    </group>
                 </group>
                 <group>
-                    <group col="4">
-                        <field name="reference"/>
-                            <field name="date_rma" attrs="{'readonly':[('state', '!=', 'draft')]}"/>
-                        </group>
-                        <group name="contact" string="Contact">
-                            <field name="requested_by" readonly="1"/>
-                            <field name="assigned_to" attrs="{'readonly':[('state', '!=', 'draft')]}"/>
-                        </group>
-                    </group>
-                    <group name="route">
-                        <group name="inbound_route" string="Inbound">
-                            <field name="in_warehouse_id" attrs="{'readonly':[('state', '!=', 'draft')]}"/>
-                        </group>
-                        <group name="outbound_route" string="Outbound">
-                            <field name="supplier_to_customer" attrs="{'readonly':[('state', '!=', 'draft')]}"/>
-                            <field name="customer_address_id"
-                                   context="{'show_address': 1}"
-                                   options="{'always_reload': 1}"
-                                   attrs="{'required':[('supplier_to_customer', '=', True)],
-                                           'invisible':[('supplier_to_customer', '=', False)],
-                                           'readonly':[('state', '!=', 'draft')]}"/>
+                    <group name="contact" string="Contact">
+                        <field name="requested_by" readonly="1"/>
+                        <field name="assigned_to" attrs="{'readonly':[('state', '!=', 'draft')]}"/>
+                        <field name="company_id"
+                               groups="base.group_multi_company"/>
                     </group>
                 </group>
                 <notebook colspan="4">
@@ -223,16 +226,6 @@
                                 <field name="origin"/>
                             </tree>
                         </field>
-                    </page>
-                    <page name="other_info" string="Other Info">
-                        <group name="company">
-                            <field name="company_id"
-                                   groups="base.group_multi_company"/>
-                        </group>
-                        <group name="comments">
-                            <field name="comment"/>
-                            <field name="type" readonly="1"/>
-                        </group>
                     </page>
                 </notebook>
             </sheet>
@@ -266,7 +259,6 @@
     <record id="action_rma_customer" model="ir.actions.act_window">
         <field name="name">Customer RMA Group</field>
         <field name="res_model">rma.order</field>
-        <field name="view_type">form</field>
         <field name="domain">[('type','=', 'customer')]</field>
         <field name="context">{'customer':1}</field>
         <field name="view_mode">tree,form</field>
@@ -276,7 +268,6 @@
     <record id="action_rma_supplier" model="ir.actions.act_window">
         <field name="name">Supplier RMA Group</field>
         <field name="res_model">rma.order</field>
-        <field name="view_type">form</field>
         <field name="domain">[('type','=', 'supplier')]</field>
         <field name="context">{'supplier':1}</field>
         <field name="view_mode">tree,form</field>

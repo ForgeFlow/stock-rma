@@ -1,7 +1,7 @@
-# Copyright (C) 2017 Eficent Business and IT Consulting Services S.L.
+# Copyright (C) 2017 ForgeFlow
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo import _, api, fields, models
+from odoo import _, fields, models
 
 
 class StockWarehouse(models.Model):
@@ -41,7 +41,6 @@ class StockWarehouse(models.Model):
         comodel_name="stock.rule", string="RMA Supplier Out Rule"
     )
 
-    @api.multi
     def _get_rma_types(self):
         return [
             self.rma_cust_out_type_id,
@@ -50,16 +49,14 @@ class StockWarehouse(models.Model):
             self.rma_sup_in_type_id,
         ]
 
-    @api.multi
     def _rma_types_available(self):
         self.ensure_one()
         rma_types = self._get_rma_types()
-        for type in rma_types:
-            if not type:
+        for r_type in rma_types:
+            if not r_type:
                 return False
         return True
 
-    @api.multi
     def write(self, vals):
         if "rma_in_this_wh" in vals:
             if vals.get("rma_in_this_wh"):
@@ -78,16 +75,16 @@ class StockWarehouse(models.Model):
                     if not wh._rma_types_available():
                         wh._create_rma_picking_types()
                     else:
-                        for type in wh._get_rma_types():
-                            if type:
-                                type.active = True
+                        for r_type in wh._get_rma_types():
+                            if r_type:
+                                r_type.active = True
                     # RMA rules:
                     wh._create_or_update_rma_pull()
             else:
                 for wh in self:
-                    for type in wh._get_rma_types():
-                        if type:
-                            type.active = False
+                    for r_type in wh._get_rma_types():
+                        if r_type:
+                            r_type.active = False
                 # Unlink rules:
                 self.mapped("rma_customer_in_pull_id").unlink()
                 self.mapped("rma_customer_out_pull_id").unlink()
@@ -174,7 +171,6 @@ class StockWarehouse(models.Model):
             )
         return True
 
-    @api.multi
     def get_rma_rules_dict(self):
         self.ensure_one()
         rma_rules = dict()
