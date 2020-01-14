@@ -1,4 +1,4 @@
-# Copyright (C) 2017 Eficent Business and IT Consulting Services S.L.
+# Copyright (C) 2017 ForgeFlow
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from odoo import _, api, fields, models
@@ -106,7 +106,6 @@ class RmaAddStockMove(models.TransientModel):
             existing_move_lines.append(rma_line.reference_move_id)
         return existing_move_lines
 
-    @api.multi
     def add_lines(self):
         rma_line_obj = self.env["rma.order.line"]
         existing_stock_moves = self._get_existing_stock_moves()

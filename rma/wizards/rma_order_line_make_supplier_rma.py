@@ -1,10 +1,8 @@
-# Copyright 2017 Eficent Business and IT Consulting Services S.L.
+# Copyright 2017 ForgeFlow
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
-
-import odoo.addons.decimal_precision as dp
 
 
 class RmaLineMakeSupplierRma(models.TransientModel):
@@ -86,7 +84,6 @@ class RmaLineMakeSupplierRma(models.TransientModel):
             raise ValidationError(_("Enter a supplier."))
         return {
             "partner_id": self.partner_id.id,
-            "delivery_address_id": self.partner_id.id,
             "type": "supplier",
             "company_id": company.id,
         }
@@ -121,6 +118,7 @@ class RmaLineMakeSupplierRma(models.TransientModel):
             "origin": item.line_id.rma_id.name,
             "customer_address_id": item.line_id.delivery_address_id.id
             or item.line_id.partner_id.id,
+            "delivery_address_id": self.partner_id.id,
             "product_id": item.line_id.product_id.id,
             "customer_rma_id": item.line_id.id,
             "product_qty": item.product_qty,
@@ -142,7 +140,6 @@ class RmaLineMakeSupplierRma(models.TransientModel):
         }
         return data
 
-    @api.multi
     def make_supplier_rma(self):
         self = self.with_context(supplier=True, customer=False)
         rma_obj = self.env["rma.order"]
@@ -165,7 +162,6 @@ class RmaLineMakeSupplierRma(models.TransientModel):
         if rma:
             return {
                 "name": _("Supplier RMA"),
-                "view_type": "form",
                 "view_mode": "form",
                 "res_model": "rma.order",
                 "view_id": False,
@@ -176,7 +172,6 @@ class RmaLineMakeSupplierRma(models.TransientModel):
         else:
             return {
                 "name": _("Supplier RMA Line"),
-                "view_type": "form",
                 "view_mode": "form",
                 "res_model": "rma.order.line",
                 "view_id": False,
@@ -208,9 +203,7 @@ class RmaLineMakeRmaOrderItem(models.TransientModel):
     )
     name = fields.Char(related="line_id.name", readonly=True)
     uom_id = fields.Many2one("uom.uom", string="UoM", readonly=True)
-    product_qty = fields.Float(
-        string="Quantity", digits=dp.get_precision("Product UoS")
-    )
+    product_qty = fields.Float(string="Quantity", digits="Product UoS")
     operation_id = fields.Many2one(
         comodel_name="rma.operation",
         string="Operation",

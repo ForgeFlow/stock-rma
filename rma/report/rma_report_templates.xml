@@ -6,7 +6,7 @@
             <div class="page">
                 <div class="oe_structure"/>
                 <div class="row">
-                    <div class="col-xs-6">
+                    <div class="col-6">
                         <t t-if="(doc.customer_to_supplier==False and doc.type=='customer') or (doc.supplier_to_customer==False and doc.type=='supplier')">
                             <strong>Shipping address:</strong>
                             <div class="mt8">
@@ -28,7 +28,7 @@
                                 <p t-if="doc.customer_address_id.vat">VAT: <span t-field="doc.customer_address_id.vat"/></p>
                         </div>
                     </div>
-                    <div class="col-xs-3 col-xs-offset-1">
+                    <div class="col-3 offset-1">
                         <strong t-if="doc.type=='customer'">Customer:</strong>
                         <strong t-if="doc.type=='supplier'">Supplier:</strong>
                         <div t-field="doc.partner_id"
@@ -36,24 +36,24 @@
                     </div>
                 </div>
 
-                <h2>
+                <h2 class="mt32">
                     <span t-field="doc.name"/>
                 </h2>
 
                 <div class="row mt32 mb32" id="informations">
-                    <div t-if="doc.origin" class="col-xs-3">
+                    <div t-if="doc.origin" class="col-3">
                         <strong>Origin Reference:</strong>
                         <p t-field="doc.origin"/>
                     </div>
-                    <div t-if="doc.create_date" class="col-xs-3">
+                    <div t-if="doc.create_date" class="col-3">
                         <strong>Date Ordered:</strong>
                         <p t-field="doc.create_date"/>
                     </div>
-                    <div t-if="doc.requested_by.name" class="col-xs-3">
+                    <div t-if="doc.requested_by.name" class="col-3">
                         <strong>Contact Person:</strong>
                         <p t-field="doc.requested_by.name"/>
                     </div>
-                    <div name="operation_id" t-if="doc.operation_id" class="col-xs-3">
+                    <div name="operation_id" t-if="doc.operation_id" class="col-3">
                         <strong>Operation:</strong>
                         <p t-field="doc.operation_id.name"/>
                     </div>
@@ -108,7 +108,7 @@
             <div class="page">
                 <div class="oe_structure"/>
                 <div class="row">
-                    <div class="col-xs-6">
+                    <div class="col-6">
                         <t t-if="(doc.customer_to_supplier==False and doc.type=='customer') or (doc.supplier_to_customer==False and doc.type=='supplier')">
                             <strong>Shipping address:</strong>
                             <div class="mt8">
@@ -130,7 +130,7 @@
                                 <p t-if="doc.customer_address_id.vat">VAT: <span t-field="doc.customer_address_id.vat"/></p>
                         </div>
                     </div>
-                    <div class="col-xs-3 col-xs-offset-1">
+                    <div class="col-3 offset-1">
                         <strong t-if="doc.type=='customer'">Customer:</strong>
                         <strong t-if="doc.type=='supplier'">Supplier:</strong>
                         <div t-field="doc.partner_id"
@@ -138,20 +138,20 @@
                     </div>
                 </div>
 
-                <h2>
+                <h2 class="mt32">
                     <span t-field="doc.name"/>
                 </h2>
 
                 <div class="row mt32 mb32" id="informations">
-                    <div t-if="doc.reference" class="col-xs-3">
+                    <div t-if="doc.reference" class="col-3">
                         <strong>Reference:</strong>
                         <p t-field="doc.reference"/>
                     </div>
-                    <div t-if="doc.date_rma" class="col-xs-3">
+                    <div t-if="doc.date_rma" class="col-3">
                         <strong>Date Ordered:</strong>
                         <p t-field="doc.date_rma"/>
                     </div>
-                    <div t-if="doc.requested_by.name" class="col-xs-3">
+                    <div t-if="doc.requested_by.name" class="col-3">
                         <strong>Contact Person:</strong>
                         <p t-field="doc.requested_by.name"/>
                     </div>
