@@ -1,15 +1,15 @@
-# Copyright (C) 2017 Eficent Business and IT Consulting Services S.L.
+# Copyright (C) 2017 ForgeFlow
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 {
     "name": "RMA (Return Merchandise Authorization)",
-    "version": "12.0.2.3.0",
+    "version": "13.0.1.0.0",
     "license": "LGPL-3",
     "category": "RMA",
     "summary": "Introduces the return merchandise authorization (RMA) process "
     "in odoo",
-    "author": "Eficent, Odoo Community Association (OCA)",
-    "website": "https://github.com/Eficent/stock-rma",
+    "author": "ForgeFlow",
+    "website": "https://github.com/ForgeFlow/stock-rma",
     "depends": ["stock", "mail", "web"],
     "demo": ["demo/stock_demo.xml"],
     "data": [
@@ -33,5 +33,4 @@
         "wizards/rma_order_line_make_supplier_rma_view.xml",
     ],
     "installable": True,
-    "auto_install": False,
 }
