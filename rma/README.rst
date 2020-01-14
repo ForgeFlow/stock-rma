@@ -100,7 +100,7 @@ Bug Tracker
 ===========
 
 Bugs are tracked on `GitHub Issues
-<https://github.com/Eficent/stock-rma/issues>`_. In case of trouble, please
+<https://github.com/ForgeFlow/stock-rma/issues>`_. In case of trouble, please
 check there if your issue has already been reported. If you spotted it first,
 help us smashing it by providing a detailed and welcomed feedback.
 
@@ -111,9 +111,9 @@ Credits
 Contributors
 ------------
 
-* Jordi Ballester Alomar <jordi.ballester@eficent.com>
-* Aaron Henriquez <ahenriquez@eficent.com>
-* Lois Rilo <lois.rilo@eficent.com>
+* Jordi Ballester Alomar <jordi.ballester@ForgeFlow.com>
+* Aaron Henriquez <ahenriquez@ForgeFlow.com>
+* Lois Rilo <lois.rilo@ForgeFlow.com>
 * Bhavesh Odedra <bodedra@opensourceintegrators.com>
 * Akim Juillerat <akim.juillerat@camptocamp.com>
 * Alexandre Fayolle <alexandre.fayolle@camptocamp.com>
@@ -122,4 +122,4 @@ Contributors
 Maintainer
 ----------
 
-This module is maintained by Eficent.
+This module is maintained by ForgeFlow.

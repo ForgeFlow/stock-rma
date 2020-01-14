@@ -1,12 +1,10 @@
-# Copyright (C) 2017 Eficent Business and IT Consulting Services S.L.
+# Copyright (C) 2017 ForgeFlow
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 import operator
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
-
-from odoo.addons import decimal_precision as dp
 
 ops = {"=": operator.eq, "!=": operator.ne}
 
@@ -38,16 +36,12 @@ class RmaOrderLine(models.Model):
         wh = self._default_warehouse_id()
         return wh.lot_rma_id
 
-    @api.model
-    def _default_delivery_address(self):
-        partner_id = self.env.context.get("partner_id", False)
-        if partner_id:
-            partner = self.env["res.partner"].browse(partner_id)
-            addr = partner.address_get(["delivery"])
-            return self.env["res.partner"].browse(addr["delivery"])
-        return False
+    @api.onchange("partner_id")
+    def _onchange_delivery_address(self):
+        self.delivery_address_id = self.env["res.partner"].browse(
+            self.partner_id.address_get(["delivery"])["delivery"]
+        )
 
-    @api.multi
     def _compute_in_shipment_count(self):
         for line in self:
             picking_ids = []
@@ -60,7 +54,6 @@ class RmaOrderLine(models.Model):
             shipments = list(set(picking_ids))
             line.in_shipment_count = len(shipments)
 
-    @api.multi
     def _compute_out_shipment_count(self):
         picking_ids = []
         for line in self:
@@ -71,7 +64,6 @@ class RmaOrderLine(models.Model):
             shipments = list(set(picking_ids))
             line.out_shipment_count = len(shipments)
 
-    @api.multi
     def _get_rma_move_qty(self, states, direction="in"):
         for rec in self:
             product_obj = self.env["uom.uom"]
@@ -86,7 +78,6 @@ class RmaOrderLine(models.Model):
                 qty += product_obj._compute_quantity(move.product_uom_qty, rec.uom_id)
             return qty
 
-    @api.multi
     @api.depends(
         "move_ids",
         "move_ids.state",
@@ -103,7 +94,6 @@ class RmaOrderLine(models.Model):
             elif rec.receipt_policy == "delivered":
                 rec.qty_to_receive = rec.qty_delivered - rec.qty_received
 
-    @api.multi
     @api.depends(
         "move_ids",
         "move_ids.state",
@@ -121,7 +111,6 @@ class RmaOrderLine(models.Model):
             elif rec.delivery_policy == "received":
                 rec.qty_to_deliver = rec.qty_received - rec.qty_delivered
 
-    @api.multi
     @api.depends("move_ids", "move_ids.state", "type")
     def _compute_qty_incoming(self):
         for rec in self:
@@ -130,14 +119,12 @@ class RmaOrderLine(models.Model):
             )
             rec.qty_incoming = qty
 
-    @api.multi
     @api.depends("move_ids", "move_ids.state", "type")
     def _compute_qty_received(self):
         for rec in self:
             qty = rec._get_rma_move_qty("done", direction="in")
             rec.qty_received = qty
 
-    @api.multi
     @api.depends("move_ids", "move_ids.state", "type")
     def _compute_qty_outgoing(self):
         for rec in self:
@@ -146,7 +133,6 @@ class RmaOrderLine(models.Model):
             )
             rec.qty_outgoing = qty
 
-    @api.multi
     @api.depends("move_ids", "move_ids.state", "type")
     def _compute_qty_delivered(self):
         for rec in self:
@@ -161,7 +147,6 @@ class RmaOrderLine(models.Model):
             )
         )
 
-    @api.multi
     @api.depends(
         "customer_to_supplier",
         "supplier_rma_line_ids",
@@ -182,7 +167,6 @@ class RmaOrderLine(models.Model):
                 rec.qty_to_supplier_rma = 0.0
                 rec.qty_in_supplier_rma = 0.0
 
-    @api.multi
     def _compute_rma_line_count(self):
         for rec in self.filtered(lambda r: r.type == "customer"):
             rec.rma_line_count = len(rec.supplier_rma_line_ids)
@@ -192,7 +176,6 @@ class RmaOrderLine(models.Model):
     delivery_address_id = fields.Many2one(
         comodel_name="res.partner",
         string="Partner delivery address",
-        default=lambda self: self._default_delivery_address(),
         readonly=True,
         states={"draft": [("readonly", False)]},
         help="This address will be used to deliver repaired or replacement "
@@ -279,7 +262,7 @@ class RmaOrderLine(models.Model):
         string="Return Qty",
         copy=False,
         default=1.0,
-        digits=dp.get_precision("Product Unit of Measure"),
+        digits="Product Unit of Measure",
         readonly=True,
         states={"draft": [("readonly", False)]},
     )
@@ -309,7 +292,11 @@ class RmaOrderLine(models.Model):
         readonly=True,
         states={"draft": [("readonly", False)]},
     )
-    currency_id = fields.Many2one("res.currency", string="Currency")
+    currency_id = fields.Many2one(
+        "res.currency",
+        string="Currency",
+        default=lambda self: self.env.user.company_id.currency_id,
+    )
     company_id = fields.Many2one(
         comodel_name="res.company",
         string="Company",
@@ -420,7 +407,7 @@ class RmaOrderLine(models.Model):
     )
     qty_to_receive = fields.Float(
         string="Qty To Receive",
-        digits=dp.get_precision("Product Unit of Measure"),
+        digits="Product Unit of Measure",
         compute="_compute_qty_to_receive",
         store=True,
     )
@@ -428,21 +415,21 @@ class RmaOrderLine(models.Model):
         string="Incoming Qty",
         copy=False,
         readonly=True,
-        digits=dp.get_precision("Product Unit of Measure"),
+        digits="Product Unit of Measure",
         compute="_compute_qty_incoming",
         store=True,
     )
     qty_received = fields.Float(
         string="Qty Received",
         copy=False,
-        digits=dp.get_precision("Product Unit of Measure"),
+        digits="Product Unit of Measure",
         compute="_compute_qty_received",
         store=True,
     )
     qty_to_deliver = fields.Float(
         string="Qty To Deliver",
         copy=False,
-        digits=dp.get_precision("Product Unit of Measure"),
+        digits="Product Unit of Measure",
         readonly=True,
         compute="_compute_qty_to_deliver",
         store=True,
@@ -451,28 +438,28 @@ class RmaOrderLine(models.Model):
         string="Outgoing Qty",
         copy=False,
         readonly=True,
-        digits=dp.get_precision("Product Unit of Measure"),
+        digits="Product Unit of Measure",
         compute="_compute_qty_outgoing",
         store=True,
     )
     qty_delivered = fields.Float(
         string="Qty Delivered",
         copy=False,
-        digits=dp.get_precision("Product Unit of Measure"),
+        digits="Product Unit of Measure",
         readonly=True,
         compute="_compute_qty_delivered",
         store=True,
     )
     qty_to_supplier_rma = fields.Float(
         string="Qty to send to Supplier RMA",
-        digits=dp.get_precision("Product Unit of Measure"),
+        digits="Product Unit of Measure",
         readonly=True,
         compute="_compute_qty_supplier_rma",
         store=True,
     )
     qty_in_supplier_rma = fields.Float(
         string="Qty in Supplier RMA",
-        digits=dp.get_precision("Product Unit of Measure"),
+        digits="Product Unit of Measure",
         readonly=True,
         compute="_compute_qty_supplier_rma",
         store=True,
@@ -481,7 +468,6 @@ class RmaOrderLine(models.Model):
         string="Under Warranty?", readonly=True, states={"draft": [("readonly", False)]}
     )
 
-    @api.multi
     def _prepare_rma_line_from_stock_move(self, sm, lot=False):
         if not self.type:
             self.type = self._get_default_type()
@@ -542,7 +528,6 @@ class RmaOrderLine(models.Model):
         }
         return data
 
-    @api.multi
     @api.onchange("reference_move_id")
     def _onchange_reference_move_id(self):
         self.ensure_one()
@@ -562,7 +547,6 @@ class RmaOrderLine(models.Model):
             self.update(data)
         self._remove_other_data_origin("reference_move_id")
 
-    @api.multi
     @api.constrains("reference_move_id", "partner_id")
     def _check_move_partner(self):
         for rec in self:
@@ -577,13 +561,11 @@ class RmaOrderLine(models.Model):
                     )
                 )
 
-    @api.multi
     def _remove_other_data_origin(self, exception):
         if not exception == "reference_move_id":
             self.reference_move_id = False
         return True
 
-    @api.multi
     def action_rma_to_approve(self):
         self.write({"state": "to_approve"})
         for rec in self:
@@ -591,19 +573,16 @@ class RmaOrderLine(models.Model):
                 rec.action_rma_approve()
         return True
 
-    @api.multi
     def action_rma_draft(self):
         if self.in_shipment_count or self.out_shipment_count:
             raise UserError(_("You cannot reset to draft a RMA with related pickings."))
         self.write({"state": "draft"})
         return True
 
-    @api.multi
     def action_rma_approve(self):
         self.write({"state": "approved"})
         return True
 
-    @api.multi
     def action_rma_done(self):
         self.write({"state": "done"})
         return True
@@ -676,7 +655,6 @@ class RmaOrderLine(models.Model):
             self.product_id = product
             self.uom_id = product.uom_id
 
-    @api.multi
     def action_view_in_shipments(self):
         action = self.env.ref("stock.action_picking_tree_all")
         result = action.read()[0]
@@ -699,7 +677,6 @@ class RmaOrderLine(models.Model):
             result["res_id"] = shipments[0]
         return result
 
-    @api.multi
     def action_view_out_shipments(self):
         action = self.env.ref("stock.action_picking_tree_all")
         result = action.read()[0]
@@ -719,7 +696,6 @@ class RmaOrderLine(models.Model):
             result["res_id"] = shipments[0]
         return result
 
-    @api.multi
     def action_view_rma_lines(self):
         if self.type == "customer":
             # from customer we link to supplier rma

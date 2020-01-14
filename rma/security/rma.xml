@@ -4,7 +4,7 @@
 
         <record model="ir.module.category" id="module_category_rma">
             <field name="name">RMA</field>
-            <field name="parent_id" ref="base.module_category_sales_management"/>
+            <field name="parent_id" ref="base.module_category_sales"/>
             <field name="sequence">30</field>
         </record>
 

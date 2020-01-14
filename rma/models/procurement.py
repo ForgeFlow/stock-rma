@@ -1,4 +1,4 @@
-# Copyright (C) 2017 Eficent Business and IT Consulting Services S.L.
+# Copyright (C) 2017 ForgeFlow
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from odoo import fields, models
@@ -6,10 +6,6 @@ from odoo import fields, models
 
 class StockRule(models.Model):
     _inherit = "stock.rule"
-
-    rma_line_id = fields.Many2one(
-        comodel_name="rma.order.line", string="RMA line", ondelete="set null"
-    )
 
     def _get_stock_move_values(
         self,
@@ -19,8 +15,8 @@ class StockRule(models.Model):
         location_id,
         name,
         origin,
+        company_id,
         values,
-        group_id,
     ):
         res = super(StockRule, self)._get_stock_move_values(
             product_id,
@@ -29,11 +25,11 @@ class StockRule(models.Model):
             location_id,
             name,
             origin,
+            company_id,
             values,
-            group_id,
         )
         if "rma_line_id" in values:
-            line = self.env["rma.order.line"].browse(values.get("rma_line_id"))
+            line = values.get("rma_line_id")
             res["rma_line_id"] = line.id
             if line.delivery_address_id:
                 res["partner_id"] = line.delivery_address_id.id

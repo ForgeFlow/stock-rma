@@ -61,7 +61,6 @@
         <field name="name">Create Incoming Shipment</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">rma_make_picking.wizard</field>
-        <field name="view_type">form</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
         <field name="view_id" ref="view_rma_picking"/>
@@ -74,7 +73,6 @@
         <field name="name">Create Delivery</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">rma_make_picking.wizard</field>
-        <field name="view_type">form</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
         <field name="view_id" ref="view_rma_picking_out"/>

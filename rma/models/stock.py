@@ -1,4 +1,4 @@
-# Copyright (C) 2017 Eficent Business and IT Consulting Services S.L.
+# Copyright (C) 2017 ForgeFlow
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from odoo import api, fields, models
@@ -7,7 +7,6 @@ from odoo import api, fields, models
 class StockPicking(models.Model):
     _inherit = "stock.picking"
 
-    @api.multi
     def action_assign(self):
         """When you try to bring back a product from a customer location,
         it may happen that there is no quants available to perform the
