@@ -1,4 +1,4 @@
-# Copyright (C) 2017 ForgeFlow
+# Copyright (C) 2017-20 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 {
@@ -27,10 +27,12 @@
         "views/stock_warehouse.xml",
         "views/product_view.xml",
         "views/res_partner_view.xml",
+        "views/res_config_settings_views.xml",
+        "views/rma_menu.xml",
         "wizards/rma_make_picking_view.xml",
         "wizards/rma_add_stock_move_view.xml",
-        "wizards/stock_config_settings.xml",
         "wizards/rma_order_line_make_supplier_rma_view.xml",
     ],
     "installable": True,
+    "application": True,
 }
