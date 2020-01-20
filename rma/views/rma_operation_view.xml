@@ -78,18 +78,4 @@
         <field name="view_id" ref="rma_operation_tree"/>
     </record>
 
-    <menuitem id="menu_rma_operation_customer"
-        name="Customer Operations"
-        groups="rma.group_rma_manager"
-        sequence="35"
-        parent="rma.menu_rma_config"
-        action="action_rma_operation_customer"/>
-
-    <menuitem id="menu_rma_operation_supplier"
-        name="Supplier Operations"
-        groups="rma.group_rma_manager"
-        sequence="40"
-        parent="rma.menu_rma_config"
-        action="action_rma_operation_supplier"/>
-
 </odoo>

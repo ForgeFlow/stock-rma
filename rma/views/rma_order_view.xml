@@ -289,36 +289,4 @@
         <field name="act_window_id" ref="action_rma_supplier"/>
     </record>
 
-    <menuitem id="menu_customer_rma"
-        name="Customer RMA"
-        groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"
-        sequence="30"
-        parent="stock.menu_stock_root"/>
-
-    <menuitem id="menu_supplier_rma"
-        name="Supplier RMA"
-        groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"
-        sequence="31"
-        parent="stock.menu_stock_root"/>
-
-    <menuitem
-        id="menu_rma_act_customer"
-        sequence="50"
-        parent="menu_customer_rma"
-        groups="rma.group_rma_groups"
-        action="action_rma_customer"/>
-
-    <menuitem
-        id="menu_rma_act_supplier"
-        sequence="50"
-        parent="menu_supplier_rma"
-        groups="rma.group_rma_groups"
-        action="action_rma_supplier"/>
-
-    <menuitem id="menu_rma_config"
-        name="RMA"
-        groups="rma.group_rma_manager"
-        sequence="30"
-        parent="stock.menu_stock_config_settings"/>
-
 </odoo>
