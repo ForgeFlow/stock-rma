@@ -1,4 +1,4 @@
-# Copyright (C) 2017 ForgeFlow
+# Copyright (C) 2017-20 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from odoo import _, fields, models
@@ -114,6 +114,7 @@ class StockWarehouse(models.Model):
                     "default_location_dest_id": customer_loc.id,
                     "sequence": max_sequence,
                     "color": color,
+                    "sequence_code": "RMA → Customer",
                 }
             )
             # create rma_sup_out_type_id:
@@ -129,6 +130,7 @@ class StockWarehouse(models.Model):
                     "default_location_dest_id": supplier_loc.id,
                     "sequence": max_sequence,
                     "color": color,
+                    "sequence_code": "Customer → RMA",
                 }
             )
             # create rma_cust_in_type_id:
@@ -144,6 +146,7 @@ class StockWarehouse(models.Model):
                     "default_location_dest_id": wh.lot_rma_id.id,
                     "sequence": max_sequence,
                     "color": color,
+                    "sequence_code": "RMA -> Supplier",
                 }
             )
             # create rma_sup_in_type_id:
@@ -159,6 +162,7 @@ class StockWarehouse(models.Model):
                     "default_location_dest_id": wh.lot_rma_id.id,
                     "sequence": max_sequence,
                     "color": color,
+                    "sequence_code": "Supplier -> RMA",
                 }
             )
             wh.write(
