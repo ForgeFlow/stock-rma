@@ -93,7 +93,7 @@
                         </div>
                         <div class="oe_title" name="title">
                         <h1>
-                            <field name="name"
+                            <field name="name" readonly="1"
                                    invisible="context.get('hide_title',False)"/>
                         </h1>
                         </div>
@@ -248,11 +248,12 @@
                                 <field name="out_shipment_count" widget="statinfo"
                                        string="Deliveries"/>
                             </button>
-                            <button type="object"  name="action_view_invoice"
+                            <!--Move this button to rma_account-->
+                            <!--<button type="object"  name="action_view_invoice"
                                     class="oe_stat_button"
                                     icon="fa-pencil-square-o"
                                     string="Origin Inv">
-                            </button>
+                            </button>-->
                             <button type="object" name="action_view_rma_lines"
                                     class="oe_stat_button"
                                     icon="fa-link"
@@ -263,7 +264,7 @@
                         </div>
                         <div class="oe_title" name="title">
                         <h1>
-                            <field name="name"
+                            <field name="name" readonly="1"
                                    invisible="context.get('hide_title',False)"/>
                         </h1>
                         </div>
@@ -453,22 +454,6 @@
             <field name="view_id" ref="view_rma_line_supplier_form"/>
             <field name="act_window_id" ref="action_rma_supplier_lines"/>
         </record>
-
-        <menuitem
-            id="menu_rma_line_customer"
-            sequence="20"
-            parent="menu_customer_rma"
-            groups="rma.group_rma_customer_user"
-            action="action_rma_customer_lines"
-            />
-
-        <menuitem
-            id="menu_rma_line_supplier"
-            sequence="20"
-            parent="menu_supplier_rma"
-            groups="rma.group_rma_supplier_user"
-            action="action_rma_supplier_lines"
-            />
 
     </data>
 </odoo>
