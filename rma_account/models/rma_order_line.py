@@ -17,21 +17,20 @@ class RmaOrderLine(models.Model):
             return self.env["res.partner"].browse(partner_id)
         return self.env["res.partner"]
 
-    @api.multi
     @api.depends(
-        "refund_line_ids", "refund_line_ids.invoice_id.state", "refund_policy", "type"
+        "refund_line_ids", "refund_line_ids.move_id.state", "refund_policy", "type"
     )
     def _compute_qty_refunded(self):
         for rec in self:
             rec.qty_refunded = sum(
                 rec.refund_line_ids.filtered(
-                    lambda i: i.invoice_id.state in ("open", "paid")
+                    lambda i: i.move_id.state in ("open", "paid")
                 ).mapped("quantity")
             )
 
     @api.depends(
         "refund_line_ids",
-        "refund_line_ids.invoice_id.state",
+        "refund_line_ids.move_id.state",
         "refund_policy",
         "move_ids",
         "move_ids.state",
@@ -48,10 +47,9 @@ class RmaOrderLine(models.Model):
                 qty = res.qty_delivered - res.qty_refunded
             res.qty_to_refund = qty
 
-    @api.multi
     def _compute_refund_count(self):
         for rec in self:
-            rec.refund_count = len(rec.refund_line_ids.mapped("invoice_id"))
+            rec.refund_count = len(rec.refund_line_ids.mapped("move_id"))
 
     invoice_address_id = fields.Many2one(
         "res.partner",
@@ -64,8 +62,8 @@ class RmaOrderLine(models.Model):
     refund_count = fields.Integer(
         compute="_compute_refund_count", string="# of Refunds", default=0
     )
-    invoice_line_id = fields.Many2one(
-        comodel_name="account.invoice.line",
+    account_move_line_id = fields.Many2one(
+        comodel_name="account.move.line",
         string="Originating Invoice Line",
         ondelete="restrict",
         index=True,
@@ -73,17 +71,17 @@ class RmaOrderLine(models.Model):
         states={"draft": [("readonly", False)]},
     )
     refund_line_ids = fields.One2many(
-        comodel_name="account.invoice.line",
+        comodel_name="account.move.line",
         inverse_name="rma_line_id",
         string="Refund Lines",
         copy=False,
         index=True,
         readonly=True,
     )
-    invoice_id = fields.Many2one(
-        "account.invoice",
+    move_id = fields.Many2one(
+        "account.move",
         string="Source",
-        related="invoice_line_id.invoice_id",
+        related="account_move_line_id.move_id",
         index=True,
         readonly=True,
     )
@@ -125,15 +123,14 @@ class RmaOrderLine(models.Model):
             res["domain"] = {}
         domain = [
             "|",
-            ("invoice_id.partner_id", "=", self.partner_id.id),
-            ("invoice_id.partner_id", "child_of", self.partner_id.id),
+            ("move_id.partner_id", "=", self.partner_id.id),
+            ("move_id.partner_id", "child_of", self.partner_id.id),
         ]
         if self.product_id:
             domain.append(("product_id", "=", self.product_id.id))
-        res["domain"]["invoice_line_id"] = domain
+        res["domain"]["account_move_line_id"] = domain
         return res
 
-    @api.multi
     def _prepare_rma_line_from_inv_line(self, line):
         self.ensure_one()
         if not self.type:
@@ -173,15 +170,15 @@ class RmaOrderLine(models.Model):
                 )
         data = {
             "product_id": line.product_id.id,
-            "origin": line.invoice_id.number,
-            "uom_id": line.uom_id.id,
+            "origin": line.move_id.name,
+            "uom_id": line.product_uom_id.id,
             "operation_id": operation.id,
             "product_qty": line.quantity,
-            "price_unit": line.invoice_id.currency_id.compute(
+            "price_unit": line.move_id.currency_id.compute(
                 line.price_unit, line.currency_id, round=False
             ),
-            "delivery_address_id": line.invoice_id.partner_id.id,
-            "invoice_address_id": line.invoice_id.partner_id.id,
+            "delivery_address_id": line.move_id.partner_id.id,
+            "invoice_address_id": line.move_id.partner_id.id,
             "receipt_policy": operation.receipt_policy,
             "refund_policy": operation.refund_policy,
             "delivery_policy": operation.delivery_policy,
@@ -198,21 +195,20 @@ class RmaOrderLine(models.Model):
         }
         return data
 
-    @api.onchange("invoice_line_id")
-    def _onchange_invoice_line_id(self):
-        if not self.invoice_line_id:
+    @api.onchange("account_move_line_id")
+    def _onchange_account_move_line_id(self):
+        if not self.account_move_line_id:
             return
-        data = self._prepare_rma_line_from_inv_line(self.invoice_line_id)
+        data = self._prepare_rma_line_from_inv_line(self.account_move_line_id)
         self.update(data)
-        self._remove_other_data_origin("invoice_line_id")
+        self._remove_other_data_origin("account_move_line_id")
 
-    @api.multi
-    @api.constrains("invoice_line_id", "partner_id")
+    @api.constrains("account_move_line_id", "partner_id")
     def _check_invoice_partner(self):
         for rec in self:
             if (
-                rec.invoice_line_id
-                and rec.invoice_line_id.invoice_id.partner_id != rec.partner_id
+                rec.account_move_line_id
+                and rec.account_move_line_id.move_id.partner_id != rec.partner_id
             ):
                 raise ValidationError(
                     _(
@@ -221,11 +217,10 @@ class RmaOrderLine(models.Model):
                     )
                 )
 
-    @api.multi
     def _remove_other_data_origin(self, exception):
         res = super(RmaOrderLine, self)._remove_other_data_origin(exception)
-        if not exception == "invoice_line_id":
-            self.invoice_line_id = False
+        if not exception == "account_move_line_id":
+            self.account_move_line_id = False
         return res
 
     @api.onchange("operation_id")
@@ -235,49 +230,45 @@ class RmaOrderLine(models.Model):
             self.refund_policy = self.operation_id.refund_policy or "no"
         return result
 
-    @api.multi
-    @api.constrains("invoice_line_id")
+    @api.constrains("account_move_line_id")
     def _check_duplicated_lines(self):
         for line in self:
-            matching_inv_lines = self.env["account.invoice.line"].search(
-                [("id", "=", line.invoice_line_id.id)]
+            matching_inv_lines = self.env["account.move.line"].search(
+                [("id", "=", line.account_move_line_id.id)]
             )
             if len(matching_inv_lines) > 1:
                 raise UserError(
                     _(
                         "There's an rma for the invoice line %s "
                         "and invoice %s"
-                        % (line.invoice_line_id, line.invoice_line_id.invoice_id)
+                        % (line.account_move_line_id, line.account_move_line_id.move_id)
                     )
                 )
         return {}
 
-    @api.multi
     def action_view_invoice(self):
         action = self.env.ref("account.action_invoice_tree")
         result = action.read()[0]
-        res = self.env.ref("account.invoice_form", False)
+        res = self.env.ref("account.view_move_form", False)
         result["views"] = [(res and res.id or False, "form")]
         result["view_id"] = res and res.id or False
-        result["res_id"] = self.invoice_line_id.invoice_id.id
+        result["res_id"] = self.account_move_line_id.move_id.id
         return result
 
-    @api.multi
     def action_view_refunds(self):
         action = self.env.ref("account.action_invoice_tree2")
         result = action.read()[0]
-        invoice_ids = self.mapped("refund_line_ids.invoice_id").ids
-        if invoice_ids:
+        move_ids = self.mapped("refund_line_ids.move_id").ids
+        if move_ids:
             # choose the view_mode accordingly
-            if len(invoice_ids) > 1:
-                result["domain"] = [("id", "in", invoice_ids)]
+            if len(move_ids) > 1:
+                result["domain"] = [("id", "in", move_ids)]
             else:
-                res = self.env.ref("account.invoice_supplier_form", False)
+                res = self.env.ref("account.move_supplier_form", False)
                 result["views"] = [(res and res.id or False, "form")]
-                result["res_id"] = invoice_ids[0]
+                result["res_id"] = move_ids[0]
         return result
 
-    @api.multi
     def name_get(self):
         res = []
         if self.env.context.get("rma"):

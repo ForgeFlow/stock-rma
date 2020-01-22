@@ -25,7 +25,7 @@
             <!--
             <xpath expr="//field[@name='rma_line_ids']/tree/field[@name='price_unit']"
                    position="after">
-                <field name="invoice_line_id" invisible="True"/>
+                <field name="account_move_line_id" invisible="True"/>
             </xpath>
             -->
         </field>
@@ -56,7 +56,7 @@
             <!--
             <xpath expr="//field[@name='rma_line_ids']/tree"
                    position="inside">
-                <field name="invoice_line_id" invisible="True"/>
+                <field name="account_move_line_id" invisible="True"/>
             </xpath>
             -->
         </field>
