@@ -2,9 +2,9 @@
 
 <odoo>
 
-    <record id="view_rma_add_invoice" model="ir.ui.view">
+    <record id="view_rma_add_account_move" model="ir.ui.view">
         <field name="name">rma.add.invoice</field>
-        <field name="model">rma_add_invoice</field>
+        <field name="model">rma_add_account_move</field>
         <field name="arch" type="xml">
             <form string="Select Invoice from customer">
                 <group>
@@ -13,15 +13,16 @@
                            string="Customer"/>
                 </group>
                 <separator string="Select Invoices lines to add"/>
-                <field name="invoice_line_ids"
-                       domain="[('invoice_id.partner_id', '=', partner_id),
-                       ('invoice_id.type', '=', 'out_invoice')]">
+                <field name="line_ids"
+                       domain="[('move_id.partner_id', '=', partner_id),
+                       ('move_id.type', '=', 'out_invoice')]">
                     <tree string="Invoice Lines">
-                        <field name="invoice_id"/>
+                        <field name="move_id"/>
                         <field name="name"/>
                         <field name="account_id" groups="account.group_account_user"/>
                         <field name="quantity"/>
-                        <field name="uom_id" groups="uom.group_uom"/>
+                        <field name="product_id"/>
+                        <field name="product_uom_id"/>
                         <field name="price_unit"/>
                         <field name="discount" groups="base.group_no_one"/>
                         <field name="price_subtotal"/>
@@ -41,9 +42,9 @@
         </field>
     </record>
 
-    <record id="view_rma_add_invoice_supplier" model="ir.ui.view">
+    <record id="view_rma_add_account_move_supplier" model="ir.ui.view">
         <field name="name">rma.add.invoice.supplier</field>
-        <field name="model">rma_add_invoice</field>
+        <field name="model">rma_add_account_move</field>
         <field name="arch" type="xml">
             <form string="Select Invoice from supplier">
                 <group>
@@ -52,15 +53,16 @@
                            string="Supplier"/>
                 </group>
                 <separator string="Select Invoices lines to add"/>
-                <field name="invoice_line_ids"
-                       domain="[('invoice_id.partner_id', '=', partner_id),
-                       ('invoice_id.type', '=', 'in_invoice')]">
+                <field name="line_ids"
+                       domain="[('move_id.partner_id', '=', partner_id),
+                       ('move_id.type', '=', 'in_invoice')]">
                     <tree string="Invoice Lines">
-                        <field name="invoice_id"/>
+                        <field name="move_id"/>
                         <field name="name"/>
                         <field name="account_id" groups="account.group_account_user"/>
                         <field name="quantity"/>
-                        <field name="uom_id" groups="uom.group_uom"/>
+                        <field name="product_id"/>
+                        <field name="product_uom_id"/>
                         <field name="price_unit"/>
                         <field name="discount" groups="base.group_no_one"/>
                         <field name="price_subtotal"/>
@@ -80,50 +82,47 @@
         </field>
     </record>
 
-    <record id="action_rma_add_invoice" model="ir.actions.act_window">
+    <record id="action_rma_add_account_move" model="ir.actions.act_window">
         <field name="name">Add Invoice</field>
         <field name="type">ir.actions.act_window</field>
-        <field name="res_model">rma_add_invoice</field>
-        <field name="src_model">rma.order</field>
-        <field name="view_type">form</field>
+        <field name="res_model">rma_add_account_move</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
-        <field name="view_id" ref="view_rma_add_invoice"/>
+        <field name="view_id" ref="view_rma_add_account_move"/>
         <field name="groups_id" eval="[(4, ref('rma.group_rma_customer_user'))]"/>
     </record>
 
-    <record id="action_rma_add_invoice_supplier" model="ir.actions.act_window">
+    <record id="action_rma_add_account_move_supplier" model="ir.actions.act_window">
         <field name="name">Add Invoice</field>
         <field name="type">ir.actions.act_window</field>
-        <field name="res_model">rma_add_invoice</field>
-        <field name="src_model">rma.order</field>
-        <field name="view_type">form</field>
+        <field name="res_model">rma_add_account_move</field>
+        <field name="binding_model_id" ref="rma.model_rma_order_line"/>
         <field name="view_mode">form</field>
         <field name="target">new</field>
-        <field name="view_id" ref="view_rma_add_invoice_supplier"/>
+        <field name="view_id" ref="view_rma_add_account_move_supplier"/>
         <field name="groups_id" eval="[(4, ref('rma.group_rma_supplier_user'))]"/>
     </record>
 
-    <record id="view_rma_add_invoice_form" model="ir.ui.view">
+    <record id="view_rma_add_account_move_form" model="ir.ui.view">
         <field name="name">rma.order.form - invoice wizard</field>
         <field name="model">rma.order</field>
         <field name="inherit_id" ref="rma.view_rma_form"/>
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
-                <button name="%(action_rma_add_invoice)d"
+                <button name="%(action_rma_add_account_move)d"
                         string="Add From Invoice"
                         type="action"/>
             </xpath>
         </field>
     </record>
 
-    <record id="view_rma_add_invoice_button_form" model="ir.ui.view">
+    <record id="view_rma_add_account_move_button_form" model="ir.ui.view">
         <field name="name">rma.order.supplier.form - invoice wizard</field>
         <field name="model">rma.order</field>
         <field name="inherit_id" ref="rma.view_rma_supplier_form"/>
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
-                <button name="%(action_rma_add_invoice_supplier)d"
+                <button name="%(action_rma_add_account_move_supplier)d"
                         string="Add From Invoice"
                         type="action"/>
             </xpath>

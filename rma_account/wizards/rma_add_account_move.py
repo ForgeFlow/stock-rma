@@ -5,8 +5,8 @@ from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 
-class RmaAddInvoice(models.TransientModel):
-    _name = "rma_add_invoice"
+class RmaAddAccountMove(models.TransientModel):
+    _name = "rma_add_account_move"
     _description = "Wizard to add rma lines"
 
     @api.model
@@ -21,7 +21,7 @@ class RmaAddInvoice(models.TransientModel):
         rma = rma_obj.browse(rma_id)
         res["rma_id"] = rma.id
         res["partner_id"] = rma.partner_id.id
-        res["invoice_line_ids"] = False
+        res["line_ids"] = False
         return res
 
     rma_id = fields.Many2one(
@@ -30,11 +30,11 @@ class RmaAddInvoice(models.TransientModel):
     partner_id = fields.Many2one(
         comodel_name="res.partner", string="Partner", readonly=True
     )
-    invoice_line_ids = fields.Many2many(
-        "account.invoice.line",
-        "rma_add_invoice_add_line_rel",
-        "invoice_line_id",
-        "rma_add_invoice_id",
+    line_ids = fields.Many2many(
+        "account.move.line",
+        "rma_add_account_move_add_line_rel",
+        "account_move_line_id",
+        "rma_add_move_id",
         string="Invoice Lines",
     )
 
@@ -76,17 +76,17 @@ class RmaAddInvoice(models.TransientModel):
                 )
         data = {
             "partner_id": self.partner_id.id,
-            "invoice_line_id": line.id,
+            "account_move_line_id": line.id,
             "product_id": line.product_id.id,
-            "origin": line.invoice_id.number,
-            "uom_id": line.uom_id.id,
+            "origin": line.move_id.name,
+            "uom_id": line.product_uom_id.id,
             "operation_id": operation.id,
             "product_qty": line.quantity,
-            "price_unit": line.invoice_id.currency_id.compute(
+            "price_unit": line.move_id.currency_id.compute(
                 line.price_unit, line.currency_id, round=False
             ),
-            "delivery_address_id": line.invoice_id.partner_id.id,
-            "invoice_address_id": line.invoice_id.partner_id.id,
+            "delivery_address_id": line.move_id.partner_id.id,
+            "invoice_address_id": line.move_id.partner_id.id,
             "rma_id": self.rma_id.id,
             "receipt_policy": operation.receipt_policy,
             "refund_policy": operation.refund_policy,
@@ -112,14 +112,13 @@ class RmaAddInvoice(models.TransientModel):
     def _get_existing_invoice_lines(self):
         existing_invoice_lines = []
         for rma_line in self.rma_id.rma_line_ids:
-            existing_invoice_lines.append(rma_line.invoice_line_id)
+            existing_invoice_lines.append(rma_line.account_move_line_id)
         return existing_invoice_lines
 
-    @api.multi
     def add_lines(self):
         rma_line_obj = self.env["rma.order.line"]
         existing_invoice_lines = self._get_existing_invoice_lines()
-        for line in self.invoice_line_ids:
+        for line in self.line_ids:
             # Load a PO line only once
             if line not in existing_invoice_lines:
                 data = self._prepare_rma_line_from_inv_line(line)
