@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<odoo noupdate="0">
+<odoo noupdate="1">
 
     <record id="rma.rma_operation_customer_replace" model="rma.operation">
         <field name="refund_policy">no</field>
