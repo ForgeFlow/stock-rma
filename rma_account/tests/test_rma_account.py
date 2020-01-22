@@ -15,8 +15,8 @@ class TestRmaAccount(common.SingleTransactionCase):
         cls.rma_add_invoice_wiz = cls.env["rma_add_invoice"]
         cls.rma_refund_wiz = cls.env["rma.refund"]
         cls.acc_obj = cls.env["account.account"]
-        cls.inv_obj = cls.env["account.invoice"]
-        cls.invl_obj = cls.env["account.invoice.line"]
+        cls.inv_obj = cls.env["account.move"]
+        cls.invl_obj = cls.env["account.move.line"]
         cls.product_obj = cls.env["product.product"]
         cls.partner_obj = cls.env["res.partner"]
 
@@ -89,7 +89,7 @@ class TestRmaAccount(common.SingleTransactionCase):
                 "product_id": cls.product_1.id,
                 "quantity": 12.0,
                 "price_unit": 100.0,
-                "invoice_id": cls.inv_customer.id,
+                "move_id": cls.inv_customer.id,
                 "uom_id": cls.product_1.uom_id.id,
                 "account_id": customer_account,
             }
@@ -100,7 +100,7 @@ class TestRmaAccount(common.SingleTransactionCase):
                 "product_id": cls.product_2.id,
                 "quantity": 15.0,
                 "price_unit": 150.0,
-                "invoice_id": cls.inv_customer.id,
+                "move_id": cls.inv_customer.id,
                 "uom_id": cls.product_2.uom_id.id,
                 "account_id": customer_account,
             }
@@ -122,7 +122,7 @@ class TestRmaAccount(common.SingleTransactionCase):
                 "product_id": cls.product_3.id,
                 "quantity": 17.0,
                 "price_unit": 250.0,
-                "invoice_id": cls.inv_supplier.id,
+                "move_id": cls.inv_supplier.id,
                 "uom_id": cls.product_3.uom_id.id,
                 "account_id": supplier_account,
             }
@@ -133,7 +133,7 @@ class TestRmaAccount(common.SingleTransactionCase):
                 "product_id": cls.product_4.id,
                 "quantity": 9.0,
                 "price_unit": 300.0,
-                "invoice_id": cls.inv_supplier.id,
+                "move_id": cls.inv_supplier.id,
                 "uom_id": cls.product_4.uom_id.id,
                 "account_id": supplier_account,
             }
@@ -147,7 +147,7 @@ class TestRmaAccount(common.SingleTransactionCase):
                 "active_ids": self.rma_group_customer.id,
                 "active_model": "rma.order",
             }
-        ).create({"invoice_line_ids": [(6, 0, self.inv_customer.invoice_line_ids.ids)]})
+        ).create({"line_ids": [(6, 0, self.inv_customer.line_ids.ids)]})
         add_inv.add_lines()
         self.assertEqual(len(self.rma_group_customer.rma_line_ids), 2)
         for t in self.rma_group_supplier.rma_line_ids.mapped("type"):
@@ -169,7 +169,7 @@ class TestRmaAccount(common.SingleTransactionCase):
                 "active_ids": self.rma_group_supplier.id,
                 "active_model": "rma.order",
             }
-        ).create({"invoice_line_ids": [(6, 0, self.inv_supplier.invoice_line_ids.ids)]})
+        ).create({"line_ids": [(6, 0, self.inv_supplier.line_ids.ids)]})
         add_inv.add_lines()
         self.assertEqual(len(self.rma_group_supplier.rma_line_ids), 2)
         for t in self.rma_group_supplier.rma_line_ids.mapped("type"):
@@ -206,7 +206,7 @@ class TestRmaAccount(common.SingleTransactionCase):
             {"customer": True, "active_ids": rma.ids, "active_model": "rma.order.line"}
         ).create({"description": "Test refund"})
         make_refund.invoice_refund()
-        rma.refund_line_ids.invoice_id.action_invoice_open()
+        rma.refund_line_ids.move_id.action_invoice_open()
         rma._compute_refund_count()
         self.assertEqual(rma.refund_count, 1)
         self.assertEqual(rma.qty_to_refund, 0.0)
@@ -217,10 +217,10 @@ class TestRmaAccount(common.SingleTransactionCase):
         rma = self.rma_line_obj.new(
             {
                 "partner_id": self.inv_customer.partner_id.id,
-                "invoice_line_id": self.inv_line_1.id,
+                "account_move_line_id": self.inv_line_1.id,
             }
         )
         self.assertFalse(rma.product_id)
-        rma._onchange_invoice_line_id()
+        rma._onchange_account_move_line_id()
         self.assertEqual(rma.product_id, self.product_1)
         self.assertEqual(rma.product_qty, 12.0)
