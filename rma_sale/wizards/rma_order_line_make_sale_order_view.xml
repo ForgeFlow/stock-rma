@@ -26,9 +26,10 @@
                      <newline/>
                      <group>
                          <field name="item_ids" nolabel="1" colspan="2">
-                              <tree string="Details" editable="bottom" create="false">
+                              <tree string="Details" editable="bottom">
+                                  <field name="wiz_id" invisible="True"/>
                                   <field name="line_id"
-                                       options="{'no_open': true}"/>
+                                         invisible="True"/>
                                   <field name="product_id"/>
                                   <field name="name"/>
                                   <field name="product_qty"/>
