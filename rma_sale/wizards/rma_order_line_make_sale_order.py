@@ -18,7 +18,9 @@ class RmaLineMakeSaleOrder(models.TransientModel):
         comodel_name="rma.order.line.make.sale.order.item",
         inverse_name="wiz_id",
         string="Items",
+        readonly=False,
     )
+
     sale_order_id = fields.Many2one(
         comodel_name="sale.order",
         string="Sales Order",
@@ -67,16 +69,17 @@ class RmaLineMakeSaleOrder(models.TransientModel):
         return res
 
     @api.model
-    def _prepare_sale_order(self, out_warehouse, company, item):
+    def _prepare_sale_order(self, line):
         if not self.partner_id:
             raise exceptions.Warning(_("Enter a customer."))
         customer = self.partner_id
         data = {
-            "origin": item.line_id.name,
+            "origin": line.name,
             "partner_id": customer.id,
-            "warehouse_id": out_warehouse.id,
-            "company_id": company.id,
+            "warehouse_id": line.out_warehouse_id.id,
+            "company_id": line.company_id.id,
         }
+
         return data
 
     @api.model
@@ -108,10 +111,9 @@ class RmaLineMakeSaleOrder(models.TransientModel):
             if self.sale_order_id:
                 sale = self.sale_order_id
             if not sale:
-                po_data = self._prepare_sale_order(
-                    line.out_warehouse_id, line.company_id, item
-                )
+                po_data = self._prepare_sale_order(line)
                 sale = sale_obj.create(po_data)
+                sale.name = sale.name + " - " + line.name
 
             so_line_data = self._prepare_sale_order_line(sale, item)
             so_line_obj.create(so_line_data)
@@ -130,7 +132,9 @@ class RmaLineMakeSaleOrderItem(models.TransientModel):
     wiz_id = fields.Many2one(
         comodel_name="rma.order.line.make.sale.order", string="Wizard"
     )
-    line_id = fields.Many2one(comodel_name="rma.order.line", string="RMA Line")
+    line_id = fields.Many2one(
+        comodel_name="rma.order.line", string="RMA Line", compute="_compute_line_id"
+    )
     rma_id = fields.Many2one(
         comodel_name="rma.order", related="line_id.rma_id", readonly=False
     )
@@ -142,3 +146,17 @@ class RmaLineMakeSaleOrderItem(models.TransientModel):
         comodel_name="stock.warehouse", string="Outbound Warehouse"
     )
     free_of_charge = fields.Boolean(string="Free of Charge")
+
+    def _compute_line_id(self):
+        rma_line_obj = self.env["rma.order.line"]
+        for rec in self:
+            if not self.env.context["active_ids"]:
+                return
+            rma_line_ids = self.env.context["active_ids"] or []
+            lines = rma_line_obj.browse(rma_line_ids)
+            rec.line_id = lines[0]
+
+    @api.onchange("product_id")
+    def onchange_product_id(self):
+        if self.product_id:
+            self.name = self.product_id.name
