@@ -10,7 +10,7 @@
                 <button type="object"
                         name="action_open_partner_rma"
                         class="oe_stat_button"
-                        icon="fa-eject"
+                        icon="fa-dropbox"
                         context="{'res_partner_search_mode': 'customer'}"
                         groups="rma.group_rma_customer_user,rma.group_rma_supplier_user">
                             <field name="rma_line_count" widget="statinfo"
