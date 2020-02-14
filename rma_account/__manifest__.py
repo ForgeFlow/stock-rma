@@ -10,9 +10,9 @@
     "author": "ForgeFlow",
     "website": "https://github.com/ForgeFlow/stock-rma",
     "depends": ["stock_account", "rma"],
-    "demo": ["data/rma_operation.xml"],
     "data": [
         "security/ir.model.access.csv",
+        "data/rma_operation.xml",
         "views/rma_order_view.xml",
         "views/rma_operation_view.xml",
         "views/rma_order_line_view.xml",
