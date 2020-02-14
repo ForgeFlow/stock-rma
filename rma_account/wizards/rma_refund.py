@@ -4,8 +4,6 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
-import odoo.addons.decimal_precision as dp
-
 
 class RmaRefund(models.TransientModel):
     _name = "rma.refund"
@@ -116,8 +114,6 @@ class RmaRefund(models.TransientModel):
         values = {
             "name": item.line_id.name or item.rma_id.name,
             "account_id": account.id,
-            "debit": item.line_id.price_unit,  # todo fix
-            "credit": item.line_id.price_unit,
             "price_unit": item.line_id.price_unit,
             "product_uom_id": item.line_id.uom_id.id,
             "product_id": item.product_id.id,
@@ -144,7 +140,6 @@ class RmaRefund(models.TransientModel):
             "ref": False,
             "type": "in_refund" if rma_line.type == "supplier" else "out_refund",
             "journal_id": journal.id,
-            "currency_id": rma_line.partner_id.company_id.currency_id.id,
             "fiscal_position_id": rma_line.partner_id.property_account_position_id.id,
             "state": "draft",
             "currency_id": rma_line.currency_id.id,
@@ -211,7 +206,7 @@ class RmaRefundItem(models.TransientModel):
         comodel_name="res.partner", string="Invoice Address"
     )
     qty_to_refund = fields.Float(
-        string="Quantity To Refund", digits=dp.get_precision("Product Unit of Measure")
+        string="Quantity To Refund", digits="Product Unit of Measure"
     )
     uom_id = fields.Many2one("uom.uom", string="Unit of Measure", readonly=True)
     refund_policy = fields.Selection(
