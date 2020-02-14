@@ -18,3 +18,5 @@ class ResConfigSettings(models.TransientModel):
         readonly=False,
         implied_group="rma.group_rma_groups",
     )
+
+    module_rma_account = fields.Boolean(string="RMA invoicing")
