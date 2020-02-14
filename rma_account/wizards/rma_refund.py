@@ -80,9 +80,6 @@ class RmaRefund(models.TransientModel):
             first = self.item_ids[0]
             values = self._prepare_refund(wizard, first.line_id)
             new_refund = self.env["account.move"].create(values)
-            for item in self.item_ids:
-                refund_line_values = self.prepare_refund_line(item, new_refund)
-                self.env["account.move.line"].create(refund_line_values)
             return new_refund
 
     def invoice_refund(self):
@@ -96,9 +93,9 @@ class RmaRefund(models.TransientModel):
                 raise ValidationError(_("RMA %s is not approved") % line.name)
         new_invoice = self.compute_refund()
         action = (
-            "action_invoice_tree1"
+            "action_move_out_refund_type"
             if (new_invoice.type in ["out_refund", "out_invoice"])
-            else "action_invoice_in_refund"
+            else "action_move_in_refund_type"
         )
         result = self.env.ref("account.%s" % action).read()[0]
         form_view = self.env.ref("account.move_supplier_form", False)
@@ -107,7 +104,7 @@ class RmaRefund(models.TransientModel):
         return result
 
     @api.model
-    def prepare_refund_line(self, item, refund):
+    def prepare_refund_line(self, item):
         accounts = item.product_id.product_tmpl_id._get_product_accounts()
         if item.line_id.type == "customer":
             account = accounts["stock_output"]
@@ -115,6 +112,7 @@ class RmaRefund(models.TransientModel):
             account = accounts["stock_input"]
         if not account:
             raise ValidationError(_("Accounts are not configured for this product."))
+
         values = {
             "name": item.line_id.name or item.rma_id.name,
             "account_id": account.id,
@@ -125,7 +123,6 @@ class RmaRefund(models.TransientModel):
             "product_id": item.product_id.id,
             "rma_line_id": item.line_id.id,
             "quantity": item.qty_to_refund,
-            "move_id": refund.id,
         }
         return values
 
@@ -142,8 +139,10 @@ class RmaRefund(models.TransientModel):
             )
         values = {
             "name": rma_line.rma_id.name or rma_line.name,
+            "invoice_payment_ref": rma_line.rma_id.name or rma_line.name,
             "invoice_origin": rma_line.rma_id.name or rma_line.name,
             "ref": False,
+            "type": "in_refund" if rma_line.type == "supplier" else "out_refund",
             "journal_id": journal.id,
             "currency_id": rma_line.partner_id.company_id.currency_id.id,
             "fiscal_position_id": rma_line.partner_id.property_account_position_id.id,
@@ -152,6 +151,9 @@ class RmaRefund(models.TransientModel):
             "date": wizard.date,
             "invoice_date": wizard.date_invoice,
             "partner_id": rma_line.invoice_address_id.id or rma_line.partner_id.id,
+            "invoice_line_ids": [
+                (0, None, self.prepare_refund_line(item)) for item in self.item_ids
+            ],
         }
         if self.env.registry.models.get("crm.team", False):
             team_ids = self.env["crm.team"].search(
@@ -196,13 +198,13 @@ class RmaRefundItem(models.TransientModel):
     rma_id = fields.Many2one(
         "rma.order", related="line_id.rma_id", string="RMA", readonly=True
     )
-    product_id = fields.Many2one("product.product", string="Product")
+    product_id = fields.Many2one("product.product", string="Product (Technical)")
     product = fields.Many2one("product.product", string="Product", readonly=True)
     name = fields.Char(string="Description", required=True)
     product_qty = fields.Float(
         string="Quantity Ordered",
         copy=False,
-        digits=dp.get_precision("Product Unit of Measure"),
+        digits="Product Unit of Measure",
         readonly=True,
     )
     invoice_address_id = fields.Many2one(
