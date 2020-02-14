@@ -101,7 +101,7 @@ class RmaOrderLine(models.Model):
     qty_to_refund = fields.Float(
         string="Qty To Refund",
         copy=False,
-        digits=dp.get_precision("Product Unit of Measure"),
+        digits="Product Unit of Measure",
         readonly=True,
         compute="_compute_qty_to_refund",
         store=True,
@@ -109,7 +109,7 @@ class RmaOrderLine(models.Model):
     qty_refunded = fields.Float(
         string="Qty Refunded",
         copy=False,
-        digits=dp.get_precision("Product Unit of Measure"),
+        digits="Product Unit of Measure",
         readonly=True,
         compute="_compute_qty_refunded",
         store=True,
