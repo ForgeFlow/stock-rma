@@ -110,7 +110,7 @@ class RmaOrder(models.Model):
     )
     rma_line_ids = fields.One2many("rma.order.line", "rma_id", string="RMA lines")
     in_shipment_count = fields.Integer(
-        compute="_compute_in_shipment_count", string="# of Invoices"
+        compute="_compute_in_shipment_count", string="# of Shipments"
     )
     out_shipment_count = fields.Integer(
         compute="_compute_out_shipment_count", string="# of Outgoing Shipments"
