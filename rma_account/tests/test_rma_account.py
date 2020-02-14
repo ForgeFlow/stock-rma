@@ -1,6 +1,7 @@
 # Copyright 2017-18 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
+from odoo import fields
 from odoo.tests import common
 
 
@@ -12,22 +13,22 @@ class TestRmaAccount(common.SingleTransactionCase):
         cls.rma_obj = cls.env["rma.order"]
         cls.rma_line_obj = cls.env["rma.order.line"]
         cls.rma_op_obj = cls.env["rma.operation"]
-        cls.rma_add_invoice_wiz = cls.env["rma_add_invoice"]
+        cls.rma_add_invoice_wiz = cls.env["rma_add_account_move"]
         cls.rma_refund_wiz = cls.env["rma.refund"]
         cls.acc_obj = cls.env["account.account"]
         cls.inv_obj = cls.env["account.move"]
         cls.invl_obj = cls.env["account.move.line"]
         cls.product_obj = cls.env["product.product"]
-        cls.partner_obj = cls.env["res.partner"]
+        customer1_obj = cls.env["res.partner"]
 
         cls.rma_route_cust = cls.env.ref("rma.route_rma_customer")
         receivable_type = cls.env.ref("account.data_account_type_receivable")
-        payable_type = cls.env.ref("account.data_account_type_payable")
         cls.cust_refund_op = cls.env.ref("rma_account.rma_operation_customer_refund")
-
+        cls.sup_refund_op = cls.env.ref("rma_account.rma_operation_supplier_refund")
+        cls.company_id = cls.env.user.company_id
         # Create partners
-        customer1 = cls.partner_obj.create({"name": "Customer 1"})
-        supplier1 = cls.partner_obj.create({"name": "Supplier 1"})
+        customer1 = customer1_obj.create({"name": "Customer 1"})
+        supplier1 = customer1_obj.create({"name": "Supplier 1"})
 
         # Create RMA group and operation:
         cls.rma_group_customer = cls.rma_obj.create(
@@ -55,6 +56,7 @@ class TestRmaAccount(common.SingleTransactionCase):
                 "type": "product",
                 "list_price": 100.0,
                 "rma_customer_operation_id": cls.cust_refund_op.id,
+                "rma_supplier_operation_id": cls.sup_refund_op.id,
             }
         )
         cls.product_2 = cls.product_obj.create(
@@ -63,81 +65,78 @@ class TestRmaAccount(common.SingleTransactionCase):
                 "type": "product",
                 "list_price": 150.0,
                 "rma_customer_operation_id": cls.operation_1.id,
+                "rma_supplier_operation_id": cls.sup_refund_op.id,
             }
         )
-        cls.product_3 = cls.product_obj.create(
-            {"name": "Test Product 3", "type": "product"}
-        )
-        cls.product_4 = cls.product_obj.create(
-            {"name": "Test Product 4", "type": "product"}
-        )
+        cls.currency_id = cls.company_id.currency_id
 
         # Create Invoices:
-        customer_account = cls.acc_obj.search(
+        cls.customer_account = cls.acc_obj.search(
             [("user_type_id", "=", receivable_type.id)], limit=1
         ).id
-        cls.inv_customer = cls.inv_obj.create(
-            {
-                "partner_id": customer1.id,
-                "account_id": customer_account,
-                "type": "out_invoice",
-            }
-        )
-        cls.inv_line_1 = cls.invl_obj.create(
-            {
-                "name": cls.product_1.name,
-                "product_id": cls.product_1.id,
-                "quantity": 12.0,
-                "price_unit": 100.0,
-                "move_id": cls.inv_customer.id,
-                "uom_id": cls.product_1.uom_id.id,
-                "account_id": customer_account,
-            }
-        )
-        cls.inv_line_2 = cls.invl_obj.create(
-            {
-                "name": cls.product_2.name,
-                "product_id": cls.product_2.id,
-                "quantity": 15.0,
-                "price_unit": 150.0,
-                "move_id": cls.inv_customer.id,
-                "uom_id": cls.product_2.uom_id.id,
-                "account_id": customer_account,
-            }
-        )
 
-        supplier_account = cls.acc_obj.search(
-            [("user_type_id", "=", payable_type.id)], limit=1
-        ).id
-        cls.inv_supplier = cls.inv_obj.create(
-            {
-                "partner_id": supplier1.id,
-                "account_id": supplier_account,
-                "type": "in_invoice",
-            }
+        cls.invoices = cls.env["account.move"].create(
+            [
+                {
+                    "type": "out_invoice",
+                    "partner_id": customer1.id,
+                    "invoice_date": fields.Date.from_string("2016-01-01"),
+                    "currency_id": cls.currency_id.id,
+                    "invoice_line_ids": [
+                        (
+                            0,
+                            None,
+                            {
+                                "product_id": cls.product_1.id,
+                                "product_uom_id": cls.product_1.uom_id.id,
+                                "quantity": 3,
+                                "price_unit": 1000,
+                            },
+                        ),
+                        (
+                            0,
+                            None,
+                            {
+                                "product_id": cls.product_2.id,
+                                "product_uom_id": cls.product_2.uom_id.id,
+                                "quantity": 2,
+                                "price_unit": 3000,
+                            },
+                        ),
+                    ],
+                },
+                {
+                    "type": "in_invoice",
+                    "partner_id": supplier1.id,
+                    "invoice_date": fields.Date.from_string("2016-01-01"),
+                    "currency_id": cls.currency_id.id,
+                    "invoice_line_ids": [
+                        (
+                            0,
+                            None,
+                            {
+                                "product_id": cls.product_1.id,
+                                "product_uom_id": cls.product_1.uom_id.id,
+                                "quantity": 3,
+                                "price_unit": 1000,
+                            },
+                        ),
+                        (
+                            0,
+                            None,
+                            {
+                                "product_id": cls.product_2.id,
+                                "product_uom_id": cls.product_2.uom_id.id,
+                                "quantity": 2,
+                                "price_unit": 3000,
+                            },
+                        ),
+                    ],
+                },
+            ]
         )
-        cls.inv_line_3 = cls.invl_obj.create(
-            {
-                "name": cls.product_3.name,
-                "product_id": cls.product_3.id,
-                "quantity": 17.0,
-                "price_unit": 250.0,
-                "move_id": cls.inv_supplier.id,
-                "uom_id": cls.product_3.uom_id.id,
-                "account_id": supplier_account,
-            }
-        )
-        cls.inv_line_4 = cls.invl_obj.create(
-            {
-                "name": cls.product_4.name,
-                "product_id": cls.product_4.id,
-                "quantity": 9.0,
-                "price_unit": 300.0,
-                "move_id": cls.inv_supplier.id,
-                "uom_id": cls.product_4.uom_id.id,
-                "account_id": supplier_account,
-            }
-        )
+        cls.inv_customer = cls.invoices[0]
+        cls.inv_supplier = cls.invoices[1]
 
     def test_01_add_from_invoice_customer(self):
         """Test wizard to create RMA from a customer invoice."""
@@ -147,8 +146,9 @@ class TestRmaAccount(common.SingleTransactionCase):
                 "active_ids": self.rma_group_customer.id,
                 "active_model": "rma.order",
             }
-        ).create({"line_ids": [(6, 0, self.inv_customer.line_ids.ids)]})
+        ).create({"line_ids": [(6, 0, self.inv_customer.invoice_line_ids.ids)]})
         add_inv.add_lines()
+
         self.assertEqual(len(self.rma_group_customer.rma_line_ids), 2)
         for t in self.rma_group_supplier.rma_line_ids.mapped("type"):
             self.assertEqual(t, "customer")
@@ -190,7 +190,7 @@ class TestRmaAccount(common.SingleTransactionCase):
         )
         rma_2._onchange_operation_id()
         self.assertEqual(rma_2.refund_policy, "ordered")
-        self.assertEqual(rma_2.qty_to_refund, 15.0)
+        self.assertEqual(rma_2.qty_to_refund, 2.0)
 
     def test_04_rma_create_refund(self):
         """Generate a Refund from a customer RMA."""
@@ -200,27 +200,27 @@ class TestRmaAccount(common.SingleTransactionCase):
         rma.action_rma_to_approve()
         rma.action_rma_approve()
         self.assertEqual(rma.refund_count, 0)
-        self.assertEqual(rma.qty_to_refund, 15.0)
+        self.assertEqual(rma.qty_to_refund, 2.0)
         self.assertEqual(rma.qty_refunded, 0.0)
         make_refund = self.rma_refund_wiz.with_context(
             {"customer": True, "active_ids": rma.ids, "active_model": "rma.order.line"}
         ).create({"description": "Test refund"})
         make_refund.invoice_refund()
-        rma.refund_line_ids.move_id.action_invoice_open()
+        rma.refund_line_ids.move_id.post()
         rma._compute_refund_count()
         self.assertEqual(rma.refund_count, 1)
         self.assertEqual(rma.qty_to_refund, 0.0)
-        self.assertEqual(rma.qty_refunded, 15.0)
+        self.assertEqual(rma.qty_refunded, 2.0)
 
     def test_05_fill_rma_from_inv_line(self):
         """Test filling a RMA (line) from a invoice line."""
         rma = self.rma_line_obj.new(
             {
                 "partner_id": self.inv_customer.partner_id.id,
-                "account_move_line_id": self.inv_line_1.id,
+                "account_move_line_id": self.inv_supplier.line_ids.ids[0],
             }
         )
         self.assertFalse(rma.product_id)
         rma._onchange_account_move_line_id()
         self.assertEqual(rma.product_id, self.product_1)
-        self.assertEqual(rma.product_qty, 12.0)
+        self.assertEqual(rma.product_qty, 3.0)
