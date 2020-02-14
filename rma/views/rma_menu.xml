@@ -80,20 +80,20 @@
 
     <menuitem id="menu_rma_rma_control" name="Master Data" parent="menu_rma_root" sequence="50"/>
     <menuitem id="menu_rma_config_warehouse" name="Warehouse"
-        parent="rma.menu_rma_rma_control" sequence="10"/>    
+        parent="rma.menu_rma_rma_control" sequence="10"/>
     <menuitem id="menu_rma_config_stock" name="Products" action="stock.product_template_action_product"
         parent="rma.menu_rma_config_warehouse" sequence="10"/>
     <menuitem id="rma_product_product_menu" name="Product Variants" action="stock.stock_product_normal_action"
         parent="rma.menu_rma_config_warehouse" sequence="20" groups="product.group_product_variant"/>
 
     <menuitem id="menu_rma_config_partners" name="Partners"
-        parent="rma.menu_rma_rma_control" sequence="20"/>    
+        parent="rma.menu_rma_rma_control" sequence="20"/>
     <menuitem id="rma_res_partner_menu_customer"
         name="Customers"
         parent="rma.menu_rma_config_partners"
         action="base.action_partner_form"
-        sequence="50"/>        
+        sequence="50"/>
     <menuitem id="rma_res_partner_menu_suppliers" name="Suppliers"
         parent="rma.menu_rma_config_partners"
-        action="account.res_partner_action_supplier" sequence="60"/>        
+        action="account.res_partner_action_supplier" sequence="60"/>
 </odoo>
