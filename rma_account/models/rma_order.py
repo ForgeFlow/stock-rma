@@ -91,33 +91,27 @@ class RmaOrder(models.Model):
         return res
 
     def action_view_invoice_refund(self):
-        action = self.env.ref("account.action_invoice_tree2")
-        result = action.read()[0]
-        move_ids = self.mapped("rma_line_ids.refund_line_ids.move_id").ids
-        if move_ids:
-            # choose the view_mode accordingly
-            if len(move_ids) > 1:
-                result["domain"] = [("id", "in", move_ids)]
-            else:
-                res = self.env.ref("account.move_supplier_form", False)
-                result["views"] = [(res and res.id or False, "form")]
-                result["res_id"] = move_ids[0]
-        return result
+        move_ids = self.mapped("rma_line_ids.move_id").ids
+        form_view_ref = self.env.ref("account.view_move_form", False)
+        tree_view_ref = self.env.ref("account.view_move_tree", False)
+
+        return {
+            "domain": [("id", "in", move_ids)],
+            "name": "Refunds",
+            "res_model": "account.move",
+            "type": "ir.actions.act_window",
+            "views": [(tree_view_ref.id, "tree"), (form_view_ref.id, "form")],
+        }
 
     def action_view_invoice(self):
-        if self.type == "supplier":
-            action = self.env.ref("account.action_invoice_tree2")
-            res = self.env.ref("account.move_supplier_form", False)
-        else:
-            action = self.env.ref("account.action_invoice_tree")
-            res = self.env.ref("account.view_move_form", False)
-        result = action.read()[0]
         move_ids = self.mapped("rma_line_ids.move_id").ids
-        if move_ids:
-            # choose the view_mode accordingly
-            if len(move_ids) > 1:
-                result["domain"] = [("id", "in", move_ids)]
-            else:
-                result["views"] = [(res and res.id or False, "form")]
-                result["res_id"] = move_ids[0]
-        return result
+        form_view_ref = self.env.ref("account.view_move_form", False)
+        tree_view_ref = self.env.ref("account.view_move_tree", False)
+
+        return {
+            "domain": [("id", "in", move_ids)],
+            "name": "Originating Invoice",
+            "res_model": "account.move",
+            "type": "ir.actions.act_window",
+            "views": [(tree_view_ref.id, "tree"), (form_view_ref.id, "form")],
+        }
