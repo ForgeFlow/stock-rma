@@ -1,4 +1,4 @@
-# Copyright 2017 Eficent Business and IT Consulting Services S.L.
+# Copyright 2020 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 from odoo import api, fields, models
 
@@ -30,7 +30,6 @@ class RmaOrder(models.Model):
             domain = super(RmaOrder, self)._get_line_domain(rma_id, line)
         return domain
 
-    @api.multi
     def action_view_sale_order(self):
         action = self.env.ref("sale.action_quotations")
         result = action.read()[0]

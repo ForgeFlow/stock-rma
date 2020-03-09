@@ -1,13 +1,13 @@
-# Copyright 2017 Eficent Business and IT Consulting Services S.L.
+# Copyright 2020 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 {
     "name": "RMA Sale",
-    "version": "12.0.1.0.0",
+    "version": "13.0.1.0.0",
     "license": "LGPL-3",
     "category": "RMA",
     "summary": "Links RMA with Sales Orders",
-    "author": "Eficent, Odoo Community Association (OCA)",
+    "author": "ForgeFlow, Odoo Community Association (OCA)",
     "website": "https://github.com/Eficent/stock-rma",
     "depends": ["rma_account", "sale_stock"],
     "data": [

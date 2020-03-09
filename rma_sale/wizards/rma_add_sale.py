@@ -1,4 +1,4 @@
-# Copyright 2017 Eficent Business and IT Consulting Services S.L.
+# Copyright 2020 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from odoo import _, api, fields, models
@@ -80,8 +80,11 @@ class RmaAddSale(models.TransientModel):
             "product_qty": line.product_uom_qty,
             "delivery_address_id": self.sale_id.partner_id.id,
             "invoice_address_id": self.sale_id.partner_id.id,
-            "price_unit": line.currency_id.compute(
-                line.price_unit, line.currency_id, round=False
+            "price_unit": line.currency_id._convert(
+                line.price_unit,
+                line.currency_id,
+                line.company_id,
+                line.order_id.date_order,
             ),
             "rma_id": self.rma_id.id,
             "in_route_id": operation.in_route_id.id or route.id,
@@ -101,11 +104,7 @@ class RmaAddSale(models.TransientModel):
 
     @api.model
     def _get_rma_data(self):
-        data = {
-            "date_rma": fields.Datetime.now(),
-            "delivery_address_id": self.sale_id.partner_id.id,
-            "invoice_address_id": self.sale_id.partner_id.id,
-        }
+        data = {"date_rma": fields.Datetime.now()}
         return data
 
     @api.model
@@ -115,7 +114,6 @@ class RmaAddSale(models.TransientModel):
             existing_sale_lines.append(rma_line.sale_line_id)
         return existing_sale_lines
 
-    @api.multi
     def add_lines(self):
         rma_line_obj = self.env["rma.order.line"]
         existing_sale_lines = self._get_existing_sale_lines()

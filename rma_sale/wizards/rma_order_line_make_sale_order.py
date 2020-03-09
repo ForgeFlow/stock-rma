@@ -1,9 +1,7 @@
-# Copyright 2017 Eficent Business and IT Consulting Services S.L.
+# Copyright 2020 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from odoo import _, api, exceptions, fields, models
-
-import odoo.addons.decimal_precision as dp
 
 
 class RmaLineMakeSaleOrder(models.TransientModel):
@@ -96,7 +94,6 @@ class RmaLineMakeSaleOrder(models.TransientModel):
             vals["price_unit"] = 0.0
         return vals
 
-    @api.multi
     def make_sale_order(self):
         res = []
         sale_obj = self.env["sale.order"]
@@ -139,9 +136,7 @@ class RmaLineMakeSaleOrderItem(models.TransientModel):
     )
     product_id = fields.Many2one(comodel_name="product.product", string="Product")
     name = fields.Char(string="Description")
-    product_qty = fields.Float(
-        string="Quantity to sell", digits=dp.get_precision("Product UoS")
-    )
+    product_qty = fields.Float(string="Quantity to sell", digits="Product UoS")
     product_uom_id = fields.Many2one(comodel_name="uom.uom", string="UoM")
     out_warehouse_id = fields.Many2one(
         comodel_name="stock.warehouse", string="Outbound Warehouse"
