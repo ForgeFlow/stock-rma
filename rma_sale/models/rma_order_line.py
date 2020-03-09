@@ -1,9 +1,7 @@
-# Copyright 2017 Eficent Business and IT Consulting Services S.L.
+# Copyright 2020 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
-
-from odoo.addons import decimal_precision as dp
 
 
 class RmaOrderLine(models.Model):
@@ -61,7 +59,7 @@ class RmaOrderLine(models.Model):
     qty_to_sell = fields.Float(
         string="Qty To Sell",
         copy=False,
-        digits=dp.get_precision("Product Unit of Measure"),
+        digits="Product Unit of Measure",
         readonly=True,
         compute="_compute_qty_to_sell",
         store=True,
@@ -69,7 +67,7 @@ class RmaOrderLine(models.Model):
     qty_sold = fields.Float(
         string="Qty Sold",
         copy=False,
-        digits=dp.get_precision("Product Unit of Measure"),
+        digits="Product Unit of Measure",
         readonly=True,
         compute="_compute_qty_sold",
         store=True,
@@ -111,7 +109,6 @@ class RmaOrderLine(models.Model):
             self.sale_policy = self.operation_id.sale_policy or "no"
         return res
 
-    @api.multi
     def _prepare_rma_line_from_sale_order_line(self, line):
         self.ensure_one()
         if not self.type:
@@ -148,8 +145,12 @@ class RmaOrderLine(models.Model):
             "product_qty": line.product_uom_qty,
             "delivery_address_id": line.order_id.partner_id.id,
             "invoice_address_id": line.order_id.partner_id.id,
-            "price_unit": line.currency_id.compute(
-                line.price_unit, line.currency_id, round=False
+            "price_unit": line.currency_id._convert(
+                line.price_unit,
+                line.currency_id,
+                line.company_id,
+                line.order_id.date_order,
+                round=False,
             ),
             "in_route_id": operation.in_route_id.id or route.id,
             "out_route_id": operation.out_route_id.id or route.id,
@@ -175,14 +176,12 @@ class RmaOrderLine(models.Model):
         self.update(data)
         self._remove_other_data_origin("sale_line_id")
 
-    @api.multi
     def _remove_other_data_origin(self, exception):
         res = super(RmaOrderLine, self)._remove_other_data_origin(exception)
         if not exception == "sale_line_id":
             self.sale_line_id = False
         return res
 
-    @api.multi
     @api.constrains("sale_line_id", "partner_id")
     def _check_sale_partner(self):
         for rec in self:
@@ -198,7 +197,6 @@ class RmaOrderLine(models.Model):
                     )
                 )
 
-    @api.multi
     def action_view_sale_order(self):
         action = self.env.ref("sale.action_quotations")
         result = action.read()[0]
@@ -206,7 +204,6 @@ class RmaOrderLine(models.Model):
         result["domain"] = [("id", "in", order_ids)]
         return result
 
-    @api.multi
     def _get_rma_sold_qty(self):
         self.ensure_one()
         qty = 0.0
