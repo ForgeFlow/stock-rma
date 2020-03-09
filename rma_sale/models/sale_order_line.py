@@ -1,4 +1,4 @@
-# Copyright 2017 Eficent Business and IT Consulting Services S.L.
+# Copyright 2020 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 from odoo import api, fields, models
 
@@ -33,7 +33,6 @@ class SaleOrderLine(models.Model):
             name_get_uid=name_get_uid,
         )
 
-    @api.multi
     def name_get(self):
         res = []
         if self.env.context.get("rma"):
@@ -66,7 +65,6 @@ class SaleOrderLine(models.Model):
         comodel_name="rma.order.line", string="RMA", ondelete="restrict"
     )
 
-    @api.multi
     def _prepare_order_line_procurement(self, group_id=False):
         vals = super(SaleOrderLine, self)._prepare_order_line_procurement(
             group_id=group_id
