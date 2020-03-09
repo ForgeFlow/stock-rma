@@ -4,17 +4,16 @@ from odoo import api, fields, models
 
 
 class RmaMakePicking(models.TransientModel):
-    _inherit = 'rma_make_picking.wizard'
+    _inherit = "rma_make_picking.wizard"
 
-    @api.returns('rma.order.line')
+    @api.returns("rma.order.line")
     def _prepare_item(self, line):
         res = super(RmaMakePicking, self)._prepare_item(line)
-        res['sale_line_id'] = line.sale_line_id.id
+        res["sale_line_id"] = line.sale_line_id.id
         return res
 
 
 class RmaMakePickingItem(models.TransientModel):
     _inherit = "rma_make_picking.wizard.item"
 
-    sale_line_id = fields.Many2one(
-        comodel_name='sale.order.line', string='Sale Line')
+    sale_line_id = fields.Many2one(comodel_name="sale.order.line", string="Sale Line")
