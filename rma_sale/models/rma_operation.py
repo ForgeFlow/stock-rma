@@ -4,9 +4,14 @@ from odoo import fields, models
 
 
 class RmaOperation(models.Model):
-    _inherit = 'rma.operation'
+    _inherit = "rma.operation"
 
-    sale_policy = fields.Selection([
-        ('no', 'Not required'), ('ordered', 'Based on Ordered Quantities'),
-        ('received', 'Based on Received Quantities')],
-        string="Sale Policy", default='no')
+    sale_policy = fields.Selection(
+        [
+            ("no", "Not required"),
+            ("ordered", "Based on Ordered Quantities"),
+            ("received", "Based on Received Quantities"),
+        ],
+        string="Sale Policy",
+        default="no",
+    )
