@@ -9,7 +9,7 @@
                 <div class="oe_button_box" attrs="{'invisible': [('rma_count', '=', 0)]}">
                     <button type="object"  name="action_view_rma_customer"
                             class="oe_stat_button"
-                            icon="fa-eject"
+                            icon="fa-dropbox"
                             groups="rma.group_rma_customer_user,rma.group_rma_supplier_user">
                         <field name="rma_count" widget="statinfo"
                                string="RMA"/>
@@ -28,7 +28,7 @@
                 <div class="oe_button_box" attrs="{'invisible': [('rma_count', '=', 0)]}">
                     <button type="object"  name="action_view_rma_supplier"
                             class="oe_stat_button"
-                            icon="fa-eject"
+                            icon="fa-dropbox"
                             groups="rma.group_rma_customer_user,rma.group_rma_supplier_user">
                         <field name="rma_count" widget="statinfo"
                                string="RMA"/>
