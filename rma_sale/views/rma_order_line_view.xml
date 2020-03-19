@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+        <record id="view_rma_line_form" model="ir.ui.view">
+            <field name="name">rma.order.line.form</field>
+            <field name="model">rma.order.line</field>
+            <field name="inherit_id" ref="rma.view_rma_line_form"/>
+            <field name="arch" type="xml">
+                <div name='button_box' position="inside">
+                    <button type="object"  name="action_view_sale_order"
+                            class="oe_stat_button"
+                            icon="fa-strikethrough"
+                            groups="sales_team.group_sale_salesman_all_leads">
+                            <field name="sales_count" widget="statinfo"
+                                   string="Sales Orders"/>
+                    </button>
+                </div>
+                <group name="main_info" position="inside">
+                    <field name="sale_line_id"
+                           context="{'rma': True}"
+                           options="{'no_create': True}"/>
+                </group>
+                <group name="quantities" position="inside">
+                    <group>
+                        <field name="qty_to_sell"/>
+                        <field name="qty_sold"/>
+                    </group>
+                </group>
+                <field name="delivery_policy" position="after">
+                    <field name="sale_policy"/>
+                </field>
+                <field name="origin" position="after">
+                    <field name="sale_id"
+                           attrs="{'invisible': [('sale_line_id', '=', False)]}"/>
+                </field>
+                <notebook position="inside">
+                    <page name="sale" string="Sale Lines">
+                        <field name="sale_line_ids" nolabel="1"/>
+                    </page>
+                </notebook>
+            </field>
+        </record>
+
+        <record id="view_rma_line_supplier_form" model="ir.ui.view">
+            <field name="name">rma.order.line.supplier.form</field>
+            <field name="model">rma.order.line</field>
+            <field name="inherit_id" ref="rma.view_rma_line_supplier_form"/>
+            <field name="arch" type="xml">
+                <div name='button_box' position="inside">
+                    <button type="object"  name="action_view_sale_order"
+                            class="oe_stat_button"
+                            icon="fa-strikethrough"
+                            groups="sales_team.group_sale_salesman_all_leads">
+                            <field name="sales_count" widget="statinfo"
+                                   string="Sales Orders"/>
+                    </button>
+                </div>
+                <group name="quantities" position="inside">
+                    <group>
+                        <field name="qty_to_sell"/>
+                        <field name="qty_sold"/>
+                    </group>
+                </group>
+                <field name="delivery_policy" position="after">
+                    <field name="sale_policy"/>
+                </field>
+                <notebook position="inside">
+                    <page name="sale" string="Sale Lines">
+                        <field name="sale_line_ids" nolabel="1"/>
+                    </page>
+                </notebook>
+            </field>
+        </record>
+
+    <record id="view_rma_line_button_sale_form" model="ir.ui.view">
+        <field name="name">rma.order.line.form</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_line_button_form"/>
+        <field name="arch" type="xml">
+            <header position="inside">
+                <button name="%(action_rma_order_line_make_sale_order)d" states="approved"
+                        string="Create Sales Quotation" class="oe_highlight"
+                        type="action"/>
+            </header>
+        </field>
+    </record>
+    <record id="view_rma_line_supplier_button_sale_form" model="ir.ui.view">
+        <field name="name">rma.order.line.supplier.form</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_line_supplier_button_form"/>
+        <field name="arch" type="xml">
+            <header position="inside">
+                <button name="%(action_rma_order_line_make_sale_order)d" states="approved"
+                        string="Create Sales Quotation" class="oe_highlight"
+                        type="action"/>
+            </header>
+        </field>
+    </record>
+
+    <record id="view_rma_rma_line_filter" model="ir.ui.view">
+        <field name="name">rma.order.line.select - rma_sale</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_rma_line_filter"/>
+        <field name="arch" type="xml">
+            <group name="stock_quantities" position="after">
+                <group name="sale_quantities" groups="sales_team.group_sale_salesman">
+                    <filter domain="[('state','!=', 'done'),('qty_to_sell','>',0.0)]" help="To Sell" name="to_sell"/>
+                </group>
+            </group>
+        </field>
+    </record>
+
+</odoo>
