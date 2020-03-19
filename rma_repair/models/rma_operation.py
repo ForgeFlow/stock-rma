@@ -5,11 +5,17 @@ from odoo import fields, models
 
 
 class RmaOperation(models.Model):
-    _inherit = 'rma.operation'
+    _inherit = "rma.operation"
 
-    repair_type = fields.Selection([
-        ('no', 'Not required'), ('ordered', 'Based on Ordered Quantities'),
-        ('received', 'Based on Received Quantities')],
-        string="Repair Policy", default='no')
-    delivery_policy = fields.Selection(selection_add=[
-        ('repair', 'Based on Repair Quantities')])
+    repair_type = fields.Selection(
+        [
+            ("no", "Not required"),
+            ("ordered", "Based on Ordered Quantities"),
+            ("received", "Based on Received Quantities"),
+        ],
+        string="Repair Policy",
+        default="no",
+    )
+    delivery_policy = fields.Selection(
+        selection_add=[("repair", "Based on Repair Quantities")]
+    )
