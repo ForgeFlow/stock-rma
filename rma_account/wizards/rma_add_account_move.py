@@ -82,8 +82,12 @@ class RmaAddAccountMove(models.TransientModel):
             "uom_id": line.product_uom_id.id,
             "operation_id": operation.id,
             "product_qty": line.quantity,
-            "price_unit": line.move_id.currency_id.compute(
-                line.price_unit, line.currency_id, round=False
+            "price_unit": line.move_id.currency_id._convert(
+                line.price_unit,
+                line.currency_id,
+                line.company_id,
+                line.date,
+                round=False,
             ),
             "delivery_address_id": line.move_id.partner_id.id,
             "invoice_address_id": line.move_id.partner_id.id,
