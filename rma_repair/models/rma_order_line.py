@@ -1,9 +1,7 @@
-# Copyright 2017 Eficent Business and IT Consulting Services S.L.
-# License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
+# Copyright 2020 ForgeFlow S.L.
+# License LGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
 from odoo import api, fields, models
-
-from odoo.addons import decimal_precision as dp
 
 
 class RmaOrderLine(models.Model):
@@ -49,7 +47,7 @@ class RmaOrderLine(models.Model):
     qty_to_repair = fields.Float(
         string="Qty To Repair",
         copy=False,
-        digits=dp.get_precision("Product Unit of Measure"),
+        digits="Product Unit of Measure",
         readonly=True,
         compute="_compute_qty_to_repair",
         store=True,
@@ -57,7 +55,7 @@ class RmaOrderLine(models.Model):
     qty_under_repair = fields.Float(
         string="Qty Under Repair",
         copy=False,
-        digits=dp.get_precision("Product Unit of Measure"),
+        digits="Product Unit of Measure",
         readonly=True,
         compute="_compute_qty_under_repair",
         store=True,
@@ -65,7 +63,7 @@ class RmaOrderLine(models.Model):
     qty_repaired = fields.Float(
         string="Qty Repaired",
         copy=False,
-        digits=dp.get_precision("Product Unit of Measure"),
+        digits="Product Unit of Measure",
         readonly=True,
         compute="_compute_qty_repaired",
         store=True,
@@ -91,7 +89,6 @@ class RmaOrderLine(models.Model):
     qty_to_pay = fields.Float(compute="_compute_qty_to_pay")
     qty_to_deliver = fields.Float(compute="_compute_qty_to_deliver")
 
-    @api.multi
     @api.depends(
         "delivery_policy",
         "product_qty",
@@ -106,12 +103,11 @@ class RmaOrderLine(models.Model):
         for rec in self.filtered(lambda l: l.delivery_policy == "repair"):
             qty_to_pay = 0.0
             for repair in rec.repair_ids.filtered(
-                lambda r: r.invoice_method != "none" and r.invoice_status != "paid"
+                lambda r: r.invoice_method != "none" and r.invoice_status != "posted"
             ):
                 qty_to_pay += repair.product_qty
             rec.qty_to_pay = qty_to_pay
 
-    @api.multi
     def action_view_repair_order(self):
         action = self.env.ref("repair.action_repair_order_tree")
         result = action.read()[0]
@@ -124,7 +120,6 @@ class RmaOrderLine(models.Model):
             result["res_id"] = repair_ids[0]
         return result
 
-    @api.multi
     def _get_rma_repaired_qty(self):
         self.ensure_one()
         qty = 0.0
@@ -135,7 +130,6 @@ class RmaOrderLine(models.Model):
             qty += repair_qty
         return qty
 
-    @api.multi
     def _get_rma_under_repair_qty(self):
         self.ensure_one()
         qty = 0.0
@@ -155,7 +149,6 @@ class RmaOrderLine(models.Model):
             self.repair_type = self.operation_id.repair_type or "no"
         return result
 
-    @api.multi
     @api.depends(
         "move_ids",
         "move_ids.state",

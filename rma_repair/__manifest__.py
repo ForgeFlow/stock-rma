@@ -1,13 +1,12 @@
-# Copyright 2017 Eficent Business and IT Consulting Services S.L.
-# License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
-
+# Copyright 2020 ForgeFlow S.L.
+# License LGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 {
     "name": "RMA Repair",
-    "version": "12.0.1.2.0",
+    "version": "13.0.1.0.0",
     "license": "LGPL-3",
     "category": "RMA",
     "summary": "Links RMA with Repairs.",
-    "author": "Eficent, Odoo Community Association (OCA)",
+    "author": "ForgeFlow S.L., Odoo Community Association (OCA)",
     "website": "https://github.com/Eficent/stock-rma",
     "depends": ["rma_account", "repair_refurbish"],
     "data": [
@@ -19,5 +18,4 @@
         "data/repair_sequence.xml",
     ],
     "installable": True,
-    "auto_install": True,
 }
