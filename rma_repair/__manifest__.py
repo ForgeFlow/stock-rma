@@ -9,17 +9,15 @@
     "summary": "Links RMA with Repairs.",
     "author": "Eficent, Odoo Community Association (OCA)",
     "website": "https://github.com/Eficent/stock-rma",
-    "depends": [
-        "rma_account",
-        "repair_refurbish"
+    "depends": ["rma_account", "repair_refurbish"],
+    "data": [
+        "views/rma_order_view.xml",
+        "views/rma_operation_view.xml",
+        "views/repair_view.xml",
+        "wizards/rma_order_line_make_repair_view.xml",
+        "views/rma_order_line_view.xml",
+        "data/repair_sequence.xml",
     ],
-    "data": ["views/rma_order_view.xml",
-             "views/rma_operation_view.xml",
-             "views/repair_view.xml",
-             "wizards/rma_order_line_make_repair_view.xml",
-             "views/rma_order_line_view.xml",
-             "data/repair_sequence.xml",
-             ],
     "installable": True,
     "auto_install": True,
 }
