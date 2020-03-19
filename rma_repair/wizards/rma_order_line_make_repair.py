@@ -1,10 +1,8 @@
-# Copyright 2017 Eficent Business and IT Consulting Services S.L.
-# License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl-3.0).
+# Copyright 2020 ForgeFlow S.L.
+# License LGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
-
-import odoo.addons.decimal_precision as dp
 
 
 class RmaLineMakeRepair(models.TransientModel):
@@ -56,7 +54,6 @@ class RmaLineMakeRepair(models.TransientModel):
         res["item_ids"] = items
         return res
 
-    @api.multi
     def make_repair_order(self):
         res = []
         repair_obj = self.env["repair.order"]
@@ -68,7 +65,6 @@ class RmaLineMakeRepair(models.TransientModel):
         return {
             "domain": [("id", "in", res)],
             "name": _("Repairs"),
-            "view_type": "form",
             "view_mode": "tree,form",
             "res_model": "repair.order",
             "view_id": False,
@@ -106,9 +102,7 @@ class RmaLineMakeRepairItem(models.TransientModel):
     product_id = fields.Many2one(
         comodel_name="product.product", string="Product", readonly=True
     )
-    product_qty = fields.Float(
-        string="Quantity to repair", digits=dp.get_precision("Product UoS")
-    )
+    product_qty = fields.Float(string="Quantity to repair", digits="Product UoS")
     product_uom_id = fields.Many2one(
         comodel_name="uom.uom", string="UoM", readonly=True
     )
