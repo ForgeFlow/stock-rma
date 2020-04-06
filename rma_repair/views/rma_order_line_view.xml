@@ -45,6 +45,12 @@
                         string="Create Repair Order"
                         class="oe_highlight"
                         type="action"/>
+                <button name="rma_repair_make_invoice"
+                        states="approved"
+                        string="Create Repair Invoices"
+                        class="oe_highlight"
+                        attrs="{'invisible':[('repair_count', '=', 0)]}"
+                        type="object"/>
             </header>
         </field>
     </record>

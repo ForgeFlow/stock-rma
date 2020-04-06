@@ -144,3 +144,8 @@ class RmaOrderLine(models.Model):
         for rec in self.filtered(lambda l: l.delivery_policy == 'repair'):
             rec.qty_to_deliver = rec.qty_repaired - rec.qty_delivered
         return res
+
+    def rma_repair_make_invoice(self):
+        res = self.env['repair.order.make_invoice'].with_context(
+            active_ids=self.repair_ids.ids).create({}).make_invoices()
+        return res
