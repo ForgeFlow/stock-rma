@@ -242,7 +242,7 @@ class TestRmaRepair(common.SingleTransactionCase):
         repair.action_repair_invoice_create()
         self.assertEqual(rma.qty_repaired, 1.0)
         repair.invoice_id.action_invoice_open()
-        self.assertEqual(rma.qty_to_deliver, 0.0)
+        self.assertEqual(rma.qty_to_deliver, 1.0)
         repair.invoice_id.pay_and_reconcile(self.bank_journal, 200.0)
         self.assertEqual(repair.invoice_status, 'paid')
         self.assertEqual(rma.qty_to_pay, 0.0)
