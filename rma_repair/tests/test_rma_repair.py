@@ -261,9 +261,8 @@ class TestRmaRepair(common.SingleTransactionCase):
         repair.action_repair_end()
         repair.action_repair_invoice_create()
         self.assertEqual(rma.qty_repaired, 1.0)
-        self.assertEqual(rma.qty_to_deliver, 0.0)
+        self.assertEqual(rma.qty_to_deliver, 1.0)
         repair.invoice_id.post()
-
         repair.invoice_id.action_invoice_register_payment()
         self.assertEqual(repair.invoice_status, "posted")
         self.assertEqual(rma.qty_to_pay, 0.0)
