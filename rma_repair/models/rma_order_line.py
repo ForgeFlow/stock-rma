@@ -147,5 +147,5 @@ class RmaOrderLine(models.Model):
 
     def rma_repair_make_invoice(self):
         res = self.env['repair.order.make_invoice'].with_context(
-            active_ids=self.repair_ids.ids).create({}).make_invoices()
+            active_ids=self.repair_ids.ids).create({'group': True}).make_invoices()
         return res
