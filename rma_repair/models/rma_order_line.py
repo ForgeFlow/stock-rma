@@ -142,6 +142,10 @@ class RmaOrderLine(models.Model):
     def _compute_qty_to_deliver(self):
         res = super(RmaOrderLine, self)._compute_qty_to_deliver()
         for rec in self.filtered(lambda l: l.delivery_policy == 'repair'):
-            rec.qty_to_deliver = rec.qty_repaired - rec.qty_delivered - \
-                rec.qty_to_pay
+            rec.qty_to_deliver = rec.qty_repaired - rec.qty_delivered
+        return res
+
+    def rma_repair_make_invoice(self):
+        res = self.env['repair.order.make_invoice'].with_context(
+            active_ids=self.repair_ids.ids).create({'group': True}).make_invoices()
         return res

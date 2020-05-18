@@ -45,8 +45,25 @@
                         string="Create Repair Order"
                         class="oe_highlight"
                         type="action"/>
+                <button name="rma_repair_make_invoice"
+                        states="approved"
+                        string="Create Repair Invoices"
+                        class="oe_highlight"
+                        attrs="{'invisible':[('repair_count', '=', 0)]}"
+                        type="object"/>
             </header>
         </field>
+    </record>
+
+    <record id="action_rma_order_line_make_repair_invoice"
+            model="ir.actions.act_window">
+        <field name="name">Create Repair Invoices</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">repair.order.make_invoice</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="rma_repair.model_rma_order_line"/>
     </record>
 
 </odoo>
