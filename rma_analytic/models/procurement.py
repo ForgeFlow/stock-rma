@@ -12,8 +12,8 @@ class ProcurementOrder(models.Model):
     @api.constrains('account_analytic_id')
     def check_analytic(self):
         for order in self:
-            if (order.account_analytic_id !=
-                    order.rma_line_id.analytic_account_id):
+            if order.rma_line_id and (order.account_analytic_id !=
+                                      order.rma_line_id.analytic_account_id):
                 raise exceptions.ValidationError(
                     _("The analytic account in the procurement it's not the "
                       "same as in the rma line"))
