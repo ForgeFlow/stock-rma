@@ -108,7 +108,7 @@ class RmaMakePicking(models.TransientModel):
                     delivery_address_id, 'supplier')
             elif line.supplier_to_customer:
                 location = self._get_address_location(
-                    delivery_address_id, '  ')
+                    delivery_address_id, line.type)
             else:
                 location = line.location_id
             warehouse = line.in_warehouse_id
