@@ -191,7 +191,8 @@ class RmaOrderLine(models.Model):
     )
     rma_id = fields.Many2one(
         comodel_name='rma.order', string='RMA Group',
-        track_visibility='onchange', readonly=True,
+        track_visibility='onchange',
+        readonly=True, states={'draft': [('readonly', False)]},
         copy=False
     )
     name = fields.Char(
