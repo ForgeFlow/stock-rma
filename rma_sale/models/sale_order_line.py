@@ -44,12 +44,7 @@ class SaleOrderLine(models.Model):
                             "SO:%s | INV: %s, | PART:%s | QTY:%s"
                             % (
                                 sale.order_id.name,
-                                " ".join(
-                                    str(x)
-                                    for x in [
-                                        inv.number for inv in sale.order_id.invoice_ids
-                                    ]
-                                ),
+                                " ".join(str(x) for x in [inv.name for inv in sale.order_id.invoice_ids]),
                                 sale.product_id.name,
                                 sale.product_uom_qty,
                             ),
