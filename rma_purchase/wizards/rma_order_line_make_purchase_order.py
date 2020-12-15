@@ -36,7 +36,6 @@ class RmaLineMakePurchaseOrder(models.TransientModel):
     def _prepare_item(self, line):
         return {
             "line_id": line.id,
-            "rma_line_id": line.id,
             "product_id": line.product_id.id,
             "name": line.product_id.name,
             "product_qty": line.qty_to_purchase,
@@ -101,7 +100,6 @@ class RmaLineMakePurchaseOrder(models.TransientModel):
             vals["price_unit"] = 0.0
         return vals
 
-    @api.multi
     def create_purchase_order(self):
         res = []
         purchase_obj = self.env["purchase.order"]

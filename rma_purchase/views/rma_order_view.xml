@@ -14,11 +14,7 @@
                     icon="fa-shopping-cart"
                     groups="purchase.group_purchase_user"
                 >
-                    <field
-                        name="po_count"
-                        widget="statinfo"
-                        string="Purchase Orders"
-                    />
+                    <field name="po_count" widget="statinfo" string="Purchase Orders" />
                 </button>
                 <button
                     type="object"

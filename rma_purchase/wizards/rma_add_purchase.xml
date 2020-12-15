@@ -62,8 +62,6 @@
         <field name="name">Add Purchase Order</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">rma_add_purchase</field>
-        <field name="src_model">rma.order</field>
-        <field name="view_type">form</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
         <field name="view_id" ref="view_rma_add_purchase" />
