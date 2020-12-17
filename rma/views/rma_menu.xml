@@ -142,7 +142,7 @@
         id="rma_res_partner_menu_suppliers"
         name="Suppliers"
         parent="rma.menu_rma_config_partners"
-        action="account.res_partner_action_supplier"
+        action="base.action_partner_supplier_form"
         sequence="60"
     />
 </odoo>
