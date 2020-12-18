@@ -2,10 +2,7 @@
 <odoo>
     <template id="report_rma_order_line_document">
         <t t-call="web.external_layout">
-            <t
-                t-set="doc"
-                t-value="doc.with_context({'lang':doc.partner_id.lang})"
-            />
+            <t t-set="doc" t-value="doc.with_context({'lang':doc.partner_id.lang})" />
             <div class="page">
                 <div class="oe_structure" />
                 <div class="row">
@@ -19,9 +16,7 @@
                                     t-field="doc.in_warehouse_id.partner_id"
                                     t-options='{"widget": "contact", "fields": ["address", "name", "phone", "fax"], "no_marker": True, "phone_icons": True}'
                                 />
-                                <p
-                                    t-if="doc.in_warehouse_id.partner_id.vat"
-                                >VAT: <span
+                                <p t-if="doc.in_warehouse_id.partner_id.vat">VAT: <span
                                         t-field="doc.in_warehouse_id.partner_id.vat"
                                     /></p>
                             </div>
@@ -80,11 +75,7 @@
                         <strong>Contact Person:</strong>
                         <p t-field="doc.requested_by.name" />
                     </div>
-                    <div
-                        name="operation_id"
-                        t-if="doc.operation_id"
-                        class="col-3"
-                    >
+                    <div name="operation_id" t-if="doc.operation_id" class="col-3">
                         <strong>Operation:</strong>
                         <p t-field="doc.operation_id.name" />
                     </div>
@@ -103,10 +94,7 @@
                             <td><span t-field="doc.product_id" /></td>
                             <td class="text-right">
                                 <span t-field="doc.product_qty" />
-                                <span
-                                    t-field="doc.uom_id"
-                                    groups="uom.group_uom"
-                                />
+                                <span t-field="doc.uom_id" groups="uom.group_uom" />
                             </td>
                             <td class="text-right">
                                 <span
@@ -144,10 +132,7 @@
 
     <template id="report_rma_order_document">
         <t t-call="web.external_layout">
-            <t
-                t-set="doc"
-                t-value="doc.with_context({'lang':doc.partner_id.lang})"
-            />
+            <t t-set="doc" t-value="doc.with_context({'lang':doc.partner_id.lang})" />
             <div class="page">
                 <div class="oe_structure" />
                 <div class="row">
@@ -161,9 +146,7 @@
                                     t-field="doc.in_warehouse_id.partner_id"
                                     t-options='{"widget": "contact", "fields": ["address", "name", "phone", "fax"], "no_marker": True, "phone_icons": True}'
                                 />
-                                <p
-                                    t-if="doc.in_warehouse_id.partner_id.vat"
-                                >VAT: <span
+                                <p t-if="doc.in_warehouse_id.partner_id.vat">VAT: <span
                                         t-field="doc.in_warehouse_id.partner_id.vat"
                                     /></p>
                             </div>
@@ -241,10 +224,7 @@
                             <td><span t-field="l.product_id" /></td>
                             <td class="text-right">
                                 <span t-field="l.product_qty" />
-                                <span
-                                    t-field="l.uom_id"
-                                    groups="uom.group_uom"
-                                />
+                                <span t-field="l.uom_id" groups="uom.group_uom" />
                             </td>
                             <td class="text-right">
                                 <span t-field="l.price_unit" />
