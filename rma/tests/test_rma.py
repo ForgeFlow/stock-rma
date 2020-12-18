@@ -225,7 +225,7 @@ class TestRma(common.SavepointCase):
         }
 
     def _check_equal_quantity(self, qty1, qty2, msg):
-        self.assertEquals(qty1, qty2, msg)
+        self.assertEqual(qty1, qty2, msg)
 
     def test_01_rma_order_line(self):
         for line in self.rma_customer_id.rma_line_ids:
@@ -238,22 +238,22 @@ class TestRma(common.SavepointCase):
             line._compute_out_shipment_count()
 
             # check assert if call reference_move_id onchange
-            self.assertEquals(line.product_id, line.reference_move_id.product_id)
-            self.assertEquals(line.product_qty, line.reference_move_id.product_uom_qty)
-            self.assertEquals(
+            self.assertEqual(line.product_id, line.reference_move_id.product_id)
+            self.assertEqual(line.product_qty, line.reference_move_id.product_uom_qty)
+            self.assertEqual(
                 line.location_id.location_id, line.reference_move_id.location_id
             )
-            self.assertEquals(line.origin, line.reference_move_id.picking_id.name)
-            self.assertEquals(
+            self.assertEqual(line.origin, line.reference_move_id.picking_id.name)
+            self.assertEqual(
                 line.delivery_address_id, line.reference_move_id.picking_partner_id
             )
-            self.assertEquals(
+            self.assertEqual(
                 line.qty_to_receive, line.reference_move_id.product_uom_qty
             )
             line._onchange_product_id()
             line._onchange_operation_id()
             # check assert if call operation_id onchange
-            self.assertEquals(line.operation_id.receipt_policy, line.receipt_policy)
+            self.assertEqual(line.operation_id.receipt_policy, line.receipt_policy)
 
             data = {"customer_to_supplier": line.customer_to_supplier}
             line = self.rma_line.new(data)
@@ -287,20 +287,20 @@ class TestRma(common.SavepointCase):
         res = self.rma_customer_id.rma_line_ids.action_view_in_shipments()
         self.assertTrue("res_id" in res, "Incorrect number of pickings" "created")
         picking = self.env["stock.picking"].browse(res["res_id"])
-        self.assertEquals(len(picking), 1, "Incorrect number of pickings created")
+        self.assertEqual(len(picking), 1, "Incorrect number of pickings created")
         moves = picking.move_lines
-        self.assertEquals(len(moves), 3, "Incorrect number of moves created")
+        self.assertEqual(len(moves), 3, "Incorrect number of moves created")
         lines = self.rma_customer_id.rma_line_ids
-        self.assertEquals(
+        self.assertEqual(
             list(set(lines.mapped("qty_received"))), [0], "Wrong qty received"
         )
-        self.assertEquals(
+        self.assertEqual(
             list(set(lines.mapped("qty_to_deliver"))), [0], "Wrong qty to deliver"
         )
-        self.assertEquals(
+        self.assertEqual(
             list(set(lines.mapped("qty_outgoing"))), [0], "Wrong qty outgoing"
         )
-        self.assertEquals(
+        self.assertEqual(
             list(set(lines.mapped("qty_delivered"))), [0], "Wrong qty delivered"
         )
         # product specific
@@ -338,18 +338,18 @@ class TestRma(common.SavepointCase):
         picking.action_assign()
         for mv in picking.move_lines:
             mv.quantity_done = mv.product_uom_qty
-        picking.action_done()
+        picking._action_done()
         lines = self.rma_customer_id.rma_line_ids
-        self.assertEquals(
+        self.assertEqual(
             list(set(lines.mapped("qty_to_receive"))), [0], "Wrong qty to_receive"
         )
-        self.assertEquals(
+        self.assertEqual(
             list(set(lines.mapped("qty_incoming"))), [0], "Wrong qty incoming"
         )
-        self.assertEquals(
+        self.assertEqual(
             list(set(lines.mapped("qty_outgoing"))), [0], "Wrong qty outgoing"
         )
-        self.assertEquals(
+        self.assertEqual(
             list(set(lines.mapped("qty_delivered"))), [0], "Wrong qty delivered"
         )
         # product specific
@@ -397,15 +397,15 @@ class TestRma(common.SavepointCase):
         self.assertTrue("res_id" in res, "Incorrect number of pickings" "created")
         picking = self.env["stock.picking"].browse(res["res_id"])
         moves = picking.move_lines
-        self.assertEquals(len(moves), 3, "Incorrect number of moves created")
+        self.assertEqual(len(moves), 3, "Incorrect number of moves created")
         lines = self.rma_customer_id.rma_line_ids
-        self.assertEquals(
+        self.assertEqual(
             list(set(lines.mapped("qty_to_receive"))), [0], "Wrong qty to_receive"
         )
-        self.assertEquals(
+        self.assertEqual(
             list(set(lines.mapped("qty_incoming"))), [0], "Wrong qty incoming"
         )
-        self.assertEquals(
+        self.assertEqual(
             list(set(lines.mapped("qty_delivered"))), [0], "Wrong qty delivered"
         )
 
@@ -444,15 +444,15 @@ class TestRma(common.SavepointCase):
         picking.action_assign()
         for mv in picking.move_lines:
             mv.quantity_done = mv.product_uom_qty
-        picking.action_done()
+        picking._action_done()
         lines = self.rma_customer_id.rma_line_ids
-        self.assertEquals(
+        self.assertEqual(
             list(set(lines.mapped("qty_to_receive"))), [0], "Wrong qty to_receive"
         )
-        self.assertEquals(
+        self.assertEqual(
             list(set(lines.mapped("qty_incoming"))), [0], "Wrong qty incoming"
         )
-        self.assertEquals(
+        self.assertEqual(
             list(set(lines.mapped("qty_outgoing"))), [0], "Wrong qty_outgoing"
         )
 
@@ -489,7 +489,7 @@ class TestRma(common.SavepointCase):
         )
 
         self.line.action_rma_done()
-        self.assertEquals(self.line.state, "done", "Wrong State")
+        self.assertEqual(self.line.state, "done", "Wrong State")
         self.rma_customer_id.action_view_in_shipments()
         self.rma_customer_id.action_view_out_shipments()
         self.rma_customer_id.action_view_lines()
@@ -514,9 +514,9 @@ class TestRma(common.SavepointCase):
         res = self.rma_droship_id.rma_line_ids.action_view_in_shipments()
         self.assertTrue("res_id" in res, "Incorrect number of pickings" "created")
         picking = self.env["stock.picking"].browse(res["res_id"])
-        self.assertEquals(len(picking), 1, "Incorrect number of pickings created")
+        self.assertEqual(len(picking), 1, "Incorrect number of pickings created")
         moves = picking.move_lines
-        self.assertEquals(len(moves), 3, "Incorrect number of moves created")
+        self.assertEqual(len(moves), 3, "Incorrect number of moves created")
         wizard = self.make_supplier_rma.with_context(
             {
                 "active_ids": self.rma_droship_id.rma_line_ids.ids,
@@ -527,15 +527,13 @@ class TestRma(common.SavepointCase):
         res = wizard.make_supplier_rma()
         supplier_rma = self.rma.browse(res["res_id"])
         lines = supplier_rma.rma_line_ids
-        self.assertEquals(
+        self.assertEqual(
             list(set(lines.mapped("qty_received"))), [0], "Wrong qty_received"
         )
-        self.assertEquals(
+        self.assertEqual(
             list(set(lines.mapped("qty_outgoing"))), [0], "Wrong qty_outgoing"
         )
-        self.assertEquals(
-            list(set(lines.mapped("qty_delivered"))), [0], "qty_delivered"
-        )
+        self.assertEqual(list(set(lines.mapped("qty_delivered"))), [0], "qty_delivered")
 
         # product specific
         self._check_equal_quantity(
@@ -577,7 +575,7 @@ class TestRma(common.SavepointCase):
             "Wrong qty_in_supplier_rma",
         )
 
-        self.assertEquals(
+        self.assertEqual(
             list(set(lines.mapped("qty_to_supplier_rma"))),
             [0],
             "Wrong qty_to_supplier_rma",
@@ -586,7 +584,7 @@ class TestRma(common.SavepointCase):
         for line in self.rma_droship_id.rma_line_ids:
             line.action_rma_done()
 
-        self.assertEquals(line.mapped("state"), ["done"], "Wrong State")
+        self.assertEqual(line.mapped("state"), ["done"], "Wrong State")
 
     # Supplier RMA
     def test_04_supplier_rma(self):
@@ -607,15 +605,13 @@ class TestRma(common.SavepointCase):
         self.assertTrue("res_id" in res, "Incorrect number of pickings" "created")
         picking = self.env["stock.picking"].browse(res["res_id"])
         moves = picking.move_lines
-        self.assertEquals(len(moves), 3, "Incorrect number of moves created")
+        self.assertEqual(len(moves), 3, "Incorrect number of moves created")
 
         lines = self.rma_supplier_id.rma_line_ids
-        self.assertEquals(
+        self.assertEqual(
             list(set(lines.mapped("qty_received"))), [0], "Wrong qty_received"
         )
-        self.assertEquals(
-            list(set(lines.mapped("qty_delivered"))), [0], "qty_delivered"
-        )
+        self.assertEqual(list(set(lines.mapped("qty_delivered"))), [0], "qty_delivered")
 
         # product specific
         self._check_equal_quantity(
@@ -648,24 +644,24 @@ class TestRma(common.SavepointCase):
             2,
             "Wrong qty_to_deliver",
         )
-        self.assertEquals(
+        self.assertEqual(
             list(set(lines.mapped("qty_incoming"))), [0], "Wrong qty_incoming"
         )
         picking.action_assign()
         for mv in picking.move_lines:
             mv.quantity_done = mv.product_uom_qty
-        picking.action_done()
+        picking._action_done()
 
-        self.assertEquals(
+        self.assertEqual(
             list(set(lines.mapped("qty_incoming"))), [0], "Wrong qty_incoming"
         )
-        self.assertEquals(
+        self.assertEqual(
             list(set(lines.mapped("qty_to_deliver"))), [0], "Wrong qty_to_deliver"
         )
-        self.assertEquals(
+        self.assertEqual(
             list(set(lines.mapped("qty_received"))), [0], "Wrong qty_received"
         )
-        self.assertEquals(list(set(lines.mapped("qty_outgoing"))), [0], "qty_outgoing")
+        self.assertEqual(list(set(lines.mapped("qty_outgoing"))), [0], "qty_outgoing")
 
         # product specific
         self._check_equal_quantity(
@@ -716,13 +712,13 @@ class TestRma(common.SavepointCase):
         res = self.rma_supplier_id.rma_line_ids.action_view_in_shipments()
         self.assertTrue("res_id" in res, "Incorrect number of pickings" "created")
         pickings = self.env["stock.picking"].browse(res["res_id"])
-        self.assertEquals(len(pickings), 1, "Incorrect number of pickings created")
+        self.assertEqual(len(pickings), 1, "Incorrect number of pickings created")
         picking_in = pickings[0]
         moves = picking_in.move_lines
-        self.assertEquals(len(moves), 3, "Incorrect number of moves created")
+        self.assertEqual(len(moves), 3, "Incorrect number of moves created")
 
         lines = self.rma_supplier_id.rma_line_ids
-        self.assertEquals(
+        self.assertEqual(
             list(set(lines.mapped("qty_to_deliver"))), [0], "qty_to_deliver"
         )
 
@@ -747,14 +743,14 @@ class TestRma(common.SavepointCase):
         picking_in.action_assign()
         for mv in picking_in.move_line_ids:
             mv.qty_done = mv.product_uom_qty
-        picking_in.action_done()
-        self.assertEquals(
+        picking_in._action_done()
+        self.assertEqual(
             list(set(lines.mapped("qty_outgoing"))), [0], "Wrong qty_outgoing"
         )
-        self.assertEquals(
+        self.assertEqual(
             list(set(lines.mapped("qty_incoming"))), [0], "Wrong qty_incoming"
         )
-        self.assertEquals(
+        self.assertEqual(
             list(set(lines.mapped("qty_to_deliver"))), [0], "qty_to_deliver"
         )
 
@@ -791,4 +787,4 @@ class TestRma(common.SavepointCase):
         )
         for line in self.rma_supplier_id.rma_line_ids:
             line.action_rma_done()
-        self.assertEquals(line.mapped("state"), ["done"], "Wrong State")
+        self.assertEqual(line.mapped("state"), ["done"], "Wrong State")
