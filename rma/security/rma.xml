@@ -10,19 +10,13 @@
 
         <record id="group_rma_customer_user" model="res.groups">
             <field name="name">RMA Customer User</field>
-            <field
-                name="implied_ids"
-                eval="[(4, ref('stock.group_stock_user'))]"
-            />
+            <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]" />
             <field name="category_id" ref="module_category_rma" />
         </record>
 
         <record id="group_rma_supplier_user" model="res.groups">
             <field name="name">RMA Supplier User</field>
-            <field
-                name="implied_ids"
-                eval="[(4, ref('stock.group_stock_user'))]"
-            />
+            <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]" />
             <field name="category_id" ref="module_category_rma" />
         </record>
 

@@ -7,11 +7,7 @@
             <tree string="RMA">
                 <field name="name" />
                 <field name="reference" />
-                <field
-                    name="partner_id"
-                    groups="base.group_user"
-                    string="Customer"
-                />
+                <field name="partner_id" groups="base.group_user" string="Customer" />
                 <field name="date_rma" />
             </tree>
         </field>
@@ -24,11 +20,7 @@
             <tree string="RMA">
                 <field name="name" />
                 <field name="reference" />
-                <field
-                    name="partner_id"
-                    groups="base.group_user"
-                    string="Supplier"
-                />
+                <field name="partner_id" groups="base.group_user" string="Supplier" />
                 <field name="date_rma" />
             </tree>
         </field>
@@ -75,11 +67,7 @@
                             icon="fa-list"
                             groups="rma.group_rma_customer_user"
                         >
-                        <field
-                                name="line_count"
-                                widget="statinfo"
-                                string="RMA Lines"
-                            />
+                        <field name="line_count" widget="statinfo" string="RMA Lines" />
                     </button>
                     <button
                             type="object"
@@ -147,10 +135,7 @@
                                 name="assigned_to"
                                 attrs="{'readonly':[('state', '!=', 'draft')]}"
                             />
-                        <field
-                                name="company_id"
-                                groups="base.group_multi_company"
-                            />
+                        <field name="company_id" groups="base.group_multi_company" />
                     </group>
                 </group>
                 <notebook colspan="4">
@@ -232,11 +217,7 @@
                             icon="fa-list"
                             groups="rma.group_rma_supplier_user"
                         >
-                        <field
-                                name="line_count"
-                                widget="statinfo"
-                                string="RMA Lines"
-                            />
+                        <field name="line_count" widget="statinfo" string="RMA Lines" />
                     </button>
                 </div>
                 <div class="oe_title" name="title">
@@ -293,10 +274,7 @@
                                 name="assigned_to"
                                 attrs="{'readonly':[('state', '!=', 'draft')]}"
                             />
-                        <field
-                                name="company_id"
-                                groups="base.group_multi_company"
-                            />
+                        <field name="company_id" groups="base.group_multi_company" />
                     </group>
                 </group>
                 <notebook colspan="4">
