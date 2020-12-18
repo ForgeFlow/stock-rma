@@ -86,7 +86,7 @@ class RmaOrder(models.Model):
     @api.model
     def _default_warehouse_id(self):
         warehouse = self.env["stock.warehouse"].search(
-            [("company_id", "=", self.env.user.company_id.id)], limit=1
+            [("company_id", "=", self.env.company.id)], limit=1
         )
         return warehouse
 
@@ -123,16 +123,16 @@ class RmaOrder(models.Model):
         "res.company",
         string="Company",
         required=True,
-        default=lambda self: self.env.user.company_id,
+        default=lambda self: self.env.company,
     )
     assigned_to = fields.Many2one(
         comodel_name="res.users",
-        track_visibility="onchange",
+        tracking=True,
         default=lambda self: self.env.uid,
     )
     requested_by = fields.Many2one(
         comodel_name="res.users",
-        track_visibility="onchange",
+        tracking=True,
         default=lambda self: self.env.uid,
     )
     in_warehouse_id = fields.Many2one(
