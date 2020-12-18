@@ -226,8 +226,7 @@ class RmaOrder(models.Model):
         return result
 
     def _get_valid_lines(self):
-        """:return: A recordset of rma lines.
-        """
+        """:return: A recordset of rma lines."""
         self.ensure_one()
         return self.rma_line_ids
 
