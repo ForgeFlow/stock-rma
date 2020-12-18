@@ -6,17 +6,10 @@
         <field name="arch" type="xml">
             <form string="Select Move">
                 <group>
-                    <field
-                        name="partner_id"
-                        domain="[('customer','=',True)]"
-                        string="Customer"
-                    />
+                    <field name="partner_id" string="Customer" />
                 </group>
                 <separator string="Select Stock Moves to add" />
-                <field
-                    name="move_ids"
-                    domain="[('picking_id.partner_id', '=', partner_id), ('location_dest_id.usage', '=', 'customer')]"
-                >
+                <field name="move_ids">
                     <tree>
                         <field name="product_id" />
                         <field name="product_uom_qty" />
@@ -36,7 +29,6 @@
                         />
                         <field name="create_date" groups="base.group_no_one" />
                         <field name="date" string="Date" groups="base.group_no_one" />
-                        <field name="date_expected" string="Date Expected" />
                         <field name="state" />
                     </tree>
                 </field>
@@ -91,17 +83,10 @@
         <field name="arch" type="xml">
             <form string="Select Move">
                 <group>
-                    <field
-                        name="partner_id"
-                        domain="[('supplier','=',True)]"
-                        string="Supplier"
-                    />
+                    <field name="partner_id" string="Supplier" />
                 </group>
                 <separator string="Select Stock Moves to add" />
-                <field
-                    name="move_ids"
-                    domain="[('picking_id.partner_id', '=', partner_id), ('location_id.usage', '=', 'supplier')]"
-                />
+                <field name="move_ids" />
                 <footer>
                     <button
                         string="Confirm"

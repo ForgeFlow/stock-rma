@@ -184,7 +184,7 @@ class RmaOrderLine(models.Model):
     rma_id = fields.Many2one(
         comodel_name="rma.order",
         string="RMA Group",
-        track_visibility="onchange",
+        tracking=True,
         readonly=True,
     )
     name = fields.Char(
@@ -213,7 +213,7 @@ class RmaOrderLine(models.Model):
         ],
         string="State",
         default="draft",
-        track_visibility="onchange",
+        tracking=True,
     )
     operation_id = fields.Many2one(
         comodel_name="rma.operation",
@@ -223,19 +223,19 @@ class RmaOrderLine(models.Model):
     )
     assigned_to = fields.Many2one(
         comodel_name="res.users",
-        track_visibility="onchange",
+        tracking=True,
         default=lambda self: self.env.uid,
     )
     requested_by = fields.Many2one(
         comodel_name="res.users",
-        track_visibility="onchange",
+        tracking=True,
         default=lambda self: self.env.uid,
     )
     partner_id = fields.Many2one(
         comodel_name="res.partner",
         required=True,
         store=True,
-        track_visibility="onchange",
+        tracking=True,
         string="Partner",
         readonly=True,
         states={"draft": [("readonly", False)]},
@@ -295,13 +295,13 @@ class RmaOrderLine(models.Model):
     currency_id = fields.Many2one(
         "res.currency",
         string="Currency",
-        default=lambda self: self.env.user.company_id.currency_id,
+        default=lambda self: self.env.company.currency_id,
     )
     company_id = fields.Many2one(
         comodel_name="res.company",
         string="Company",
         required=True,
-        default=lambda self: self.env.user.company_id,
+        default=lambda self: self.env.company,
     )
     type = fields.Selection(
         selection=[("customer", "Customer"), ("supplier", "Supplier")],
@@ -342,6 +342,7 @@ class RmaOrderLine(models.Model):
         string="Delivery Policy",
         default="no",
         readonly=True,
+        ondelete="cascade",
         states={"draft": [("readonly", False)]},
     )
     in_route_id = fields.Many2one(
