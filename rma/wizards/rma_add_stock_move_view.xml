@@ -35,11 +35,7 @@
                             groups="stock.group_stock_multi_locations"
                         />
                         <field name="create_date" groups="base.group_no_one" />
-                        <field
-                            name="date"
-                            string="Date"
-                            groups="base.group_no_one"
-                        />
+                        <field name="date" string="Date" groups="base.group_no_one" />
                         <field name="date_expected" string="Date Expected" />
                         <field name="state" />
                     </tree>
@@ -63,20 +59,14 @@
         </field>
     </record>
 
-    <record
-        id="action_rma_add_stock_move_customer"
-        model="ir.actions.act_window"
-    >
+    <record id="action_rma_add_stock_move_customer" model="ir.actions.act_window">
         <field name="name">Add from Stock Move</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">rma_add_stock_move</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
         <field name="view_id" ref="view_rma_add_stock_move_customer" />
-        <field
-            name="groups_id"
-            eval="[(4, ref('rma.group_rma_customer_user'))]"
-        />
+        <field name="groups_id" eval="[(4, ref('rma.group_rma_customer_user'))]" />
     </record>
 
 
@@ -131,26 +121,17 @@
         </field>
     </record>
 
-    <record
-        id="action_rma_add_stock_move_supplier"
-        model="ir.actions.act_window"
-    >
+    <record id="action_rma_add_stock_move_supplier" model="ir.actions.act_window">
         <field name="name">Add from Stock Move</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">rma_add_stock_move</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
         <field name="view_id" ref="view_rma_add_stock_move_supplier" />
-        <field
-            name="groups_id"
-            eval="[(4, ref('rma.group_rma_supplier_user'))]"
-        />
+        <field name="groups_id" eval="[(4, ref('rma.group_rma_supplier_user'))]" />
     </record>
 
-    <record
-        id="view_rma_add_stock_move_button_supplier_form"
-        model="ir.ui.view"
-    >
+    <record id="view_rma_add_stock_move_button_supplier_form" model="ir.ui.view">
         <field name="name">rma.order.supplier.form - stock.move wizard</field>
         <field name="model">rma.order</field>
         <field name="inherit_id" ref="rma.view_rma_supplier_form" />
