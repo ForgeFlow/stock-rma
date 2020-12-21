@@ -7,11 +7,7 @@
             <form string="Select Sale Order from customer">
                 <separator string="Select Sale Order from customer" />
                 <group>
-                    <field
-                        name="partner_id"
-                        domain="[('customer','=',True)]"
-                        string="Customer"
-                    />
+                    <field name="partner_id" />
                 </group>
                 <separator string="Select Sale Order Lines to Add" />
                 <group>

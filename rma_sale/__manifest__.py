@@ -3,14 +3,15 @@
 
 {
     "name": "RMA Sale",
-    "version": "13.0.1.0.0",
+    "version": "14.0.1.0.0",
     "license": "LGPL-3",
     "category": "RMA",
     "summary": "Links RMA with Sales Orders",
     "author": "ForgeFlow, Odoo Community Association (OCA)",
-    "website": "https://github.com/OCA/account-budgeting",
+    "website": "https://github.com/OCA/https://github.com/ForgeFlow/stock-rma",
     "depends": ["rma_account", "sale_stock"],
     "data": [
+        "security/ir.model.access.csv",
         "data/rma_operation.xml",
         "views/rma_order_view.xml",
         "views/rma_operation_view.xml",
