@@ -8,7 +8,7 @@
     "category": "RMA",
     "summary": "Links RMA with Sales Orders",
     "author": "ForgeFlow, Odoo Community Association (OCA)",
-    "website": "https://github.com/Eficent/stock-rma",
+    "website": "https://github.com/OCA/account-budgeting",
     "depends": ["rma_account", "sale_stock"],
     "data": [
         "data/rma_operation.xml",
