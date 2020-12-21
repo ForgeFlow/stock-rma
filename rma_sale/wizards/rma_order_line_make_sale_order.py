@@ -12,7 +12,6 @@ class RmaLineMakeSaleOrder(models.TransientModel):
         comodel_name="res.partner",
         string="Customer",
         required=False,
-        domain=[("customer", "=", True)],
     )
     item_ids = fields.One2many(
         comodel_name="rma.order.line.make.sale.order.item",
