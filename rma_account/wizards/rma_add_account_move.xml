@@ -22,10 +22,7 @@
                     <tree string="Invoice Lines">
                         <field name="move_id" />
                         <field name="name" />
-                        <field
-                            name="account_id"
-                            groups="account.group_account_user"
-                        />
+                        <field name="account_id" groups="account.group_account_user" />
                         <field name="quantity" />
                         <field name="product_id" />
                         <field name="product_uom_id" />
@@ -75,10 +72,7 @@
                     <tree string="Invoice Lines">
                         <field name="move_id" />
                         <field name="name" />
-                        <field
-                            name="account_id"
-                            groups="account.group_account_user"
-                        />
+                        <field name="account_id" groups="account.group_account_user" />
                         <field name="quantity" />
                         <field name="product_id" />
                         <field name="product_uom_id" />
@@ -114,16 +108,10 @@
         <field name="view_mode">form</field>
         <field name="target">new</field>
         <field name="view_id" ref="view_rma_add_account_move" />
-        <field
-            name="groups_id"
-            eval="[(4, ref('rma.group_rma_customer_user'))]"
-        />
+        <field name="groups_id" eval="[(4, ref('rma.group_rma_customer_user'))]" />
     </record>
 
-    <record
-        id="action_rma_add_account_move_supplier"
-        model="ir.actions.act_window"
-    >
+    <record id="action_rma_add_account_move_supplier" model="ir.actions.act_window">
         <field name="name">Add Invoice</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">rma_add_account_move</field>
@@ -131,10 +119,7 @@
         <field name="view_mode">form</field>
         <field name="target">new</field>
         <field name="view_id" ref="view_rma_add_account_move_supplier" />
-        <field
-            name="groups_id"
-            eval="[(4, ref('rma.group_rma_supplier_user'))]"
-        />
+        <field name="groups_id" eval="[(4, ref('rma.group_rma_supplier_user'))]" />
     </record>
 
     <record id="view_rma_add_account_move_form" model="ir.ui.view">
