@@ -38,11 +38,7 @@
                         attrs="{'invisible': [('rma_count', '=', 0)]}"
                         groups="rma.group_rma_customer_user"
                     >
-                           <field
-                            name="rma_count"
-                            widget="statinfo"
-                            string="RMA"
-                        />
+                           <field name="rma_count" widget="statinfo" string="RMA" />
                        </button>
                     </xpath>
                 </data>

@@ -42,11 +42,7 @@
                             string="Unit of Measure"
                             groups="uom.group_uom"
                         />
-                        <field
-                            name="price_subtotal"
-                            sum="Total"
-                            widget="monetary"
-                        />
+                        <field name="price_subtotal" sum="Total" widget="monetary" />
                     </tree>
 
                 </field>
