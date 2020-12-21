@@ -103,7 +103,6 @@ class RmaOrder(models.Model):
             "domain": [("id", "in", move_ids)],
             "name": "Refunds",
             "res_model": "account.move",
-            "type": "ir.actions.act_window",
             "views": [(tree_view_ref.id, "tree"), (form_view_ref.id, "form")],
         }
 
@@ -116,6 +115,5 @@ class RmaOrder(models.Model):
             "domain": [("id", "in", move_ids)],
             "name": "Originating Invoice",
             "res_model": "account.move",
-            "type": "ir.actions.act_window",
             "views": [(tree_view_ref.id, "tree"), (form_view_ref.id, "form")],
         }

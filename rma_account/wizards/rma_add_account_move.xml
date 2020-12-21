@@ -7,17 +7,12 @@
         <field name="arch" type="xml">
             <form string="Select Invoice from customer">
                 <group>
-                    <field
-                        name="partner_id"
-                        domain="[('customer','=',True)]"
-                        string="Customer"
-                    />
+                    <field name="partner_id" />
                 </group>
                 <separator string="Select Invoices lines to add" />
                 <field
                     name="line_ids"
-                    domain="[('move_id.partner_id', '=', partner_id),
-                       ('move_id.type', '=', 'out_invoice')]"
+                    domain="[('move_id.partner_id', '=', partner_id)]"
                 >
                     <tree string="Invoice Lines">
                         <field name="move_id" />
@@ -57,17 +52,12 @@
         <field name="arch" type="xml">
             <form string="Select Invoice from supplier">
                 <group>
-                    <field
-                        name="partner_id"
-                        domain="[('supplier','=',True)]"
-                        string="Supplier"
-                    />
+                    <field name="partner_id" />
                 </group>
                 <separator string="Select Invoices lines to add" />
                 <field
                     name="line_ids"
-                    domain="[('move_id.partner_id', '=', partner_id),
-                       ('move_id.type', '=', 'in_invoice')]"
+                    domain="[('move_id.partner_id', '=', partner_id)]"
                 >
                     <tree string="Invoice Lines">
                         <field name="move_id" />

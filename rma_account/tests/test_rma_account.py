@@ -78,7 +78,7 @@ class TestRmaAccount(common.SingleTransactionCase):
         cls.invoices = cls.env["account.move"].create(
             [
                 {
-                    "type": "out_invoice",
+                    "move_type": "out_invoice",
                     "partner_id": customer1.id,
                     "invoice_date": fields.Date.from_string("2016-01-01"),
                     "currency_id": cls.currency_id.id,
@@ -106,7 +106,7 @@ class TestRmaAccount(common.SingleTransactionCase):
                     ],
                 },
                 {
-                    "type": "in_invoice",
+                    "move_type": "in_invoice",
                     "partner_id": supplier1.id,
                     "invoice_date": fields.Date.from_string("2016-01-01"),
                     "currency_id": cls.currency_id.id,
