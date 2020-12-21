@@ -119,18 +119,26 @@ class RmaOrderLine(models.Model):
         res = super(RmaOrderLine, self)._onchange_product_id()
         if not res.get("domain"):
             res["domain"] = {}
-        domain = [
-            "&",
-            "&",
-            ("rma_line_id", "=", False),
-            ("exclude_from_invoice_tab", "=", False),
-            "|",
-            ("move_id.partner_id", "=", self.partner_id.id),
-            ("move_id.partner_id", "child_of", self.partner_id.id),
-        ]
-        # if self.product_id:
-        #     domain.insert(2, ("product_id", "=", self.product_id.id))
-        res["domain"]["account_move_line_id"] = domain
+        if not self.product_id:
+            domain = [
+                "&",
+                "|",
+                ("move_id.partner_id", "=", self.partner_id.id),
+                ("move_id.partner_id", "child_of", self.partner_id.id),
+                ("exclude_from_invoice_tab", "=", False),
+            ]
+            res["domain"]["account_move_line_id"] = domain
+        else:
+            domain = [
+                "&",
+                "&",
+                "|",
+                ("move_id.partner_id", "=", self.partner_id.id),
+                ("move_id.partner_id", "child_of", self.partner_id.id),
+                ("exclude_from_invoice_tab", "=", False),
+                ("product_id", "=", self.product_id.id),
+            ]
+            res["domain"]["account_move_line_id"] = domain
         return res
 
     def _prepare_rma_line_from_inv_line(self, line):
