@@ -33,10 +33,7 @@
                                   <field name="product_id" />
                                   <field name="name" />
                                   <field name="product_qty" />
-                                  <field
-                                name="product_uom_id"
-                                groups="uom.group_uom"
-                            />
+                                  <field name="product_uom_id" groups="uom.group_uom" />
                                   <field name="free_of_charge" />
                               </tree>
                          </field>
@@ -48,11 +45,7 @@
                         type="object"
                         class="oe_highlight"
                     />
-                         <button
-                        special="cancel"
-                        string="Cancel"
-                        class="oe_link"
-                    />
+                         <button special="cancel" string="Cancel" class="oe_link" />
                      </footer>
                 </form>
             </field>
