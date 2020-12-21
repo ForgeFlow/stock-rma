@@ -29,7 +29,7 @@
                     name="account_move_line_id"
                     options="{'no_create': True}"
                     context="{'rma': True}"
-                    domain="['|',
+                    domain="[('move_id.move_type', 'not in', ['entry','out_invoice','out_refund']), '|',
                                 ('move_id.partner_id', '=', partner_id),
                                 ('move_id.partner_id', 'child_of', partner_id)]"
                 />
@@ -86,7 +86,7 @@
                     name="account_move_line_id"
                     options="{'no_create': True}"
                     context="{'rma': True}"
-                    domain="['|',
+                    domain="[('move_id.move_type', '!=', 'entry'), '|',
                                 ('move_id.partner_id', '=', partner_id),
                                 ('move_id.partner_id', 'child_of', partner_id)]"
                 />
