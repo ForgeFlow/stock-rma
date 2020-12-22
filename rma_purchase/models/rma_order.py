@@ -13,42 +13,41 @@ class RmaOrder(models.Model):
             po_count = 0
             rma_line_po = []
             for line in rec.rma_line_ids:
-                rma_line_po += self.env['purchase.order'].search(
-                    [('origin', '=', line.name)]).ids
+                rma_line_po += (
+                    self.env["purchase.order"].search([("origin", "=", line.name)]).ids
+                )
             if rma_line_po:
                 po_count = len(list(set(rma_line_po)))
             rec.po_count = po_count
 
     @api.multi
-    @api.depends('rma_line_ids')
+    @api.depends("rma_line_ids")
     def _compute_origin_po_count(self):
         for rma in self:
-            purchases = rma.mapped(
-                'rma_line_ids.purchase_order_line_id.order_id')
+            purchases = rma.mapped("rma_line_ids.purchase_order_line_id.order_id")
             rma.origin_po_count = len(purchases)
 
-    po_count = fields.Integer(
-        compute='_compute_po_count', string='# of PO')
+    po_count = fields.Integer(compute="_compute_po_count", string="# of PO")
     origin_po_count = fields.Integer(
-        compute='_compute_origin_po_count', string='# of Origin PO')
+        compute="_compute_origin_po_count", string="# of Origin PO"
+    )
 
     @api.multi
     def action_view_purchase_order(self):
-        action = self.env.ref('purchase.purchase_rfq')
+        action = self.env.ref("purchase.purchase_rfq")
         result = action.read()[0]
-        po_ids = self.env['purchase.order'].search(
-            [('origin', '=', self.name)]).ids
+        po_ids = self.env["purchase.order"].search([("origin", "=", self.name)]).ids
         for line in self.rma_line_ids:
-            po_ids += self.env['purchase.order'].search(
-                [('origin', '=', line.name)]).ids
-        result['domain'] = [('id', 'in', po_ids)]
+            po_ids += (
+                self.env["purchase.order"].search([("origin", "=", line.name)]).ids
+            )
+        result["domain"] = [("id", "in", po_ids)]
         return result
 
     @api.multi
     def action_view_origin_purchase_order(self):
-        action = self.env.ref('purchase.purchase_rfq')
+        action = self.env.ref("purchase.purchase_rfq")
         result = action.read()[0]
-        po_ids = self.mapped(
-            'rma_line_ids.purchase_order_line_id.order_id').ids
-        result['domain'] = [('id', 'in', po_ids)]
+        po_ids = self.mapped("rma_line_ids.purchase_order_line_id.order_id").ids
+        result["domain"] = [("id", "in", po_ids)]
         return result
