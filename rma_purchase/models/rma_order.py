@@ -7,7 +7,6 @@ from odoo import api, fields, models
 class RmaOrder(models.Model):
     _inherit = "rma.order"
 
-    @api.multi
     def _compute_po_count(self):
         for rec in self:
             po_count = 0
@@ -20,7 +19,6 @@ class RmaOrder(models.Model):
                 po_count = len(list(set(rma_line_po)))
             rec.po_count = po_count
 
-    @api.multi
     @api.depends("rma_line_ids")
     def _compute_origin_po_count(self):
         for rma in self:
@@ -32,7 +30,6 @@ class RmaOrder(models.Model):
         compute="_compute_origin_po_count", string="# of Origin PO"
     )
 
-    @api.multi
     def action_view_purchase_order(self):
         action = self.env.ref("purchase.purchase_rfq")
         result = action.read()[0]
@@ -44,7 +41,6 @@ class RmaOrder(models.Model):
         result["domain"] = [("id", "in", po_ids)]
         return result
 
-    @api.multi
     def action_view_origin_purchase_order(self):
         action = self.env.ref("purchase.purchase_rfq")
         result = action.read()[0]

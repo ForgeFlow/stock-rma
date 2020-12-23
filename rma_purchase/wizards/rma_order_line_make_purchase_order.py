@@ -15,9 +15,7 @@ class RmaLineMakePurchaseOrder(models.TransientModel):
 
     partner_id = fields.Many2one(
         comodel_name="res.partner",
-        string="Supplier",
         required=False,
-        domain=[("supplier", "=", True)],
         readonly=1,
     )
     item_ids = fields.One2many(
@@ -101,7 +99,6 @@ class RmaLineMakePurchaseOrder(models.TransientModel):
             vals["price_unit"] = 0.0
         return vals
 
-    @api.multi
     def create_purchase_order(self):
         res = []
         purchase_obj = self.env["purchase.order"]
@@ -145,3 +142,6 @@ class RmaLineMakePurchaseOrderItem(models.TransientModel):
     )
     product_uom_id = fields.Many2one(comodel_name="uom.uom", string="UoM")
     free_of_charge = fields.Boolean(string="Free of Charge")
+    rma_line_id = fields.Many2one(
+        comodel_name="rma.order", string="RMA", ondelete="set null"
+    )

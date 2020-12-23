@@ -4,7 +4,6 @@
     <record id="action_rma_line_purchase" model="ir.actions.act_window">
         <field name="name">Purchase Order</field>
         <field name="res_model">purchase.order</field>
-        <field name="view_type">form</field>
         <field name="target">current</field>
         <field name="view_mode">form,tree</field>
     </record>

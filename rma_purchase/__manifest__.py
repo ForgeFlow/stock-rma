@@ -3,12 +3,12 @@
 
 {
     "name": "RMA Purchase",
-    "version": "12.0.1.0.0",
+    "version": "14.0.1.0.0",
     "category": "RMA",
     "summary": "RMA from PO",
     "license": "LGPL-3",
     "author": "Eficent, Odoo Community Association (OCA)",
-    "website": "https://github.com/OCA/account-budgeting",
+    "website": "https://github.com/OCA/https://github.com/ForgeFlow/stock-rma",
     "depends": ["rma_account", "purchase"],
     "data": [
         "wizards/rma_order_line_make_purchase_order_view.xml",
