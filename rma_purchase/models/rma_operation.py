@@ -18,7 +18,6 @@ class RmaOperation(models.Model):
         default="no",
     )
 
-    @api.multi
     @api.constrains("purchase_policy")
     def _check_purchase_policy(self):
         if self.filtered(lambda r: r.purchase_policy != "no" and r.type != "supplier"):
