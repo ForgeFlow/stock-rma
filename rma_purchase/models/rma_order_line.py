@@ -10,7 +10,6 @@ from odoo.addons import decimal_precision as dp
 class RmaOrderLine(models.Model):
     _inherit = "rma.order.line"
 
-    @api.multi
     def _compute_purchase_count(self):
         for rec in self:
             purchase_line_count = self.env["purchase.order.line"].search(
@@ -18,7 +17,6 @@ class RmaOrderLine(models.Model):
             )
             rec.purchase_count = len(purchase_line_count.mapped("order_id"))
 
-    @api.multi
     def _compute_purchase_order_lines(self):
         for rec in self:
             purchase_list = []
@@ -28,7 +26,6 @@ class RmaOrderLine(models.Model):
                 purchase_list.append(line.id)
             rec.purchase_order_line_ids = [(6, 0, purchase_list)]
 
-    @api.multi
     def _compute_qty_purchase(self):
         for rec in self:
             rec.qty_purchased = rec._get_rma_purchased_qty()
@@ -119,7 +116,6 @@ class RmaOrderLine(models.Model):
             self.purchase_policy = self.operation_id.purchase_policy or "no"
         return res
 
-    @api.multi
     def _prepare_rma_line_from_po_line(self, line):
         self.ensure_one()
         if not self.type:
@@ -195,7 +191,6 @@ class RmaOrderLine(models.Model):
         self.update(data)
         self._remove_other_data_origin("purchase_order_line_id")
 
-    @api.multi
     @api.constrains("purchase_order_line_id", "partner_id")
     def _check_purchase_partner(self):
         for rec in self:
@@ -210,14 +205,12 @@ class RmaOrderLine(models.Model):
                     )
                 )
 
-    @api.multi
     def _remove_other_data_origin(self, exception):
         res = super(RmaOrderLine, self)._remove_other_data_origin(exception)
         if not exception == "purchase_order_line_id":
             self.purchase_order_line_id = False
         return res
 
-    @api.multi
     def action_view_purchase_order(self):
         action = self.env.ref("purchase.purchase_rfq")
         result = action.read()[0]
@@ -225,7 +218,6 @@ class RmaOrderLine(models.Model):
         result["domain"] = [("id", "in", orders.ids)]
         return result
 
-    @api.multi
     def _get_rma_purchased_qty(self):
         self.ensure_one()
         qty = 0.0
