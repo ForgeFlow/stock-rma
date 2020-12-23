@@ -122,7 +122,6 @@ class RmaAddPurchase(models.TransientModel):
             existing_purchase_lines.append(rma_line.purchase_order_line_id)
         return existing_purchase_lines
 
-    @api.multi
     def add_lines(self):
         rma_line_obj = self.env["rma.order.line"]
         existing_purchase_lines = self._get_existing_purchase_lines()
