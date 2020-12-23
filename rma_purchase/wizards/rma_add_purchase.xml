@@ -6,11 +6,7 @@
         <field name="arch" type="xml">
             <form string="Select Purchase Order from customer">
                 <group>
-                    <field
-                        name="partner_id"
-                        domain="[('customer','=',True)]"
-                        string="Customer"
-                    />
+                    <field name="partner_id" string="Customer" />
                 </group>
                 <separator string="Select Purchase Order from customer" />
                 <group>
@@ -62,8 +58,7 @@
         <field name="name">Add Purchase Order</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">rma_add_purchase</field>
-        <field name="src_model">rma.order</field>
-        <field name="view_type">form</field>
+        <field name="binding_model_id" ref="rma.model_rma_order" />
         <field name="view_mode">form</field>
         <field name="target">new</field>
         <field name="view_id" ref="view_rma_add_purchase" />

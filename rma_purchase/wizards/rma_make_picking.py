@@ -7,7 +7,6 @@ from odoo import api, fields, models
 class RmaMakePicking(models.TransientModel):
     _inherit = "rma_make_picking.wizard"
 
-    @api.returns("rma.order.line")
     def _prepare_item(self, line):
         res = super(RmaMakePicking, self)._prepare_item(line)
         res["purchase_order_line_id"] = line.purchase_order_line_id.id

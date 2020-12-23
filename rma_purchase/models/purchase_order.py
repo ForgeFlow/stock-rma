@@ -8,7 +8,7 @@ class PurchaseOrder(models.Model):
     _inherit = "purchase.order"
 
     @api.model
-    def new(self, vals):
+    def new(self, vals, origin=None, ref=None):
         """Allows to propose a line based on the RMA information."""
         res = super(PurchaseOrder, self).new(vals)
         rma_line_id = self.env.context.get("rma_line_id")
