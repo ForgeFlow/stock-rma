@@ -206,18 +206,17 @@ class RmaMakePickingItem(models.TransientModel):
 
     wiz_id = fields.Many2one("rma_make_picking.wizard", string="Wizard", required=True)
     line_id = fields.Many2one(
-        "rma.order.line", string="RMA order Line", readonly=True, ondelete="cascade"
+        "rma.order.line", string="RMA order Line", ondelete="cascade"
     )
     rma_id = fields.Many2one(
-        "rma.order", related="line_id.rma_id", string="RMA Group", readonly=True
+        "rma.order", related="line_id.rma_id", string="RMA Group"
     )
-    product_id = fields.Many2one("product.product", string="Product", readonly=True)
+    product_id = fields.Many2one("product.product", string="Product")
     product_qty = fields.Float(
         related="line_id.product_qty",
         string="Quantity Ordered",
         copy=False,
         digits="Product Unit of Measure",
-        readonly=True,
     )
     qty_to_receive = fields.Float(
         string="Quantity to Receive", digits="Product Unit of Measure"
@@ -225,4 +224,4 @@ class RmaMakePickingItem(models.TransientModel):
     qty_to_deliver = fields.Float(
         string="Quantity To Deliver", digits="Product Unit of Measure"
     )
-    uom_id = fields.Many2one("uom.uom", string="Unit of Measure", readonly=True)
+    uom_id = fields.Many2one("uom.uom", string="Unit of Measure")
