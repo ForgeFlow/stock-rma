@@ -217,6 +217,7 @@ class RmaOrderLine(models.Model):
     )
     operation_id = fields.Many2one(
         comodel_name="rma.operation",
+        required=True,
         string="Operation",
         readonly=True,
         states={"draft": [("readonly", False)]},
@@ -342,7 +343,7 @@ class RmaOrderLine(models.Model):
         string="Delivery Policy",
         default="no",
         readonly=True,
-        ondelete="cascade",
+        ondelete='cascade',
         states={"draft": [("readonly", False)]},
     )
     in_route_id = fields.Many2one(
