@@ -208,9 +208,7 @@ class RmaMakePickingItem(models.TransientModel):
     line_id = fields.Many2one(
         "rma.order.line", string="RMA order Line", ondelete="cascade"
     )
-    rma_id = fields.Many2one(
-        "rma.order", related="line_id.rma_id", string="RMA Group"
-    )
+    rma_id = fields.Many2one("rma.order", related="line_id.rma_id", string="RMA Group")
     product_id = fields.Many2one("product.product", string="Product")
     product_qty = fields.Float(
         related="line_id.product_qty",
