@@ -533,7 +533,9 @@ class TestRma(common.SavepointCase):
         self.assertEqual(
             list(set(lines.mapped("qty_outgoing"))), [0], "Wrong qty_outgoing"
         )
-        self.assertEqual(list(set(lines.mapped("qty_delivered"))), [0], "qty_delivered")
+        self.assertEqual(
+            list(set(lines.mapped("qty_delivered"))), [0], "qty_delivered"
+        )
 
         # product specific
         self._check_equal_quantity(
@@ -611,7 +613,9 @@ class TestRma(common.SavepointCase):
         self.assertEqual(
             list(set(lines.mapped("qty_received"))), [0], "Wrong qty_received"
         )
-        self.assertEqual(list(set(lines.mapped("qty_delivered"))), [0], "qty_delivered")
+        self.assertEqual(
+            list(set(lines.mapped("qty_delivered"))), [0], "qty_delivered"
+        )
 
         # product specific
         self._check_equal_quantity(
