@@ -15,3 +15,9 @@ access_rma_picking_wizard_supplier,rma.order.manager,model_rma_make_picking_wiza
 access_rma_picking_wizard_item,rma.order.manager,model_rma_make_picking_wizard_item,group_rma_manager,1,1,1,1
 access_rma_picking_wizard_item_customer,rma.order.manager,model_rma_make_picking_wizard_item,group_rma_customer_user,1,1,1,1
 access_rma_picking_wizard_item_supplier,rma.order.manager,model_rma_make_picking_wizard_item,group_rma_supplier_user,1,1,1,1
+access_rma_order_line_make_supplier_rma_customer_user,rma.order.line.make.supplier.rma.customer.user,model_rma_order_line_make_supplier_rma,rma.group_rma_customer_user,1,1,1,1
+access_rma_order_line_make_supplier_rmasupplier_user,rma.order.line.make.supplier.rma.supplier.user,model_rma_order_line_make_supplier_rma,rma.group_rma_supplier_user,1,1,1,1
+access_rma_order_line_make_supplier_rma_customer_user_item,rma.order.line.make.supplier.rma.item.customer.user,model_rma_order_line_make_supplier_rma_item,rma.group_rma_customer_user,1,1,1,1
+access_rma_order_line_make_supplier_rmasupplier_user_item,rma.order.line.make.supplier.rma.item.supplier.user,model_rma_order_line_make_supplier_rma_item,rma.group_rma_supplier_user,1,1,1,1
+access_rma_add_stock_move_customer_user_item,rma.add.stock.move.customer.user,model_rma_add_stock_move,rma.group_rma_customer_user,1,1,1,1
+access_rma_add_stock_move_supplier_user_item,rma.add.stock.move.supplier.user,model_rma_add_stock_move,rma.group_rma_supplier_user,1,1,1,1
