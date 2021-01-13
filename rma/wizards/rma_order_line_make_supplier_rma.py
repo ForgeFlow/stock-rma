@@ -12,7 +12,6 @@ class RmaLineMakeSupplierRma(models.TransientModel):
     partner_id = fields.Many2one(
         comodel_name="res.partner",
         string="Supplier",
-        domain=[("supplier", "=", True)],
         required=True,
     )
     item_ids = fields.One2many(
