@@ -157,27 +157,12 @@ class RmaLineMakeSupplierRma(models.TransientModel):
                 rma = rma_obj.create(rma_data)
 
             rma_line_data = self._prepare_supplier_rma_line(rma, item)
-            rma_line = rma_line_obj.create(rma_line_data)
-        if rma:
-            return {
-                "name": _("Supplier RMA"),
-                "view_mode": "form",
-                "res_model": "rma.order",
-                "view_id": False,
-                "res_id": rma.id,
-                "context": {"supplier": True, "customer": False},
-                "type": "ir.actions.act_window",
-            }
-        else:
-            return {
-                "name": _("Supplier RMA Line"),
-                "view_mode": "form",
-                "res_model": "rma.order.line",
-                "view_id": False,
-                "res_id": rma_line.id,
-                "context": {"supplier": True, "customer": False},
-                "type": "ir.actions.act_window",
-            }
+            rma_line_obj.create(rma_line_data)
+        action = self.env.ref("rma.action_rma_supplier_lines")
+        rma_lines = self.item_ids.mapped("line_id.supplier_rma_line_ids").ids
+        result = action.read()[0]
+        result["domain"] = [("id", "in", rma_lines)]
+        return result
 
 
 class RmaLineMakeRmaOrderItem(models.TransientModel):
@@ -198,7 +183,7 @@ class RmaLineMakeRmaOrderItem(models.TransientModel):
         "rma.order", related="line_id.rma_id", string="RMA Order", readonly=True
     )
     product_id = fields.Many2one(
-        "product.product", related="line_id.product_id", readony=True
+        "product.product", related="line_id.product_id", readonly=True
     )
     name = fields.Char(related="line_id.name", readonly=True)
     uom_id = fields.Many2one("uom.uom", string="UoM", readonly=True)
