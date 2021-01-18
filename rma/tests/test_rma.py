@@ -524,9 +524,8 @@ class TestRma(common.SavepointCase):
                 "active_id": 1,
             }
         ).create({})
-        res = wizard.make_supplier_rma()
-        supplier_rma = self.rma.browse(res["res_id"])
-        lines = supplier_rma.rma_line_ids
+        wizard.make_supplier_rma()
+        lines = self.rma_droship_id.rma_line_ids.mapped("supplier_rma_line_ids")
         self.assertEqual(
             list(set(lines.mapped("qty_received"))), [0], "Wrong qty_received"
         )
