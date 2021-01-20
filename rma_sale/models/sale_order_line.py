@@ -47,7 +47,7 @@ class SaleOrderLine(models.Model):
                                 " ".join(
                                     str(x)
                                     for x in [
-                                        inv.number for inv in sale.order_id.invoice_ids
+                                        inv.name for inv in sale.order_id.invoice_ids
                                     ]
                                 ),
                                 sale.product_id.name,
