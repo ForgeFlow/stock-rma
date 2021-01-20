@@ -46,8 +46,8 @@
     </record>
 
 
-    <record id="view_invoice_customer_rma_form" model="ir.ui.view">
-        <field name="name">account.move.customer.rma</field>
+    <record id="view_invoice_supplier_rma_form" model="ir.ui.view">
+        <field name="name">account.move.supplier.rma</field>
         <field name="model">account.move</field>
         <field name="inherit_id" ref="account.view_move_form" />
         <field name="arch" type="xml">
