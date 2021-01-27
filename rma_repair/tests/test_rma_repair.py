@@ -98,7 +98,7 @@ class TestRmaRepair(common.SingleTransactionCase):
         cls.inv_customer = cls.env["account.move"].create(
             [
                 {
-                    "type": "out_invoice",
+                    "move_type": "out_invoice",
                     "partner_id": cls.customer1.id,
                     "invoice_date": fields.Date.from_string("2016-01-01"),
                     "currency_id": cls.currency_id.id,
@@ -263,7 +263,7 @@ class TestRmaRepair(common.SingleTransactionCase):
         self.assertEqual(rma.qty_repaired, 1.0)
         self.assertEqual(rma.qty_to_deliver, 1.0)
         repair.invoice_id.post()
-        repair.invoice_id.action_invoice_register_payment()
+        repair.invoice_id.action_register_payment()
         self.assertEqual(repair.invoice_status, "posted")
         self.assertEqual(rma.qty_to_pay, 0.0)
         self.assertEqual(rma.qty_repaired, 1.0)
