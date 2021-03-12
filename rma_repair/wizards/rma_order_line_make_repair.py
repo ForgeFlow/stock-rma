@@ -55,6 +55,7 @@ class RmaLineMakeRepair(models.TransientModel):
         return res
 
     def make_repair_order(self):
+        self.ensure_one()
         res = []
         repair_obj = self.env["repair.order"]
         for item in self.item_ids:
@@ -142,8 +143,8 @@ class RmaLineMakeRepairItem(models.TransientModel):
         "invoice for this repair order.",
     )
 
-    @api.model
     def _prepare_repair_order(self, rma_line):
+        self.ensure_one()
         location_dest = (
             self.location_dest_id
             if not self.to_refurbish
