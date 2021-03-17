@@ -498,14 +498,21 @@ class RmaOrderLine(models.Model):
             if not route:
                 raise ValidationError(_("Please define an RMA route."))
 
-        if not operation.in_warehouse_id or not operation.out_warehouse_id:
+        if (
+            not operation.in_warehouse_id
+            or not operation.out_warehouse_id
+            or not (
+                operation.in_warehouse_id.lot_rma_id
+                or operation.out_warehouse_id.lot_rma_id
+            )
+        ):
             warehouse = self.env["stock.warehouse"].search(
                 [("company_id", "=", self.company_id.id), ("lot_rma_id", "!=", False)],
                 limit=1,
             )
             if not warehouse:
                 raise ValidationError(
-                    _("Please define a warehouse with a default RMA " "location.")
+                    _("Please define a warehouse with a default RMA location.")
                 )
 
         data = {
@@ -525,6 +532,7 @@ class RmaOrderLine(models.Model):
             "location_id": (
                 operation.location_id.id
                 or operation.in_warehouse_id.lot_rma_id.id
+                or operation.out_warehouse_id.lot_rma_id.id
                 or warehouse.lot_rma_id.id
             ),
         }
