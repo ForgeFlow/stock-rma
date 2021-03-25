@@ -57,4 +57,21 @@
         </field>
     </record>
 
+    <record id="view_rma_rma_line_filter" model="ir.ui.view">
+        <field name="name">rma.order.line.select - rma_repair</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_rma_line_filter" />
+        <field name="arch" type="xml">
+            <group name="stock_quantities" position="after">
+                <group name="repair_quantities" groups="stock.group_stock_user">
+                    <filter
+                        domain="[('state','!=', 'done'),('qty_to_repair','>',0.0)]"
+                        help="To Repair"
+                        name="to_repair"
+                    />
+                </group>
+            </group>
+        </field>
+    </record>
+
 </odoo>
