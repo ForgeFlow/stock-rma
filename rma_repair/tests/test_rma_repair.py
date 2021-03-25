@@ -1,4 +1,4 @@
-# Copyright 2020 ForgeFlow S.L.
+# Copyright 2020-21 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
 from odoo import fields
@@ -168,14 +168,14 @@ class TestRmaRepair(common.SingleTransactionCase):
             lambda r: r.product_id == self.product_1
         )
         rma_1.repair_type = self.operation_1.repair_type
-        self.assertEquals(
+        self.assertEqual(
             rma_1.operation_id, self.operation_1, "Operation should be operation_1"
         )
         rma_2 = self.rma_group_customer.rma_line_ids.filtered(
             lambda r: r.product_id == self.product_2
         )
         rma_2.repair_type = self.operation_2.repair_type
-        self.assertEquals(
+        self.assertEqual(
             rma_2.operation_id, self.operation_2, "Operation should be operation_2"
         )
 
@@ -185,15 +185,15 @@ class TestRmaRepair(common.SingleTransactionCase):
         rma_1 = self.rma_group_customer.rma_line_ids.filtered(
             lambda r: r.product_id == self.product_1
         )
-        self.assertEquals(
+        self.assertEqual(
             rma_1.operation_id.repair_type, "received", "Incorrect Repair operation"
         )
-        self.assertEquals(rma_1.qty_to_repair, 0.0, "Quantity to repair should be 0.0")
+        self.assertEqual(rma_1.qty_to_repair, 0.0, "Quantity to repair should be 0.0")
         # Ordered repair_type:
         rma_2 = self.rma_group_customer.rma_line_ids.filtered(
             lambda r: r.product_id == self.product_2
         )
-        self.assertEquals(
+        self.assertEqual(
             rma_2.operation_id.repair_type, "ordered", "Incorrect Repair operation"
         )
         self.assertEqual(rma_2.qty_to_repair, 15.0)
@@ -259,13 +259,13 @@ class TestRmaRepair(common.SingleTransactionCase):
         repair.action_repair_confirm()
         repair.action_repair_start()
         repair.action_repair_end()
+        self.assertEqual(rma.qty_to_pay, 0.0)
         repair.action_repair_invoice_create()
         self.assertEqual(rma.qty_repaired, 1.0)
         self.assertEqual(rma.qty_to_deliver, 1.0)
-        repair.invoice_id.post()
-        repair.invoice_id.action_register_payment()
-        self.assertEqual(repair.invoice_status, "posted")
-        self.assertEqual(rma.qty_to_pay, 0.0)
+        repair.invoice_id.action_post()
+        self.assertEqual(repair.payment_state, "not_paid")
+        self.assertEqual(rma.qty_to_pay, 1.0)
         self.assertEqual(rma.qty_repaired, 1.0)
         self.assertEqual(rma.delivery_policy, "repair")
         self.assertEqual(rma.qty_delivered, 0.0)
