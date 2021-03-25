@@ -1,4 +1,4 @@
-# Copyright 2020 ForgeFlow S.L.
+# Copyright 2020-21 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
 from odoo import api, fields, models
@@ -14,10 +14,10 @@ class RmaOrderLine(models.Model):
                 line.qty_to_repair = 0.0
             elif line.repair_type == "ordered":
                 qty = line._get_rma_repaired_qty() + line._get_rma_under_repair_qty()
-                line.qty_to_repair = line.product_qty - qty
+                line.qty_to_repair = max(line.product_qty - qty, 0)
             elif line.repair_type == "received":
                 qty = line._get_rma_repaired_qty() + line._get_rma_under_repair_qty()
-                line.qty_to_repair = line.qty_received - qty
+                line.qty_to_repair = max(line.qty_received - qty, 0)
             else:
                 line.qty_to_repair = 0.0
 
@@ -87,8 +87,10 @@ class RmaOrderLine(models.Model):
         selection_add=[("repair", "Based on Repair Quantities")],
         ondelete={"repair": lambda recs: recs.write({"delivery_policy": "no"})},
     )
-    qty_to_pay = fields.Float(compute="_compute_qty_to_pay")
-    qty_to_deliver = fields.Float(compute="_compute_qty_to_deliver")
+    qty_to_pay = fields.Float(
+        compute="_compute_qty_to_pay",
+        digits="Product Unit of Measure",
+    )
 
     @api.depends(
         "delivery_policy",
@@ -98,7 +100,8 @@ class RmaOrderLine(models.Model):
         "repair_ids.state",
         "repair_ids.invoice_method",
         "repair_type",
-        "repair_ids.invoice_status",
+        "repair_ids.invoice_id",
+        "repair_ids.invoice_id.payment_state",
     )
     def _compute_qty_to_pay(self):
         for rec in self:
@@ -106,9 +109,13 @@ class RmaOrderLine(models.Model):
             if rec.delivery_policy == "repair":
                 for repair in rec.repair_ids.filtered(
                     lambda r: r.invoice_method != "none"
-                    and r.invoice_status != "posted"
+                    and r.invoice_id
+                    and r.invoice_id.state != "cancel"
+                    and r.invoice_id.payment_state in ["not_paid", "partial"]
                 ):
-                    qty_to_pay += repair.product_qty
+                    qty_to_pay += self.uom_id._compute_quantity(
+                        repair.product_qty, repair.product_uom
+                    )
             rec.qty_to_pay = qty_to_pay
 
     def action_view_repair_order(self):
@@ -137,7 +144,7 @@ class RmaOrderLine(models.Model):
         self.ensure_one()
         qty = 0.0
         for repair in self.repair_ids.filtered(
-            lambda p: p.state not in ("draft", "cancel", "done")
+            lambda p: p.state not in ("cancel", "done")
         ):
             repair_qty = self.uom_id._compute_quantity(
                 repair.product_qty, repair.product_uom
@@ -164,7 +171,8 @@ class RmaOrderLine(models.Model):
         "repair_type",
         "repair_ids.state",
         "qty_to_pay",
-        "repair_ids.invoice_status",
+        "repair_ids.invoice_id",
+        "repair_ids.payment_state",
     )
     def _compute_qty_to_deliver(self):
         res = super(RmaOrderLine, self)._compute_qty_to_deliver()
