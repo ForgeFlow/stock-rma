@@ -5,25 +5,6 @@
         <field name="model">rma.order.line</field>
         <field name="inherit_id" ref="rma.view_rma_line_supplier_form" />
         <field name="arch" type="xml">
-            <button name="action_view_out_shipments" position="after">
-                <button
-                    type="object"
-                    name="action_view_invoice"
-                    class="oe_stat_button"
-                    icon="fa-pencil-square-o"
-                    string="Origin Inv"
-                >
-                </button>
-                <button
-                    type="object"
-                    name="action_view_refunds"
-                    class="oe_stat_button"
-                    icon="fa-pencil-square-o"
-                    groups="account.group_account_user"
-                >
-                        <field name="refund_count" widget="statinfo" string="Refunds" />
-                    </button>
-            </button>
             <group name="main_info" position="inside">
                 <field
                     name="account_move_line_id"
@@ -32,27 +13,8 @@
                     domain="[('move_id.move_type', 'not in', ['entry','out_invoice','out_refund']), '|',
                                 ('move_id.partner_id', '=', partner_id),
                                 ('move_id.partner_id', 'child_of', partner_id)]"
+                    attrs="{'invisible':[('type', '!=', 'supplier')]}"
                 />
-            </group>
-            <field name="operation_id" position="after">
-                <field name="refund_policy" />
-            </field>
-            <page name="stock" position="after">
-                <page name="refunds" string="Refunds">
-                    <field name="refund_line_ids" nolabel="1" />
-                </page>
-            </page>
-            <field name="delivery_address_id" position="after">
-                <field
-                    name="invoice_address_id"
-                    groups='rma.group_rma_delivery_invoice_address'
-                />
-            </field>
-            <group name="deliver" position="after">
-                <group name="refund">
-                    <field name="qty_to_refund" />
-                    <field name="qty_refunded" />
-                </group>
             </group>
         </field>
     </record>
@@ -89,6 +51,7 @@
                     domain="[('move_id.move_type', '!=', 'entry'), '|',
                                 ('move_id.partner_id', '=', partner_id),
                                 ('move_id.partner_id', 'child_of', partner_id)]"
+                    attrs="{'invisible':[('type', '!=', 'customer')]}"
                 />
             </group>
             <field name="operation_id" position="after">
