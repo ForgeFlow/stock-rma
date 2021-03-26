@@ -48,9 +48,15 @@
             <header position="inside">
                 <button
                     name="%(action_rma_order_line_make_repair)d"
-                    states="approved"
                     string="Create Repair Order"
                     class="oe_highlight"
+                    attrs="{'invisible':['|', '|', ('type', '!=', 'customer'), ('qty_to_repair', '=', 0), ('state', '!=', 'approved')]}"
+                    type="action"
+                />
+                <button
+                    name="%(action_rma_order_line_make_repair)d"
+                    string="Create Repair Order"
+                    attrs="{'invisible':['|', '|', ('type', '!=', 'customer'), ('qty_to_repair', '!=', 0), ('state', '!=', 'approved')]}"
                     type="action"
                 />
             </header>
