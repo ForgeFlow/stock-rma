@@ -67,9 +67,8 @@
         <header position="inside">
             <button
                     name="%(action_rma_order_line_make_supplier_rma)d"
-                    states="approved"
                     string="Create Supplier RMA"
-                    class="oe_highlight"
+                    attrs="{'invisible':['|', ('type', '!=', 'customer'), ('state', '!=', 'approved')]}"
                     type="action"
                 />
         </header>
