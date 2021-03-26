@@ -11,7 +11,7 @@ class RepairOrder(models.Model):
         comodel_name="rma.order.line", string="RMA", ondelete="restrict"
     )
     under_warranty = fields.Boolean(
-        related="rma_line_id.under_warranty", readonly=False
+        related="rma_line_id.under_warranty",
     )
     payment_state = fields.Selection(
         related="invoice_id.payment_state", string="Payment Status"
