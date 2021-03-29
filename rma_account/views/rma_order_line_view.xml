@@ -82,14 +82,15 @@
         <field name="model">rma.order.line</field>
         <field name="inherit_id" ref="rma.view_rma_rma_line_filter" />
         <field name="arch" type="xml">
-            <field name="product_id" position="after">
-                <filter
-                    name="to_refund"
-                    string="To Refund"
-                    domain="[('qty_to_refund', '>', 0)]"
-                    context="{'group_by':'partner_id'}"
-                />
-            </field>
+            <group name="stock_quantities" position="after">
+                <group name="account_quantities" groups="account.group_account_invoice">
+                    <filter
+                        name="to_refund"
+                        string="To Refund"
+                        domain="[('qty_to_refund', '>', 0)]"
+                    />
+                </group>
+            </group>
         </field>
     </record>
 </odoo>
