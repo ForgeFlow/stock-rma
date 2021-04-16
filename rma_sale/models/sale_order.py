@@ -23,7 +23,7 @@ class SaleOrder(models.Model):
 
     def action_view_rma(self):
         action = self.env.ref("rma.action_rma_customer_lines")
-        result = action.read()[0]
+        result = action.sudo().read()[0]
         rma_ids = self.mapped("rma_line_ids").ids
         if rma_ids:
             # choose the view_mode accordingly
