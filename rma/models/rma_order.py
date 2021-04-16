@@ -185,7 +185,7 @@ class RmaOrder(models.Model):
 
     def action_view_in_shipments(self):
         action = self.env.ref("stock.action_picking_tree_all")
-        result = action.read()[0]
+        result = action.sudo().read()[0]
         picking_ids = []
         for line in self.rma_line_ids:
             for move in line.move_ids:
@@ -207,7 +207,7 @@ class RmaOrder(models.Model):
 
     def action_view_out_shipments(self):
         action = self.env.ref("stock.action_picking_tree_all")
-        result = action.read()[0]
+        result = action.sudo().read()[0]
         picking_ids = []
         for line in self.rma_line_ids:
             for move in line.move_ids:
@@ -237,7 +237,7 @@ class RmaOrder(models.Model):
         else:
             action = self.env.ref("rma.action_rma_supplier_lines")
             res = self.env.ref("rma.view_rma_line_supplier_form", False)
-        result = action.read()[0]
+        result = action.sudo().read()[0]
         lines = self._get_valid_lines()
         # choose the view_mode accordingly
         if len(lines.ids) != 1:
@@ -250,7 +250,7 @@ class RmaOrder(models.Model):
 
     def action_view_supplier_lines(self):
         action = self.env.ref("rma.action_rma_supplier_lines")
-        result = action.read()[0]
+        result = action.sudo().read()[0]
         lines = self.rma_line_ids
         for line_id in lines:
             related_lines = [line.id for line in line_id.supplier_rma_line_ids]
