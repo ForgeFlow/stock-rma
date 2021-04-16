@@ -120,7 +120,7 @@ class RmaOrderLine(models.Model):
 
     def action_view_repair_order(self):
         action = self.env.ref("repair.action_repair_order_tree")
-        result = action.read()[0]
+        result = action.sudo().read()[0]
         repair_ids = self.repair_ids.ids
         if len(repair_ids) != 1:
             result["domain"] = [("id", "in", repair_ids)]
