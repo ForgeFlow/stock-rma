@@ -18,6 +18,6 @@ class ResPartner(models.Model):
 
     def action_open_partner_rma(self):
         action = self.env.ref("rma.action_rma_customer_lines")
-        result = action.read()[0]
+        result = action.sudo().read()[0]
         result["context"] = {"search_default_partner_id": self.id}
         return result
