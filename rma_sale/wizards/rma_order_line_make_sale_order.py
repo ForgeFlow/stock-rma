@@ -119,7 +119,7 @@ class RmaLineMakeSaleOrder(models.TransientModel):
             res.append(sale.id)
 
         action = self.env.ref("sale.action_orders")
-        result = action.read()[0]
+        result = action.sudo().read()[0]
         result["domain"] = "[('id','in', [" + ",".join(map(str, res)) + "])]"
         return result
 

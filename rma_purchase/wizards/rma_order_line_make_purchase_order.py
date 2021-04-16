@@ -118,7 +118,7 @@ class RmaLineMakePurchaseOrder(models.TransientModel):
             res.append(purchase.id)
 
         action = self.env.ref("purchase.purchase_rfq")
-        result = action.read()[0]
+        result = action.sudo().read()[0]
         result["domain"] = "[('id','in', [" + ",".join(map(str, res)) + "])]"
         return result
 

@@ -64,7 +64,7 @@ class AccountMove(models.Model):
 
     def action_view_rma_supplier(self):
         action = self.env.ref("rma.action_rma_supplier_lines")
-        result = action.read()[0]
+        result = action.sudo().read()[0]
         rma_ids = self.mapped("line_ids.rma_line_ids").ids
         if rma_ids:
             # choose the view_mode accordingly
@@ -78,7 +78,7 @@ class AccountMove(models.Model):
 
     def action_view_rma_customer(self):
         action = self.env.ref("rma.action_rma_customer_lines")
-        result = action.read()[0]
+        result = action.sudo().read()[0]
         rma_ids = self.mapped("line_ids.rma_line_ids").ids
         if rma_ids:
             # choose the view_mode accordingly
