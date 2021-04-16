@@ -20,7 +20,7 @@ class RmaMakePicking(models.TransientModel):
                 po_list.append(procurement.purchase_id.id)
         if len(po_list):
             action = self.env.ref("purchase.purchase_rfq")
-            result = action.read()[0]
+            result = action.sudo().read()[0]
             result["domain"] = [("id", "in", po_list)]
             return result
         else:
