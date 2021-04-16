@@ -667,7 +667,7 @@ class RmaOrderLine(models.Model):
 
     def action_view_in_shipments(self):
         action = self.env.ref("stock.action_picking_tree_all")
-        result = action.read()[0]
+        result = action.sudo().read()[0]
         picking_ids = []
         for line in self:
             for move in line.move_ids:
@@ -689,7 +689,7 @@ class RmaOrderLine(models.Model):
 
     def action_view_out_shipments(self):
         action = self.env.ref("stock.action_picking_tree_all")
-        result = action.read()[0]
+        result = action.sudo().read()[0]
         picking_ids = []
         for line in self:
             for move in line.move_ids:
@@ -717,7 +717,7 @@ class RmaOrderLine(models.Model):
             action = self.env.ref("rma.action_rma_customer_lines")
             rma_lines = self.customer_rma_id.ids
             res = self.env.ref("rma.view_rma_line_form", False)
-        result = action.read()[0]
+        result = action.sudo().read()[0]
         # choose the view_mode accordingly
         if rma_lines and len(rma_lines) != 1:
             result["domain"] = rma_lines.ids
