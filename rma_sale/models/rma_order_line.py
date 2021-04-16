@@ -199,7 +199,7 @@ class RmaOrderLine(models.Model):
 
     def action_view_sale_order(self):
         action = self.env.ref("sale.action_quotations")
-        result = action.read()[0]
+        result = action.sudo().read()[0]
         order_ids = self.mapped("sale_line_ids.order_id").ids
         result["domain"] = [("id", "in", order_ids)]
         return result
