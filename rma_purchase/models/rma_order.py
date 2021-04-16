@@ -32,7 +32,7 @@ class RmaOrder(models.Model):
 
     def action_view_purchase_order(self):
         action = self.env.ref("purchase.purchase_rfq")
-        result = action.read()[0]
+        result = action.sudo().read()[0]
         po_ids = self.env["purchase.order"].search([("origin", "=", self.name)]).ids
         for line in self.rma_line_ids:
             po_ids += (
@@ -43,7 +43,7 @@ class RmaOrder(models.Model):
 
     def action_view_origin_purchase_order(self):
         action = self.env.ref("purchase.purchase_rfq")
-        result = action.read()[0]
+        result = action.sudo().read()[0]
         po_ids = self.mapped("rma_line_ids.purchase_order_line_id.order_id").ids
         result["domain"] = [("id", "in", po_ids)]
         return result

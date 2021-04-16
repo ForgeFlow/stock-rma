@@ -213,7 +213,7 @@ class RmaOrderLine(models.Model):
 
     def action_view_purchase_order(self):
         action = self.env.ref("purchase.purchase_rfq")
-        result = action.read()[0]
+        result = action.sudo().read()[0]
         orders = self.mapped("purchase_order_line_ids.order_id")
         result["domain"] = [("id", "in", orders.ids)]
         return result
