@@ -98,7 +98,7 @@ class RmaRefund(models.TransientModel):
             if (new_invoice.move_type in ["out_refund", "out_invoice"])
             else "action_move_in_refund_type"
         )
-        result = self.env.ref("account.%s" % action).read()[0]
+        result = self.env.ref("account.%s" % action).sudo().read()[0]
         form_view = self.env.ref("account.move_supplier_form", False)
         result["views"] = [(form_view and form_view.id or False, "form")]
         result["res_id"] = new_invoice.id
