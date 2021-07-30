@@ -18,6 +18,8 @@
         <field name="arch" type="xml">
             <field name="receipt_policy" position="before">
                 <field name="refund_policy" />
+                <field name="valid_refund_journal_ids" invisible="1" />
+                <field name="refund_journal_id" />
             </field>
         </field>
     </record>
