@@ -128,7 +128,9 @@ class RmaRefund(models.TransientModel):
     @api.model
     def _prepare_refund(self, wizard, rma_line):
         # origin_invoices = self._get_invoice(rma_line)
-        if rma_line.type == "customer":
+        if rma_line.operation_id.refund_journal_id:
+            journal = rma_line.operation_id.refund_journal_id
+        elif rma_line.type == "customer":
             journal = self.env["account.journal"].search(
                 [("type", "=", "sale")], limit=1
             )

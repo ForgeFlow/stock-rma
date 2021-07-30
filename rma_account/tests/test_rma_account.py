@@ -26,12 +26,26 @@ class TestRmaAccount(common.SingleTransactionCase):
         cls.cust_refund_op = cls.env.ref("rma_account.rma_operation_customer_refund")
         cls.sup_refund_op = cls.env.ref("rma_account.rma_operation_supplier_refund")
         cls.company_id = cls.env.user.company_id
+
         # Create partners
         customer1 = customer1_obj.create({"name": "Customer 1"})
         supplier1 = customer1_obj.create({"name": "Supplier 1"})
 
+        # Create Journal
+        cls.journal_sale = cls.env["account.journal"].create(
+            {
+                "name": "Test Sales Journal",
+                "code": "tSAL",
+                "type": "sale",
+                "company_id": cls.company_id.id,
+            }
+        )
+
         # Create RMA group and operation:
         cls.rma_group_customer = cls.rma_obj.create(
+            {"partner_id": customer1.id, "type": "customer"}
+        )
+        cls.rma_group_customer_2 = cls.rma_obj.create(
             {"partner_id": customer1.id, "type": "customer"}
         )
         cls.rma_group_supplier = cls.rma_obj.create(
@@ -224,3 +238,28 @@ class TestRmaAccount(common.SingleTransactionCase):
         rma._onchange_account_move_line_id()
         self.assertEqual(rma.product_id, self.product_1)
         self.assertEqual(rma.product_qty, 3.0)
+
+    def test_06_default_journal(self):
+        self.operation_1.write({"refund_journal_id": self.journal_sale.id})
+        add_inv = self.rma_add_invoice_wiz.with_context(
+            {
+                "customer": True,
+                "active_ids": self.rma_group_customer_2.id,
+                "active_model": "rma.order",
+            }
+        ).create({"line_ids": [(6, 0, self.inv_customer.invoice_line_ids.ids)]})
+        add_inv.add_lines()
+        rma = self.rma_group_customer_2.rma_line_ids.filtered(
+            lambda r: r.product_id == self.product_2
+        )
+        rma.action_rma_to_approve()
+        rma.action_rma_approve()
+        make_refund = self.rma_refund_wiz.with_context(
+            {"customer": True, "active_ids": rma.ids, "active_model": "rma.order.line"}
+        ).create({"description": "Test refund"})
+        make_refund.invoice_refund()
+        rma.refund_line_ids.move_id.post()
+        rma._compute_refund_count()
+        self.assertEqual(
+            self.operation_1.refund_journal_id, rma.refund_line_ids.journal_id
+        )
