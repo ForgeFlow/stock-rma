@@ -72,11 +72,21 @@ class RmaLineMakeSaleOrder(models.TransientModel):
         if not self.partner_id:
             raise exceptions.Warning(_("Enter a customer."))
         customer = self.partner_id
+        auto = self.env["account.fiscal.position"].search(
+            [("auto_apply", "=", True), ("country_id", "=", customer.country_id.id)],
+            limit=1,
+        )
+        fiscal_position = False
+        if customer.property_account_position_id:
+            fiscal_position = customer.property_account_position_id
+        elif auto:
+            fiscal_position = auto
         data = {
             "origin": line.name,
             "partner_id": customer.id,
             "warehouse_id": line.out_warehouse_id.id,
             "company_id": line.company_id.id,
+            "fiscal_position_id": fiscal_position.id if fiscal_position else False,
         }
 
         return data
