@@ -1,0 +1,19 @@
+<odoo>
+
+    <record id="rma_return_label_mail" model="mail.template">
+        <field name="name">Return Label</field>
+        <field name="email_from">${(user.partner_id.email or '')|safe}</field>
+        <field name="subject">Return Label</field>
+        <field name="email_to">${(object.partner_id.email or '')|safe}</field>
+        <field name="model_id" ref="stock.model_stock_picking" />
+        <field
+            name="body_html"
+        ><![CDATA[
+            <p>Hello ${object.partner_id.name},</p>
+            <p>Please find attached the shipping label to return your products.</p>
+            <p>Thank you,</p>
+            ]]>
+        </field>
+    </record>
+
+</odoo>

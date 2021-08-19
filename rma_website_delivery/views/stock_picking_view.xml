@@ -1,0 +1,19 @@
+<odoo>
+
+    <record id="view_picking_form_inherit_rma_delivery" model="ir.ui.view">
+        <field name="name">stock.picking.form</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//header/button[@name='action_cancel']" position="after">
+                <button
+                    name="get_return_label"
+                    string="Get Return Label"
+                    type="object"
+                    attrs="{'invisible': [('picking_type_id', '!=', %(rma.picking_type_rma_cust_in)d), ('carrier_id','=',False)]}"
+                />
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
