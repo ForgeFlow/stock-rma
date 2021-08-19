@@ -1,0 +1,370 @@
+<odoo>
+
+    <template
+        id="portal_my_home_rma"
+        name="Portal layout: RMA menu entries"
+        inherit_id="portal.portal_breadcrumbs"
+        priority="50"
+    >
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li
+                t-if="page_name == 'rma_order'"
+                t-attf-class="breadcrumb-item #{'active ' if not rma_order else ''}"
+            >
+                <t t-if="rma_order">
+                    <a href="/my/rma/order" aria-label="RMA" title="RMA">
+                        <span>RMA</span>
+                    </a>
+                </t>
+                <t t-else="0">
+                    <span>RMA</span>
+                </t>
+            </li>
+            <li t-if="rma_order" class="breadcrumb-item">
+                <span t-esc="rma_order.name" />
+            </li>
+        </xpath>
+
+    </template>
+
+    <template
+        id="portal_my_rma_order"
+        name="RMA Orders"
+        customize_show="True"
+        inherit_id="portal.portal_my_home"
+        priority="50"
+    >
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">RMA</t>
+                <t t-set="url" t-value="'/my/rma/order'" />
+                <t t-set="placeholder_count" t-value="'rma_order_count'" />
+            </t>
+        </xpath>
+    </template>
+
+    <template id="rma_order_portal" name="My RMA Orders">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True" />
+
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">RMA</t>
+            </t>
+            <div class="offset-10 col-2 flex-grow-0 text-center mb-2">
+                <a href="/rma/order/new" class="btn btn-primary">New RMA</a>
+            </div>
+            <t t-if="not orders">
+                <p>There are currently no RMA order for your account.</p>
+            </t>
+            <t t-if="orders" t-call="portal.portal_table">
+                <thead>
+                    <tr class="active">
+                        <th class="text-left">Ref</th>
+                        <th class="text-left">Assign To</th>
+                        <th class="text-left">Date</th>
+                        <th class="text-left">State</th>
+                    </tr>
+                </thead>
+                <t t-foreach="orders" t-as="order">
+                    <tr>
+                        <td>
+                            <a t-attf-href="/rma/order/#{order.id}">
+                                <t t-esc="order.name" />
+                            </a>
+                        </td>
+                        <td>
+                            <span t-field="order.assigned_to" />
+                        </td>
+                        <td>
+                            <span t-field="order.order_date" />
+                        </td>
+                        <td>
+                            <span t-field="order.state" />
+                        </td>
+                    </tr>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="rma_customer_portal" name="RMA Customer">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True" />
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">RMA</t>
+            </t>
+            <t t-call="portal.portal_table">
+                <form
+                    class="form"
+                    id="create-form"
+                    action="/create/group"
+                    method="post"
+                >
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        t-att-value="request.csrf_token()"
+                    />
+
+                    <div name="customer_info" class="row">
+                        <div class="col-md-6">
+                            <label for="customer">Customer:</label>
+                            <select
+                                class="o_input form-control"
+                                id="customer"
+                                name="customer"
+                                required="required"
+                            >
+                                <t t-foreach="customer_ids" t-as="customer_id">
+                                    <option t-att-value="customer_id.id">
+                                        <t t-esc="customer_id.display_name" />
+                                    </option>
+                                </t>
+                            </select>
+
+                        </div>
+                        <div class="col-md-6">
+                            <label for="order_date">Date:</label>
+                            <input
+                                type="datetime-local"
+                                id="order_date"
+                                name="order_date"
+                                class="form-control datetimepicker-input"
+                                required="required"
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <label for="info">Additional Information:</label>
+                        <textarea
+                            rows="4"
+                            cols="50"
+                            id="info"
+                            class="o_input form-control"
+                            style="resize:none;"
+                            name="info"
+                            required="required"
+                        />
+                    </div>
+                    <input type="hidden" name="products" id="hidden-product" />
+                    <input type="hidden" name="lots" id="hidden-lot" />
+                    <input type="hidden" name="operations" id="hidden-operation" />
+                    <input type="hidden" name="return_qty" id="hidden-return_qty" />
+                    <input
+                        type="number"
+                        class="o_hidden"
+                        name="total_counts"
+                        id="hidden-total_counts"
+                        value="0"
+                    />
+                    <div name="product_info mt-2">
+                        <table class="table table-sm table-striped form-table ">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Lot/Serial Number</th>
+                                    <th class="o_hidden">Operation</th>
+                                    <th>Return Qty</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="table-input-tr o_hidden">
+                                    <td>
+                                        <select
+                                            class="o_input form-control product-input product"
+                                        >
+                                            <option value="" />
+                                            <t t-foreach="product_ids" t-as="product">
+                                                <option t-att-value="product.id">
+                                                    <t t-esc="product.display_name" />
+                                                </option>
+                                            </t>
+                                        </select>
+                                        <p class="text-danger o_hidden">Field required
+                                        </p>
+                                    </td>
+                                    <td>
+                                        <select class="o_input form-control lot">
+                                            <option value="" />
+                                            <t t-foreach="lot_ids" t-as="lot">
+                                                <option
+                                                    t-att-data-product="lot.product_id.id"
+                                                    t-att-value="lot.id"
+                                                >
+                                                    <t t-esc="lot.display_name" />
+                                                </option>
+                                            </t>
+                                        </select>
+                                    </td>
+                                    <td class="o_hidden">
+                                        <select class="o_input form-control operation">
+                                            <option value="" />
+                                            <t
+                                                t-foreach="operation_ids"
+                                                t-as="operation"
+                                            >
+                                                <t
+                                                    t-if="operation.id == operation_id.id"
+                                                >
+                                                    <option
+                                                        t-att-value="operation.id"
+                                                        selected="True"
+                                                    >
+                                                        <t
+                                                            t-esc="operation.display_name"
+                                                        />
+                                                    </option>
+                                                </t>
+                                                <t t-else="0">
+                                                    <option t-att-value="operation.id">
+                                                        <t
+                                                            t-esc="operation.display_name"
+                                                        />
+                                                    </option>
+                                                </t>
+                                            </t>
+                                        </select>
+                                        <p class="text-danger o_hidden">Field required
+                                        </p>
+                                    </td>
+                                    <td>
+                                        <input
+                                            type="number"
+                                            class="form-control return_qty"
+                                        />
+                                        <p class="text-danger o_hidden">Field required
+                                        </p>
+                                    </td>
+                                    <td>
+                                        <button
+                                            class="btn fa fa-trash-o"
+                                            name="delete"
+                                            aria-label="Delete row"
+                                            onclick="$(this).parent().parent().remove();"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="7">
+                                        <a href="#" class="btn btn-add-line">Add a Line
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <a
+                            class="btn btn-primary pull-right"
+                            id="a-submit-rma"
+                            role="button"
+                        >Submit
+                        </a>
+                        <button
+                            class="btn btn-primary pull-right o_hidden"
+                            id="btn-submit"
+                            role="button"
+                        >Submit
+                        </button>
+                    </div>
+                </form>
+            </t>
+        </t>
+    </template>
+
+    <template id="rma_order_tmaplate_view" name="RMA Orders">
+        <t t-call="portal.portal_layout">
+            <t t-set="wrapwrap_classes" t-value="'o_portal_bg_dark'" />
+
+            <t t-set="o_portal_fullwidth_alert">
+                <t t-call="portal.portal_back_in_edit_mode">
+                    <t
+                        t-set="backend_url"
+                        t-value="'/web#model=rma.order&amp;id=%s&amp;view_type=form' % (rma_order.id)"
+                    />
+                </t>
+            </t>
+
+            <t t-call="portal.portal_record_layout">
+                <t t-set="card_header">
+                    <div class="row no-gutters">
+                        <div class="col-md">
+                            <h5 class="d-flex mb-1 mb-md-0">
+                                <div class="col-12 text-truncate">
+                                    <span t-field="rma_order.name" />
+                                    <small class="text-muted ">(#
+                                        <span t-field="rma_order.id" />
+                                        )
+                                    </small>
+                                </div>
+                            </h5>
+                        </div>
+                    </div>
+                </t>
+                <t t-set="card_body">
+                    <div class="row mb-4">
+                        <strong class="col-lg-2">Order Date</strong>
+                        <span
+                            class="col-lg-4"
+                            t-field="rma_order.date_rma"
+                            t-options='{"widget": "date"}'
+                        />
+                    </div>
+                    <div class="row mb-4">
+                        <strong class="col-lg-2">Customer</strong>
+                        <span class="col-lg-10" t-field="rma_order.partner_id" />
+                    </div>
+                    <div class="row mb-4">
+                        <strong class="col-lg-2">Requested By</strong>
+                        <span class="col-lg-10" t-field="rma_order.requested_by" />
+                    </div>
+                    <div class="row mb-4">
+                        <strong class="col-lg-2">Assign</strong>
+                        <span class="col-lg-10" t-field="rma_order.assigned_to" />
+                    </div>
+                    <table t-att-data-order-id="rma_order.id" class="table table-sm">
+                        <thead class="bg-100">
+                            <tr>
+                                <th class="text-left">Products</th>
+                                <th class="text-right">Return Qty</th>
+                                <th class="text-left">State</th>
+                            </tr>
+                        </thead>
+                        <tbody class="sale_tbody">
+                            <t t-foreach="rma_order.rma_line_ids" t-as="line">
+                                <tr>
+                                    <td class="text-left">
+                                        <span t-field="line.product_id" />
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-field="line.product_qty" />
+                                    </td>
+                                    <td class="text-left">
+                                        <span class="badge badge-pill badge-info">
+                                            <i
+                                                class="fa fa-fw fa-clock-o"
+                                                aria-label="Opened"
+                                                title="Opened"
+                                                role="img"
+                                            />
+                                            <span
+                                                class="d-none d-md-inline"
+                                                t-field="line.state"
+                                            />
+                                        </span>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                    <div id="sale_order_communication" class="mt-4">
+                        <h2>History</h2>
+                        <t t-call="portal.message_thread">
+                            <t t-set="object" t-value="rma_order" />
+                        </t>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

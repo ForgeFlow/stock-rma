@@ -1,0 +1,6 @@
+"id","name","model_id/id","group_id/id","perm_read","perm_write","perm_create","perm_unlink"
+"access_rma_order_line_portal","rma.order.line.portal","rma.model_rma_order_line","base.group_portal",1,0,0,0
+"access_rma_order_portal","rma.order.portal","rma.model_rma_order","base.group_portal",1,0,0,0
+"access_rma_operation_portal","rma.operation.portal","rma_account.model_rma_operation","base.group_portal",1,0,0,0
+"access_stock_production_lot_portal","stock.production.lot.portal","stock.model_stock_production_lot","base.group_portal",1,0,0,0
+"access_stock_warehouse_portal","stock.warehouse.portal","stock.model_stock_warehouse","base.group_portal",1,0,0,0
