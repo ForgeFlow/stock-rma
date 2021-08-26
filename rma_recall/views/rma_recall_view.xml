@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
+
     <record id="rma_recall_form" model="ir.ui.view">
         <field name="name">rma.recall.form</field>
         <field name="model">rma.recall</field>
         <field name="arch" type="xml">
-            <form string="RMA Recall">
+            <form string="Recalls">
                 <header>
                     <button
                         name="action_search"
@@ -23,12 +23,21 @@
                     </div>
                     <group>
                         <group>
-                            <field name="lot_id" />
+                            <field
+                                name="lot_id"
+                                attrs="{'readonly': [('state', '!=', 'new')]}"
+                            />
                             <field name="product_id" />
                          </group>
                          <group>
-                            <field name="rma_date" />
-                            <field name="origin" />
+                            <field
+                                name="rma_date"
+                                attrs="{'readonly': [('state', '!=', 'new')]}"
+                            />
+                            <field
+                                name="origin"
+                                attrs="{'readonly': [('state', '!=', 'new')]}"
+                            />
                         </group>
                     </group>
                     <group cols="4">
@@ -38,52 +47,54 @@
                                 <field name="partner_id" />
                                 <field name="product_id" />
                                 <field name="qty" />
-                                <field name="uom_id" />
-                                <field name="state" />
-                                <field name="recall_id" invisible="1" />
+                                <field name="uom_id" groups="uom.group_uom" />
                                 <field name="rma_id" />
-                                <field name="picking_id" invisible="1" />
-                                <field name="scrap_id" invisible="0" />
+                                <field name="scrap_id" />
+                                <field name="state" />
                                 <button
                                     name="button_rma_order"
                                     type="object"
                                     string="RMA order"
-                                    attrs="{'invisible': [('partner_id','=', False),('rma_id','=',False)]}"
+                                    attrs="{'invisible': ['|', ('partner_id', '=', False), ('rma_id', '!=', False)]}"
                                 />
                                 <button
                                     name="button_scrap_order"
                                     type="object"
                                     string="Scrap Order"
                                     class="btn-success"
-                                    attrs="{'invisible': [('partner_id','!=',False),('scrap_id','=',False)]}"
+                                    attrs="{'invisible': ['|', ('partner_id', '!=', False), ('scrap_id','!=', False)]}"
                                 />
                             </tree>
-                            <form>
-                                <group>
-                                    <field name="location_id" />
-                                    <field name="recall_id" />
-                                    <field name="partner_id" />
-                                    <field name="rma_id" />
-                                    <field name="picking_id" />
-                                    <field name="scrap_id" />
-                                    <field name="product_id" />
-                                    <field name="qty" />
-                                    <field name="uom_id" />
-                                    <field name="state" />
-                                   <button
+                            <form string="Recall Line">
+                              <header>
+                                <button
                                         name="button_rma_order"
                                         type="object"
                                         string="RMA order"
-                                        attrs="{'invisible': [('partner_id','!=',True)]}"
+                                        attrs="{'invisible': ['|', ('partner_id', '=', False), ('rma_id', '!=', False)]}"
                                     />
-                                    <button
+                                <button
                                         name="button_scrap_order"
                                         type="object"
                                         string="Scrap Order"
                                         class="btn-success"
-                                        attrs="{'invisible': [('scrap_id','=', True)]}"
+                                        attrs="{'invisible': ['|', ('partner_id', '!=', False), ('scrap_id','!=', False)]}"
                                     />
+                                <field name="state" widget="statusbar" />
+                              </header>
+                              <group>
+                                <group>
+                                  <field name="product_id" />
+                                  <field name="qty" />
+                                  <field name="uom_id" groups="uom.group_uom" />
+                                  <field name="location_id" />
+                                  <field name="partner_id" />
                                 </group>
+                                <group>
+                                  <field name="rma_id" />
+                                  <field name="scrap_id" />
+                                </group>
+                              </group>
                             </form>
                         </field>
                     </group>
@@ -99,11 +110,12 @@
             </form>
         </field>
     </record>
+
     <record id="rma_recall_tree" model="ir.ui.view">
         <field name="name">rma.recall.tree</field>
         <field name="model">rma.recall</field>
         <field name="arch" type="xml">
-            <tree string="RMA Recall">
+            <tree string="Recalls">
                 <field name="name" />
                 <field name="lot_id" />
                 <field name="product_id" />
@@ -113,11 +125,12 @@
             </tree>
         </field>
     </record>
+
     <record id="rma_recall_search" model="ir.ui.view">
         <field name="name">rma.recall.search</field>
         <field name="model">rma.recall</field>
         <field name="arch" type="xml">
-            <search string="Search RMA Recall">
+            <search string="Search Recalls">
                 <field
                     name="name"
                     filter_domain="[('name', 'ilike', self)]"
@@ -136,23 +149,20 @@
             </search>
         </field>
     </record>
+
     <record id="rma_recall_action" model="ir.actions.act_window">
-        <field name="name">RMA Recall</field>
+        <field name="name">Recalls</field>
         <field name="res_model">rma.recall</field>
         <field name="view_mode">tree,form</field>
     </record>
-    <!-- Top menu item -->
-    <menuitem
-        id="rma_recall_main_menu"
-        name="RMA Recall"
-        parent="rma.menu_rma_root"
-        sequence="32"
-    />
+
+    <!-- Menu items -->
     <menuitem
         id="rma_recall_menu"
-        name="RMA Recall"
-        parent="rma_recall_main_menu"
-        sequence="1"
+        name="Recalls"
+        parent="rma.menu_rma_root"
+        sequence="20"
         action="rma_recall_action"
     />
+
 </odoo>

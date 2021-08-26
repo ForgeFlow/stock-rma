@@ -24,7 +24,9 @@ class RmaRecall(models.Model):
         index=True,
         states={"new": [("readonly", False)]},
     )
-    product_id = fields.Many2one("product.product", "Product", readonly=True)
+    product_id = fields.Many2one(
+        related="lot_id.product_id", string="Product", store=True
+    )
     rma_date = fields.Date("Date", default=fields.Date.today())
     origin = fields.Char("Origin", copy=False, states={"new": [("readonly", False)]})
     state = fields.Selection(
@@ -41,10 +43,6 @@ class RmaRecall(models.Model):
         tracking=True,
     )
     line_ids = fields.One2many("rma.recall.line", "recall_id", "Lines", readonly=True)
-
-    @api.onchange("lot_id")
-    def _onchange_lot_number(self):
-        self.product_id = self.lot_id.product_id
 
     @api.model
     def create(self, vals):
@@ -90,8 +88,12 @@ class RmaRecall(models.Model):
                         or move_line.product_id.uom_id.id,
                     }
                     recall_lines.append((0, 0, vals))
-            rec.line_ids = recall_lines
-            rec.state = "in_progress"
+            rec.write(
+                {
+                    "line_ids": recall_lines,
+                    "state": "in_progress",
+                }
+            )
 
 
 class RmaRecallLine(models.Model):
@@ -121,12 +123,8 @@ class RmaRecallLine(models.Model):
     picking_id = fields.Many2one("stock.picking", "Transfer")
     product_id = fields.Many2one("product.product", "Product")
     qty = fields.Float("Quantity")
-    uom_id = fields.Many2one("uom.uom", "Unit of Measure")
+    uom_id = fields.Many2one(related="product_id.uom_id", string="UoM")
     state = fields.Char("State", compute="_compute_state")
-
-    @api.onchange("product_id")
-    def _onchange_product(self):
-        self.uom_id = self.product_id.uom_id
 
     def button_rma_order(self):
         # Todo: need to create RMA
