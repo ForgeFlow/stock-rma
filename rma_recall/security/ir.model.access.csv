@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_rma_recall,access_rma_recall_all_employee,rma_recall.model_rma_recall,,1,1,1,1
+access_rma_recall_line,access_rma_recall_line_all_employee,rma_recall.model_rma_recall_line,,1,1,1,1

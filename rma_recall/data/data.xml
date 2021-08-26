@@ -1,0 +1,12 @@
+<odoo>
+
+    <record id="rma_recall_seq" model="ir.sequence">
+        <field name="name">RMA Recall Sequence</field>
+        <field name="code">rma.recall</field>
+        <field name="padding">5</field>
+        <field name="prefix">RECALL/%(year)s/</field>
+        <field eval="1" name="number_next" />
+        <field eval="1" name="number_increment" />
+    </record>
+
+</odoo>
