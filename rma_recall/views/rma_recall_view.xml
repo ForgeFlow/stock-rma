@@ -13,6 +13,20 @@
                         type="object"
                         string="Search"
                     />
+                    <button
+                        name="action_done"
+                        states="in_progress"
+                        class="oe_highlight"
+                        type="object"
+                        string="Done"
+                    />
+                    <button
+                        name="action_cancel"
+                        states="new,in_progress"
+                        class="oe_highlight"
+                        type="object"
+                        string="Cancel"
+                    />
                     <field name="state" widget="statusbar" />
                 </header>
                 <sheet>
@@ -40,7 +54,7 @@
                             />
                         </group>
                     </group>
-                    <group cols="4">
+                    <group>
                         <field name="line_ids" nolabel="1">
                             <tree>
                                 <field name="location_id" />
@@ -70,7 +84,8 @@
                                 <button
                                         name="button_rma_order"
                                         type="object"
-                                        string="RMA order"
+                                        string="RMA Order"
+                                        class="btn-success"
                                         attrs="{'invisible': ['|', ('partner_id', '=', False), ('rma_id', '!=', False)]}"
                                     />
                                 <button
