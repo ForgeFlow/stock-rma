@@ -5,7 +5,7 @@
         <field name="email_from">${(user.partner_id.email or '')|safe}</field>
         <field name="subject">Return Label</field>
         <field name="email_to">${(object.partner_id.email or '')|safe}</field>
-        <field name="model_id" ref="stock.model_stock_picking" />
+        <field name="model_id" ref="rma.model_rma_order" />
         <field
             name="body_html"
         ><![CDATA[

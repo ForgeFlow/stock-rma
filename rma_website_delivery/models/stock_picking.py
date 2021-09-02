@@ -12,13 +12,19 @@ class StockPicking(models.Model):
             if not rec.carrier_id:
                 raise UserError(_("You need to assign the carrier."))
             else:
-                data, labels = rec.carrier_id.get_return_label(self)
-                rec.carrier_tracking_ref = data["tracking_number"]
-                mail_template = self.env.ref(
-                    "rma_website_delivery.rma_return_label_mail"
+                rma_order_line_id = self.env["rma.order.line"].search(
+                    [("name", "=", rec.origin)]
                 )
-                attach_id = self.env["ir.attachment"].search(
-                    [("name", "=", labels[0][0])]
-                )
-                mail_template.write({"attachment_ids": [(6, 0, [attach_id.id])]})
-                mail_template.send_mail(rec.id, force_send=True)
+                if rma_order_line_id and rma_order_line_id.rma_id:
+                    data, labels = rec.carrier_id.get_return_label(self)
+                    rec.carrier_tracking_ref = data["tracking_number"]
+                    mail_template = self.env.ref(
+                        "rma_website_delivery.rma_return_label_mail"
+                    )
+                    attach_id = self.env["ir.attachment"].search(
+                        [("name", "=", labels[0][0])], limit=1
+                    )
+                    mail_template.write({"attachment_ids": [(6, 0, attach_id.ids)]})
+                    mail_template.send_mail(
+                        rma_order_line_id.rma_id.id, force_send=True
+                    )
