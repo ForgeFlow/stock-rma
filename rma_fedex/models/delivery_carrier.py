@@ -145,7 +145,6 @@ class ProviderFedex(models.Model):
             )
         srm.return_label(tracking_number, origin_date)
         response = srm.process_shipment()
-        # 3/0
         if not response.get("errors_message"):
             fedex_labels = [
                 (
@@ -162,7 +161,15 @@ class ProviderFedex(models.Model):
                     srm._get_labels(self.fedex_label_file_type)
                 )
             ]
+
             picking.message_post(body=_("Return Label"), attachments=fedex_labels)
+            rma_order_line_id = self.env["rma.order.line"].search(
+                [("name", "=", picking.origin)]
+            )
+            if rma_order_line_id and rma_order_line_id.rma_id:
+                rma_order_line_id.rma_id.message_post(
+                    body=_("Return Label"), attachments=fedex_labels
+                )
             return response, fedex_labels
         else:
             raise UserError(response["errors_message"])
