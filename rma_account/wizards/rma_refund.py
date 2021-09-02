@@ -139,7 +139,6 @@ class RmaRefund(models.TransientModel):
                 [("type", "=", "purchase")], limit=1
             )
         values = {
-            "name": rma_line.rma_id.name or rma_line.name,
             "payment_reference": rma_line.rma_id.name or rma_line.name,
             "invoice_origin": rma_line.rma_id.name or rma_line.name,
             "ref": False,
