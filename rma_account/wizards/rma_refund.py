@@ -138,7 +138,6 @@ class RmaRefund(models.TransientModel):
             journal = self.env['account.journal'].search(
                 [('type', '=', 'purchase')], limit=1)
         values = {
-            'name': rma_line.rma_id.name or rma_line.name,
             'origin': rma_line.rma_id.name or rma_line.name,
             'reference': False,
             # 'account_id': account.id,
