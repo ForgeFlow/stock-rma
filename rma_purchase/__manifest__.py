@@ -8,7 +8,7 @@
     "summary": "RMA from PO",
     "license": "LGPL-3",
     "author": "Eficent, Odoo Community Association (OCA)",
-    "website": "https://github.com/OCA/https://github.com/ForgeFlow/stock-rma",
+    "website": "https://github.com/ForgeFlow/stock-rma",
     "depends": ["rma_account", "purchase"],
     "data": [
         "wizards/rma_order_line_make_purchase_order_view.xml",
