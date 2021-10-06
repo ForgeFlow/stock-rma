@@ -8,7 +8,7 @@
     "author": "Open Source Integrators",
     "maintainer": "ForgeFlow",
     "website": "https://github.com/ForgeFlow/stock-rma",
-    "depends": ["portal", "rma_account"],
+    "depends": ["portal", "utm", "rma_account"],
     "data": [
         "security/ir.model.access.csv",
         "security/ir.rule.csv",

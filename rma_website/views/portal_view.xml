@@ -76,7 +76,7 @@
                             <span t-field="order.assigned_to" />
                         </td>
                         <td>
-                            <span t-field="order.order_date" />
+                            <span t-field="order.date_rma" />
                         </td>
                         <td>
                             <span t-field="order.state" />

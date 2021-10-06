@@ -5,11 +5,10 @@ odoo.define("rma_website.rma_website_portal", function (require) {
 
     var publicWidget = require("web.public.widget");
     const ajax = require("web.ajax");
-
     require("web.dom_ready");
 
     publicWidget.registry.RMAProduct = publicWidget.Widget.extend({
-        selector: ".rma-table-input-tr",
+        selector: ".table-input-tr",
         events: {
             "click .product-input": "product_input",
         },
@@ -129,9 +128,20 @@ odoo.define("rma_website.rma_website_portal", function (require) {
         // Filter the lot dropdown options by product.
         $(document).on("change", ".product-input", function (ev) {
             ev.preventDefault();
-            var $lot_select = $(this).parent().parent().find("#lot");
-            $lot_select.children("option").hide();
-            $lot_select.children("option[data-product^=" + $(this).val() + "]").show();
+            if ($(ev.currentTarget).val()) {
+                ajax.jsonRpc("/website/find/lot", "call", {
+                    product_id: $(ev.currentTarget).val(),
+                }).then((results) => {
+                    $(ev.currentTarget).parent().parent().find(".lot option").remove();
+                    _.each(results, (result) => {
+                        $(ev.currentTarget)
+                            .parent()
+                            .parent()
+                            .find(".lot")
+                            .append(new Option(result.name, result.id));
+                    });
+                });
+            }
         });
 
         // To-Do: Improve the code to get the table data
