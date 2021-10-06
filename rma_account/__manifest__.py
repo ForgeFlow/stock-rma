@@ -8,7 +8,7 @@
     "category": "RMA",
     "summary": "Integrates RMA with Invoice Processing",
     "author": "ForgeFlow",
-    "website": "https://github.com/OCA/https://github.com/ForgeFlow/stock-rma",
+    "website": "https://github.com/ForgeFlow/stock-rma",
     "depends": ["stock_account", "rma"],
     "data": [
         "security/ir.model.access.csv",
