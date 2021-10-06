@@ -8,7 +8,7 @@
     "category": "RMA",
     "summary": "Links RMA with Sales Orders",
     "author": "ForgeFlow, Odoo Community Association (OCA)",
-    "website": "https://github.com/OCA/https://github.com/ForgeFlow/stock-rma",
+    "website": "https://github.com/ForgeFlow/stock-rma",
     "depends": ["rma_account", "sale_stock"],
     "data": [
         "security/ir.model.access.csv",
