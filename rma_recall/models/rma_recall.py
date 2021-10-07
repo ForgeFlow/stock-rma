@@ -175,6 +175,7 @@ class RmaRecallLine(models.Model):
                     "type": partner_type,
                     "operation_id": operation.id,
                     "origin": rec.recall_id.name,
+                    'product_qty': rec.qty
                 }
                 rma_order_line_new = RmaOrderLine.new(vals)
                 vals.update(rma_order_line_new.default_get(rma_order_line_new._fields))
