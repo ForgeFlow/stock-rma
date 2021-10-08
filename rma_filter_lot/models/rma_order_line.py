@@ -9,10 +9,9 @@ class RmaOrderLine(models.Model):
     _inherit = "rma.order.line"
 
     lot_id = fields.Many2one(
-        comodel_name="stock.production.lot",
-        domain="[('id', 'in', valid_lots_ids)]",
+        domain="[('id', 'in', valid_lot_ids)]",
     )
-    valid_lots_ids = fields.One2many(
+    valid_lot_ids = fields.One2many(
         comodel_name="stock.production.lot",
         compute="_compute_domain_lot_ids",
     )
@@ -40,8 +39,9 @@ class RmaOrderLine(models.Model):
                         valid_ids |= quant.lot_id
                 if valid_ids:
                     lots = valid_ids
-            rec.valid_lots_ids = lots
+            rec.valid_lot_ids = lots
 
     def _onchange_product_id(self):
         super()._onchange_product_id()
-        return {"domain": {"lot_id": [("id", "in", self.valid_lots_ids)]}}
+        # Override domain added in base `rma` module.
+        return {"domain": {"lot_id": [("id", "in", self.valid_lot_ids.ids)]}}
