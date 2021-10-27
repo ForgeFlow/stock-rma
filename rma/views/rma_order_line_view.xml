@@ -78,6 +78,13 @@
                             groups="rma.group_rma_customer_user"
                         />
                         <button
+                            name="action_rma_approve"
+                            type="object"
+                            string="Back to Approved"
+                            attrs="{'invisible':[('state', '!=', 'done')]}"
+                            groups="rma.group_rma_customer_user"
+                        />
+                        <button
                             name="action_rma_done"
                             type="object"
                             string="Done"
