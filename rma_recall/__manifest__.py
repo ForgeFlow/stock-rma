@@ -8,7 +8,7 @@
     "category": "RMA",
     "summary": "To track inventory items by lot number",
     "author": "Open Source Integrators, Odoo Community Association (OCA)",
-    "website": "https://github.com/OCA/https://github.com/ForgeFlow/stock-rma",
+    "website": "https://github.com/ForgeFlow/stock-rma",
     "depends": ["rma"],
     "data": [
         "security/ir.model.access.csv",

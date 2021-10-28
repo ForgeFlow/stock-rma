@@ -56,7 +56,8 @@ class RmaRecall(models.Model):
         # I can't even
         return name == "tracking" or super()._valid_field_parameter(field, name)
 
-    def _prepare_recall_line(self, line, recall_lines=[]):
+    def _prepare_recall_line(self, line, recall_lines=False):
+        recall_lines = recall_lines or []
         TraceabilityReport = self.env["stock.traceability.report"]
         vals = {}
         move_line = self.env[line.get("model")].browse(line.get("model_id"))
@@ -175,7 +176,7 @@ class RmaRecallLine(models.Model):
                     "type": partner_type,
                     "operation_id": operation.id,
                     "origin": rec.recall_id.name,
-                    'product_qty': rec.qty
+                    "product_qty": rec.qty,
                 }
                 rma_order_line_new = RmaOrderLine.new(vals)
                 vals.update(rma_order_line_new.default_get(rma_order_line_new._fields))
