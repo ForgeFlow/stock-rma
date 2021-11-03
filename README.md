@@ -7,7 +7,7 @@
 
 # stock-rma
 
-None
+Manage returns authorizations
 
 <!-- /!\ do not modify below this line -->
 
