@@ -7,7 +7,7 @@
 
 # stock-rma
 
-TODO: add repo description.
+Return Merchandise Authorization for Odoo
 
 <!-- /!\ do not modify below this line -->
 
