@@ -82,7 +82,8 @@ class TestRmaRepair(common.SingleTransactionCase):
         })
         # Create Invoices:
         customer_account = cls.acc_obj.search(
-            [('user_type_id', '=', receivable_type.id)], limit=1).id
+            [('user_type_id', '=', receivable_type.id),
+             ('company_id', '=', cls.env.user.company_id.id)], limit=1).id
         cls.inv_customer = cls.inv_obj.create({
             'partner_id': customer1.id,
             'account_id': customer_account,
@@ -125,7 +126,8 @@ class TestRmaRepair(common.SingleTransactionCase):
             'type': 'customer',
         })
         cls.bank_journal = cls.env['account.journal'].search(
-            [('type', '=', 'bank')], limit=1)
+            [('type', '=', 'bank'),
+             ('company_id', '=', cls.env.user.company_id.id)], limit=1)
         cls.material = cls.product_obj.create({
             'name': 'Materials',
             'type': 'product',
