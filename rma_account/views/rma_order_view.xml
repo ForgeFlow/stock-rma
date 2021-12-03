@@ -11,7 +11,7 @@
                     name="action_view_invoice_refund"
                     class="oe_stat_button"
                     icon="fa-pencil-square-o"
-                    groups="account.group_account_user"
+                    groups="account.group_account_invoice"
                 >
                     <field
                         name="invoice_refund_count"
@@ -24,7 +24,7 @@
                     name="action_view_invoice"
                     class="oe_stat_button"
                     icon="fa-pencil-square-o"
-                    groups="account.group_account_user"
+                    groups="account.group_account_invoice"
                 >
                     <field name="invoice_count" widget="statinfo" string="Origin Inv" />
                 </button>
@@ -49,7 +49,7 @@
                     name="action_view_invoice_refund"
                     class="oe_stat_button"
                     icon="fa-pencil-square-o"
-                    groups="account.group_account_user"
+                    groups="account.group_account_invoice"
                 >
                      <field
                         name="invoice_refund_count"
@@ -62,7 +62,7 @@
                     name="action_view_invoice"
                     class="oe_stat_button"
                     icon="fa-pencil-square-o"
-                    groups="account.group_account_user"
+                    groups="account.group_account_invoice"
                 >
                      <field
                         name="invoice_count"
