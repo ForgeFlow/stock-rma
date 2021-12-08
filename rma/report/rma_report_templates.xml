@@ -52,7 +52,7 @@
                         <strong t-if="doc.type=='customer'">Customer:</strong>
                         <strong t-if="doc.type=='supplier'">Supplier:</strong>
                         <div
-                            t-field="doc.partner_id"
+                            t-field="doc.delivery_address_id"
                             t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'
                         />
                     </div>
@@ -86,7 +86,7 @@
                         <tr>
                             <th>Product</th>
                             <th class="text-right">Quantity</th>
-                            <th class="text-right">Unit Price</th>
+                            <th class="text-right">Serial Number</th>
                         </tr>
                    </thead>
                    <tbody>
@@ -98,8 +98,7 @@
                             </td>
                             <td class="text-right">
                                 <span
-                                    t-field="doc.price_unit"
-                                    t-options='{"widget": "monetary", "display_currency": doc.currency_id}'
+                                    t-field="doc.lot_id.name"
                                 />
                             </td>
                         </tr>
@@ -182,7 +181,7 @@
                         <strong t-if="doc.type=='customer'">Customer:</strong>
                         <strong t-if="doc.type=='supplier'">Supplier:</strong>
                         <div
-                            t-field="doc.partner_id"
+                            t-field="doc.delivery_address_id"
                             t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'
                         />
                     </div>
@@ -214,7 +213,7 @@
                             <th>Operation</th>
                             <th>Product</th>
                             <th class="text-right">Quantity</th>
-                            <th class="text-right">Unit Price</th>
+                            <th class="text-right">Serial Number</th>
                         </tr>
                    </thead>
                    <tbody>
@@ -227,7 +226,7 @@
                                 <span t-field="l.uom_id" groups="uom.group_uom" />
                             </td>
                             <td class="text-right">
-                                <span t-field="l.price_unit" />
+                                <span t-field="l.lot_id.name" />
                             </td>
                         </tr>
                     </tbody>
