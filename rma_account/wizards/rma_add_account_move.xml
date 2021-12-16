@@ -17,7 +17,10 @@
                     <tree string="Invoice Lines">
                         <field name="move_id" />
                         <field name="name" />
-                        <field name="account_id" groups="account.group_account_user" />
+                        <field
+                            name="account_id"
+                            groups="account.group_account_invoice"
+                        />
                         <field name="quantity" />
                         <field name="product_id" />
                         <field name="product_uom_id" />
@@ -62,7 +65,10 @@
                     <tree string="Invoice Lines">
                         <field name="move_id" />
                         <field name="name" />
-                        <field name="account_id" groups="account.group_account_user" />
+                        <field
+                            name="account_id"
+                            groups="account.group_account_invoice"
+                        />
                         <field name="quantity" />
                         <field name="product_id" />
                         <field name="product_uom_id" />
