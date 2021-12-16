@@ -24,7 +24,7 @@
     <menuitem
         id="menu_rma_account"
         name="Accounting"
-        groups="account.group_account_user"
+        groups="account.group_account_invoice"
         sequence="32"
         parent="rma.menu_rma_root"
     />
