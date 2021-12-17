@@ -152,9 +152,12 @@ class RmaMakePicking(models.TransientModel):
         # create picking
         try:
             self.env['procurement.group'].run(
-                item.line_id.product_id,
+                values.get('product_id') or item.line_id.product_id,
                 qty,
-                item.line_id.product_id.product_tmpl_id.uom_id,
+                self.env['uom.uom'].browse(
+                    values.get('product_uom') or
+                    item.line_id.product_id.product_tmpl_id.uom_id.id
+                ),
                 values.get('location_id'),
                 values.get('origin'),
                 values.get('origin'),
