@@ -266,29 +266,20 @@ class RmaOrder(models.Model):
     @api.onchange("in_warehouse_id")
     def _onchange_in_warehouse_id(self):
         if self.in_warehouse_id and self.rma_line_ids:
-            self.rma_line_ids.write(
-                {
-                    "in_warehouse_id": self.in_warehouse_id.id,
-                    "location_id": self.in_warehouse_id.lot_rma_id.id,
-                }
-            )
+            for rma_line in self.rma_line_ids:
+                rma_line.in_warehouse_id = self.in_warehouse_id.id
+                rma_line.location_id = self.in_warehouse_id.lot_rma_id.id
 
     @api.onchange("customer_to_supplier", "supplier_address_id")
     def _onchange_customer_to_supplier(self):
         if self.type == "customer" and self.rma_line_ids:
-            self.rma_line_ids.write(
-                {
-                    "customer_to_supplier": self.customer_to_supplier,
-                    "supplier_address_id": self.supplier_address_id.id,
-                }
-            )
+            for rma_line in self.rma_line_ids:
+                rma_line.customer_to_supplier = self.customer_to_supplier
+                rma_line.supplier_address_id = self.supplier_address_id.id
 
     @api.onchange("supplier_to_customer", "customer_address_id")
     def _onchange_supplier_to_customer(self):
         if self.type == "supplier" and self.rma_line_ids:
-            self.rma_line_ids.write(
-                {
-                    "supplier_to_customer": self.supplier_to_customer,
-                    "customer_address_id": self.customer_address_id.id,
-                }
-            )
+            for rma_line in self.rma_line_ids:
+                rma_line.supplier_to_customer = self.supplier_to_customer
+                rma_line.customer_address_id = self.customer_address_id.id

@@ -5,7 +5,7 @@ from odoo.exceptions import ValidationError
 from odoo.tests import common
 
 
-class TestRma(common.SavepointCase):
+class TestRma(common.TransactionCase):
     """ Test the routes and the quantities """
 
     @classmethod
@@ -245,7 +245,7 @@ class TestRma(common.SavepointCase):
             )
             self.assertEqual(line.origin, line.reference_move_id.picking_id.name)
             self.assertEqual(
-                line.delivery_address_id, line.reference_move_id.picking_partner_id
+                line.delivery_address_id, line.reference_move_id.picking_id.partner_id
             )
             self.assertEqual(
                 line.qty_to_receive, line.reference_move_id.product_uom_qty
