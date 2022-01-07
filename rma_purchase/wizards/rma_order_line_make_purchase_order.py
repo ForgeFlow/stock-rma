@@ -6,8 +6,6 @@ from datetime import datetime
 from odoo import _, api, exceptions, fields, models
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DF
 
-import odoo.addons.decimal_precision as dp
-
 
 class RmaLineMakePurchaseOrder(models.TransientModel):
     _name = "rma.order.line.make.purchase.order"
@@ -138,7 +136,7 @@ class RmaLineMakePurchaseOrderItem(models.TransientModel):
     name = fields.Char(string="Description")
     product_qty = fields.Float(
         string="Quantity to purchase",
-        digits=dp.get_precision("Product Unit of Measure"),
+        digits="Product Unit of Measure",
     )
     product_uom_id = fields.Many2one(comodel_name="uom.uom", string="UoM")
     free_of_charge = fields.Boolean(string="Free of Charge")
