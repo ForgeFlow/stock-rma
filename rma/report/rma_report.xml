@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
     <data>
-        <report
-            id="rma_order_line_report"
-            string="RMA"
-            model="rma.order.line"
-            report_type="qweb-pdf"
-            file="rma.report_rma_order_line"
-            name="rma.report_rma_order_line"
-        />
-        <report
-            id="rma_order_report"
-            string="RMA Group"
-            model="rma.order"
-            report_type="qweb-pdf"
-            file="rma.report_rma_order"
-            name="rma.report_rma_order"
-        />
+        <record id="rma_order_line_report" model="ir.actions.report">
+            <field name="name">RMA</field>
+            <field name="model">rma.order.line</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">rma.report_rma_order_line</field>
+            <field name="report_file">rma.report_rma_order_line</field>
+            <field name="print_report_name">('RMA - %s' % (object.name))</field>
+            <field name="binding_model_id" ref="model_rma_order_line" />
+            <field name="binding_type">report</field>
+        </record>
+        <record id="rma_order_report" model="ir.actions.report">
+            <field name="name">RMA Group</field>
+            <field name="model">rma.order</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">rma.report_rma_order</field>
+            <field name="report_file">rma.report_rma_order</field>
+            <field name="print_report_name">('RMA Group - %s' % (object.name))</field>
+            <field name="binding_model_id" ref="model_rma_order" />
+            <field name="binding_type">report</field>
+        </record>
     </data>
 </odoo>
