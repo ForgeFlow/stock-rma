@@ -220,7 +220,7 @@ class TestRmaAccount(common.SingleTransactionCase):
             {"customer": True, "active_ids": rma.ids, "active_model": "rma.order.line"}
         ).create({"description": "Test refund"})
         make_refund.invoice_refund()
-        rma.refund_line_ids.move_id.post()
+        rma.refund_line_ids.move_id.action_post()
         rma._compute_refund_count()
         self.assertEqual(rma.refund_count, 1)
         self.assertEqual(rma.qty_to_refund, 0.0)
@@ -258,7 +258,7 @@ class TestRmaAccount(common.SingleTransactionCase):
             {"customer": True, "active_ids": rma.ids, "active_model": "rma.order.line"}
         ).create({"description": "Test refund"})
         make_refund.invoice_refund()
-        rma.refund_line_ids.move_id.post()
+        rma.refund_line_ids.move_id.action_post()
         rma._compute_refund_count()
         self.assertEqual(
             self.operation_1.refund_journal_id, rma.refund_line_ids.journal_id
