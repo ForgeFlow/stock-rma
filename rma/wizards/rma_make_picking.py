@@ -166,7 +166,7 @@ class RmaMakePicking(models.TransientModel):
             procurements.append(procurement)
             self.env["procurement.group"].run(procurements)
         except UserError as error:
-            errors.append(error.name)
+            errors.append(error.args[0])
         if errors:
             raise UserError("\n".join(errors))
         return procurements
