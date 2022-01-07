@@ -4,8 +4,6 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
-from odoo.addons import decimal_precision as dp
-
 
 class RmaOrderLine(models.Model):
     _inherit = "rma.order.line"
@@ -80,14 +78,14 @@ class RmaOrderLine(models.Model):
     qty_to_purchase = fields.Float(
         string="Qty To Purchase",
         copy=False,
-        digits=dp.get_precision("Product Unit of Measure"),
+        digits="Product Unit of Measure",
         readonly=True,
         compute="_compute_qty_purchase",
     )
     qty_purchased = fields.Float(
         string="Qty Purchased",
         copy=False,
-        digits=dp.get_precision("Product Unit of Measure"),
+        digits="Product Unit of Measure",
         readonly=True,
         compute="_compute_qty_purchase",
     )
