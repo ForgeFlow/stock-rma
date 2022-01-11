@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+
+        <record id="view_rma_line_form" model="ir.ui.view">
+            <field name="name">rma.order.line.form.view</field>
+            <field name="model">rma.order.line</field>
+            <field name="inherit_id" ref="rma.view_rma_line_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_view_rma_lines']" position="before">
+                    <button
+                        type="object"
+                        name="action_show_invoices"
+                        class="oe_stat_button"
+                        icon="fa-sticky-note-o"
+                        groups="account.group_account_invoice"
+                        attrs="{'invisible': [('invoice_count', '&lt;=', 0)]}"
+                    >
+                        <field
+                            name="invoice_count"
+                            widget="statinfo"
+                            string="Service Invoices"
+                        />
+                    </button>
+                </xpath>
+                <xpath expr="//field[@name='receipt_policy']" position="before">
+                    <field name="invoice_policy" />
+                </xpath>
+                <xpath expr="//button[@name='action_rma_done']" position="after">
+                    <button
+                        name="%(wizard_create_invoice_rma_action)d"
+                        type="action"
+                        string="Create Services Invoice"
+                        class="oe_highlight"
+                        attrs="{'invisible': ['|', ('invoice_policy', '!=', 'yes'), ('state', '=', 'draft')]}"
+                    />
+                </xpath>
+            </field>
+        </record>
+
+
+    </data>
+</odoo>
