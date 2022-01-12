@@ -7,12 +7,17 @@ class RmaOperation(models.Model):
 
     _inherit = "rma.operation"
 
-    invoice_policy = fields.Selection(
-        string="Invoice policy",
-        selection=[
-            ("no", "Can't Create Services Invoice"),
-            ("yes", "Can Create Services Invoice"),
+    receipt_policy = fields.Selection(
+        selection_add=[
+            ("prepaid_invoice_ordered", "Prepaid Service Invoice - Ordered"),
+            ("prepaid_invoice_delivered", "Prepaid Service Invoice - Delivered"),
         ],
-        required=False,
-        default="no",
+        ondelete={
+            "prepaid_invoice_ordered": lambda recs: recs.write(
+                {"receipt_policy": "ordered"}
+            ),
+            "prepaid_invoice_delivered": lambda recs: recs.write(
+                {"receipt_policy": "delivered"}
+            ),
+        },
     )

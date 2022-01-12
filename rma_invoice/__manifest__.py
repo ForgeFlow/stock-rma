@@ -15,7 +15,6 @@
         "wizard/wizard_create_invoice_rma_view.xml",
         "views/account_move_view.xml",
         "views/rma_order_line_view.xml",
-        "views/rma_operation_view.xml",
     ],
     "maintainers": ["ChisOForgeFlow"],
     "development_status": "Beta",

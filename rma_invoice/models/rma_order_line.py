@@ -8,12 +8,19 @@ class RmaOrderLine(models.Model):
 
     _inherit = "rma.order.line"
 
-    invoice_policy = fields.Selection(
-        string="Invoice policy",
-        selection=[
-            ("no", "No Service Invoice"),
-            ("yes", "Create Service Invoice"),
+    receipt_policy = fields.Selection(
+        selection_add=[
+            ("prepaid_invoice_ordered", "Prepaid Service Invoice - Ordered"),
+            ("prepaid_invoice_delivered", "Prepaid Service Invoice - Delivered"),
         ],
+        ondelete={
+            "prepaid_invoice_ordered": lambda recs: recs.write(
+                {"receipt_policy": "ordered"}
+            ),
+            "prepaid_invoice_delivered": lambda recs: recs.write(
+                {"receipt_policy": "delivered"}
+            ),
+        },
     )
 
     invoice_ids = fields.Many2many(comodel_name="account.move", string="Invoices")
@@ -56,21 +63,37 @@ class RmaOrderLine(models.Model):
             action["domain"] = action["domain"]
         return action
 
-    def _prepare_rma_line_from_stock_move(self, sm, lot=False):
-        operation_model = self.env["rma.operation"]
-        res = super()._prepare_rma_line_from_stock_move(sm, lot)
-        if res.get("operation_id", False):
-            operation = operation_model.browse(res.get("operation_id", False))
-            res.update(
-                {
-                    "invoice_policy": operation.invoice_policy,
-                }
-            )
-        return res
+    qty_to_receive = fields.Float(
+        compute="_compute_qty_to_receive",
+        store=True,
+    )
 
-    @api.onchange("operation_id")
-    def _onchange_operation_id(self):
-        res = super()._onchange_operation_id()
-        if self.operation_id:
-            self.invoice_policy = self.operation_id.invoice_policy
-        return res
+    @api.depends(
+        "move_ids",
+        "move_ids.state",
+        "qty_received",
+        "receipt_policy",
+        "product_qty",
+        "type",
+        "invoice_ids.payment_state",
+    )
+    def _compute_qty_to_receive(self):
+        for rec in self:
+            qty_to_receive = 0.0
+            if rec.receipt_policy == "ordered":
+                qty_to_receive = rec.product_qty - rec.qty_received
+            elif rec.receipt_policy == "delivered":
+                qty_to_receive = rec.qty_delivered - rec.qty_received
+            elif rec.receipt_policy in (
+                "prepaid_invoice_ordered",
+                "prepaid_invoice_delivered",
+            ):
+                not_paid_invoices = rec.invoice_ids.filtered(
+                    lambda x: x.payment_state not in ("paid", "in_payment")
+                )
+                if not (not rec.invoice_ids or not_paid_invoices):
+                    if rec.receipt_policy == "prepaid_invoice_ordered":
+                        qty_to_receive = rec.product_qty - rec.qty_received
+                    if rec.receipt_policy == "prepaid_invoice_delivered":
+                        qty_to_receive = rec.qty_delivered - rec.qty_received
+            rec.qty_to_receive = qty_to_receive

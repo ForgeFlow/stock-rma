@@ -23,16 +23,20 @@
                         />
                     </button>
                 </xpath>
-                <xpath expr="//field[@name='receipt_policy']" position="before">
-                    <field name="invoice_policy" />
-                </xpath>
                 <xpath expr="//button[@name='action_rma_done']" position="after">
+                    <field name="invoice_ids" widget="many2many_tags" invisible="1" />
+                    <button
+                        name="%(wizard_create_invoice_rma_action)d"
+                        type="action"
+                        string="Create Services Invoice"
+                        attrs="{'invisible': ['|', '|', ('receipt_policy', 'in', ('prepaid_invoice_ordered', 'prepaid_invoice_delivered')), ('state', '=', 'draft'), ('invoice_ids', '!=', [])]}"
+                    />
                     <button
                         name="%(wizard_create_invoice_rma_action)d"
                         type="action"
                         string="Create Services Invoice"
                         class="oe_highlight"
-                        attrs="{'invisible': ['|', ('invoice_policy', '!=', 'yes'), ('state', '=', 'draft')]}"
+                        attrs="{'invisible': ['|', '|', ('receipt_policy', 'not in', ('prepaid_invoice_ordered', 'prepaid_invoice_delivered')), ('state', '=', 'draft'), ('invoice_ids', '!=', [])]}"
                     />
                 </xpath>
             </field>
