@@ -58,7 +58,7 @@ class RmaOrderLine(models.Model):
 
     def _prepare_rma_line_from_stock_move(self, sm, lot=False):
         operation_model = self.env["rma.operation"]
-        res = super()._prepare_rma_line_from_stock_move()
+        res = super()._prepare_rma_line_from_stock_move(sm, lot)
         if res.get("operation_id", False):
             operation = operation_model.browse(res.get("operation_id", False))
             res.update(
