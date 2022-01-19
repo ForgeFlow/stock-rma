@@ -216,10 +216,7 @@ class RmaOrderLine(models.Model):
         track_visibility="onchange",
     )
     operation_id = fields.Many2one(
-        comodel_name="rma.operation",
-        string="Operation",
-        readonly=True,
-        states={"draft": [("readonly", False)]},
+        comodel_name="rma.operation", string="Operation", readonly=False, tracking=True,
     )
     assigned_to = fields.Many2one(
         comodel_name="res.users",
@@ -329,8 +326,7 @@ class RmaOrderLine(models.Model):
         required=True,
         string="Receipts Policy",
         default="no",
-        readonly=True,
-        states={"draft": [("readonly", False)]},
+        readonly=False,
     )
     delivery_policy = fields.Selection(
         [
@@ -341,8 +337,7 @@ class RmaOrderLine(models.Model):
         required=True,
         string="Delivery Policy",
         default="no",
-        readonly=True,
-        states={"draft": [("readonly", False)]},
+        readonly=False,
     )
     in_route_id = fields.Many2one(
         "stock.location.route",
@@ -574,8 +569,6 @@ class RmaOrderLine(models.Model):
         return True
 
     def action_rma_draft(self):
-        if self.in_shipment_count or self.out_shipment_count:
-            raise UserError(_("You cannot reset to draft a RMA with related pickings."))
         self.write({"state": "draft"})
         return True
 
