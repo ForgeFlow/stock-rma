@@ -81,8 +81,7 @@ class RmaOrderLine(models.Model):
         string="Sale Policy",
         default="no",
         required=True,
-        readonly=True,
-        states={"draft": [("readonly", False)]},
+        readonly=False,
     )
     sales_count = fields.Integer(compute="_compute_sales_count", string="# of Sales")
 
