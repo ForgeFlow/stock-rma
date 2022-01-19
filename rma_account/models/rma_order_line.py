@@ -93,8 +93,7 @@ class RmaOrderLine(models.Model):
         string="Refund Policy",
         required=True,
         default="no",
-        readonly=True,
-        states={"draft": [("readonly", False)], "approved": [("readonly", False)]},
+        readonly=False,
     )
     qty_to_refund = fields.Float(
         string="Qty To Refund",
