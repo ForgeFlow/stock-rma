@@ -32,6 +32,20 @@
                         <field name="state" />
                     </tree>
                 </field>
+                <field name="show_lot_filter" invisible="1" />
+                <field name="lot_domain_ids" widget="many2many_tags" invisible="1" />
+                <label
+                    for="lot_ids"
+                    attrs="{'invisible': [('show_lot_filter', '=', False)]}"
+                    string="Create rma with lot/serials selected"
+                />
+                <field
+                    name="lot_ids"
+                    widget="many2many_tags"
+                    domain="[('id', 'in', lot_domain_ids)]"
+                    attrs="{'invisible': [('show_lot_filter', '=', False)], 'required': [('show_lot_filter', '=', True)]}"
+                    options="{'no_create': True}"
+                />
                 <footer>
                     <button
                         string="Confirm"
