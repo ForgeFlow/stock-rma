@@ -36,6 +36,27 @@ class RmaAddStockMove(models.TransientModel):
         string="Stock Moves",
         domain="[('state', '=', 'done')]",
     )
+    show_lot_filter = fields.Boolean(
+        string="Show lot filter?",
+        compute="_compute_lot_domain",
+    )
+    lot_domain_ids = fields.Many2many(
+        comodel_name="stock.production.lot",
+        string="Lots Domain",
+        compute="_compute_lot_domain",
+    )
+
+    @api.depends(
+        "move_ids.move_line_ids.lot_id",
+    )
+    def _compute_lot_domain(self):
+        for rec in self:
+            rec.lot_domain_ids = rec.mapped("move_ids.move_line_ids.lot_id").ids
+            rec.show_lot_filter = bool(rec.lot_domain_ids)
+
+    lot_ids = fields.Many2many(
+        comodel_name="stock.production.lot", string="Lots/Serials selected"
+    )
 
     def _prepare_rma_line_from_stock_move(self, sm, lot=False):
         if self.env.context.get("customer"):
@@ -74,6 +95,15 @@ class RmaAddStockMove(models.TransientModel):
                 raise ValidationError(
                     _("Please define a warehouse with a default RMA location")
                 )
+        product_qty = sm.product_uom_qty
+        if sm.product_id.tracking == "serial":
+            product_qty = 1
+        elif sm.product_id.tracking == "lot":
+            product_qty = sum(
+                sm.move_line_ids.filtered(lambda x: x.lot_id.id == lot.id).mapped(
+                    "qty_done"
+                )
+            )
         data = {
             "partner_id": self.partner_id.id,
             "reference_move_id": sm.id,
@@ -82,7 +112,7 @@ class RmaAddStockMove(models.TransientModel):
             "origin": sm.picking_id.name or sm.name,
             "uom_id": sm.product_uom.id,
             "operation_id": operation.id,
-            "product_qty": sm.product_uom_qty,
+            "product_qty": product_qty,
             "delivery_address_id": sm.picking_id.partner_id.id,
             "rma_id": self.rma_id.id,
             "receipt_policy": operation.receipt_policy,
@@ -110,16 +140,21 @@ class RmaAddStockMove(models.TransientModel):
         rma_line_obj = self.env["rma.order.line"]
         existing_stock_moves = self._get_existing_stock_moves()
         for sm in self.move_ids:
-            if sm not in existing_stock_moves:
+            tracking_move = sm.product_id.tracking in ("serial", "lot")
+            if sm not in existing_stock_moves or tracking_move:
                 if sm.product_id.tracking == "none":
                     data = self._prepare_rma_line_from_stock_move(sm, lot=False)
                     rma_line_obj.with_context(default_rma_id=self.rma_id.id).create(
                         data
                     )
                 else:
-                    lot_ids = [x.lot_id.id for x in sm.move_line_ids if x.lot_id]
-                    data = self._prepare_rma_line_from_stock_move(sm, lot=lot_ids[0])
-                    rma_line_obj.with_context(default_rma_id=self.rma_id.id).create(
-                        data
-                    )
+                    for lot in sm.move_line_ids.mapped("lot_id").filtered(
+                        lambda x: x.id in self.lot_ids.ids
+                    ):
+                        if lot.id in self.rma_id.rma_line_ids.mapped("lot_id").ids:
+                            continue
+                        data = self._prepare_rma_line_from_stock_move(sm, lot)
+                        rma_line_obj.with_context(default_rma_id=self.rma_id.id).create(
+                            data
+                        )
         return {"type": "ir.actions.act_window_close"}
