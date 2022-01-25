@@ -595,7 +595,19 @@ class RmaOrderLine(models.Model):
             self.reference_move_id = False
         return True
 
+    def _check_production_lot_assigned(self):
+        for rec in self:
+            if rec.product_id.tracking == "serial" and rec.product_qty != 1:
+                raise ValidationError(
+                    _(
+                        "Product %s has serial tracking configuration, "
+                        "quantity to receive should be 1"
+                    )
+                    % (rec.product_id.display_name)
+                )
+
     def action_rma_to_approve(self):
+        self._check_production_lot_assigned()
         self.write({"state": "to_approve"})
         for rec in self:
             if rec.product_id.rma_approval_policy == "one_step":
