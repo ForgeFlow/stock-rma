@@ -41,8 +41,34 @@ class RmaAddSale(models.TransientModel):
         readonly=False,
         string="Sale Lines",
     )
+    show_lot_filter = fields.Boolean(
+        string="Show lot filter?",
+        compute="_compute_lot_domain",
+    )
+    lot_domain_ids = fields.Many2many(
+        comodel_name="stock.production.lot",
+        string="Lots Domain",
+        compute="_compute_lot_domain",
+    )
 
-    def _prepare_rma_line_from_sale_order_line(self, line):
+    @api.depends(
+        "sale_line_ids.move_ids.move_line_ids.lot_id",
+    )
+    def _compute_lot_domain(self):
+        for rec in self:
+            rec.lot_domain_ids = (
+                rec.mapped("sale_line_ids.move_ids")
+                .filtered(lambda x: x.state == "done")
+                .mapped("move_line_ids.lot_id")
+                .ids
+            )
+            rec.show_lot_filter = bool(rec.lot_domain_ids)
+
+    lot_ids = fields.Many2many(
+        comodel_name="stock.production.lot", string="Lots/Serials selected"
+    )
+
+    def _prepare_rma_line_from_sale_order_line(self, line, lot=None):
         operation = line.product_id.rma_customer_operation_id
         if not operation:
             operation = line.product_id.categ_id.rma_customer_operation_id
@@ -70,14 +96,24 @@ class RmaAddSale(models.TransientModel):
                 raise ValidationError(
                     _("Please define a warehouse with a " "default rma location.")
                 )
+        product_qty = line.product_uom_qty
+        if line.product_id.tracking == "serial":
+            product_qty = 1
+        elif line.product_id.tracking == "lot":
+            product_qty = sum(
+                line.mapped("move_ids.move_line_ids")
+                .filtered(lambda x: x.lot_id.id == lot.id)
+                .mapped("qty_done")
+            )
         data = {
             "partner_id": self.partner_id.id,
             "sale_line_id": line.id,
             "product_id": line.product_id.id,
+            "lot_id": lot and lot.id or False,
             "origin": line.order_id.name,
             "uom_id": line.product_uom.id,
             "operation_id": operation.id,
-            "product_qty": line.product_uom_qty,
+            "product_qty": product_qty,
             "delivery_address_id": self.sale_id.partner_id.id,
             "invoice_address_id": self.sale_id.partner_id.id,
             "price_unit": line.currency_id._convert(
@@ -118,10 +154,20 @@ class RmaAddSale(models.TransientModel):
         rma_line_obj = self.env["rma.order.line"]
         existing_sale_lines = self._get_existing_sale_lines()
         for line in self.sale_line_ids:
+            tracking_move = line.product_id.tracking in ("serial", "lot")
             # Load a PO line only once
-            if line not in existing_sale_lines:
-                data = self._prepare_rma_line_from_sale_order_line(line)
-                rma_line_obj.create(data)
+            if line not in existing_sale_lines or tracking_move:
+                if not tracking_move:
+                    data = self._prepare_rma_line_from_sale_order_line(line)
+                    rma_line_obj.create(data)
+                else:
+                    for lot in line.mapped("move_ids.move_line_ids.lot_id").filtered(
+                        lambda x: x.id in self.lot_ids.ids
+                    ):
+                        if lot.id in self.rma_id.rma_line_ids.mapped("lot_id").ids:
+                            continue
+                        data = self._prepare_rma_line_from_sale_order_line(line, lot)
+                        rma_line_obj.create(data)
         rma = self.rma_id
         data_rma = self._get_rma_data()
         rma.write(data_rma)
