@@ -228,6 +228,9 @@ class TestAccountMoveLineRmaOrderLine(common.SavepointCase):
         ]
         rma = self._create_rma(products2move, self.partner1)
         rma_line = rma.rma_line_ids
+        for rma in rma_line:
+            if rma.price_unit == 0:
+                rma.price_unit = 1.0
         rma_line.action_rma_approve()
         wizard = self.rma_make_picking.with_context(
             {
@@ -269,6 +272,12 @@ class TestAccountMoveLineRmaOrderLine(common.SavepointCase):
                 "description": "Test refund",
             }
         )
+        for item in make_refund.item_ids:
+            item.write(
+                {
+                    "qty_to_refund": 1.0,
+                }
+            )
         make_refund.invoice_refund()
         rma_line.refund_line_ids.move_id.filtered(
             lambda x: x.state != "posted"
