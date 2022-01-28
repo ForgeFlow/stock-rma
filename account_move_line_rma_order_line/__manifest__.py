@@ -16,4 +16,5 @@
     "installable": True,
     "maintainers": ["ChisOForgeFlow"],
     "development_status": "Beta",
+    "post_init_hook": "post_init_hook",
 }
