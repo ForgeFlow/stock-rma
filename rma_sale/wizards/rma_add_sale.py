@@ -68,6 +68,22 @@ class RmaAddSale(models.TransientModel):
         comodel_name="stock.production.lot", string="Lots/Serials selected"
     )
 
+    def select_all(self):
+        self.ensure_one()
+        self.write(
+            {
+                "lot_ids": [(6, 0, self.lot_domain_ids.ids)],
+            }
+        )
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Add Sale Order"),
+            "view_mode": "form",
+            "res_model": self._name,
+            "res_id": self.id,
+            "target": "new",
+        }
+
     def _prepare_rma_line_from_sale_order_line(self, line, lot=None):
         operation = line.product_id.rma_customer_operation_id
         if not operation:
