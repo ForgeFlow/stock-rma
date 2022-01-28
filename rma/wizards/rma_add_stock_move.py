@@ -58,6 +58,22 @@ class RmaAddStockMove(models.TransientModel):
         comodel_name="stock.production.lot", string="Lots/Serials selected"
     )
 
+    def select_all(self):
+        self.ensure_one()
+        self.write(
+            {
+                "lot_ids": [(6, 0, self.lot_domain_ids.ids)],
+            }
+        )
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Add from Stock Move"),
+            "view_mode": "form",
+            "res_model": self._name,
+            "res_id": self.id,
+            "target": "new",
+        }
+
     def _prepare_rma_line_from_stock_move(self, sm, lot=False):
         if self.env.context.get("customer"):
             operation = (
