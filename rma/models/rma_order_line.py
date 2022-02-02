@@ -75,6 +75,11 @@ class RmaOrderLine(models.Model):
             for move in rec.move_ids.filtered(
                 lambda m: m.state in states and op(m.location_id.usage, rec.type)
             ):
+                # If the move is part of a chain don't count it
+                if direction == "out" and move.move_orig_ids:
+                    continue
+                elif direction == "in" and move.move_dest_ids:
+                    continue
                 qty += product_obj._compute_quantity(move.product_uom_qty, rec.uom_id)
             return qty
 
