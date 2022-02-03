@@ -44,3 +44,19 @@ class StockMove(models.Model):
             if move.rma_line_id:
                 move.partner_id = move.rma_line_id.partner_id.id or False
         return res
+
+    @api.model
+    def _get_first_usage(self):
+        if self.move_orig_ids:
+            # We assume here that all origin moves come from the same place
+            return self.move_orig_ids[0]._get_first_usage()
+        else:
+            return self.location_id.usage
+
+    @api.model
+    def _get_last_usage(self):
+        if self.move_dest_ids:
+            # We assume here that all origin moves come from the same place
+            return self.move_dest_ids[0]._get_last_usage()
+        else:
+            return self.location_dest_id.usage
