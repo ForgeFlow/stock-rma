@@ -42,27 +42,43 @@ class RmaOrderLine(models.Model):
             self.partner_id.address_get(["delivery"])["delivery"]
         )
 
+    @api.model
+    def _get_in_pickings(self):
+        # We consider an in move one where the first origin is outside
+        # of the company and the final destination is outside. In case
+        # of 2 or 3 step pickings, we should categorize as in shipments
+        # even when they are technically internal transfers.
+        pickings = self.env["stock.picking"]
+        for move in self.move_ids:
+            first_usage = move._get_first_usage()
+            last_usage = move._get_last_usage()
+            if last_usage == "internal" and first_usage != "internal":
+                pickings |= move.picking_id
+            elif last_usage == "supplier" and first_usage == "customer":
+                pickings |= move.picking_id
+        return pickings
+
+    @api.model
+    def _get_out_pickings(self):
+        pickings = self.env["stock.picking"]
+        for move in self.move_ids:
+            first_usage = move._get_first_usage()
+            last_usage = move._get_last_usage()
+            if first_usage == "internal" and last_usage != "internal":
+                pickings |= move.picking_id
+            elif last_usage == "customer" and first_usage == "supplier":
+                pickings |= move.picking_id
+        return pickings
+
     def _compute_in_shipment_count(self):
         for line in self:
-            picking_ids = []
-            for move in line.move_ids:
-                if move.location_dest_id.usage == "internal":
-                    picking_ids.append(move.picking_id.id)
-                else:
-                    if line.customer_to_supplier:
-                        picking_ids.append(move.picking_id.id)
-            shipments = list(set(picking_ids))
-            line.in_shipment_count = len(shipments)
+            pickings = line._get_in_pickings()
+            line.in_shipment_count = len(pickings)
 
     def _compute_out_shipment_count(self):
-        picking_ids = []
         for line in self:
-            for move in line.move_ids:
-                if move.location_dest_id.usage in ("supplier", "customer"):
-                    if not line.customer_to_supplier:
-                        picking_ids.append(move.picking_id.id)
-            shipments = list(set(picking_ids))
-            line.out_shipment_count = len(shipments)
+            pickings = line._get_out_pickings()
+            line.out_shipment_count = len(pickings)
 
     def _get_rma_move_qty(self, states, direction="in"):
         for rec in self:
@@ -669,42 +685,31 @@ class RmaOrderLine(models.Model):
     def action_view_in_shipments(self):
         action = self.env.ref("stock.action_picking_tree_all")
         result = action.sudo().read()[0]
-        picking_ids = []
+        shipments = self.env["stock.picking"]
         for line in self:
-            for move in line.move_ids:
-                if move.location_dest_id.usage == "internal":
-                    picking_ids.append(move.picking_id.id)
-                else:
-                    if line.customer_to_supplier:
-                        picking_ids.append(move.picking_id.id)
-
-        shipments = list(set(picking_ids))
+            shipments |= line._get_in_pickings()
         # choose the view_mode accordingly
         if len(shipments) != 1:
-            result["domain"] = "[('id', 'in', " + str(shipments) + ")]"
+            result["domain"] = "[('id', 'in', " + str(shipments.ids) + ")]"
         elif len(shipments) == 1:
             res = self.env.ref("stock.view_picking_form", False)
             result["views"] = [(res and res.id or False, "form")]
-            result["res_id"] = shipments[0]
+            result["res_id"] = shipments.ids[0]
         return result
 
     def action_view_out_shipments(self):
         action = self.env.ref("stock.action_picking_tree_all")
         result = action.sudo().read()[0]
-        picking_ids = []
+        shipments = self.env["stock.picking"]
         for line in self:
-            for move in line.move_ids:
-                if move.location_dest_id.usage in ("supplier", "customer"):
-                    if not line.customer_to_supplier:
-                        picking_ids.append(move.picking_id.id)
-        shipments = list(set(picking_ids))
+            shipments |= line._get_out_pickings()
         # choose the view_mode accordingly
         if len(shipments) != 1:
-            result["domain"] = "[('id', 'in', " + str(shipments) + ")]"
+            result["domain"] = "[('id', 'in', " + str(shipments.ids) + ")]"
         elif len(shipments) == 1:
             res = self.env.ref("stock.view_picking_form", False)
             result["views"] = [(res and res.id or False, "form")]
-            result["res_id"] = shipments[0]
+            result["res_id"] = shipments.ids[0]
         return result
 
     def action_view_rma_lines(self):
