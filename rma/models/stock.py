@@ -60,3 +60,9 @@ class StockMove(models.Model):
             return self.move_dest_ids[0]._get_last_usage()
         else:
             return self.location_dest_id.usage
+
+    def _should_bypass_reservation(self, forced_location=False):
+        res = super()._should_bypass_reservation(forced_location=forced_location)
+        if self.env.context.get("force_no_bypass_reservation"):
+            return False
+        return res
