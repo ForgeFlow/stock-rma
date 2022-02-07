@@ -30,7 +30,7 @@ class RmaOrder(models.Model):
             pickings = self.env["stock.picking"]
             for line in rec.rma_line_ids:
                 pickings |= line._get_out_pickings()
-            rec.in_shipment_count = len(pickings)
+            rec.out_shipment_count = len(pickings)
 
     def _compute_supplier_line_count(self):
         self.supplier_line_count = len(
