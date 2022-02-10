@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="view_rma_line_form" model="ir.ui.view">
+        <field name="name">rma.order.line.form - rma_repair</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_line_form" />
+        <field name="arch" type="xml">
+            <div name='button_box' position="inside">
+                <button
+                    type="object"
+                    name="action_view_repair_order"
+                    class="oe_stat_button"
+                    icon="fa-wrench"
+                    groups="stock.group_stock_user"
+                >
+                        <field
+                        name="repair_count"
+                        widget="statinfo"
+                        string="Repair Orders"
+                    />
+                </button>
+            </div>
+            <group name="quantities" position="inside">
+                <group>
+                    <field name="qty_to_repair" />
+                    <field name="qty_under_repair" />
+                    <field name="qty_to_pay" />
+                    <field name="qty_repaired" />
+                </group>
+            </group>
+            <field name="delivery_policy" position="after">
+                <field name="repair_type" />
+            </field>
+            <notebook position="inside">
+                <page name="repair" string="Repair Orders">
+                    <field name="repair_ids" nolabel="1" />
+                </page>
+            </notebook>
+        </field>
+    </record>
+
+    <record id="view_rma_line_button_repair_form" model="ir.ui.view">
+        <field name="name">rma.order.line.form - rma_repair</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_line_button_form" />
+        <field name="arch" type="xml">
+            <header position="inside">
+                <button
+                    name="%(action_rma_order_line_make_repair)d"
+                    string="Create Repair Order"
+                    class="oe_highlight"
+                    attrs="{'invisible':['|', '|', ('type', '!=', 'customer'), ('qty_to_repair', '=', 0), ('state', '!=', 'approved')]}"
+                    type="action"
+                />
+                <button
+                    name="%(action_rma_order_line_make_repair)d"
+                    string="Create Repair Order"
+                    attrs="{'invisible':['|', '|', ('type', '!=', 'customer'), ('qty_to_repair', '!=', 0), ('state', '!=', 'approved')]}"
+                    type="action"
+                />
+            </header>
+        </field>
+    </record>
+
+    <record id="view_rma_rma_line_filter" model="ir.ui.view">
+        <field name="name">rma.order.line.select - rma_repair</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_rma_line_filter" />
+        <field name="arch" type="xml">
+            <group name="stock_quantities" position="after">
+                <group name="repair_quantities" groups="stock.group_stock_user">
+                    <filter
+                        domain="[('state','!=', 'done'),('qty_to_repair','>',0.0)]"
+                        help="To Repair"
+                        name="to_repair"
+                    />
+                </group>
+            </group>
+        </field>
+    </record>
+
+</odoo>
