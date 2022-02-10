@@ -37,8 +37,7 @@ class RmaAddStockMove(models.TransientModel):
         domain="[('state', '=', 'done')]",
     )
     show_lot_filter = fields.Boolean(
-        string="Show lot filter?",
-        compute="_compute_lot_domain",
+        string="Show lot filter?", compute="_compute_lot_domain",
     )
     lot_domain_ids = fields.Many2many(
         comodel_name="stock.production.lot",
@@ -46,9 +45,7 @@ class RmaAddStockMove(models.TransientModel):
         compute="_compute_lot_domain",
     )
 
-    @api.depends(
-        "move_ids.move_line_ids.lot_id",
-    )
+    @api.depends("move_ids.move_line_ids.lot_id")
     def _compute_lot_domain(self):
         for rec in self:
             rec.lot_domain_ids = rec.mapped("move_ids.move_line_ids.lot_id").ids
@@ -60,11 +57,7 @@ class RmaAddStockMove(models.TransientModel):
 
     def select_all(self):
         self.ensure_one()
-        self.write(
-            {
-                "lot_ids": [(6, 0, self.lot_domain_ids.ids)],
-            }
-        )
+        self.write({"lot_ids": [(6, 0, self.lot_domain_ids.ids)]})
         return {
             "type": "ir.actions.act_window",
             "name": _("Add from Stock Move"),
