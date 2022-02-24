@@ -650,6 +650,5 @@ if records.filtered(lambda x: x.state == "draft"):
     records.filtered(lambda x: x.state == "draft").action_rma_to_approve()
             </field>
          </record>
-
     </data>
 </odoo>
