@@ -1,4 +1,4 @@
-# Copyright (C) 2017-20 ForgeFlow S.L.
+# Copyright 2017-2022 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from odoo import fields, models
@@ -30,15 +30,23 @@ class StockRule(models.Model):
         )
         if "rma_line_id" in values:
             line = values.get("rma_line_id")
-            res["rma_line_id"] = line.id
-            if line.delivery_address_id:
-                res["partner_id"] = line.delivery_address_id.id
-            else:
-                res["partner_id"] = line.rma_id.partner_id.id
-            company_id = res["company_id"]
-            company = self.env["res.company"].browse(company_id)
-            cost = product_id.with_company(company).standard_price
-            res["price_unit"] = cost
+            if line.reference_move_id:
+                return res
+            if line.purchase_order_line_id:
+                moves = line.purchase_order_line_id.move_ids
+                if moves:
+                    # TODO: Should we be smart in the choice of the move?
+                    layers = moves.mapped("stock_valuation_layer_ids")
+                    cost = layers[-1].unit_cost
+                    res["price_unit"] = cost
+            elif line.account_move_line_id.purchase_line_id:
+                purchase_lines = line.account_move_line_id.purchase_line_id
+                moves = purchase_lines.mapped("move_ids")
+                if moves:
+                    layers = moves.mapped("stock_valuation_layer_ids")
+                    cost = layers[-1].unit_cost
+                    # TODO: Should we be smart in the choice of the move?
+                    res["price_unit"] = cost
         return res
 
 

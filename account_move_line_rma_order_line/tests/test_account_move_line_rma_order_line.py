@@ -282,9 +282,7 @@ class TestAccountMoveLineRmaOrderLine(common.SavepointCase):
         rma_line.refund_line_ids.move_id.filtered(
             lambda x: x.state != "posted"
         ).action_post()
-        for aml in rma_line.refund_line_ids.move_id.filtered(
-            lambda x: x.move_type in ("out_refund", "in_refund")
-        ).invoice_line_ids:
+        for aml in rma_line.refund_line_ids.move_id.invoice_line_ids:
             if aml.product_id == rma_line.product_id and aml.move_id:
                 self.assertEqual(
                     aml.rma_line_id,

@@ -80,7 +80,13 @@ class RmaRefund(models.TransientModel):
         for wizard in self:
             first = self.item_ids[0]
             values = self._prepare_refund(wizard, first.line_id)
-            new_refund = self.env["account.move"].create(values)
+            default_move_type = (
+                "in_refund" if first.line_id.type == "supplier" else "out_refund",
+            )
+            account_move_model = self.env["account.move"].with_context(
+                default_move_type=default_move_type
+            )
+            new_refund = account_move_model.create(values)
             return new_refund
 
     def invoice_refund(self):
@@ -106,17 +112,8 @@ class RmaRefund(models.TransientModel):
 
     @api.model
     def prepare_refund_line(self, item):
-        accounts = item.product.product_tmpl_id._get_product_accounts()
-        if item.line_id.type == "customer":
-            account = accounts["income"]
-        else:
-            account = accounts["expense"]
-        if not account:
-            raise ValidationError(_("Accounts are not configured for this product."))
-
         values = {
             "name": item.line_id.name or item.rma_id.name,
-            "account_id": account.id,
             "price_unit": item.line_id.price_unit,
             "product_uom_id": item.line_id.uom_id.id,
             "product_id": item.product.id,
