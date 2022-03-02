@@ -16,19 +16,20 @@ class RmaOrderLine(models.Model):
         return self.env["res.partner"]
 
     @api.depends(
-        "refund_line_ids", "refund_line_ids.move_id.state", "refund_policy", "type"
+        "move_line_ids", "move_line_ids.move_id.state", "refund_policy", "type"
     )
     def _compute_qty_refunded(self):
         for rec in self:
             rec.qty_refunded = sum(
-                rec.refund_line_ids.filtered(
+                rec.move_line_ids.filtered(
                     lambda i: i.move_id.state in ("posted")
+                    and i.move_id.move_type in ["out_refund", "in_refund"]
                 ).mapped("quantity")
             )
 
     @api.depends(
-        "refund_line_ids",
-        "refund_line_ids.move_id.state",
+        "move_line_ids",
+        "move_line_ids.move_id.state",
         "refund_policy",
         "move_ids",
         "move_ids.state",
@@ -47,7 +48,11 @@ class RmaOrderLine(models.Model):
 
     def _compute_refund_count(self):
         for rec in self:
-            rec.refund_count = len(rec.refund_line_ids.mapped("move_id"))
+            rec.refund_count = len(
+                rec.move_line_ids.mapped("move_id").filtered(
+                    lambda m: m.move_type in ["out_refund", "in_refund"]
+                )
+            )
 
     invoice_address_id = fields.Many2one(
         "res.partner",
@@ -68,7 +73,7 @@ class RmaOrderLine(models.Model):
         readonly=True,
         states={"draft": [("readonly", False)]},
     )
-    refund_line_ids = fields.One2many(
+    move_line_ids = fields.One2many(
         comodel_name="account.move.line",
         inverse_name="rma_line_id",
         string="Refund Lines",
@@ -269,12 +274,14 @@ class RmaOrderLine(models.Model):
         }
 
     def action_view_refunds(self):
-        move_ids = self.mapped("refund_line_ids.move_id").ids
+        moves = self.mapped("move_line_ids.move_id").filtered(
+            lambda m: m.move_type in ["out_refund", "in_refund"]
+        )
         form_view_ref = self.env.ref("account.view_move_form", False)
         tree_view_ref = self.env.ref("account.view_move_tree", False)
 
         return {
-            "domain": [("id", "in", move_ids)],
+            "domain": [("id", "in", moves.ids)],
             "name": "Refunds",
             "res_model": "account.move",
             "type": "ir.actions.act_window",
