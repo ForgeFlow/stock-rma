@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+
+        <record id="view_rma_line_form" model="ir.ui.view">
+            <field name="name">rma.order.line.view.form</field>
+            <field name="model">rma.order.line</field>
+            <field name="inherit_id" ref="rma.view_rma_line_form" />
+            <field name="arch" type="xml">
+                <div name="button_box" position="inside">
+                    <field name="unreconciled" invisible="1" />
+                    <button
+                        type="object"
+                        string="Unreconciled Journal Items"
+                        name="action_view_unreconciled"
+                        groups="account.group_account_invoice"
+                        class="oe_stat_button"
+                        icon="fa-gears"
+                        attrs="{'invisible':[('unreconciled', '=', False)]}"
+                    >
+                    </button>
+                    <button
+                        type="object"
+                        string="Reconcile"
+                        name="action_open_reconcile"
+                        groups="account.group_account_invoice"
+                        class="oe_stat_button"
+                        icon="fa-link"
+                        attrs="{'invisible':[('unreconciled', '=', False)]}"
+                    >
+                    </button>
+                </div>
+            </field>
+        </record>
+
+        <record id="view_rma_rma_line_filter" model="ir.ui.view">
+            <field name="name">rma.order.line.search.view</field>
+            <field name="model">rma.order.line</field>
+            <field name="inherit_id" ref="rma.view_rma_rma_line_filter" />
+            <field name="arch" type="xml">
+                <field name="lot_id" position="after">
+                    <filter
+                        name="unreconciled"
+                        string="Unreconciled"
+                        domain="[('unreconciled','=', True)]"
+                        groups="account.group_account_invoice"
+                        help="Purchase orders with unreconciled journal items."
+                    />
+                </field>
+            </field>
+        </record>
+
+    </data>
+</odoo>
