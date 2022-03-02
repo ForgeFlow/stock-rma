@@ -279,10 +279,10 @@ class TestAccountMoveLineRmaOrderLine(common.SavepointCase):
                 }
             )
         make_refund.invoice_refund()
-        rma_line.refund_line_ids.move_id.filtered(
+        rma_line.move_line_ids.move_id.filtered(
             lambda x: x.state != "posted"
         ).action_post()
-        for aml in rma_line.refund_line_ids.move_id.filtered(
+        for aml in rma_line.move_line_ids.move_id.filtered(
             lambda x: x.move_type in ("out_refund", "in_refund")
         ).invoice_line_ids:
             if aml.product_id == rma_line.product_id and aml.move_id:
