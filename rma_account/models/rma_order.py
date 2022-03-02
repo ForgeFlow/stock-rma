@@ -9,7 +9,9 @@ class RmaOrder(models.Model):
 
     def _compute_invoice_refund_count(self):
         for rec in self:
-            invoices = rec.mapped("rma_line_ids.refund_line_ids.move_id")
+            invoices = rec.mapped("rma_line_ids.move_line_ids.move_id").filtered(
+                lambda m: m.move_type in ["in_refund", "out_refund"]
+            )
             rec.invoice_refund_count = len(invoices)
 
     def _compute_invoice_count(self):
