@@ -168,7 +168,7 @@ class AccountMoveLine(models.Model):
 
     rma_line_id = fields.Many2one(
         comodel_name="rma.order.line",
-        string="RMA line refund",
+        string="RMA line",
         ondelete="set null",
-        help="This will contain the rma line that originated the refund line",
+        help="This will contain the rma line that originated this line",
     )
