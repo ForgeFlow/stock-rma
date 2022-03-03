@@ -99,3 +99,8 @@ class StockMove(models.Model):
             owner_id=owner_id,
             strict=strict,
         )
+
+    @api.model
+    def _prepare_merge_moves_distinct_fields(self):
+        res = super()._prepare_merge_moves_distinct_fields()
+        return res + ["rma_line_id"]
