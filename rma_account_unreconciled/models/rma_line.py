@@ -21,7 +21,7 @@ class RmaOrderLine(models.Model):
     def _compute_unreconciled(self):
         acc_item = self.env["account.move.line"]
         for rec in self:
-            domain = rec._get_purchase_unreconciled_base_domain()
+            domain = rec._get_rma_unreconciled_base_domain()
             unreconciled_domain = expression.AND(
                 [domain, [("rma_line_id", "=", rec.id)]]
             )
@@ -32,7 +32,7 @@ class RmaOrderLine(models.Model):
         if operator != "=" or not isinstance(value, bool):
             raise ValueError(_("Unsupported search operator"))
         acc_item = self.env["account.move.line"]
-        domain = self._get_purchase_unreconciled_base_domain()
+        domain = self._get_rma_unreconciled_base_domain()
         unreconciled_domain = expression.AND([domain, [("rma_line_id", "!=", False)]])
         unreconciled_items = acc_item.search(unreconciled_domain)
         unreconciled_pos = unreconciled_items.mapped("rma_line_id")
@@ -42,7 +42,7 @@ class RmaOrderLine(models.Model):
             return [("id", "not in", unreconciled_pos.ids)]
 
     @api.model
-    def _get_purchase_unreconciled_base_domain(self):
+    def _get_rma_unreconciled_base_domain(self):
         categories = self.env["product.category"].search(
             [("property_valuation", "=", "real_time")]
         )
@@ -63,7 +63,7 @@ class RmaOrderLine(models.Model):
     def action_view_unreconciled(self):
         self.ensure_one()
         acc_item = self.env["account.move.line"]
-        domain = self._get_purchase_unreconciled_base_domain()
+        domain = self._get_rma_unreconciled_base_domain()
         unreconciled_domain = expression.AND([domain, [("rma_line_id", "=", self.id)]])
         unreconciled_items = acc_item.search(unreconciled_domain)
         action = self.env.ref("account.action_account_moves_all")
@@ -71,5 +71,20 @@ class RmaOrderLine(models.Model):
         action_dict["domain"] = [("id", "in", unreconciled_items.ids)]
         return action_dict
 
-    def action_reconcile(self):
-        return True
+    def action_open_reconcile(self):
+        aml_model = self.env["account.move.line"]
+        action = self.action_view_unreconciled()
+        amls = aml_model.search(action.get("domain", [(1, "!=", 1)]))
+        accounts = amls.mapped("account_id")
+        action_context = {
+            "show_mode_selector": False,
+            "account_ids": accounts.ids,
+            "partner_ids": self.partner_id.ids,
+            "active_model": "account.move.line",
+            "active_ids": amls.ids,
+        }
+        return {
+            "type": "ir.actions.client",
+            "tag": "manual_reconciliation_view",
+            "context": action_context,
+        }

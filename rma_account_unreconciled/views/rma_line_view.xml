@@ -22,7 +22,7 @@
                     <button
                         type="object"
                         string="Reconcile"
-                        name="action_reconcile"
+                        name="action_open_reconcile"
                         groups="account.group_account_manager"
                         class="oe_stat_button"
                         icon="fa-link"
