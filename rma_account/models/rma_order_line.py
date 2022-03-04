@@ -71,7 +71,7 @@ class RmaOrderLine(models.Model):
     move_line_ids = fields.One2many(
         comodel_name="account.move.line",
         inverse_name="rma_line_id",
-        string="Refund Lines",
+        string="Journal Items",
         copy=False,
         index=True,
         readonly=True,
