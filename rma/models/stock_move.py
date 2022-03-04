@@ -4,25 +4,6 @@
 from odoo import api, fields, models
 
 
-class StockPicking(models.Model):
-    _inherit = "stock.picking"
-
-    def action_assign(self):
-        """When you try to bring back a product from a customer location,
-        it may happen that there is no quants available to perform the
-        picking."""
-        res = super(StockPicking, self).action_assign()
-        for picking in self:
-            for move in picking.move_lines:
-                if (
-                    move.rma_line_id
-                    and move.state == "confirmed"
-                    and move.location_id.usage == "customer"
-                ):
-                    move.force_assign()
-        return res
-
-
 class StockMove(models.Model):
     _inherit = "stock.move"
 
@@ -66,3 +47,55 @@ class StockMove(models.Model):
         if self.env.context.get("force_no_bypass_reservation"):
             return False
         return res
+
+    def _get_available_quantity(
+        self,
+        location_id,
+        lot_id=None,
+        package_id=None,
+        owner_id=None,
+        strict=False,
+        allow_negative=False,
+    ):
+        if (
+            not lot_id
+            and self.rma_line_id.lot_id
+            and self.location_id.usage == "internal"
+        ):
+            # In supplier RMA deliveries we can only send the RMA lot/serial.
+            lot_id = self.rma_line_id.lot_id
+        return super()._get_available_quantity(
+            location_id,
+            lot_id=lot_id,
+            package_id=package_id,
+            owner_id=owner_id,
+            strict=strict,
+            allow_negative=allow_negative,
+        )
+
+    def _update_reserved_quantity(
+        self,
+        need,
+        available_quantity,
+        location_id,
+        lot_id=None,
+        package_id=None,
+        owner_id=None,
+        strict=True,
+    ):
+        if (
+            not lot_id
+            and self.rma_line_id.lot_id
+            and self.location_id.usage == "internal"
+        ):
+            # In supplier RMA deliveries we can only send the RMA lot/serial.
+            lot_id = self.rma_line_id.lot_id
+        return super()._update_reserved_quantity(
+            need,
+            available_quantity,
+            location_id,
+            lot_id=lot_id,
+            package_id=package_id,
+            owner_id=owner_id,
+            strict=strict,
+        )
