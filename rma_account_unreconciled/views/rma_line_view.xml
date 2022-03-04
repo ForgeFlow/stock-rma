@@ -13,7 +13,7 @@
                         type="object"
                         string="Unreconciled Journal Items"
                         name="action_view_unreconciled"
-                        groups="account.group_account_manager"
+                        groups="account.group_account_invoice"
                         class="oe_stat_button"
                         icon="fa-gears"
                         attrs="{'invisible':[('unreconciled', '=', False)]}"
@@ -23,7 +23,7 @@
                         type="object"
                         string="Reconcile"
                         name="action_open_reconcile"
-                        groups="account.group_account_manager"
+                        groups="account.group_account_invoice"
                         class="oe_stat_button"
                         icon="fa-link"
                         attrs="{'invisible':[('unreconciled', '=', False)]}"
@@ -43,7 +43,7 @@
                         name="unreconciled"
                         string="Unreconciled"
                         domain="[('unreconciled','=', True)]"
-                        groups="account.group_account_manager"
+                        groups="account.group_account_invoice"
                         help="Purchase orders with unreconciled journal items."
                     />
                 </field>

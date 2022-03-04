@@ -74,12 +74,13 @@ class RmaOrderLine(models.Model):
     def action_open_reconcile(self):
         aml_model = self.env["account.move.line"]
         action = self.action_view_unreconciled()
-        amls = aml_model.search(action.get("domain", [(1, "!=", 1)]))
+        amls = (
+            action.get("domain") and aml_model.search(action.get("domain")) or aml_model
+        )
         accounts = amls.mapped("account_id")
         action_context = {
             "show_mode_selector": False,
             "account_ids": accounts.ids,
-            "partner_ids": self.partner_id.ids,
             "active_model": "account.move.line",
             "active_ids": amls.ids,
         }
