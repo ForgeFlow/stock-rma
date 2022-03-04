@@ -37,14 +37,16 @@ class StockRule(models.Model):
                 if moves:
                     # TODO: Should we be smart in the choice of the move?
                     layers = moves.mapped("stock_valuation_layer_ids")
-                    cost = layers[-1].unit_cost
-                    res["price_unit"] = cost
+                    if layers:
+                        cost = layers[-1].unit_cost
+                        res["price_unit"] = cost
             elif line.account_move_line_id:
                 sale_lines = line.account_move_line_id.sale_line_ids
                 moves = sale_lines.mapped("move_ids")
                 if moves:
                     layers = moves.mapped("stock_valuation_layer_ids")
-                    cost = layers[-1].unit_cost
-                    # TODO: Should we be smart in the choice of the move?
-                    res["price_unit"] = cost
+                    if layers:
+                        cost = layers[-1].unit_cost
+                        # TODO: Should we be smart in the choice of the move?
+                        res["price_unit"] = cost
         return res
