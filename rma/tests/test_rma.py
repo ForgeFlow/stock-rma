@@ -48,6 +48,7 @@ class TestRma(common.TransactionCase):
         cls.g_rma_customer_user = cls.env.ref("rma.group_rma_customer_user")
         cls.g_rma_supplier_user = cls.env.ref("rma.group_rma_supplier_user")
         cls.g_rma_manager = cls.env.ref("rma.group_rma_manager")
+        cls.g_account_manager = cls.env.ref("account.group_account_manager")
         cls.g_stock_user = cls.env.ref("stock.group_stock_user")
         cls.g_stock_manager = cls.env.ref("stock.group_stock_manager")
 
@@ -58,7 +59,7 @@ class TestRma(common.TransactionCase):
         )
         cls.rma_manager_user = cls._create_user(
             "rma manager",
-            [cls.g_stock_manager, cls.g_rma_manager],
+            [cls.g_stock_manager, cls.g_rma_manager, cls.g_account_manager],
             cls.company,
         )
         # Customer RMA:
