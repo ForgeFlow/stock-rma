@@ -82,14 +82,14 @@ class TestAccountMoveLineRmaOrderLine(common.SavepointCase):
         return user.id
 
     @classmethod
-    def _create_account_type(cls, name, atype, internal_group):
+    def _create_account_type(cls, name, account_type, internal_group):
         acc_type = cls.acc_type_model.create(
-            {"name": name, "type": atype, "internal_group": internal_group}
+            {"name": name, "type": account_type, "internal_group": internal_group}
         )
         return acc_type
 
     @classmethod
-    def _create_account(cls, acc_type, name, code, company):
+    def _create_account(cls, acc_type, name, code, company, reconcile=False):
         """Create an account."""
         account = cls.account_model.create(
             {
@@ -97,6 +97,7 @@ class TestAccountMoveLineRmaOrderLine(common.SavepointCase):
                 "code": code,
                 "user_type_id": acc_type.id,
                 "company_id": company.id,
+                "reconcile": reconcile,
             }
         )
         return account
