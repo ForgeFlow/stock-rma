@@ -10,7 +10,9 @@ class TestRmaAccountUnreconciled(TestRma):
     def setUpClass(cls):
         super().setUpClass()
         cls.rma_refund_wiz = cls.env["rma.refund"]
-        for categ in cls.rma_customer_id.mapped("rma_line_ids.product_id.categ_id"):
+        for categ in cls.rma_customer_id.with_user(cls.rma_manager_user).mapped(
+            "rma_line_ids.product_id.categ_id"
+        ):
             categ.write(
                 {
                     "property_valuation": "real_time",
@@ -27,7 +29,9 @@ class TestRmaAccountUnreconciled(TestRma):
                     "reconcile": True,
                 }
             )
-        for product in cls.rma_customer_id.mapped("rma_line_ids.product_id"):
+        for product in cls.rma_customer_id.with_user(cls.rma_manager_user).mapped(
+            "rma_line_ids.product_id"
+        ):
             product.write(
                 {
                     "standard_price": 10.0,
@@ -80,7 +84,9 @@ class TestRmaAccountUnreconciled(TestRma):
                 }
             )
         make_refund.invoice_refund()
-        self.rma_customer_id.rma_line_ids.refund_line_ids.move_id.filtered(
+        self.rma_customer_id.with_user(
+            self.rma_manager_user
+        ).rma_line_ids.refund_line_ids.move_id.filtered(
             lambda x: x.state != "posted"
         ).action_post()
         for rma_line in self.rma_customer_id.rma_line_ids:
@@ -98,7 +104,7 @@ class TestRmaAccountUnreconciled(TestRma):
             3,
         )
         for rma_line in self.rma_customer_id.rma_line_ids:
-            aml_domain = rma_line.action_view_unreconciled().get("domain")
+            aml_domain = rma_line.sudo().action_view_unreconciled().get("domain")
             aml_lines = (
                 aml_domain and self.env["account.move.line"].search(aml_domain) or False
             )
