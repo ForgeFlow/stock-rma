@@ -11,15 +11,18 @@ class TestRma(common.TransactionCase):
     @classmethod
     def setUpClass(cls):
         super(TestRma, cls).setUpClass()
-
+        # models
         cls.rma_make_picking = cls.env["rma_make_picking.wizard"]
         cls.make_supplier_rma = cls.env["rma.order.line.make.supplier.rma"]
         cls.rma_add_stock_move = cls.env["rma_add_stock_move"]
+        cls.product_ctg_model = cls.env["product.category"]
         cls.stockpicking = cls.env["stock.picking"]
         cls.rma = cls.env["rma.order"]
         cls.rma_line = cls.env["rma.order.line"]
         cls.rma_op = cls.env["rma.operation"]
         cls.product_product_model = cls.env["product.product"]
+        cls.res_users_model = cls.env["res.users"]
+        # References and records
         cls.rma_cust_replace_op_id = cls.env.ref("rma.rma_operation_customer_replace")
         cls.rma_sup_replace_op_id = cls.env.ref("rma.rma_operation_supplier_replace")
         cls.rma_ds_replace_op_id = cls.env.ref("rma.rma_operation_ds_replace")
@@ -31,16 +34,34 @@ class TestRma(common.TransactionCase):
         cls.product_2 = cls._create_product("PT2")
         cls.product_3 = cls._create_product("PT3")
         cls.uom_unit = cls.env.ref("uom.product_uom_unit")
-        cls.env.user.company_id.group_rma_delivery_address = True
-        cls.env.user.company_id.group_rma_lines = True
+        cls.company = cls.env.company
+        cls.company.group_rma_delivery_address = True
+        cls.company.group_rma_lines = True
 
         cls.partner_id = cls.env.ref("base.res_partner_2")
         cls.stock_location = cls.env.ref("stock.stock_location_stock")
-        wh = cls.env.ref("stock.warehouse0")
-        cls.stock_rma_location = wh.lot_rma_id
+        cls.wh = cls.env.ref("stock.warehouse0")
+        cls.stock_rma_location = cls.wh.lot_rma_id
         cls.customer_location = cls.env.ref("stock.stock_location_customers")
         cls.supplier_location = cls.env.ref("stock.stock_location_suppliers")
         cls.product_uom_id = cls.env.ref("uom.product_uom_unit")
+        cls.g_rma_customer_user = cls.env.ref("rma.group_rma_customer_user")
+        cls.g_rma_supplier_user = cls.env.ref("rma.group_rma_supplier_user")
+        cls.g_account_manager = cls.env.ref("account.group_account_manager")
+        cls.g_rma_manager = cls.env.ref("rma.group_rma_manager")
+        cls.g_stock_user = cls.env.ref("stock.group_stock_user")
+        cls.g_stock_manager = cls.env.ref("stock.group_stock_manager")
+
+        cls.rma_basic_user = cls._create_user(
+            "rma worker",
+            [cls.g_stock_user, cls.g_rma_customer_user, cls.g_rma_supplier_user],
+            cls.company,
+        )
+        cls.rma_manager_user = cls._create_user(
+            "rma manager",
+            [cls.g_stock_manager, cls.g_rma_manager, cls.g_account_manager],
+            cls.company,
+        )
         # Customer RMA:
         products2move = [(cls.product_1, 3), (cls.product_2, 5), (cls.product_3, 2)]
         cls.rma_customer_id = cls._create_rma_from_move(
@@ -60,10 +81,63 @@ class TestRma(common.TransactionCase):
         )
 
     @classmethod
+    def _create_user(cls, login, groups, company):
+        group_ids = [group.id for group in groups]
+        user = cls.res_users_model.create(
+            {
+                "name": login,
+                "login": login,
+                "email": "example@yourcompany.com",
+                "company_id": company.id,
+                "company_ids": [(4, company.id)],
+                "groups_id": [(6, 0, group_ids)],
+            }
+        )
+        return user
+
+    @classmethod
+    def _receive_rma(cls, rma_line_ids):
+        wizard = cls.rma_make_picking.with_context(
+            **{
+                "active_ids": rma_line_ids.ids,
+                "active_model": "rma.order.line",
+                "picking_type": "incoming",
+                "active_id": 1,
+            }
+        ).create({})
+        wizard._create_picking()
+        res = rma_line_ids.action_view_in_shipments()
+        picking = cls.env["stock.picking"].browse(res["res_id"])
+        picking.action_assign()
+        for mv in picking.move_lines:
+            mv.quantity_done = mv.product_uom_qty
+        picking._action_done()
+        return picking
+
+    @classmethod
+    def _deliver_rma(cls, rma_line_ids):
+        wizard = cls.rma_make_picking.with_context(
+            **{
+                "active_ids": rma_line_ids.ids,
+                "active_model": "rma.order.line",
+                "picking_type": "outgoing",
+                "active_id": 1,
+            }
+        ).create({})
+        wizard._create_picking()
+        res = rma_line_ids.action_view_out_shipments()
+        picking = cls.env["stock.picking"].browse(res["res_id"])
+        picking.action_assign()
+        for mv in picking.move_lines:
+            mv.quantity_done = mv.product_uom_qty
+        picking._action_done()
+        return picking
+
+    @classmethod
     def _create_product_category(
         cls, rma_approval_policy, rma_customer_operation_id, rma_supplier_operation_id
     ):
-        return cls.env["product.category"].create(
+        return cls.product_ctg_model.create(
             {
                 "name": "Test category",
                 "rma_approval_policy": rma_approval_policy,
@@ -79,45 +153,115 @@ class TestRma(common.TransactionCase):
         )
 
     @classmethod
-    def _create_picking(cls, partner):
+    def _create_picking(cls, partner, picking_type):
         return cls.stockpicking.create(
             {
                 "partner_id": partner.id,
-                "picking_type_id": cls.env.ref("stock.picking_type_in").id,
+                "picking_type_id": picking_type.id,
                 "location_id": cls.stock_location.id,
                 "location_dest_id": cls.supplier_location.id,
             }
         )
 
     @classmethod
+    def _do_picking(cls, picking):
+        """Do picking with only one move on the given date."""
+        picking.action_confirm()
+        picking.action_assign()
+        for ml in picking.move_lines:
+            ml.filtered(
+                lambda m: m.state != "waiting"
+            ).quantity_done = ml.product_uom_qty
+        picking.button_validate()
+
+    @classmethod
+    def _create_inventory(cls, product, qty, location):
+        """
+        Creates inventory of a product on a specific location, this will be used
+        eventually to create a inventory at specific cost, that will be received in
+        a customer RMA or delivered in a supplier RMA
+        """
+        inventory = (
+            cls.env["stock.quant"]
+            .create(
+                {
+                    "location_id": location.id,
+                    "product_id": product.id,
+                    "inventory_quantity": qty,
+                }
+            )
+            .action_apply_inventory()
+        )
+        return inventory
+
+    @classmethod
+    def _get_picking_type(cls, wh, loc1, loc2):
+        picking_type = cls.env["stock.picking.type"].search(
+            [
+                ("warehouse_id", "=", wh.id),
+                ("default_location_src_id", "=", loc1.id),
+                ("default_location_dest_id", "=", loc2.id),
+            ],
+            limit=1,
+        )
+        if picking_type:
+            return picking_type
+        picking_type = cls.env["stock.picking.type"].create(
+            {
+                "name": loc1.name + " to " + loc2.name,
+                "sequence_code": loc1.name + " to " + loc2.name,
+                "code": "incoming",
+                "warehouse_id": wh.id,
+                "default_location_src_id": loc1.id,
+                "default_location_dest_id": loc2.id,
+            }
+        )
+        return picking_type
+
+    @classmethod
     def _create_rma_from_move(
         cls, products2move, r_type, partner, dropship, supplier_address_id=None
     ):
-        picking_in = cls._create_picking(partner)
 
         moves = []
         if r_type == "customer":
+            picking_type = cls._get_picking_type(
+                cls.wh, cls.stock_location, cls.customer_location
+            )
+            picking = cls._create_picking(partner, picking_type)
             for item in products2move:
+                product = item[0]
+                product_qty = item[1]
+                cls._create_inventory(product, product_qty, cls.stock_location)
                 move_values = cls._prepare_move(
-                    item[0],
-                    item[1],
+                    product,
+                    product_qty,
                     cls.stock_location,
                     cls.customer_location,
-                    picking_in,
+                    picking,
                 )
                 moves.append(cls.env["stock.move"].create(move_values))
         else:
+            picking_type = cls._get_picking_type(
+                cls.wh, cls.supplier_location, cls.stock_rma_location
+            )
+            picking = cls._create_picking(partner, picking_type)
             for item in products2move:
+                product = item[0]
+                product_qty = item[1]
+                cls._create_inventory(product, product_qty, cls.stock_location)
                 move_values = cls._prepare_move(
-                    item[0],
-                    item[1],
+                    product,
+                    product_qty,
                     cls.supplier_location,
                     cls.stock_rma_location,
-                    picking_in,
+                    picking,
                 )
                 moves.append(cls.env["stock.move"].create(move_values))
+        # Process the picking
+        cls._do_picking(picking)
         # Create the RMA from the stock_move
-        rma_id = cls.rma.create(
+        rma_id = cls.rma.with_user(cls.rma_basic_user).create(
             {
                 "reference": "0001",
                 "type": r_type,
@@ -127,7 +271,7 @@ class TestRma(common.TransactionCase):
         )
         for move in moves:
             if r_type == "customer":
-                wizard = cls.rma_add_stock_move.new(
+                wizard = cls.rma_add_stock_move.with_user(cls.rma_basic_user).new(
                     {
                         "move_ids": [(4, move.id)],
                         "rma_id": rma_id.id,
@@ -144,12 +288,14 @@ class TestRma(common.TransactionCase):
                         "active_model": "rma.order",
                     }
                 ).default_get([str(move.id), str(cls.partner_id.id)])
-                data = wizard.with_context(
-                    customer=1
-                )._prepare_rma_line_from_stock_move(move)
+                data = (
+                    wizard.with_user(cls.rma_basic_user)
+                    .with_context(customer=1)
+                    ._prepare_rma_line_from_stock_move(move)
+                )
 
             else:
-                wizard = cls.rma_add_stock_move.new(
+                wizard = cls.rma_add_stock_move.with_user(cls.rma_basic_user).new(
                     {
                         "move_ids": [(4, move.id)],
                         "rma_id": rma_id.id,
@@ -165,7 +311,9 @@ class TestRma(common.TransactionCase):
                         "active_model": "rma.order",
                     }
                 ).default_get([str(move.id), str(cls.partner_id.id)])
-                data = wizard._prepare_rma_line_from_stock_move(move)
+                data = wizard.with_user(
+                    cls.rma_basic_user
+                )._prepare_rma_line_from_stock_move(move)
                 data["type"] = "supplier"
             if dropship:
                 data.update(
@@ -173,21 +321,15 @@ class TestRma(common.TransactionCase):
                     operation_id=cls.rma_ds_replace_op_id.id,
                     supplier_address_id=supplier_address_id.id,
                 )
-            cls.line = cls.rma_line.create(data)
+            cls.line = cls.rma_line.with_user(cls.rma_basic_user).create(data)
             cls.line._onchange_product_id()
             cls.line._onchange_operation_id()
             cls.line.action_rma_to_approve()
         rma_id._get_default_type()
-        rma_id._compute_in_shipment_count()
-        rma_id._compute_out_shipment_count()
-        rma_id._compute_supplier_line_count()
-        rma_id._compute_line_count()
         rma_id.action_view_in_shipments()
         rma_id.action_view_out_shipments()
         rma_id.action_view_lines()
-
         rma_id.partner_id.action_open_partner_rma()
-        rma_id.partner_id._compute_rma_line_count()
         return rma_id
 
     @classmethod
@@ -205,23 +347,8 @@ class TestRma(common.TransactionCase):
             "product_uom_qty": qty,
             "location_id": location_id,
             "location_dest_id": dest.id,
-            "move_line_ids": [
-                (
-                    0,
-                    0,
-                    {
-                        "product_id": product.id,
-                        "product_uom_id": product.uom_id.id,
-                        "qty_done": qty,
-                        "location_id": location_id,
-                        "location_dest_id": dest.id,
-                        "package_id": False,
-                        "owner_id": False,
-                        "lot_id": False,
-                    },
-                )
-            ],
             "picking_id": picking_in.id,
+            "price_unit": product.standard_price,
         }
 
     def _check_equal_quantity(self, qty1, qty2, msg):
@@ -511,8 +638,12 @@ class TestRma(common.TransactionCase):
             2,
             "Wrong qty_delivered",
         )
-        self.line.action_rma_done()
-        self.assertEqual(self.line.state, "done", "Wrong State")
+        self.rma_customer_id.rma_line_ids.action_rma_done()
+        self.assertEqual(
+            self.rma_customer_id.rma_line_ids.mapped("state"),
+            ["done", "done", "done"],
+            "Wrong State",
+        )
         self.rma_customer_id.action_view_in_shipments()
         self.rma_customer_id.action_view_out_shipments()
         self.rma_customer_id.action_view_lines()
