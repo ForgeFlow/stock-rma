@@ -209,7 +209,7 @@ class RmaMakePicking(models.TransientModel):
                 # Force the reservation of the RMA specific lot for incoming shipments.
                 move.move_line_ids.unlink()
                 if move.product_id.tracking == "serial":
-                    move.write({"lot_ids": [(6, 0, move.rma_line_id.lot_id.ids)]})
+                    move._set_lot_ids(move.rma_line_id.lot_id.ids)
                     move.move_line_ids.write({"product_uom_qty": 1, "qty_done": 0})
                 elif move.product_id.tracking == "lot":
                     if picking_type == "incoming":
