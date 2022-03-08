@@ -191,43 +191,46 @@ class RmaMakePicking(models.TransientModel):
         self._create_picking()
         move_line_model = self.env["stock.move.line"]
         picking_type = self.env.context.get("picking_type")
-        pickings = self.env["stock.picking"].browse()
         if picking_type == "outgoing":
             pickings = self.mapped("item_ids.line_id")._get_out_pickings()
             action = self.item_ids.line_id.action_view_out_shipments()
         else:
             pickings = self.mapped("item_ids.line_id")._get_in_pickings()
             action = self.item_ids.line_id.action_view_in_shipments()
-        for move in pickings.move_lines.filtered(
-            lambda x: x.state not in ("draft", "cancel", "done")
-            and x.rma_line_id
-            and x.product_id.tracking in ("lot", "serial")
-            and x.rma_line_id.lot_id
-        ):
-            move.move_line_ids.unlink()
-            if move.product_id.tracking == "serial":
-                move.write({"lot_ids": [(6, 0, move.rma_line_id.lot_id.ids)]})
-                move.move_line_ids.write({"product_uom_qty": 1, "qty_done": 0})
-            elif move.product_id.tracking == "lot":
-                if picking_type == "incoming":
-                    qty = self.item_ids.filtered(
-                        lambda x: x.line_id.id == move.rma_line_id.id
-                    ).qty_to_receive
-                else:
-                    qty = self.item_ids.filtered(
-                        lambda x: x.line_id.id == move.rma_line_id.id
-                    ).qty_to_deliver
-                move_line_data = move._prepare_move_line_vals()
-                move_line_data.update(
-                    {
-                        "lot_id": move.rma_line_id.lot_id.id,
-                        "product_uom_id": move.product_id.uom_id.id,
-                        "qty_done": 0,
-                        "product_uom_qty": qty,
-                    }
-                )
-                move_line_model.create(move_line_data)
         if picking_type == "incoming":
+            # Force the reservation of the RMA specific lot for incoming shipments.
+            # FIXME: still needs fixing, not reserving appropriate serials.
+            for move in pickings.move_lines.filtered(
+                lambda x: x.state not in ("draft", "cancel", "done")
+                and x.rma_line_id
+                and x.product_id.tracking in ("lot", "serial")
+                and x.rma_line_id.lot_id
+            ):
+                # Force the reservation of the RMA specific lot for incoming shipments.
+                move.move_line_ids.unlink()
+                if move.product_id.tracking == "serial":
+                    move._set_lot_ids(move.rma_line_id.lot_id.ids)
+                    move.move_line_ids.write({"product_uom_qty": 1, "qty_done": 0})
+                elif move.product_id.tracking == "lot":
+                    if picking_type == "incoming":
+                        qty = self.item_ids.filtered(
+                            lambda x: x.line_id.id == move.rma_line_id.id
+                        ).qty_to_receive
+                    else:
+                        qty = self.item_ids.filtered(
+                            lambda x: x.line_id.id == move.rma_line_id.id
+                        ).qty_to_deliver
+                    move_line_data = move._prepare_move_line_vals()
+                    move_line_data.update(
+                        {
+                            "lot_id": move.rma_line_id.lot_id.id,
+                            "product_uom_id": move.product_id.uom_id.id,
+                            "qty_done": 0,
+                            "product_uom_qty": qty,
+                        }
+                    )
+                    move_line_model.create(move_line_data)
+
             pickings.with_context(force_no_bypass_reservation=True).action_assign()
         return action
 
@@ -241,18 +244,15 @@ class RmaMakePickingItem(models.TransientModel):
 
     wiz_id = fields.Many2one("rma_make_picking.wizard", string="Wizard", required=True)
     line_id = fields.Many2one(
-        "rma.order.line", string="RMA order Line", readonly=True, ondelete="cascade"
+        "rma.order.line", string="RMA order Line", ondelete="cascade"
     )
-    rma_id = fields.Many2one(
-        "rma.order", related="line_id.rma_id", string="RMA Group", readonly=True
-    )
-    product_id = fields.Many2one("product.product", string="Product", readonly=True)
+    rma_id = fields.Many2one("rma.order", related="line_id.rma_id", string="RMA Group")
+    product_id = fields.Many2one("product.product", string="Product")
     product_qty = fields.Float(
         related="line_id.product_qty",
         string="Quantity Ordered",
         copy=False,
         digits="Product Unit of Measure",
-        readonly=True,
     )
     qty_to_receive = fields.Float(
         string="Quantity to Receive", digits="Product Unit of Measure"
@@ -260,4 +260,4 @@ class RmaMakePickingItem(models.TransientModel):
     qty_to_deliver = fields.Float(
         string="Quantity To Deliver", digits="Product Unit of Measure"
     )
-    uom_id = fields.Many2one("uom.uom", string="Unit of Measure", readonly=True)
+    uom_id = fields.Many2one("uom.uom", string="Unit of Measure")

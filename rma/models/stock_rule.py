@@ -1,7 +1,7 @@
-# Copyright (C) 2017-20 ForgeFlow S.L.
+# Copyright (C) 2017-22 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo import fields, models
+from odoo import models
 
 
 class StockRule(models.Model):
@@ -18,7 +18,7 @@ class StockRule(models.Model):
         company_id,
         values,
     ):
-        res = super(StockRule, self)._get_stock_move_values(
+        res = super()._get_stock_move_values(
             product_id,
             product_qty,
             product_uom,
@@ -39,14 +39,3 @@ class StockRule(models.Model):
             if dest_loc.usage == "internal":
                 res["price_unit"] = line.price_unit
         return res
-
-
-class ProcurementGroup(models.Model):
-    _inherit = "procurement.group"
-
-    rma_id = fields.Many2one(
-        comodel_name="rma.order", string="RMA", ondelete="set null"
-    )
-    rma_line_id = fields.Many2one(
-        comodel_name="rma.order.line", string="RMA line", ondelete="set null"
-    )
