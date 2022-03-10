@@ -197,6 +197,17 @@ class RmaMakePicking(models.TransientModel):
         else:
             pickings = self.mapped("item_ids.line_id")._get_in_pickings()
             action = self.item_ids.line_id.action_view_in_shipments()
+        for move in pickings.move_lines.filtered(
+            lambda x: x.state not in ("draft", "cancel", "done")
+            and x.rma_line_id
+            and x.rma_line_id.reference_move_id
+            and not x.origin_returned_move_id
+            and not x.move_orig_ids
+        ):
+            move.write(
+                {"origin_returned_move_id": move.rma_line_id.reference_move_id.id}
+            )
+
         if picking_type == "incoming":
             # Force the reservation of the RMA specific lot for incoming shipments.
             # FIXME: still needs fixing, not reserving appropriate serials.
