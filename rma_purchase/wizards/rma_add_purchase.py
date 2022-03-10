@@ -41,7 +41,50 @@ class RmaAddPurchase(models.TransientModel):
         string="Purchase Order Lines",
     )
 
-    def _prepare_rma_line_from_po_line(self, line):
+    show_lot_filter = fields.Boolean(
+        string="Show lot filter?",
+        compute="_compute_lot_domain",
+    )
+    lot_domain_ids = fields.Many2many(
+        comodel_name="stock.production.lot",
+        string="Lots Domain",
+        compute="_compute_lot_domain",
+    )
+
+    @api.depends(
+        "purchase_line_ids.move_ids.move_line_ids.lot_id",
+    )
+    def _compute_lot_domain(self):
+        for rec in self:
+            rec.lot_domain_ids = (
+                rec.mapped("purchase_line_ids.move_ids")
+                .filtered(lambda x: x.state == "done")
+                .mapped("move_line_ids.lot_id")
+                .ids
+            )
+            rec.show_lot_filter = bool(rec.lot_domain_ids)
+
+    lot_ids = fields.Many2many(
+        comodel_name="stock.production.lot", string="Lots/Serials selected"
+    )
+
+    def select_all(self):
+        self.ensure_one()
+        self.write(
+            {
+                "lot_ids": [(6, 0, self.lot_domain_ids.ids)],
+            }
+        )
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Add Sale Order"),
+            "view_mode": "form",
+            "res_model": self._name,
+            "res_id": self.id,
+            "target": "new",
+        }
+
+    def _prepare_rma_line_from_po_line(self, line, lot=None):
         if self.env.context.get("customer"):
             operation = (
                 line.product_id.rma_customer_operation_id
@@ -76,6 +119,24 @@ class RmaAddPurchase(models.TransientModel):
                 raise ValidationError(
                     _("Please define a warehouse with a " "default rma location.")
                 )
+        product_qty = line.product_qty
+        if line.product_id.tracking == "serial":
+            product_qty = 1
+        elif line.product_id.tracking == "lot":
+            product_qty = sum(
+                line.mapped("move_ids.move_line_ids")
+                .filtered(lambda x: x.lot_id.id == lot.id)
+                .mapped("qty_done")
+            )
+        moves_related = line.move_ids.filtered(
+            lambda x: x.location_dest_id.usage == "internal"
+            and x.state == "done"
+            and not x.move_dest_ids
+        )
+        if lot:
+            moves_related = moves_related.filtered(
+                lambda x: lot.id in x.move_line_ids.mapped("lot_id").ids
+            )
         data = {
             "partner_id": self.partner_id.id,
             "purchase_order_line_id": line.id,
@@ -83,7 +144,7 @@ class RmaAddPurchase(models.TransientModel):
             "origin": line.order_id.name,
             "uom_id": line.product_uom.id,
             "operation_id": operation.id,
-            "product_qty": line.product_qty,
+            "product_qty": product_qty,
             "price_unit": line.currency_id._convert(
                 line.price_unit,
                 line.currency_id,
@@ -104,6 +165,7 @@ class RmaAddPurchase(models.TransientModel):
             "delivery_policy": operation.delivery_policy,
             "in_warehouse_id": operation.in_warehouse_id.id or warehouse.id,
             "out_warehouse_id": operation.out_warehouse_id.id or warehouse.id,
+            "reference_move_id": len(moves_related) == 1 and moves_related.id or False,
         }
         return data
 
@@ -127,8 +189,18 @@ class RmaAddPurchase(models.TransientModel):
         for line in self.purchase_line_ids:
             # Load a PO line only once
             if line not in existing_purchase_lines:
-                data = self._prepare_rma_line_from_po_line(line)
-                rma_line_obj.create(data)
+                tracking_move = line.product_id.tracking in ("serial", "lot")
+                if not tracking_move:
+                    data = self._prepare_rma_line_from_po_line(line)
+                    rma_line_obj.create(data)
+                else:
+                    for lot in line.mapped("move_ids.move_line_ids.lot_id").filtered(
+                        lambda x: x.id in self.lot_ids.ids
+                    ):
+                        if lot.id in self.rma_id.rma_line_ids.mapped("lot_id").ids:
+                            continue
+                        data = self._prepare_rma_line_from_po_line(line, lot)
+                        rma_line_obj.create(data)
         rma = self.rma_id
         data_rma = self._get_rma_data()
         rma.write(data_rma)
