@@ -153,7 +153,11 @@ class RmaOrderLine(models.Model):
                 raise ValidationError(
                     _("Please define a warehouse with a default rma location.")
                 )
-
+        moves_related = line.move_ids.filtered(
+            lambda x: x.location_dest_id.usage == "internal"
+            and x.state == "done"
+            and not x.move_dest_ids
+        )
         data = {
             "product_id": line.product_id.id,
             "origin": line.order_id.name,
@@ -180,6 +184,7 @@ class RmaOrderLine(models.Model):
             "delivery_policy": operation.delivery_policy,
             "in_warehouse_id": operation.in_warehouse_id.id or warehouse.id,
             "out_warehouse_id": operation.out_warehouse_id.id or warehouse.id,
+            "reference_move_id": len(moves_related) == 1 and moves_related.id or False,
         }
         return data
 

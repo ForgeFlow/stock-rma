@@ -121,6 +121,13 @@ class RmaAddSale(models.TransientModel):
                 .filtered(lambda x: x.lot_id.id == lot.id)
                 .mapped("qty_done")
             )
+        moves_related = line.move_ids.filtered(
+            lambda x: x.location_dest_id.usage == "customer" and x.state == "done"
+        )
+        if lot:
+            moves_related = moves_related.filtered(
+                lambda x: lot.id in x.move_line_ids.mapped("lot_id").ids
+            )
         data = {
             "partner_id": self.partner_id.id,
             "sale_line_id": line.id,
@@ -151,6 +158,7 @@ class RmaAddSale(models.TransientModel):
             "delivery_policy": operation.delivery_policy,
             "in_warehouse_id": operation.in_warehouse_id.id or warehouse.id,
             "out_warehouse_id": operation.out_warehouse_id.id or warehouse.id,
+            "reference_move_id": len(moves_related) == 1 and moves_related.id or False,
         }
         return data
 
