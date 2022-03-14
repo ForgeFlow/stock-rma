@@ -13,8 +13,6 @@ class RmaMakePicking(models.TransientModel):
         for line in self.mapped("item_ids.line_id").filtered(
             lambda x: x.operation_id.default_carrier_id
         ):
-            pickings = line._get_out_pickings().filtered(
-                lambda x: x.location_dest_id.usage == "customer" and not x.carrier_id
-            )
+            pickings = line._get_out_pickings().filtered(lambda x: not x.carrier_id)
             pickings.write({"carrier_id": line.operation_id.default_carrier_id.id})
         return res
