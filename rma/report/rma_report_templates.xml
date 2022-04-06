@@ -52,7 +52,7 @@
                         <strong t-if="doc.type=='customer'">Customer:</strong>
                         <strong t-if="doc.type=='supplier'">Supplier:</strong>
                         <div
-                            t-field="doc.partner_id"
+                            t-field="doc.delivery_address_id"
                             t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'
                         />
                     </div>
@@ -226,7 +226,7 @@
                                 t-if="print_lot_column"
                             >Lot/Serial Number</th>
                             <th class="text-right">Quantity</th>
-                            <th class="text-right">Unit Price</th>
+                            <th class="text-right">Serial Number</th>
                         </tr>
                    </thead>
                    <tbody>
@@ -242,7 +242,7 @@
                                 <span t-field="l.uom_id" groups="uom.group_uom" />
                             </td>
                             <td class="text-right">
-                                <span t-field="l.price_unit" />
+                                <span t-field="l.lot_id.name" />
                             </td>
                         </tr>
                     </tbody>
