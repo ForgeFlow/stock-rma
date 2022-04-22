@@ -1,5 +1,5 @@
 # Copyright 2020-21 ForgeFlow S.L.
-# License LGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
+# License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
 from odoo import api, fields, models
 
@@ -45,7 +45,6 @@ class RmaOrderLine(models.Model):
         copy=False,
     )
     qty_to_repair = fields.Float(
-        string="Qty To Repair",
         copy=False,
         digits="Product Unit of Measure",
         readonly=True,
@@ -53,7 +52,6 @@ class RmaOrderLine(models.Model):
         store=True,
     )
     qty_under_repair = fields.Float(
-        string="Qty Under Repair",
         copy=False,
         digits="Product Unit of Measure",
         readonly=True,
@@ -61,7 +59,6 @@ class RmaOrderLine(models.Model):
         store=True,
     )
     qty_repaired = fields.Float(
-        string="Qty Repaired",
         copy=False,
         digits="Product Unit of Measure",
         readonly=True,

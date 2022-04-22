@@ -1,5 +1,5 @@
 # Copyright 2020-21 ForgeFlow S.L.
-# License LGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
+# License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
 from odoo import fields
 from odoo.tests import common
@@ -156,7 +156,7 @@ class TestRmaRepair(common.SingleTransactionCase):
     def test_01_add_from_invoice_customer(self):
         """Test wizard to create RMA from a customer invoice."""
         add_inv = self.rma_add_invoice_wiz.with_context(
-            {
+            **{
                 "customer": True,
                 "active_ids": self.rma_group_customer.id,
                 "active_model": "rma.order",
@@ -209,7 +209,11 @@ class TestRmaRepair(common.SingleTransactionCase):
         self.assertEqual(rma.qty_to_repair, 15.0)
         self.assertEqual(rma.qty_repaired, 0.0)
         make_repair = self.rma_make_repair_wiz.with_context(
-            {"customer": True, "active_ids": rma.ids, "active_model": "rma.order.line"}
+            **{
+                "customer": True,
+                "active_ids": rma.ids,
+                "active_model": "rma.order.line",
+            }
         ).new()
         make_repair.make_repair_order()
         rma.repair_ids.action_repair_confirm()
@@ -221,7 +225,7 @@ class TestRmaRepair(common.SingleTransactionCase):
     def test_04_deliver_after_repair(self):
         """Only deliver after repair"""
         add_inv = self.rma_add_invoice_wiz.with_context(
-            {
+            **{
                 "customer": True,
                 "active_ids": self.rma_group_customer_2.id,
                 "active_model": "rma.order",
@@ -237,7 +241,11 @@ class TestRmaRepair(common.SingleTransactionCase):
         rma.action_rma_approve()
         self.assertEqual(rma.qty_to_deliver, 0.0)
         make_repair = self.rma_make_repair_wiz.with_context(
-            {"customer": True, "active_ids": rma.ids, "active_model": "rma.order.line"}
+            **{
+                "customer": True,
+                "active_ids": rma.ids,
+                "active_model": "rma.order.line",
+            }
         ).new()
         make_repair.make_repair_order()
         repair = rma.repair_ids
