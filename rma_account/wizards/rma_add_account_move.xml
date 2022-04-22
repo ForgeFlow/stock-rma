@@ -14,7 +14,7 @@
                     name="line_ids"
                     domain="[('move_id.partner_id', '=', partner_id)]"
                 >
-                    <tree string="Invoice Lines">
+                    <tree name="Invoice Lines">
                         <field name="move_id" />
                         <field name="name" />
                         <field
@@ -62,7 +62,7 @@
                     name="line_ids"
                     domain="[('move_id.partner_id', '=', partner_id)]"
                 >
-                    <tree string="Invoice Lines">
+                    <tree name="Invoice Lines">
                         <field name="move_id" />
                         <field name="name" />
                         <field

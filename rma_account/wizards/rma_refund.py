@@ -195,7 +195,7 @@ class RmaRefundItem(models.TransientModel):
     )
     rma_id = fields.Many2one("rma.order", related="line_id.rma_id", string="RMA")
     product_id = fields.Many2one("product.product", string="Product (Technical)")
-    product = fields.Many2one("product.product", string="Product", required=True)
+    product = fields.Many2one("product.product", required=True)
     name = fields.Char(string="Description", required=True)
     product_qty = fields.Float(
         string="Quantity Ordered",
@@ -215,5 +215,4 @@ class RmaRefundItem(models.TransientModel):
             ("ordered", "Based on Ordered Quantities"),
             ("received", "Based on Received Quantities"),
         ],
-        string="Refund Policy",
     )
