@@ -1,9 +1,9 @@
 # Copyright 2020 ForgeFlow S.L.
-# License LGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
+# License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 {
     "name": "RMA Repair",
     "version": "14.0.1.0.0",
-    "license": "LGPL-3",
+    "license": "AGPL-3",
     "category": "RMA",
     "summary": "Links RMA with Repairs.",
     "author": "ForgeFlow S.L., Odoo Community Association (OCA)",
