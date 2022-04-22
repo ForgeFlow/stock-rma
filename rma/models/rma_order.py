@@ -77,7 +77,6 @@ class RmaOrder(models.Model):
     name = fields.Char(string="Group Number", index=True, copy=False)
     type = fields.Selection(
         [("customer", "Customer"), ("supplier", "Supplier")],
-        string="Type",
         required=True,
         default=lambda self: self._get_default_type(),
         readonly=True,
@@ -145,7 +144,6 @@ class RmaOrder(models.Model):
             ("approved", "Approved"),
             ("done", "Done"),
         ],
-        string="State",
         default="draft",
         store=True,
     )

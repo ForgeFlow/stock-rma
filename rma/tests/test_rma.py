@@ -6,7 +6,7 @@ from odoo.tests import common
 
 
 class TestRma(common.TransactionCase):
-    """ Test the routes and the quantities """
+    """Test the routes and the quantities"""
 
     @classmethod
     def setUpClass(cls):
@@ -135,7 +135,7 @@ class TestRma(common.TransactionCase):
                     }
                 )
                 wizard.with_context(
-                    {
+                    **{
                         "move_ids": [(4, move.id)],
                         "reference_move_id": move.id,
                         "customer": True,
@@ -157,7 +157,7 @@ class TestRma(common.TransactionCase):
                     }
                 )
                 wizard.with_context(
-                    {
+                    **{
                         "move_ids": [(4, move.id)],
                         "reference_move_id": move.id,
                         "active_ids": rma_id.id,
@@ -230,7 +230,7 @@ class TestRma(common.TransactionCase):
     def test_01_rma_order_line(self):
         for line in self.rma_customer_id.rma_line_ids:
             line.with_context(
-                {"default_rma_id": line.rma_id.id}
+                **{"default_rma_id": line.rma_id.id}
             )._default_warehouse_id()
             line._default_location_id()
             line._onchange_delivery_address()
@@ -276,7 +276,7 @@ class TestRma(common.TransactionCase):
     def test_02_customer_rma(self):
         self.rma_customer_id.rma_line_ids.action_rma_to_approve()
         wizard = self.rma_make_picking.with_context(
-            {
+            **{
                 "active_ids": self.rma_customer_id.rma_line_ids.ids,
                 "active_model": "rma.order.line",
                 "picking_type": "incoming",
@@ -397,7 +397,7 @@ class TestRma(common.TransactionCase):
         )
 
         wizard = self.rma_make_picking.with_context(
-            {
+            **{
                 "active_id": 1,
                 "active_ids": self.rma_customer_id.rma_line_ids.ids,
                 "active_model": "rma.order.line",
@@ -526,7 +526,7 @@ class TestRma(common.TransactionCase):
             line.action_rma_to_approve()
             line.action_rma_approve()
         wizard = self.rma_make_picking.with_context(
-            {
+            **{
                 "active_id": 1,
                 "active_ids": self.rma_droship_id.rma_line_ids.ids,
                 "active_model": "rma.order.line",
@@ -555,7 +555,7 @@ class TestRma(common.TransactionCase):
             self.rma_droship_id.out_shipment_count, 0, "Incorrect Out Shipment Count"
         )
         wizard = self.make_supplier_rma.with_context(
-            {
+            **{
                 "active_ids": self.rma_droship_id.rma_line_ids.ids,
                 "active_model": "rma.order.line",
                 "active_id": 1,
@@ -626,7 +626,7 @@ class TestRma(common.TransactionCase):
         self.rma_supplier_id.rma_line_ids._onchange_operation_id()
         self.rma_supplier_id.rma_line_ids._onchange_delivery_address()
         wizard = self.rma_make_picking.with_context(
-            {
+            **{
                 "active_ids": self.rma_supplier_id.rma_line_ids.ids,
                 "active_model": "rma.order.line",
                 "picking_type": "outgoing",
@@ -743,7 +743,7 @@ class TestRma(common.TransactionCase):
             "Wrong qty_received",
         )
         wizard = self.rma_make_picking.with_context(
-            {
+            **{
                 "active_id": 1,
                 "active_ids": self.rma_supplier_id.rma_line_ids.ids,
                 "active_model": "rma.order.line",
