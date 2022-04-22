@@ -57,7 +57,6 @@ class RmaOrderLine(models.Model):
         copy=False,
     )
     qty_to_sell = fields.Float(
-        string="Qty To Sell",
         copy=False,
         digits="Product Unit of Measure",
         readonly=True,
@@ -65,7 +64,6 @@ class RmaOrderLine(models.Model):
         store=True,
     )
     qty_sold = fields.Float(
-        string="Qty Sold",
         copy=False,
         digits="Product Unit of Measure",
         readonly=True,
@@ -78,7 +76,6 @@ class RmaOrderLine(models.Model):
             ("ordered", "Based on Ordered Quantities"),
             ("received", "Based on Received Quantities"),
         ],
-        string="Sale Policy",
         default="no",
         required=True,
         readonly=False,
