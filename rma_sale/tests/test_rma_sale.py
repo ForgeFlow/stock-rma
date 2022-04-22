@@ -94,7 +94,7 @@ class TestRmaSale(common.SingleTransactionCase):
     def test_01_add_from_sale_order(self):
         """Test wizard to create RMA from Sales Orders."""
         add_sale = self.rma_add_sale_wiz.with_context(
-            {
+            **{
                 "customer": True,
                 "active_ids": self.rma_group.id,
                 "active_model": "rma.order",
@@ -134,7 +134,7 @@ class TestRmaSale(common.SingleTransactionCase):
         self.assertEqual(rma.qty_to_sell, 18.0)
         self.assertEqual(rma.qty_sold, 0.0)
         make_sale = self.rma_make_sale_wiz.with_context(
-            {"customer": True, "active_ids": rma.id, "active_model": "rma.order.line"}
+            **{"customer": True, "active_ids": rma.id, "active_model": "rma.order.line"}
         ).create({"partner_id": rma.partner_id.id})
         make_sale.make_sale_order()
         self.assertEqual(rma.sales_count, 1)
