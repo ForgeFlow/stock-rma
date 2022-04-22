@@ -26,7 +26,7 @@ class AccountMove(models.Model):
             "product_uom_id": line.uom_id.id,
             "product_id": line.product_id.id,
             "account_id": invoice_line.with_context(
-                {"journal_id": self.journal_id.id, "type": "in_invoice"}
+                **{"journal_id": self.journal_id.id, "type": "in_invoice"}
             )._default_account(),
             "price_unit": line.company_id.currency_id.with_context(
                 date=self.date
