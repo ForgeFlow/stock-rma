@@ -66,7 +66,7 @@ class TestAccountMoveLineRmaOrderLine(common.SavepointCase):
 
     @classmethod
     def _create_user(cls, login, groups, company):
-        """ Create a user."""
+        """Create a user."""
         group_ids = [group.id for group in groups]
         user = cls.res_users_model.with_context({"no_reset_password": True}).create(
             {
@@ -82,9 +82,9 @@ class TestAccountMoveLineRmaOrderLine(common.SavepointCase):
         return user.id
 
     @classmethod
-    def _create_account_type(cls, name, type, internal_group):
+    def _create_account_type(cls, name, atype, internal_group):
         acc_type = cls.acc_type_model.create(
-            {"name": name, "type": type, "internal_group": internal_group}
+            {"name": name, "type": atype, "internal_group": internal_group}
         )
         return acc_type
 
