@@ -1,5 +1,5 @@
 # Copyright 2020 ForgeFlow S.L.
-# License LGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
+# License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
@@ -130,7 +130,6 @@ class RmaLineMakeRepairItem(models.TransientModel):
         comodel_name="product.product", string="Refurbished Product"
     )
     invoice_method = fields.Selection(
-        string="Invoice Method",
         selection=[
             ("none", "No Invoice"),
             ("b4repair", "Before Repair"),
