@@ -14,7 +14,6 @@ class RmaOperation(models.Model):
             ("delivered", "Based on Delivered Quantities"),
             ("received", "Based on Received Quantities"),
         ],
-        string="Refund Policy",
         default="no",
     )
 

@@ -4,7 +4,7 @@
         <field name="name">rma.order.tree</field>
         <field name="model">rma.order</field>
         <field name="arch" type="xml">
-            <tree string="RMA">
+            <tree name="RMA">
                 <field name="name" />
                 <field name="reference" />
                 <field name="partner_id" groups="base.group_user" string="Customer" />
@@ -17,7 +17,7 @@
         <field name="name">rma.order.supplier.tree</field>
         <field name="model">rma.order</field>
         <field name="arch" type="xml">
-            <tree string="RMA">
+            <tree name="RMA">
                 <field name="name" />
                 <field name="reference" />
                 <field name="partner_id" groups="base.group_user" string="Supplier" />
@@ -146,7 +146,7 @@
                                                              'default_partner_id': partner_id,
                                                              'hide_title': True}"
                             >
-                            <tree string="RMA Lines" name="lines" editable="bottom">
+                            <tree name="lines" editable="bottom">
                                 <field name="sequence" widget="handle" />
                                 <field name="state" invisible="True" />
                                 <field name="partner_id" invisible="True" />
@@ -297,7 +297,7 @@
                                          'supplier': 1,
                                          'hide_title': True}"
                             >
-                            <tree string="RMA Lines" editable="bottom">
+                            <tree name="RMA Lines" editable="bottom">
                                 <field name="sequence" widget="handle" />
                                 <field name="state" invisible="True" />
                                 <field name="name" />

@@ -155,7 +155,7 @@ class TestRmaAccount(common.SingleTransactionCase):
     def test_01_add_from_invoice_customer(self):
         """Test wizard to create RMA from a customer invoice."""
         add_inv = self.rma_add_invoice_wiz.with_context(
-            {
+            **{
                 "customer": True,
                 "active_ids": self.rma_group_customer.id,
                 "active_model": "rma.order",
@@ -178,7 +178,7 @@ class TestRmaAccount(common.SingleTransactionCase):
     def test_02_add_from_invoice_supplier(self):
         """Test wizard to create RMA from a vendor bill."""
         add_inv = self.rma_add_invoice_wiz.with_context(
-            {
+            **{
                 "supplier": True,
                 "active_ids": self.rma_group_supplier.id,
                 "active_model": "rma.order",
@@ -217,7 +217,11 @@ class TestRmaAccount(common.SingleTransactionCase):
         self.assertEqual(rma.qty_to_refund, 2.0)
         self.assertEqual(rma.qty_refunded, 0.0)
         make_refund = self.rma_refund_wiz.with_context(
-            {"customer": True, "active_ids": rma.ids, "active_model": "rma.order.line"}
+            **{
+                "customer": True,
+                "active_ids": rma.ids,
+                "active_model": "rma.order.line",
+            }
         ).create({"description": "Test refund"})
         make_refund.invoice_refund()
         rma.refund_line_ids.move_id.action_post()
@@ -242,7 +246,7 @@ class TestRmaAccount(common.SingleTransactionCase):
     def test_06_default_journal(self):
         self.operation_1.write({"refund_journal_id": self.journal_sale.id})
         add_inv = self.rma_add_invoice_wiz.with_context(
-            {
+            **{
                 "customer": True,
                 "active_ids": self.rma_group_customer_2.id,
                 "active_model": "rma.order",
@@ -255,7 +259,11 @@ class TestRmaAccount(common.SingleTransactionCase):
         rma.action_rma_to_approve()
         rma.action_rma_approve()
         make_refund = self.rma_refund_wiz.with_context(
-            {"customer": True, "active_ids": rma.ids, "active_model": "rma.order.line"}
+            **{
+                "customer": True,
+                "active_ids": rma.ids,
+                "active_model": "rma.order.line",
+            }
         ).create({"description": "Test refund"})
         make_refund.invoice_refund()
         rma.refund_line_ids.move_id.action_post()
