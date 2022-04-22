@@ -64,7 +64,6 @@ class RmaOrderLine(models.Model):
             ("ordered", "Based on Ordered Quantities"),
             ("delivered", "Based on Delivered Quantities"),
         ],
-        string="Purchase Policy",
         default="no",
         required=True,
     )
@@ -76,14 +75,12 @@ class RmaOrderLine(models.Model):
         copy=False,
     )
     qty_to_purchase = fields.Float(
-        string="Qty To Purchase",
         copy=False,
         digits="Product Unit of Measure",
         readonly=True,
         compute="_compute_qty_purchase",
     )
     qty_purchased = fields.Float(
-        string="Qty Purchased",
         copy=False,
         digits="Product Unit of Measure",
         readonly=True,
