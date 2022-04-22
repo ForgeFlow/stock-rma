@@ -23,7 +23,7 @@
                     domain="[('order_id', '=', purchase_id)]"
                     string="Purchase Order Lines"
                 >
-                    <tree string="Purchase Order Lines">
+                    <tree name="Purchase Order Lines">
                         <field name="order_id" />
                         <field name="name" />
                         <field name="partner_id" string="Vendor" />
