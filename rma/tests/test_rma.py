@@ -6,7 +6,7 @@ from odoo.tests import common
 
 
 class TestRma(common.SavepointCase):
-    """ Test the routes and the quantities """
+    """Test the routes and the quantities"""
 
     @classmethod
     def setUpClass(cls):
