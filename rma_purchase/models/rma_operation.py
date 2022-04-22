@@ -14,7 +14,6 @@ class RmaOperation(models.Model):
             ("ordered", "Based on Ordered Quantities"),
             ("delivered", "Based on Delivered Quantities"),
         ],
-        string="Purchase Policy",
         default="no",
     )
 

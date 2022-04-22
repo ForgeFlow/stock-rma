@@ -78,7 +78,7 @@ class TestRmaPurchase(common.TransactionCase):
         """Test wizard to create supplier RMA from Purchase Orders."""
         self.assertEqual(self.rma_group.origin_po_count, 0)
         add_purchase = self.rma_add_purchase_wiz.with_context(
-            {
+            **{
                 "supplier": True,
                 "active_ids": self.rma_group.id,
                 "active_model": "rma.order",
