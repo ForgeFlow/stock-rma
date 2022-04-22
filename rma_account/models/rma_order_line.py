@@ -90,13 +90,11 @@ class RmaOrderLine(models.Model):
             ("delivered", "Based on Delivered Quantities"),
             ("received", "Based on Received Quantities"),
         ],
-        string="Refund Policy",
         required=True,
         default="no",
         readonly=False,
     )
     qty_to_refund = fields.Float(
-        string="Qty To Refund",
         copy=False,
         digits="Product Unit of Measure",
         readonly=True,
@@ -104,7 +102,6 @@ class RmaOrderLine(models.Model):
         store=True,
     )
     qty_refunded = fields.Float(
-        string="Qty Refunded",
         copy=False,
         digits="Product Unit of Measure",
         readonly=True,
@@ -252,9 +249,9 @@ class RmaOrderLine(models.Model):
             if len(matching_inv_lines) > 1:
                 raise UserError(
                     _(
-                        "There's an rma for the invoice line %s "
-                        "and invoice %s"
-                        % (line.account_move_line_id, line.account_move_line_id.move_id)
+                        "There's an rma for the invoice line %(arg1)s and invoice %(arg2)s",
+                        arg1=line.account_move_line_id,
+                        arg2=line.account_move_line_id.move_id,
                     )
                 )
         return {}
