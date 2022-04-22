@@ -33,15 +33,14 @@ class RmaOperation(models.Model):
             return self.env.ref("rma.route_rma_supplier")
 
     name = fields.Char("Description", required=True)
-    code = fields.Char("Code", required=True)
-    active = fields.Boolean(string="Active", default=True)
+    code = fields.Char(required=True)
+    active = fields.Boolean(default=True)
     receipt_policy = fields.Selection(
         [
             ("no", "Not required"),
             ("ordered", "Based on Ordered Quantities"),
             ("delivered", "Based on Delivered Quantities"),
         ],
-        string="Receipts Policy",
         default="no",
     )
     delivery_policy = fields.Selection(
@@ -50,7 +49,6 @@ class RmaOperation(models.Model):
             ("ordered", "Based on Ordered Quantities"),
             ("received", "Based on Received Quantities"),
         ],
-        string="Delivery Policy",
         default="no",
     )
     in_route_id = fields.Many2one(

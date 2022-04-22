@@ -7,7 +7,7 @@
             <form string="Select lines for picking" name="lines">
                 <separator string="Select lines for picking" />
                 <field name="item_ids">
-                    <tree string="RMA Lines" editable="bottom" create="false">
+                    <tree name="RMA Lines" editable="bottom" create="false">
                         <field
                             name="rma_id"
                             groups="rma.group_rma_groups"
@@ -46,7 +46,7 @@
             <form string="Select lines for picking" name="lines">
                 <separator string="Select lines for picking" />
                 <field name="item_ids">
-                    <tree string="RMA Lines" editable="bottom" create="false">
+                    <tree name="RMA Lines" editable="bottom" create="false">
                         <field name="rma_id" groups="rma.group_rma_groups" />
                         <field name="product_id" />
                         <field name="product_qty" />

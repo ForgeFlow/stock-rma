@@ -1,14 +1,10 @@
 <?xml version="1.0" ?>
 <odoo>
-    <data>
         <record id="view_rma_line_tree" model="ir.ui.view">
             <field name="name">rma.order.line.tree</field>
             <field name="model">rma.order.line</field>
             <field name="arch" type="xml">
-                <tree
-                    string="RMA Line"
-                    decoration-info="state in ('draft','to_approve')"
-                >
+                <tree name="RMA Line" decoration-info="state in ('draft','to_approve')">
                     <field name="name" />
                     <field name="partner_id" />
                     <field name="product_id" />
@@ -29,10 +25,7 @@
             <field name="name">rma.order.line.supplier.tree</field>
             <field name="model">rma.order.line</field>
             <field name="arch" type="xml">
-                <tree
-                    string="RMA Line"
-                    decoration-info="state in ('draft','to_approve')"
-                >
+                <tree name="RMA Line" decoration-info="state in ('draft','to_approve')">
                     <field name="name" />
                     <field name="partner_id" />
                     <field name="product_id" />
@@ -55,71 +48,71 @@
                 <form string="RMA Line">
                     <header>
                         <button
-                            name="action_rma_to_approve"
-                            type="object"
-                            string="Request Approval"
-                            attrs="{'invisible':[('state', '!=', 'draft')]}"
-                            class="oe_highlight"
-                            groups="rma.group_rma_customer_user"
-                        />
+                        name="action_rma_to_approve"
+                        type="object"
+                        string="Request Approval"
+                        attrs="{'invisible':[('state', '!=', 'draft')]}"
+                        class="oe_highlight"
+                        groups="rma.group_rma_customer_user"
+                    />
                         <button
-                            name="action_rma_draft"
-                            type="object"
-                            string="Back to Draft"
-                            attrs="{'invisible':[('state', '=', 'draft')]}"
-                            groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"
-                        />
+                        name="action_rma_draft"
+                        type="object"
+                        string="Back to Draft"
+                        attrs="{'invisible':[('state', '=', 'draft')]}"
+                        groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"
+                    />
                         <button
-                            name="action_rma_approve"
-                            type="object"
-                            string="Approve"
-                            attrs="{'invisible':[('state', '!=', 'to_approve')]}"
-                            class="oe_highlight"
-                            groups="rma.group_rma_customer_user"
-                        />
+                        name="action_rma_approve"
+                        type="object"
+                        string="Approve"
+                        attrs="{'invisible':[('state', '!=', 'to_approve')]}"
+                        class="oe_highlight"
+                        groups="rma.group_rma_customer_user"
+                    />
                         <button
-                            name="action_rma_approve"
-                            type="object"
-                            string="Back to Approved"
-                            attrs="{'invisible':[('state', '!=', 'done')]}"
-                            groups="rma.group_rma_customer_user"
-                        />
+                        name="action_rma_approve"
+                        type="object"
+                        string="Back to Approved"
+                        attrs="{'invisible':[('state', '!=', 'done')]}"
+                        groups="rma.group_rma_customer_user"
+                    />
                         <button
-                            name="action_rma_done"
-                            type="object"
-                            string="Done"
-                            attrs="{'invisible':[('state', 'in', ('done', 'draft'))]}"
-                            groups="rma.group_rma_customer_user"
-                        />
+                        name="action_rma_done"
+                        type="object"
+                        string="Done"
+                        attrs="{'invisible':[('state', 'in', ('done', 'draft'))]}"
+                        groups="rma.group_rma_customer_user"
+                    />
                         <field name="state" widget="statusbar" nolabel="1" />
                     </header>
                     <sheet>
                         <div name="button_box" class="oe_button_box">
                             <button
-                                type="object"
-                                name="action_view_in_shipments"
-                                class="oe_stat_button"
-                                icon="fa-truck"
-                                groups="stock.group_stock_user"
-                            >
+                            type="object"
+                            name="action_view_in_shipments"
+                            class="oe_stat_button"
+                            icon="fa-truck"
+                            groups="stock.group_stock_user"
+                        >
                                 <field
-                                    name="in_shipment_count"
-                                    widget="statinfo"
-                                    string="Shipments"
-                                />
+                                name="in_shipment_count"
+                                widget="statinfo"
+                                string="Shipments"
+                            />
                             </button>
                             <button
-                                type="object"
-                                name="action_view_out_shipments"
-                                class="oe_stat_button"
-                                icon="fa-truck"
-                                groups="stock.group_stock_user"
-                            >
+                            type="object"
+                            name="action_view_out_shipments"
+                            class="oe_stat_button"
+                            icon="fa-truck"
+                            groups="stock.group_stock_user"
+                        >
                                 <field
-                                    name="out_shipment_count"
-                                    widget="statinfo"
-                                    string="Deliveries"
-                                />
+                                name="out_shipment_count"
+                                widget="statinfo"
+                                string="Deliveries"
+                            />
                             </button>
                             <!--Move this button to rma_account-->
                             <!--<button type="object"  name="action_view_invoice"
@@ -128,43 +121,43 @@
                                     string="Origin Inv">
                             </button>-->
                             <button
-                                type="object"
-                                name="action_view_rma_lines"
-                                class="oe_stat_button"
-                                icon="fa-link"
-                                groups="stock.group_stock_user"
-                            >
+                            type="object"
+                            name="action_view_rma_lines"
+                            class="oe_stat_button"
+                            icon="fa-link"
+                            groups="stock.group_stock_user"
+                        >
                                 <field
-                                    name="rma_line_count"
-                                    widget="statinfo"
-                                    string="Supplier RMA"
-                                />
+                                name="rma_line_count"
+                                widget="statinfo"
+                                string="Supplier RMA"
+                            />
                             </button>
                         </div>
                         <div class="oe_title" name="title">
                         <h1>
                             <field
-                                    name="name"
-                                    readonly="1"
-                                    invisible="context.get('hide_title',False)"
-                                />
+                                name="name"
+                                readonly="1"
+                                invisible="context.get('hide_title',False)"
+                            />
                         </h1>
                         </div>
                         <group>
                             <group name="partner">
                                 <field
-                                    name="partner_id"
-                                    context="{'res_partner_search_mode': 'customer'}"
-                                    string="Customer"
-                                />
+                                name="partner_id"
+                                context="{'res_partner_search_mode': 'customer'}"
+                                string="Customer"
+                            />
                                 <field
-                                    name="delivery_address_id"
-                                    domain="['|', ('parent_id', '=', partner_id),
+                                name="delivery_address_id"
+                                domain="['|', ('parent_id', '=', partner_id),
                                                          ('id', '=', partner_id)]"
-                                    context="{'show_address': 1}"
-                                    options="{'always_reload': 1}"
-                                    groups='rma.group_rma_delivery_invoice_address'
-                                />
+                                context="{'show_address': 1}"
+                                options="{'always_reload': 1}"
+                                groups='rma.group_rma_delivery_invoice_address'
+                            />
                             </group>
                             <group>
                                 <group name="contact">
@@ -180,10 +173,10 @@
                                 <newline />
                                 <field name="product_tracking" invisible="1" />
                                 <field
-                                    name="lot_id"
-                                    groups="stock.group_production_lot"
-                                    attrs="{'required': [('product_tracking', 'in', ('serial', 'lot'))]}"
-                                />
+                                name="lot_id"
+                                groups="stock.group_production_lot"
+                                attrs="{'required': [('product_tracking', 'in', ('serial', 'lot'))]}"
+                            />
                                 <field name="under_warranty" />
                             </group>
                             <group name="product_qty" string="Quantity">
@@ -194,19 +187,19 @@
                         </group>
                         <group name="main_info" string="Origin">
                             <field
-                                name="reference_move_id"
-                                options="{'no_create': True}"
-                                domain="[('picking_id.partner_id', '=', partner_id),
+                            name="reference_move_id"
+                            options="{'no_create': True}"
+                            domain="[('picking_id.partner_id', '=', partner_id),
                                             ('location_dest_id.usage', '=', 'customer'),
                                             ('state', '=', 'done')]"
-                            />
+                        />
                         </group>
                         <group>
                             <group name="operation" string="Operation">
                                 <field
-                                    name="operation_id"
-                                    domain="[('type','=','customer')]"
-                                />
+                                name="operation_id"
+                                domain="[('type','=','customer')]"
+                            />
                                 <field name="receipt_policy" />
                                 <field name="delivery_policy" />
                             </group>
@@ -228,9 +221,9 @@
                                         <field name="qty_delivered" />
                                     </group>
                                     <group
-                                        name="supplier_rma"
-                                        attrs="{'invisible':['|', ('type', '!=', 'customer'), ('customer_to_supplier','=',False)]}"
-                                    >
+                                    name="supplier_rma"
+                                    attrs="{'invisible':['|', ('type', '!=', 'customer'), ('customer_to_supplier','=',False)]}"
+                                >
                                         <field name="qty_to_supplier_rma" />
                                         <field name="qty_in_supplier_rma" />
                                     </group>
@@ -240,42 +233,42 @@
                                 <group name="inbound" string="Inbound">
                                     <field name="in_warehouse_id" />
                                     <field
-                                        name="location_id"
-                                        domain="[('usage', '=', 'internal')]"
-                                    />
+                                    name="location_id"
+                                    domain="[('usage', '=', 'internal')]"
+                                />
                                     <field
-                                        name="in_route_id"
-                                        groups="stock.group_adv_location"
-                                    />
+                                    name="in_route_id"
+                                    groups="stock.group_adv_location"
+                                />
                                     <field
-                                        name="customer_to_supplier"
-                                        attrs="{'invisible':[('type', '!=', 'customer')]}"
-                                    />
+                                    name="customer_to_supplier"
+                                    attrs="{'invisible':[('type', '!=', 'customer')]}"
+                                />
                                     <field
-                                        name="supplier_address_id"
-                                        context="{'show_address': 1}"
-                                        options="{'always_reload': 1}"
-                                        attrs="{'required':[('customer_to_supplier', '=', True)],
+                                    name="supplier_address_id"
+                                    context="{'show_address': 1}"
+                                    options="{'always_reload': 1}"
+                                    attrs="{'required':[('customer_to_supplier', '=', True)],
                                                    'invisible':[('customer_to_supplier', '=', False)]}"
-                                    />
+                                />
                                 </group>
                                 <group name="outbound" string="Outbound">
                                     <field name="out_warehouse_id" />
                                     <field
-                                        name="out_route_id"
-                                        groups="stock.group_adv_location"
-                                    />
+                                    name="out_route_id"
+                                    groups="stock.group_adv_location"
+                                />
                                     <field
-                                        name="supplier_to_customer"
-                                        attrs="{'invisible':[('type', '!=', 'supplier')]}"
-                                    />
+                                    name="supplier_to_customer"
+                                    attrs="{'invisible':[('type', '!=', 'supplier')]}"
+                                />
                                     <field
-                                        name="customer_address_id"
-                                        context="{'show_address': 1}"
-                                        options="{'always_reload': 1}"
-                                        attrs="{'required':[('supplier_to_customer', '=', True)],
+                                    name="customer_address_id"
+                                    context="{'show_address': 1}"
+                                    options="{'always_reload': 1}"
+                                    attrs="{'required':[('supplier_to_customer', '=', True)],
                                                    'invisible':[('supplier_to_customer', '=', False)]}"
-                                    />
+                                />
                                 </group>
                             </page>
                             <page name="stock" string="Stock Moves">
@@ -285,16 +278,16 @@
                                 <group name="general" string="General">
                                     <field name="conditions" />
                                     <field
-                                        name="rma_id"
-                                        groups="rma.group_rma_groups"
-                                    />
+                                    name="rma_id"
+                                    groups="rma.group_rma_groups"
+                                />
                                     <field name="origin" />
                                 </group>
                                 <group
-                                    name="company"
-                                    string="Company"
-                                    groups="base.group_multi_company"
-                                >
+                                name="company"
+                                string="Company"
+                                groups="base.group_multi_company"
+                            >
                                     <field name="company_id" />
                                 </group>
                             </page>
@@ -302,10 +295,10 @@
                     </sheet>
                 <div class="oe_chatter">
                     <field
-                            name="message_follower_ids"
-                            widget="mail_followers"
-                            groups="base.group_user"
-                        />
+                        name="message_follower_ids"
+                        widget="mail_followers"
+                        groups="base.group_user"
+                    />
                     <field name="message_ids" widget="mail_thread" />
                 </div>
                 </form>
@@ -319,24 +312,24 @@
             <field name="mode">primary</field>
             <field name="arch" type="xml">
                 <xpath
-                    expr="//button[@name='action_view_rma_lines']/field"
-                    position="attributes"
-                >
+                expr="//button[@name='action_view_rma_lines']/field"
+                position="attributes"
+            >
                     <attribute name="string">Customer RMA</attribute>
                 </xpath>
                 <field name="partner_id" position="attributes">
                     <attribute name="string">Supplier</attribute>
                     <attribute
-                        name="context"
-                    >{'res_partner_search_mode': 'supplier'}</attribute>
+                    name="context"
+                >{'res_partner_search_mode': 'supplier'}</attribute>
                 </field>
                 <field name="under_warranty" position="attributes">
                     <attribute name="invisible">1</attribute>
                 </field>
                 <field name="reference_move_id" position="attributes">
                     <attribute
-                        name="domain"
-                    >[('picking_id.partner_id', '=', partner_id),
+                    name="domain"
+                >[('picking_id.partner_id', '=', partner_id),
                                     ('location_id.usage', '=', 'supplier'),
                                     ('state', '=', 'done')]</attribute>
                 </field>
@@ -360,67 +353,67 @@
                     <field name="lot_id" />
                     <separator />
                     <filter
-                        name="assigned_to"
-                        domain="[('assigned_to','=',uid)]"
-                        help="My RMAs"
-                    />
+                    name="assigned_to"
+                    domain="[('assigned_to','=',uid)]"
+                    help="My RMAs"
+                />
                     <separator />
                     <group name="stock_quantities" groups="stock.group_stock_user">
                         <filter
-                            name="to_receive"
-                            domain="[('state','!=', 'done'),('qty_to_receive','>',0.0)]"
-                            help="To Receive"
-                        />
+                        name="to_receive"
+                        domain="[('state','!=', 'done'),('qty_to_receive','>',0.0)]"
+                        help="To Receive"
+                    />
                         <filter
-                            name="to_deliver"
-                            domain="[('state','!=', 'done'),('qty_to_deliver','>',0.0)]"
-                            help="To Deliver"
-                        />
+                        name="to_deliver"
+                        domain="[('state','!=', 'done'),('qty_to_deliver','>',0.0)]"
+                        help="To Deliver"
+                    />
                     </group>
                     <group name="rma_supplier_quantities">
                         <filter
-                            name="to_send_to_supplier"
-                            domain="[('state','!=', 'done'),('qty_to_supplier_rma','>',0.0)]"
-                            help="To Send to Supplier RMA"
-                        />
+                        name="to_send_to_supplier"
+                        domain="[('state','!=', 'done'),('qty_to_supplier_rma','>',0.0)]"
+                        help="To Send to Supplier RMA"
+                    />
                     </group>
                     <group expand="0" string="Group By">
                         <filter
-                            name="status"
-                            string="State"
-                            domain="[]"
-                            context="{'group_by':'state'}"
-                        />
+                        name="status"
+                        string="State"
+                        domain="[]"
+                        context="{'group_by':'state'}"
+                    />
                         <filter
-                            name="partner"
-                            string="Partner"
-                            domain="[]"
-                            context="{'group_by':'partner_id'}"
-                        />
+                        name="partner"
+                        string="Partner"
+                        domain="[]"
+                        context="{'group_by':'partner_id'}"
+                    />
                         <filter
-                            name="operation"
-                            string="Operation"
-                            domain="[]"
-                            context="{'group_by':'operation_id'}"
-                        />
+                        name="operation"
+                        string="Operation"
+                        domain="[]"
+                        context="{'group_by':'operation_id'}"
+                    />
                         <filter
-                            name="product"
-                            string="Product"
-                            domain="[]"
-                            context="{'group_by':'product_id'}"
-                        />
+                        name="product"
+                        string="Product"
+                        domain="[]"
+                        context="{'group_by':'product_id'}"
+                    />
                         <filter
-                            name="to_receive"
-                            string="To Receive"
-                            domain="[('qty_to_receive', '>', 0)]"
-                            context="{'group_by':'partner_id'}"
-                        />
+                        name="to_receive"
+                        string="To Receive"
+                        domain="[('qty_to_receive', '>', 0)]"
+                        context="{'group_by':'partner_id'}"
+                    />
                         <filter
-                            name="to_deliver"
-                            string="To Deliver"
-                            domain="[('qty_to_deliver', '>', 0)]"
-                            context="{'group_by':'partner_id'}"
-                        />
+                        name="to_deliver"
+                        string="To Deliver"
+                        domain="[('qty_to_deliver', '>', 0)]"
+                        context="{'group_by':'partner_id'}"
+                    />
                     </group>
                </search>
             </field>
@@ -440,8 +433,8 @@
             <field name="res_model">rma.order.line</field>
             <field name="domain">[('type','=', 'supplier')]</field>
             <field
-                name="context"
-            >{"search_default_assigned_to":uid, "supplier":1}</field>
+            name="context"
+        >{"search_default_assigned_to":uid, "supplier":1}</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="view_rma_line_supplier_tree" />
         </record>
@@ -470,5 +463,4 @@ if records.filtered(lambda x: x.state == "draft"):
             </field>
          </record>
 
-    </data>
 </odoo>

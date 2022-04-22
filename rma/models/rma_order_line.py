@@ -217,7 +217,7 @@ class RmaOrderLine(models.Model):
         help="Add here the supplier RMA #. Otherwise an internal code is" " assigned.",
         copy=False,
     )
-    description = fields.Text(string="Description")
+    description = fields.Text()
     conditions = fields.Html(string="Terms and conditions")
     origin = fields.Char(
         string="Source Document",
@@ -232,14 +232,12 @@ class RmaOrderLine(models.Model):
             ("approved", "Approved"),
             ("done", "Done"),
         ],
-        string="State",
         default="draft",
         tracking=True,
     )
     operation_id = fields.Many2one(
         comodel_name="rma.operation",
         required=True,
-        string="Operation",
         readonly=False,
         tracking=True,
     )
@@ -258,7 +256,6 @@ class RmaOrderLine(models.Model):
         required=True,
         store=True,
         tracking=True,
-        string="Partner",
         readonly=True,
         states={"draft": [("readonly", False)]},
     )
@@ -267,7 +264,6 @@ class RmaOrderLine(models.Model):
     )
     product_id = fields.Many2one(
         comodel_name="product.product",
-        string="Product",
         ondelete="restrict",
         required=True,
         readonly=True,
@@ -295,9 +291,7 @@ class RmaOrderLine(models.Model):
         readonly=True,
         states={"draft": [("readonly", False)]},
     )
-    price_unit = fields.Monetary(
-        string="Price Unit", readonly=True, states={"draft": [("readonly", False)]}
-    )
+    price_unit = fields.Monetary(readonly=True, states={"draft": [("readonly", False)]})
     in_shipment_count = fields.Integer(
         compute="_compute_in_shipment_count", string="# of Shipments"
     )
@@ -316,18 +310,15 @@ class RmaOrderLine(models.Model):
     )
     currency_id = fields.Many2one(
         "res.currency",
-        string="Currency",
         default=lambda self: self.env.company.currency_id,
     )
     company_id = fields.Many2one(
         comodel_name="res.company",
-        string="Company",
         required=True,
         default=lambda self: self.env.company,
     )
     type = fields.Selection(
         selection=[("customer", "Customer"), ("supplier", "Supplier")],
-        string="Type",
         required=True,
         default=lambda self: self._get_default_type(),
         readonly=True,
@@ -349,7 +340,6 @@ class RmaOrderLine(models.Model):
             ("delivered", "Based on Delivered Quantities"),
         ],
         required=True,
-        string="Receipts Policy",
         default="no",
         readonly=False,
     )
@@ -360,7 +350,6 @@ class RmaOrderLine(models.Model):
             ("received", "Based on Received Quantities"),
         ],
         required=True,
-        string="Delivery Policy",
         default="no",
         readonly=False,
         ondelete="cascade",
@@ -427,7 +416,6 @@ class RmaOrderLine(models.Model):
         help="Address of the customer in case of Supplier RMA operation " "dropship.",
     )
     qty_to_receive = fields.Float(
-        string="Qty To Receive",
         digits="Product Unit of Measure",
         compute="_compute_qty_to_receive",
         store=True,
@@ -441,14 +429,12 @@ class RmaOrderLine(models.Model):
         store=True,
     )
     qty_received = fields.Float(
-        string="Qty Received",
         copy=False,
         digits="Product Unit of Measure",
         compute="_compute_qty_received",
         store=True,
     )
     qty_to_deliver = fields.Float(
-        string="Qty To Deliver",
         copy=False,
         digits="Product Unit of Measure",
         readonly=True,
@@ -464,7 +450,6 @@ class RmaOrderLine(models.Model):
         store=True,
     )
     qty_delivered = fields.Float(
-        string="Qty Delivered",
         copy=False,
         digits="Product Unit of Measure",
         readonly=True,

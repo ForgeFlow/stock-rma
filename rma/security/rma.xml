@@ -1,6 +1,5 @@
 <?xml version="1.0" ?>
-<odoo>
-    <data noupdate="0">
+<odoo noupdate="0">
 
         <record model="ir.module.category" id="module_category_rma">
             <field name="name">RMA</field>
@@ -23,10 +22,10 @@
         <record id="group_rma_manager" model="res.groups">
             <field name="name">RMA Manager</field>
             <field
-                name="implied_ids"
-                eval="[(4, ref('rma.group_rma_customer_user')),
+            name="implied_ids"
+            eval="[(4, ref('rma.group_rma_customer_user')),
                           (4, ref('rma.group_rma_supplier_user'))]"
-            />
+        />
             <field name="users" eval="[(4, ref('base.user_root'))]" />
             <field name="category_id" ref="module_category_rma" />
         </record>
@@ -48,48 +47,47 @@
 
         <record id="stock.group_stock_user" model="res.groups">
             <field
-                name="implied_ids"
-                eval="[(4, ref('group_rma_customer_user')),
+            name="implied_ids"
+            eval="[(4, ref('group_rma_customer_user')),
                           (4, ref('group_rma_supplier_user'))]"
-            />
+        />
         </record>
 
         <record model="ir.rule" id="rma_order_rule">
           <field name="name">rma order multi-company</field>
           <field
-                name="model_id"
-                search="[('model','=','rma.order')]"
-                model="ir.model"
-            />
+            name="model_id"
+            search="[('model','=','rma.order')]"
+            model="ir.model"
+        />
           <field name="global" eval="True" />
           <field
-                name="domain_force"
-            >['|',('company_id','=',False),('company_id','child_of',[user.company_id.id])]</field>
+            name="domain_force"
+        >['|',('company_id','=',False),('company_id','child_of',[user.company_id.id])]</field>
         </record>
         <record model="ir.rule" id="rma_order_line_rule">
           <field name="name">rma order line multi-company</field>
           <field
-                name="model_id"
-                search="[('model','=','rma.order.line')]"
-                model="ir.model"
-            />
+            name="model_id"
+            search="[('model','=','rma.order.line')]"
+            model="ir.model"
+        />
           <field name="global" eval="True" />
           <field
-                name="domain_force"
-            >['|',('company_id','=',False),('company_id','child_of',[user.company_id.id])]</field>
+            name="domain_force"
+        >['|',('company_id','=',False),('company_id','child_of',[user.company_id.id])]</field>
         </record>
         <record model="ir.rule" id="rma_operation_rule">
           <field name="name">rma operation multi-company</field>
           <field
-                name="model_id"
-                search="[('model','=','rma.operation')]"
-                model="ir.model"
-            />
+            name="model_id"
+            search="[('model','=','rma.operation')]"
+            model="ir.model"
+        />
           <field name="global" eval="True" />
           <field
-                name="domain_force"
-            >['|',('company_id','=',False),('company_id','child_of',[user.company_id.id])]</field>
+            name="domain_force"
+        >['|',('company_id','=',False),('company_id','child_of',[user.company_id.id])]</field>
         </record>
 
-    </data>
 </odoo>
