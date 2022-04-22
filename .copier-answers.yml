@@ -1,14 +1,17 @@
 # Do NOT update manually; changes here will be overwritten by Copier
-_commit: v1.3.5
+_commit: v1.6.1
 _src_path: https://github.com/OCA/oca-addons-repo-template.git
 ci: GitHub
 dependency_installation_mode: PIP
 generate_requirements_txt: false
 include_wkhtmltopdf: true
 odoo_version: 14.0
+org_name: ForgeFlow
+org_slug: ForgeFlow
 rebel_module_groups: []
 repo_description: Return Merchandise Authorization for Odoo
 repo_name: stock-rma
 repo_slug: https://github.com/ForgeFlow/stock-rma
+repo_website: https://github.com/ForgeFlow/stock-rma
 travis_apt_packages: []
 travis_apt_sources: []
