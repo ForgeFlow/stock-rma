@@ -167,6 +167,9 @@
                                 <field name="out_warehouse_id" invisible="True" />
                                 <field name="customer_to_supplier" invisible="True" />
                                 <field name="supplier_address_id" invisible="True" />
+                                <field name="receipt_policy" invisible="True" />
+                                <field name="delivery_policy" invisible="True" />
+                                <field name="delivery_address_id" invisible="True" />
                                 <field name="product_qty" />
                                 <field name="price_unit" />
                             </tree>
