@@ -76,7 +76,7 @@ class RmaOrderLine(models.Model):
         for move in self.move_ids:
             first_usage = move._get_first_usage()
             last_usage = move._get_last_usage()
-            if first_usage == "internal" and last_usage != "internal":
+            if first_usage in ("internal", "production") and last_usage != "internal":
                 pickings |= move.picking_id
             elif last_usage == "customer" and first_usage == "supplier":
                 pickings |= move.picking_id
