@@ -181,7 +181,7 @@
                         <strong t-if="doc.type=='customer'">Customer:</strong>
                         <strong t-if="doc.type=='supplier'">Supplier:</strong>
                         <div
-                            t-field="doc.delivery_address_id"
+                            t-field="doc.partner_id"
                             t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'
                         />
                     </div>
