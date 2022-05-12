@@ -1,10 +1,10 @@
 # Copyright 2022 ForgeFlow S.L.
-# License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
+# License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html)
 
 {
     "name": "RMA Account Unreconcile",
     "version": "14.0.1.0.0",
-    "license": "LGPL-3",
+    "license": "AGPL-3",
     "category": "RMA",
     "summary": "Integrates RMA with Invoice Processing",
     "author": "ForgeFlow",
