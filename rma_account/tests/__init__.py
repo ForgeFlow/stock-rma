@@ -3,3 +3,4 @@
 
 from . import test_rma_account
 from . import test_rma_stock_account
+from . import test_account_move_line_rma_order_line
