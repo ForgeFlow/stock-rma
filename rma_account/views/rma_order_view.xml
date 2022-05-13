@@ -29,12 +29,9 @@
                     <field name="invoice_count" widget="statinfo" string="Origin Inv" />
                 </button>
             </button>
-            <!--
-            <xpath expr="//field[@name='rma_line_ids']/tree/field[@name='price_unit']"
-                   position="after">
-                <field name="account_move_line_id" invisible="True"/>
+            <xpath expr="//field[@name='rma_line_ids']/tree" position="inside">
+                <field name="refund_policy" invisible="True" />
             </xpath>
-            -->
         </field>
     </record>
 
