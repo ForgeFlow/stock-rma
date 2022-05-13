@@ -16,6 +16,9 @@
                         <field name="sale_count" widget="statinfo" string="Origin SO" />
                     </button>
                 </div>
+                <xpath expr="//field[@name='rma_line_ids']/tree" position="inside">
+                    <field name="sale_policy" invisible="True" />
+                </xpath>
             </field>
         </record>
 </odoo>
