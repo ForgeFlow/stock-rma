@@ -42,7 +42,8 @@ class RmaAddSale(models.TransientModel):
         string="Sale Lines",
     )
     show_lot_filter = fields.Boolean(
-        string="Show lot filter?", compute="_compute_lot_domain",
+        string="Show lot filter?",
+        compute="_compute_lot_domain",
     )
     lot_domain_ids = fields.Many2many(
         comodel_name="stock.production.lot",
@@ -50,7 +51,9 @@ class RmaAddSale(models.TransientModel):
         compute="_compute_lot_domain",
     )
 
-    @api.depends("sale_line_ids.move_ids.move_line_ids.lot_id",)
+    @api.depends(
+        "sale_line_ids.move_ids.move_line_ids.lot_id",
+    )
     def _compute_lot_domain(self):
         for rec in self:
             rec.lot_domain_ids = (
