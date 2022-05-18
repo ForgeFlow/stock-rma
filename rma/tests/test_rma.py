@@ -971,39 +971,38 @@ class TestRma(common.TransactionCase):
         )
         for line in self.rma_supplier_id.rma_line_ids:
             line.action_rma_done()
-            self.assertEquals(line.state, 'done',
-                              "Wrong State")
+            self.assertEqual(line.state, "done", "Wrong State")
 
     def test_05_rma_order_line(self):
-        """ Property rma_customer_operation_id on product or product category
+        """Property rma_customer_operation_id on product or product category
         correctly handled inside _onchange_product_id()
         """
         rma_operation = self.env["rma.operation"].search([], limit=1)
         self.assertTrue(rma_operation)
 
         # Case of product template
-        self.rma_customer_id.rma_line_ids\
-            .mapped("product_id")\
-            .write({"rma_customer_operation_id": rma_operation.id})
+        self.rma_customer_id.rma_line_ids.mapped("product_id").sudo().write(
+            {"rma_customer_operation_id": rma_operation.id}
+        )
         for line in self.rma_customer_id.rma_line_ids:
-            data = {'product_id': line.product_id.id}
+            data = {"product_id": line.product_id.id}
             new_line = self.rma_line.new(data)
             self.assertFalse(new_line.operation_id)
             self.assertTrue(new_line.product_id.rma_customer_operation_id)
-            self.assertFalse(new_line.product_id.categ_id.rma_customer_operation_id)
+            self.assertTrue(new_line.product_id.categ_id.rma_customer_operation_id)
             new_line._onchange_product_id()
             self.assertEqual(new_line.operation_id, rma_operation)
 
         # Case of product category
-        self.rma_customer_id.rma_line_ids\
-            .mapped("product_id")\
-            .write({"rma_customer_operation_id": False})
-        self.rma_customer_id.rma_line_ids \
-            .mapped("product_id.categ_id") \
-            .write({"rma_customer_operation_id": rma_operation.id})
+        self.rma_customer_id.rma_line_ids.mapped("product_id").sudo().write(
+            {"rma_customer_operation_id": False}
+        )
+        self.rma_customer_id.rma_line_ids.mapped("product_id.categ_id").sudo().write(
+            {"rma_customer_operation_id": rma_operation.id}
+        )
 
         for line in self.rma_customer_id.rma_line_ids:
-            data = {'product_id': line.product_id.id}
+            data = {"product_id": line.product_id.id}
             new_line = self.rma_line.new(data)
             self.assertFalse(new_line.operation_id)
             self.assertFalse(new_line.product_id.rma_customer_operation_id)

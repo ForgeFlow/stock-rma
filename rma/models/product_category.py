@@ -20,9 +20,11 @@ class ProductCategory(models.Model):
     )
     rma_customer_operation_id = fields.Many2one(
         company_dependent=True,
-        comodel_name="rma.operation", string="Default RMA Customer Operation"
+        comodel_name="rma.operation",
+        string="Default RMA Customer Operation",
     )
     rma_supplier_operation_id = fields.Many2one(
         company_dependent=True,
-        comodel_name="rma.operation", string="Default RMA Supplier Operation"
+        comodel_name="rma.operation",
+        string="Default RMA Supplier Operation",
     )
