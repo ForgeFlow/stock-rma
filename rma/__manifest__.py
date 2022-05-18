@@ -10,7 +10,7 @@
     "in odoo",
     "author": "ForgeFlow",
     "website": "https://github.com/ForgeFlow/stock-rma",
-    "depends": ["stock", "mail", "web"],
+    "depends": ["stock", "mail", "web", "account"],
     "demo": ["demo/stock_demo.xml"],
     "data": [
         "security/rma.xml",
