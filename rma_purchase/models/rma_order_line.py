@@ -37,7 +37,8 @@ class RmaOrderLine(models.Model):
                 rec.qty_to_purchase = 0.0
 
     purchase_count = fields.Integer(
-        compute="_compute_purchase_count", string="# of Purchases",
+        compute="_compute_purchase_count",
+        string="# of Purchases",
     )
     purchase_order_line_id = fields.Many2one(
         comodel_name="purchase.order.line",

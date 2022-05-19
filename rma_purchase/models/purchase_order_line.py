@@ -7,7 +7,10 @@ from odoo import api, fields, models
 class PurchaseOrderLine(models.Model):
     _inherit = "purchase.order.line"
 
-    rma_line_id = fields.Many2one(comodel_name="rma.order.line", string="RMA",)
+    rma_line_id = fields.Many2one(
+        comodel_name="rma.order.line",
+        string="RMA",
+    )
 
     @api.model
     def name_search(self, name="", args=None, operator="ilike", limit=100):
