@@ -21,3 +21,5 @@ access_rma_order_line_make_supplier_rma_customer_user_item,rma.order.line.make.s
 access_rma_order_line_make_supplier_rmasupplier_user_item,rma.order.line.make.supplier.rma.item.supplier.user,model_rma_order_line_make_supplier_rma_item,rma.group_rma_supplier_user,1,1,1,1
 access_rma_add_stock_move_customer_user_item,rma.add.stock.move.customer.user,model_rma_add_stock_move,rma.group_rma_customer_user,1,1,1,1
 access_rma_add_stock_move_supplier_user_item,rma.add.stock.move.supplier.user,model_rma_add_stock_move,rma.group_rma_supplier_user,1,1,1,1
+access_rma_add_serial_wiz_customer,access_rma_add_serial_wiz_customer,model_rma_add_serial_wiz,rma.group_rma_customer_user,1,1,1,1
+access_rma_add_serial_wiz_supplier,access_rma_add_serial_wiz_supplier,model_rma_add_serial_wiz,rma.group_rma_supplier_user,1,1,1,1
