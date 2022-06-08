@@ -200,6 +200,13 @@ class RmaOrderLine(models.Model):
         result["domain"] = [("id", "in", order_ids)]
         return result
 
+    def action_view_origin_sale_order(self):
+        action = self.env.ref("sale.action_orders_salesteams")
+        result = action.sudo().read()[0]
+        order_ids = self.sale_id.ids
+        result["domain"] = [("id", "in", order_ids)]
+        return result
+
     def _get_rma_sold_qty(self):
         self.ensure_one()
         qty = 0.0
