@@ -30,6 +30,7 @@ class StockRule(models.Model):
         )
         if "rma_line_id" in values:
             line = values.get("rma_line_id")
+            line = self.env["rma.order.line"].browse([line])
             res["rma_line_id"] = line.id
             if line.delivery_address_id:
                 res["partner_id"] = line.delivery_address_id.id
