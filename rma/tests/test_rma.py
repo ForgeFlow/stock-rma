@@ -645,3 +645,16 @@ class TestRma(common.SavepointCase):
             self.assertTrue(new_line.product_id.categ_id.rma_customer_operation_id)
             new_line._onchange_product_id()
             self.assertEqual(new_line.operation_id, rma_operation)
+
+    def test_06_no_zero_qty_moves(self):
+        rma_lines = self.rma_customer_id.rma_line_ids
+        rma_lines.write({"receipt_policy": "delivered"})
+        self.assertEqual(sum(rma_lines.mapped("qty_to_receive")), 0)
+        wizard = self.rma_make_picking.with_context({
+            'active_ids': rma_lines.ids,
+            'active_model': 'rma.order.line',
+            'picking_type': 'incoming',
+            'active_id': 1
+        }).create({})
+        with self.assertRaisesRegex(ValidationError, "No quantity to transfer"):
+            wizard._create_picking()
