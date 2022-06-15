@@ -9,6 +9,12 @@
             <field name="delivery_policy" position="after">
                 <field name="put_away_policy" />
             </field>
+            <group name="quantities" position="inside">
+                <group>
+                    <field name="qty_to_put_away" />
+                    <field name="qty_put_away" />
+                </group>
+            </group>
         </field>
     </record>
 
