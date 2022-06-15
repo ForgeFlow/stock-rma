@@ -3,7 +3,7 @@
     "version": "14.0.1.0.0",
     "license": "LGPL-3",
     "category": "RMA",
-    "summary": "Allows to put away the recieved products"
+    "summary": "Allows to put away the received products"
     "in odoo",
     "author": "ForgeFlow",
     "website": "https://github.com/ForgeFlow/stock-rma",

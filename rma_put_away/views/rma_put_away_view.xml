@@ -10,7 +10,8 @@
                     <tree string="RMA Lines" editable="bottom" create="false">
                         <field name="rma_id" groups="rma.group_rma_groups" />
                         <field name="product_id" />
-                        <field name="product_qty" />
+                        <field name="product_qty"/>
+                        <field name="qty_to_receive" />
                         <field name="line_id" invisible="1" />
                         <field name="uom_id" groups="uom.group_uom" />
                     </tree>
