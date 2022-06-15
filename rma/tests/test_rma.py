@@ -1,8 +1,8 @@
 # © 2017 ForgeFlow
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo.exceptions import ValidationError
-from odoo.tests import common
+from odoo.exceptions import UserError, ValidationError
+from odoo.tests import Form, common
 
 
 class TestRma(common.TransactionCase):
@@ -1009,3 +1009,44 @@ class TestRma(common.TransactionCase):
             self.assertTrue(new_line.product_id.categ_id.rma_customer_operation_id)
             new_line._onchange_product_id()
             self.assertEqual(new_line.operation_id, rma_operation)
+
+    def test_06_warehouse_mismatch(self):
+        """Mismatch between operation warehouse and stock rule warehouse is raised.
+
+        * Create a second warehouse that is resupplied from the main warehouse
+        * Update an RMA to receive into the second warehouse
+        * When creating pickings, it is raised that the rules from the RMA
+        * config are not used.
+        """
+        wh2 = self.env["stock.warehouse"].create(
+            {
+                "name": "Shop.",
+                "code": "SHP",
+            }
+        )
+        wh2.resupply_wh_ids = self.env.ref("stock.warehouse0")
+        wh2.rma_in_this_wh = True
+        wh2.lot_rma_id = self.env["stock.location"].create(
+            {
+                "name": "WH2 RMA",
+                "usage": "internal",
+                "location_id": wh2.lot_stock_id.id,
+            }
+        )
+        rma = self.rma_customer_id.copy()
+        rma.rma_line_ids = self.rma_customer_id.rma_line_ids[0].copy()
+        rma.rma_line_ids.product_id.sudo().route_ids += wh2.resupply_route_ids
+        rma_form = Form(rma)
+        rma_form.in_warehouse_id = wh2
+        rma_form.save()
+        rma.rma_line_ids.action_rma_approve()
+        wizard = self.rma_make_picking.with_context(
+            **{
+                "active_ids": rma.rma_line_ids.ids,
+                "active_model": "rma.order.line",
+                "picking_type": "incoming",
+                "active_id": 1,
+            }
+        ).create({})
+        with self.assertRaisesRegex(UserError, "No rule found"):
+            wizard._create_picking()
