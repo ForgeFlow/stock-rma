@@ -10,7 +10,13 @@ class TestRmaAccountUnreconciled(TestRma):
     def setUpClass(cls):
         super().setUpClass()
         cls.rma_refund_wiz = cls.env["rma.refund"]
-        for categ in cls.rma_customer_id.with_user(cls.rma_manager_user).mapped(
+        cls.g_account_manager = cls.env.ref("account.group_account_manager")
+        cls.rma_manager_user_account = cls._create_user(
+            "rma manager account",
+            [cls.g_stock_manager, cls.g_rma_manager, cls.g_account_manager],
+            cls.company,
+        )
+        for categ in cls.rma_customer_id.with_user(cls.rma_manager_user_account).mapped(
             "rma_line_ids.product_id.categ_id"
         ):
             categ.write(
@@ -29,9 +35,9 @@ class TestRmaAccountUnreconciled(TestRma):
                     "reconcile": True,
                 }
             )
-        for product in cls.rma_customer_id.with_user(cls.rma_manager_user).mapped(
-            "rma_line_ids.product_id"
-        ):
+        for product in cls.rma_customer_id.with_user(
+            cls.rma_manager_user_account
+        ).mapped("rma_line_ids.product_id"):
             product.write(
                 {
                     "standard_price": 10.0,
@@ -85,7 +91,7 @@ class TestRmaAccountUnreconciled(TestRma):
             )
         make_refund.invoice_refund()
         self.rma_customer_id.with_user(
-            self.rma_manager_user
+            self.rma_manager_user_account
         ).rma_line_ids.refund_line_ids.move_id.filtered(
             lambda x: x.state != "posted"
         ).action_post()
