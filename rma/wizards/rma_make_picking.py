@@ -144,10 +144,8 @@ class RmaMakePicking(models.TransientModel):
             group = self.env["procurement.group"].create(pg_data)
         if picking_type == "incoming":
             qty = item.qty_to_receive
-            force_rule_ids = item.line_id.in_route_id.rule_ids.ids
         else:
             qty = item.qty_to_deliver
-            force_rule_ids = item.line_id.out_route_id.rule_ids.ids
         values = self._get_procurement_data(item, group, qty, picking_type)
         values = dict(values, rma_line_id=item.line_id, rma_id=item.line_id.rma_id)
         # create picking
@@ -165,9 +163,11 @@ class RmaMakePicking(models.TransientModel):
             )
 
             procurements.append(procurement)
-            self.env["procurement.group"].with_context(
-                rma_force_rule_ids=force_rule_ids
-            ).run(procurements)
+            # Trigger a route check with a mutable in the context that can be
+            # cleared after the first rule selection
+            self.env["procurement.group"].with_context(rma_route_check=[True]).run(
+                procurements
+            )
         except UserError as error:
             errors.append(error.args[0])
         if errors:
