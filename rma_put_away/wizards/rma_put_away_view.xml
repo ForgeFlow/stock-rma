@@ -10,8 +10,9 @@
                     <tree string="RMA Lines" editable="bottom" create="false">
                         <field name="rma_id" groups="rma.group_rma_groups" />
                         <field name="product_id" />
-                        <field name="product_qty"/>
-                        <field name="qty_to_receive" />
+                        <field name="product_qty" />
+                        <field name="qty_to_put_away" />
+                        <field name="location_id" />
                         <field name="line_id" invisible="1" />
                         <field name="uom_id" groups="uom.group_uom" />
                     </tree>
@@ -43,7 +44,6 @@
         <field name="target">new</field>
         <field name="view_id" ref="view_rma_put_away" />
         <field name="groups_id" eval="[(4, ref('stock.group_stock_user'))]" />
-        <field name="context">{'picking_type': 'internal'}</field>
         <field name="binding_model_id" ref="rma.model_rma_order_line" />
     </record>
 
@@ -55,22 +55,10 @@
             <header position="inside">
                 <button
                     name="%(action_rma_put_away)d"
-                    string="Create Put Away"
-                    class="oe_highlight"
-                    attrs="{'invisible':['|', ('qty_to_put_away', '=', 0), ('state', '!=', 'approved')]}"
+                    string="Put Away"
+                    attrs="{'invisible':[('state', '!=', 'approved')]}"
                     type="action"
                 />
-                <button
-                    name="%(action_rma_put_away)d"
-                    string="Create Put Away"
-                    attrs="{'invisible':['|', ('qty_to_put_away', '!=', 0), ('state', '!=', 'approved')]}"
-                    type="action"
-                />
-                <field
-                                name="qty_to_put_away"
-                                widget="statinfo"
-                                string="PutAwayQty"
-                            />
             </header>
         </field>
     </record>

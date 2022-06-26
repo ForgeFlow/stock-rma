@@ -21,9 +21,9 @@
                 <field name="put_away_policy" />
             </field>
             <group name="outbound" position="after">
-                <group name="internal" string="Internal">
-                    <field name="internal_route_id"/>
-                    <field name="internal_warehouse_id"/>
+                <group name="put_away" string="Put Away">
+                    <field name="put_away_route_id" string="Route" />
+                    <field name="put_away_location_id" string="Destination Location" />
                 </group>
             </group>
         </field>
