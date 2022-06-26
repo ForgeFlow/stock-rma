@@ -87,6 +87,7 @@ class RmaMakePutAway(models.TransientModel):
             "date_planned": time.strftime(DT_FORMAT),
             "product_id": item.product_id.id,
             "product_qty": item.product_qty,
+            "qty_to_put_away": item.product_qty,
             "product_uom": line.product_id.product_tmpl_id.uom_id.id,
             "location_id": item.location_id.id,
             "rma_line_id": line.id,
