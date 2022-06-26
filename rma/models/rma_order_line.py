@@ -88,8 +88,9 @@ class RmaOrderLine(models.Model):
                 op = ops["="]
             else:
                 op = ops["!="]
+
             for move in rec.move_ids.filtered(
-                lambda m: m.state in states and op(m.location_id.usage, rec.type)
+                lambda m: m._is_in_out_rma_move(op, states, rec.type)
             ):
                 # If the move is part of a chain don't count it
                 if direction == "out" and move.move_orig_ids:

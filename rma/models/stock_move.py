@@ -104,3 +104,6 @@ class StockMove(models.Model):
     def _prepare_merge_moves_distinct_fields(self):
         res = super()._prepare_merge_moves_distinct_fields()
         return res + ["rma_line_id"]
+
+    def _is_in_out_rma_move(self, op, states, location_type):
+        return self.state in states and op(self.location_id.usage, location_type)

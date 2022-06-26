@@ -56,7 +56,14 @@
                 <button
                     name="%(action_rma_put_away)d"
                     string="Put Away"
-                    attrs="{'invisible':[('state', '!=', 'approved')]}"
+                    class="oe_highlight"
+                    attrs="{'invisible':['|', ('qty_to_put_away', '=', 0), ('state', '!=', 'approved')]}"
+                    type="action"
+                />
+                <button
+                    name="%(action_rma_put_away)d"
+                    string="Put Away"
+                    attrs="{'invisible':['|', ('qty_to_put_away', '!=', 0), ('state', '!=', 'approved')]}"
                     type="action"
                 />
             </header>

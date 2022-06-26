@@ -7,6 +7,15 @@ from odoo import fields, models
 class RmaOperation(models.Model):
     _inherit = "rma.operation"
 
+    put_away_policy = fields.Selection(
+        selection=[
+            ("no", "Not required"),
+            ("ordered", "Based on Ordered Quantities"),
+            ("received", "Based on Received Quantities"),
+        ],
+        string="Put Away Policy",
+        default="no",
+    )
     put_away_route_id = fields.Many2one(
         comodel_name="stock.location.route",
         string="Put Away Route",

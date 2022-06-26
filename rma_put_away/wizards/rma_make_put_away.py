@@ -25,7 +25,7 @@ class RmaMakePutAway(models.TransientModel):
             "product_qty": line.product_qty,
             "location_id": line.operation_id.put_away_location_id.id,
             "uom_id": line.uom_id.id,
-            "qty_to_put_away": 0,
+            "qty_to_put_away": line.qty_to_put_away,
             "line_id": line.id,
             "rma_id": line.rma_id and line.rma_id.id or False,
         }
@@ -75,7 +75,7 @@ class RmaMakePutAway(models.TransientModel):
 
     def action_create_put_away(self):
         self._create_put_away()
-        action = self.item_ids.line_id.action_view_int_pickings()
+        action = self.item_ids.line_id.action_view_put_away_transfers()
         return action
 
     @api.model
@@ -96,6 +96,7 @@ class RmaMakePutAway(models.TransientModel):
             "rma_line_id": line.id,
             "route_ids": route,
             "company_id": line.company_id.id,
+            "is_rma_put_away": True,
         }
         return procurement_data
 

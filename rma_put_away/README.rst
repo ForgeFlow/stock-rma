@@ -10,9 +10,11 @@ This module allows you to put away the products after you have received them.
 Configuration
 =============
 
-Go to *RMA / Configuration / Customer Operations* and define there the route
-that you wish to use to put away the products, and the default destination
-location (optional).
+Go to *RMA / Configuration / Customer Operations* and define there:
+
+#. The Put Away Policy
+#. The route that you wish to use to put away the products.
+#. The default destination location (optional).
 
 Usage
 =====
