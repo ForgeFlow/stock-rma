@@ -25,6 +25,13 @@ class RmaOrder(models.Model):
                 pickings |= line._get_in_pickings()
             rec.in_shipment_count = len(pickings)
 
+    def _compute_int_picking_count(self):
+        for rec in self:
+            pickings = self.env["stock.picking"]
+            for line in rec.rma_line_ids:
+                pickings |= line._get_int_pickings()
+            rec.int_picking_count = len(pickings)
+
     def _compute_out_shipment_count(self):
         for rec in self:
             pickings = self.env["stock.picking"]
@@ -95,6 +102,9 @@ class RmaOrder(models.Model):
     rma_line_ids = fields.One2many("rma.order.line", "rma_id", string="RMA lines")
     in_shipment_count = fields.Integer(
         compute="_compute_in_shipment_count", string="# of Shipments"
+    )
+    int_picking_count = fields.Integer(
+        compute="_compute_int_picking_count", string="# of Internal Transfers"
     )
     out_shipment_count = fields.Integer(
         compute="_compute_out_shipment_count", string="# of Outgoing Shipments"
@@ -183,6 +193,14 @@ class RmaOrder(models.Model):
         shipments = self.env["stock.picking"]
         for line in self.rma_line_ids:
             shipments |= line._get_in_pickings()
+        return self._view_shipments(result, shipments)
+
+    def action_view_int_pickings(self):
+        action = self.env.ref("stock.action_picking_tree_all")
+        result = action.sudo().read()[0]
+        shipments = self.env["stock.picking"]
+        for line in self.rma_line_ids:
+            shipments |= line._get_int_pickings()
         return self._view_shipments(result, shipments)
 
     def action_view_out_shipments(self):

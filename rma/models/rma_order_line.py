@@ -59,6 +59,16 @@ class RmaOrderLine(models.Model):
         return pickings
 
     @api.model
+    def _get_int_pickings(self):
+        pickings = self.env["stock.picking"]
+        for move in self.move_ids:
+            first_usage = move._get_first_usage()
+            last_usage = move._get_last_usage()
+            if last_usage == "internal" and first_usage == "internal":
+                pickings |= move.picking_id
+        return pickings
+
+    @api.model
     def _get_out_pickings(self):
         pickings = self.env["stock.picking"]
         for move in self.move_ids:
@@ -74,6 +84,11 @@ class RmaOrderLine(models.Model):
         for line in self:
             pickings = line._get_in_pickings()
             line.in_shipment_count = len(pickings)
+
+    def _compute_int_picking_count(self):
+        for line in self:
+            pickings = line._get_int_pickings()
+            line.int_picking_count = len(pickings)
 
     def _compute_out_shipment_count(self):
         for line in self:
@@ -300,6 +315,9 @@ class RmaOrderLine(models.Model):
     )
     in_shipment_count = fields.Integer(
         compute="_compute_in_shipment_count", string="# of Shipments"
+    )
+    int_picking_count = fields.Integer(
+        compute="_compute_int_picking_count", string="# of Internal Transfers"
     )
     out_shipment_count = fields.Integer(
         compute="_compute_out_shipment_count", string="# of Deliveries"
@@ -700,6 +718,21 @@ class RmaOrderLine(models.Model):
         shipments = self.env["stock.picking"]
         for line in self:
             shipments |= line._get_in_pickings()
+        # choose the view_mode accordingly
+        if len(shipments) != 1:
+            result["domain"] = "[('id', 'in', " + str(shipments.ids) + ")]"
+        elif len(shipments) == 1:
+            res = self.env.ref("stock.view_picking_form", False)
+            result["views"] = [(res and res.id or False, "form")]
+            result["res_id"] = shipments.ids[0]
+        return result
+
+    def action_view_int_pickings(self):
+        action = self.env.ref("stock.action_picking_tree_all")
+        result = action.sudo().read()[0]
+        shipments = self.env["stock.picking"]
+        for line in self:
+            shipments |= line._get_int_pickings()
         # choose the view_mode accordingly
         if len(shipments) != 1:
             result["domain"] = "[('id', 'in', " + str(shipments.ids) + ")]"

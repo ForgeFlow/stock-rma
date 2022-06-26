@@ -212,6 +212,20 @@
                     </button>
                     <button
                             type="object"
+                            name="action_view_int_pickings"
+                            class="oe_stat_button"
+                            icon="fa-truck"
+                            groups="stock.group_stock_user"
+                            attrs="{'invisible': [('int_picking_count', '=', 0)]}"
+                        >
+                        <field
+                                name="int_picking_count"
+                                widget="statinfo"
+                                string="Internal Transfers"
+                            />
+                    </button>
+                    <button
+                            type="object"
                             name="action_view_out_shipments"
                             class="oe_stat_button"
                             icon="fa-truck"
