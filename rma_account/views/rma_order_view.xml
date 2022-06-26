@@ -12,6 +12,7 @@
                     class="oe_stat_button"
                     icon="fa-pencil-square-o"
                     groups="account.group_account_invoice"
+                    attrs="{'invisible': [('invoice_refund_count', '=', 0)]}"
                 >
                     <field
                         name="invoice_refund_count"
@@ -25,6 +26,7 @@
                     class="oe_stat_button"
                     icon="fa-pencil-square-o"
                     groups="account.group_account_invoice"
+                    attrs="{'invisible': [('invoice_count', '=', 0)]}"
                 >
                     <field name="invoice_count" widget="statinfo" string="Origin Inv" />
                 </button>
@@ -47,6 +49,7 @@
                     class="oe_stat_button"
                     icon="fa-pencil-square-o"
                     groups="account.group_account_invoice"
+                    attrs="{'invisible': [('invoice_refund_count', '=', 0)]}"
                 >
                      <field
                         name="invoice_refund_count"
@@ -60,6 +63,7 @@
                     class="oe_stat_button"
                     icon="fa-pencil-square-o"
                     groups="account.group_account_invoice"
+                    attrs="{'invisible': [('invoice_count', '=', 0)]}"
                 >
                      <field
                         name="invoice_count"
@@ -68,12 +72,6 @@
                     />
                  </button>
             </button>
-            <!--
-            <xpath expr="//field[@name='rma_line_ids']/tree"
-                   position="inside">
-                <field name="account_move_line_id" invisible="True"/>
-            </xpath>
-            -->
         </field>
     </record>
 </odoo>
