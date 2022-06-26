@@ -9,10 +9,10 @@
     "depends": ["rma"],
     "data": [
         "security/ir.model.access.csv",
-        "wizards/rma_put_away_view.xml",
         "views/rma_operation_view.xml",
         "views/rma_order_line_view.xml",
         "views/rma_order_view.xml",
+        "wizards/rma_put_away_view.xml",
     ],
     "installable": True,
 }
