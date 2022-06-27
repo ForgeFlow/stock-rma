@@ -7,15 +7,20 @@ class RmaOrder(models.Model):
     _inherit = "rma.order"
 
     def _compute_put_away_count(self):
-        for rma in self:
-            sales = rma.mapped("rma_line_ids.sale_line_id.order_id")
-            rma.sale_count = len(sales)
+        for order in self:
+            pickings = (
+                order.mapped("rma_line_ids.move_ids")
+                .filtered(lambda m: m.is_rma_put_away)
+                .mapped("picking_id")
+            )
+            order.put_away_count = len(pickings)
 
     put_away_count = fields.Integer(
         compute="_compute_put_away_count", string="# Put Away"
     )
 
     def action_view_put_away_transfers(self):
+        self.ensure_one()
         action = self.env.ref("stock.action_picking_tree_all")
         result = action.sudo().read()[0]
         pickings = self.env["stock.picking"]
