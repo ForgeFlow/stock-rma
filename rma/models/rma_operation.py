@@ -27,9 +27,15 @@ class RmaOperation(models.Model):
     def _default_routes(self):
         op_type = self.env.context.get('default_type')
         if op_type == 'customer':
-            return self.env.ref('rma.route_rma_customer')
+            route = self.env.ref('rma.route_rma_customer')
         elif op_type == 'supplier':
-            return self.env.ref('rma.route_rma_supplier')
+            route = self.env.ref('rma.route_rma_supplier')
+        else:
+            route = self.env['stock.location.route']
+        if route.sudo().company_id == self.env.user.company_id:
+            return route
+        else:
+            return False
 
     name = fields.Char('Description', required=True)
     code = fields.Char('Code', required=True)
