@@ -108,26 +108,26 @@
                     name="%(action_rma_picking_in)d"
                     string="Create Incoming Shipment"
                     class="oe_highlight"
-                    attrs="{'invisible':['|', ('qty_to_receive', '=', 0), ('state', '!=', 'approved')]}"
+                    attrs="{'invisible':['|', '|', ('qty_to_receive', '=', 0), ('state', '!=', 'approved'), ('receipt_policy', '=', 'no')]}"
                     type="action"
                 />
                 <button
                     name="%(action_rma_picking_in)d"
                     string="Create Incoming Shipment"
-                    attrs="{'invisible':['|', ('qty_to_receive', '!=', 0), ('state', '!=', 'approved')]}"
+                    attrs="{'invisible':['|', '|', ('qty_to_receive', '!=', 0), ('state', '!=', 'approved'), ('receipt_policy', '=', 'no')]}"
                     type="action"
                 />
                 <button
                     name="%(action_rma_picking_out)d"
                     string="Create Delivery"
                     class="oe_highlight"
-                    attrs="{'invisible':['|', ('qty_to_deliver', '=', 0), ('state', '!=', 'approved')]}"
+                    attrs="{'invisible':['|', '|', ('qty_to_deliver', '=', 0), ('state', '!=', 'approved'), ('delivery_policy', '=', 'no')]}"
                     type="action"
                 />
                 <button
                     name="%(action_rma_picking_out)d"
                     string="Create Delivery"
-                    attrs="{'invisible':['|', ('qty_to_deliver', '!=', 0), ('state', '!=', 'approved')]}"
+                    attrs="{'invisible':['|', '|', ('qty_to_deliver', '!=', 0), ('state', '!=', 'approved'), ('delivery_policy', '=', 'no')]}"
                     type="action"
                 />
             </header>
