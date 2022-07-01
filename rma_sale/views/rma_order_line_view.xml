@@ -41,7 +41,7 @@
                 />
                 </group>
                 <group name="quantities" position="inside">
-                    <group>
+                    <group attrs="{'invisible': [('sale_policy', '=', 'no')]}">
                         <field name="qty_to_sell" />
                         <field name="qty_sold" />
                     </group>
@@ -50,7 +50,11 @@
                     <field name="sale_policy" />
                 </field>
                 <notebook position="inside">
-                    <page name="sale" string="Sale Lines">
+                    <page
+                    name="sale"
+                    string="Sale Lines"
+                    attrs="{'invisible': [('sale_line_ids', '=', [])]}"
+                >
                         <field name="sale_line_ids" nolabel="1" />
                     </page>
                 </notebook>
@@ -67,13 +71,13 @@
                     name="%(action_rma_order_line_make_sale_order)d"
                     string="Create Sales Quotation"
                     class="oe_highlight"
-                    attrs="{'invisible':['|', ('qty_to_sell', '=', 0), ('state', '!=', 'approved')]}"
+                    attrs="{'invisible':['|', '|', ('qty_to_sell', '=', 0), ('state', '!=', 'approved'), ('sale_policy', '=', 'no')]}"
                     type="action"
                 />
                 <button
                     name="%(action_rma_order_line_make_sale_order)d"
                     string="Create Sales Quotation"
-                    attrs="{'invisible':['|', ('qty_to_sell', '!=', 0), ('state', '!=', 'approved')]}"
+                    attrs="{'invisible':['|', '|', ('qty_to_sell', '!=', 0), ('state', '!=', 'approved'), ('sale_policy', '=', 'no')]}"
                     type="action"
                 />
             </header>
