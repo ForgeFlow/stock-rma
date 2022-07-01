@@ -213,12 +213,18 @@
                         <notebook>
                             <page name="quantities" string="Quantities">
                                 <group name="quantities" col="4" string="Quantities">
-                                    <group name="receive">
+                                    <group
+                                    name="receive"
+                                    attrs="{'invisible': [('receipt_policy', '=', 'no')]}"
+                                >
                                         <field name="qty_to_receive" />
                                         <field name="qty_incoming" />
                                         <field name="qty_received" />
                                     </group>
-                                    <group name="deliver">
+                                    <group
+                                    name="deliver"
+                                    attrs="{'invisible': [('delivery_policy', '=', 'no')]}"
+                                >
                                         <field name="qty_to_deliver" />
                                         <field name="qty_outgoing" />
                                         <field name="qty_delivered" />
@@ -274,7 +280,11 @@
                                 />
                                 </group>
                             </page>
-                            <page name="stock" string="Stock Moves">
+                            <page
+                            name="stock"
+                            string="Stock Moves"
+                            attrs="{'invisible': [('move_ids', '=', [])]}"
+                        >
                                 <field name="move_ids" nolabel="1" readonly="1" />
                             </page>
                             <page name="other" string="Other Info">
