@@ -60,7 +60,11 @@
                 <field name="refund_policy" />
             </field>
             <page name="stock" position="after">
-                <page name="refunds" string="Refunds">
+                <page
+                    name="refunds"
+                    string="Refunds"
+                    attrs="{'invisible': [('refund_line_ids', '=', [])]}"
+                >
                     <field name="refund_line_ids" nolabel="1" />
                 </page>
             </page>
@@ -71,7 +75,10 @@
                 />
             </field>
             <group name="supplier_rma" position="after">
-                <group name="refund">
+                <group
+                    name="refund"
+                    attrs="{'invisible': [('refund_policy', '=', 'no')]}"
+                >
                     <field name="qty_to_refund" />
                     <field name="qty_refunded" />
                 </group>
