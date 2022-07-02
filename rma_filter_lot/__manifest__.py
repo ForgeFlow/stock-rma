@@ -3,15 +3,13 @@
 
 {
     "name": "RMA Filter Lot",
-    "version": "14.0.1.0.0",
+    "version": "14.0.1.1.0",
     "license": "LGPL-3",
     "category": "RMA",
     "summary": "Filter RMA lots",
     "author": "ForgeFlow",
     "website": "https://github.com/ForgeFlow/stock-rma",
     "depends": ["rma"],
-    "data": [
-        "views/rma_order_view.xml",
-    ],
+    "data": ["views/rma_order_view.xml"],
     "installable": True,
 }
