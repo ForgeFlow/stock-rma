@@ -10,8 +10,6 @@
     "author": "ForgeFlow",
     "website": "https://github.com/ForgeFlow",
     "depends": ["rma"],
-    "data": [
-        "views/rma_order_view.xml",
-    ],
+    "data": ["views/rma_order_view.xml"],
     "installable": True,
 }
