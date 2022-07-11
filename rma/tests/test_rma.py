@@ -1055,7 +1055,7 @@ class TestRma(common.TransactionCase):
         rma_lines.write({"receipt_policy": "delivered"})
         self.assertEqual(sum(rma_lines.mapped("qty_to_receive")), 0)
         wizard = self.rma_make_picking.with_context(
-            {
+            **{
                 "active_ids": rma_lines.ids,
                 "active_model": "rma.order.line",
                 "picking_type": "incoming",
