@@ -150,8 +150,11 @@ class RmaMakePicking(models.TransientModel):
         product = item.line_id.product_id
         if float_compare(qty, 0, product.uom_id.rounding) != 1:
             raise ValidationError(
-                _("No quantity to transfer on %s shipment of product %s.")
-                % (_(picking_type), product.default_code or product.name)
+                _(
+                    "No quantity to transfer on %(arg1)s shipment of product %(arg2)s.",
+                    arg1=_(picking_type),
+                    arg2=product.default_code or product.name,
+                )
             )
         # create picking
         procurements = []
