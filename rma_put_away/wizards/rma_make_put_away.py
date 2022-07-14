@@ -95,7 +95,7 @@ class RmaMakePutAway(models.TransientModel):
             "location_id": item.location_id.id,
             "rma_line_id": line.id,
             "route_ids": route,
-            "company_id": line.company_id.id,
+            "company_id": line.company_id,
             "is_rma_put_away": True,
         }
         return procurement_data

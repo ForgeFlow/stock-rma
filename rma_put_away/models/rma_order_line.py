@@ -103,6 +103,9 @@ class RmaOrderLine(models.Model):
         result = action.sudo().read()[0]
         pickings = self.env["stock.picking"]
         for line in self:
+            if line.lot_id:
+                line.move_ids.lot_ids |= line.lot_id
+                line.move_ids.move_line_ids.lot_id = line.lot_id
             pickings |= line.move_ids.filtered(lambda m: m.is_rma_put_away).mapped(
                 "picking_id"
             )
