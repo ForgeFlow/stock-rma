@@ -30,6 +30,7 @@ class StockRule(models.Model):
         )
         if "rma_line_id" in values:
             line = values.get("rma_line_id")
+            line = self.env["rma.order.line"].browse([line])
             move = line.reference_move_id
             if move and move.stock_valuation_layer_ids:
                 cost = move.stock_valuation_layer_ids[-1].unit_cost
