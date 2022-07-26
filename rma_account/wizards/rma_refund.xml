@@ -59,6 +59,7 @@
                     states="approved"
                     string="Create Refund"
                     class="oe_highlight"
+                    attrs="{'invisible':['|', '|', ('qty_to_refund', '=', 0), ('state', '!=', 'approved'), ('refund_policy', '=', 'no')]}"
                     type="action"
                 />
             </xpath>
@@ -76,6 +77,7 @@
                     states="approved"
                     string="Create Refund"
                     class="oe_highlight"
+                    attrs="{'invisible':['|', '|', ('qty_to_refund', '!=', 0), ('state', '!=', 'approved'), ('refund_policy', '=', 'no')]}"
                     type="action"
                 />
             </xpath>
