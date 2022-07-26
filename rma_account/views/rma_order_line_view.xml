@@ -68,6 +68,7 @@
                     name="action_view_invoice"
                     class="oe_stat_button"
                     icon="fa-pencil-square-o"
+                    attrs="{'invisible': [('account_move_line_id', '=', False)]}"
                     string="Origin Inv"
                 >
                 </button>
@@ -76,7 +77,8 @@
                     name="action_view_refunds"
                     class="oe_stat_button"
                     icon="fa-pencil-square-o"
-                    groups="account.group_account_user"
+                    attrs="{'invisible': [('refund_count', '=', 0)]}"
+                    groups="account.group_account_invoice"
                 >
                         <field name="refund_count" widget="statinfo" string="Refunds" />
                     </button>
