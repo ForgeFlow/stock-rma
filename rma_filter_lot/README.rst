@@ -27,6 +27,7 @@ Contributors
 
 * Mateu Griful <mateu.griful@forgeflow.com>
 * Lois Rilo <lois.rilo@forgeflow.com>
+* Jordi Ballester <jordi.ballester@forgeflow.com>
 
 Maintainers
 ~~~~~~~~~~~
