@@ -15,6 +15,7 @@ class TestRmaPutAway(common.SingleTransactionCase):
         cls.partner_obj = cls.env["res.partner"]
 
         cls.rma_route_cust = cls.env.ref("rma.route_rma_customer")
+        cls.cust_loc = cls.env.ref("stock.stock_location_customers")
 
         # Create customer
         cls.customer1 = cls.partner_obj.create({"name": "Customer 1"})
@@ -39,33 +40,12 @@ class TestRmaPutAway(common.SingleTransactionCase):
                 "company_id": cls.env.ref("base.main_company").id,
             }
         )
-
-        cls.warehouse = cls.env["stock.warehouse"].create(
-            {
-                "name": "Warehouse",
-                "reception_steps": "one_step",
-                "delivery_steps": "ship_only",
-                "code": "WH1",
-            }
-        )
-
-        cls.warehouse_rma = cls.env["stock.warehouse"].create(
-            {
-                "name": "Warehouse RMA",
-                "reception_steps": "one_step",
-                "delivery_steps": "ship_only",
-                "code": "WH2",
-            }
-        )
-
-        cls.rma_loc = cls.env["stock.location"].create(
-            {"name": "WH RMA", "location_id": cls.warehouse_rma.view_location_id.id}
-        )
-
+        cls.wh = cls.env.ref("stock.warehouse0")
+        cls.stock_rma_location = cls.wh.lot_rma_id
         cls.put_away_loc = cls.env["stock.location"].create(
             {
                 "name": "WH Put Away Location",
-                "location_id": cls.warehouse.view_location_id.id,
+                "location_id": cls.wh.view_location_id.id,
             }
         )
 
@@ -81,12 +61,12 @@ class TestRmaPutAway(common.SingleTransactionCase):
             {
                 "name": "Transfer",
                 "route_id": cls.route1.id,
-                "location_src_id": cls.rma_loc.id,
+                "location_src_id": cls.stock_rma_location.id,
                 "location_id": cls.put_away_loc.id,
                 "action": "pull",
-                "picking_type_id": cls.warehouse.int_type_id.id,
+                "picking_type_id": cls.wh.int_type_id.id,
                 "procure_method": "make_to_stock",
-                "warehouse_id": cls.warehouse.id,
+                "warehouse_id": cls.wh.id,
             }
         )
 
@@ -132,7 +112,7 @@ class TestRmaPutAway(common.SingleTransactionCase):
                 "out_route_id": self.operation_1.out_route_id.id,
                 "in_warehouse_id": self.operation_1.in_warehouse_id.id,
                 "out_warehouse_id": self.operation_1.out_warehouse_id.id,
-                "location_id": self.rma_loc.id,
+                "location_id": self.stock_rma_location.id,
             }
         )
         rma._onchange_operation_id()
@@ -167,7 +147,7 @@ class TestRmaPutAway(common.SingleTransactionCase):
         action = wizard.action_create_put_away()
         picking = self.env["stock.picking"].browse([action["res_id"]])
         self.assertEqual(picking.location_dest_id.id, self.put_away_loc.id)
-        self.assertEqual(picking.location_id.id, self.rma_loc.id)
+        self.assertEqual(picking.location_id.id, self.stock_rma_location.id)
         move = picking.move_ids_without_package
         self.assertEqual(move.product_id.id, self.product_1.id)
         self.assertEqual(move.product_uom_qty, 1)
@@ -176,7 +156,6 @@ class TestRmaPutAway(common.SingleTransactionCase):
         self.assertTrue(picking.button_validate())
 
     def test_02_rma_put_away_with_lot(self):
-        """Generate a Sales Order from a customer RMA."""
         rma = self.rma_line_obj.create(
             {
                 "partner_id": self.customer1.id,
@@ -188,7 +167,7 @@ class TestRmaPutAway(common.SingleTransactionCase):
                 "out_route_id": self.operation_1.out_route_id.id,
                 "in_warehouse_id": self.operation_1.in_warehouse_id.id,
                 "out_warehouse_id": self.operation_1.out_warehouse_id.id,
-                "location_id": self.rma_loc.id,
+                "location_id": self.stock_rma_location.id,
             }
         )
         rma._onchange_operation_id()
@@ -202,7 +181,13 @@ class TestRmaPutAway(common.SingleTransactionCase):
                 "active_id": 1,
             }
         ).create({})
-        wizard._create_picking()
+        wizard.action_create_picking()
+        res = rma.action_view_in_shipments()
+        picking = self.env["stock.picking"].browse(res["res_id"])
+        picking.action_assign()
+        for mv in picking.move_lines:
+            mv.quantity_done = mv.product_uom_qty
+        picking._action_done()
         wizard = self.rma_make_put_away_wiz.with_context(
             {
                 "active_ids": rma.id,
@@ -224,12 +209,13 @@ class TestRmaPutAway(common.SingleTransactionCase):
         ).create({})
         action = wizard.action_create_put_away()
         picking = self.env["stock.picking"].browse([action["res_id"]])
+        picking.action_assign()
         self.assertEqual(picking.location_dest_id.id, self.put_away_loc.id)
-        self.assertEqual(picking.location_id.id, self.rma_loc.id)
+        self.assertEqual(picking.location_id.id, self.stock_rma_location.id)
         move = picking.move_ids_without_package
         self.assertEqual(move.product_id.id, self.product_2.id)
         self.assertEqual(move.product_uom_qty, 1)
-        self.assertEqual(move.lot_ids.id, self.lot.id)
+        self.assertEqual(move.move_line_ids.lot_id.id, self.lot.id)
         move.quantity_done = 1
         move.move_line_ids.lot_id = self.lot
         self.assertTrue(picking.button_validate())
