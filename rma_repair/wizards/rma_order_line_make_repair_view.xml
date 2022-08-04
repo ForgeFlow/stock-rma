@@ -17,17 +17,8 @@
                               <field name="product_qty" />
                               <field name="product_uom_id" groups="uom.group_uom" />
                               <field name="partner_id" />
-                              <field name="to_refurbish" />
-                              <field
-                                name="refurbish_product_id"
-                                attrs="{'required': [('to_refurbish', '=', True)]}"
-                            />
                               <field
                                 name="location_id"
-                                groups="stock.group_stock_multi_locations"
-                            />
-                              <field
-                                name="location_dest_id"
                                 groups="stock.group_stock_multi_locations"
                             />
                               <field name="invoice_method" />

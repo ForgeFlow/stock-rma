@@ -24,11 +24,6 @@ class RmaOperation(models.Model):
         comodel_name="stock.location",
         help="Indicate here the source location of the product to be repaired",
     )
-    repair_location_dest_id = fields.Many2one(
-        string="Repair Destination Location",
-        comodel_name="stock.location",
-        help="Indicate here the destination location of the repair",
-    )
     repair_invoice_method = fields.Selection(
         selection=[
             ("none", "No Invoice"),

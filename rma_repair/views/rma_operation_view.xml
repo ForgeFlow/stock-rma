@@ -20,7 +20,6 @@
             <group name="outbound" position="after">
                 <group name="repair" string="Repair">
                     <field name="repair_location_id" />
-                    <field name="repair_location_dest_id" />
                     <field name="repair_invoice_method" />
                 </group>
             </group>
