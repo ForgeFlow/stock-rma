@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="view_rma_order_line_make_repair" model="ir.ui.view">
+        <field name="name">RMA Line Make Repair - Refurbish</field>
+        <field name="model">rma.order.line.make.repair</field>
+        <field name="inherit_id" ref="rma_repair.view_rma_order_line_make_repair" />
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="to_refurbish" />
+                <field
+                    name="refurbish_product_id"
+                    attrs="{'required': [('to_refurbish', '=', True)]}"
+                />
+                <field name="location_id" groups="stock.group_stock_multi_locations" />
+                <field
+                    name="location_dest_id"
+                    groups="stock.group_stock_multi_locations"
+                />
+            </field>
+        </field>
+    </record>
+
+</odoo>
