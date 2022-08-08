@@ -104,7 +104,9 @@ class RmaMakePutAway(models.TransientModel):
     def _prepare_procurement(self, item):
         line = item.line_id
         values = self._get_procurement_data(item)
-        values = dict(values, rma_line_id=item.line_id, rma_id=item.line_id.rma_id)
+        values = dict(
+            values, rma_line_id=item.line_id.id, rma_id=item.line_id.rma_id.id
+        )
         procurement = self.env["procurement.group"].Procurement(
             item.line_id.product_id,
             item.product_qty,
