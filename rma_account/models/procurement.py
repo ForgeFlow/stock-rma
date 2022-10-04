@@ -33,8 +33,12 @@ class StockRule(models.Model):
             line = self.env["rma.order.line"].browse([line])
             move = line.reference_move_id
             if move and move.stock_valuation_layer_ids:
-                cost = move.stock_valuation_layer_ids[-1].unit_cost
-                res["price_unit"] = cost
+                layers = move.stock_valuation_layer_ids
+                price_unit = sum(layers.mapped("value")) / sum(
+                    layers.mapped("quantity")
+                )
+
+                res["price_unit"] = price_unit
         return res
 
 
