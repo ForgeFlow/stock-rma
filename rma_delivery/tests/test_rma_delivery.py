@@ -26,7 +26,7 @@ class TestRmaDelivery(TestRma):
         )
         cls.rma_cust_replace_op_id.write(
             {
-                "default_carrier_id": cls.carrier_id.id,
+                "default_carrier_out_id": cls.carrier_id.id,
             }
         )
 
