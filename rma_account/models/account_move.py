@@ -58,12 +58,15 @@ class AccountMove(models.Model):
             self._post_process_invoice_line_from_rma_line(
                 new_line, self.add_rma_line_id
             )
+        line = new_line._convert_to_write(
+            {name: new_line[name] for name in new_line._cache}
+        )
         # Compute invoice_origin.
         origins = set(self.line_ids.mapped("rma_line_id.name"))
         self.invoice_origin = ",".join(list(origins))
         self.add_rma_line_id = False
         self._onchange_currency()
-        return {}
+        return line
 
     rma_count = fields.Integer(compute="_compute_rma_count", string="# of RMA")
 
