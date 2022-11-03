@@ -8,12 +8,8 @@ class RmaOrder(models.Model):
 
     def _compute_scrap_count(self):
         for order in self:
-            moves = (
-                order.mapped("rma_line_ids.move_ids")
-                .filtered(lambda m: m.is_rma_scrap)
-                .move_line_ids
-            )
-            order.scrap_count = len(moves)
+            scraps = order.mapped("rma_line_ids.scrap_ids")
+            order.scrap_count = len(scraps)
 
     scrap_count = fields.Integer(compute="_compute_scrap_count", string="# Scrap")
 
