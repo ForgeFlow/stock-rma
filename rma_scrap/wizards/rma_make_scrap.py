@@ -22,6 +22,7 @@ class RmaMakeScrap(models.TransientModel):
             "product_id": line.product_id.id,
             "product_qty": line.product_qty,
             "location_id": line.location_id.id,
+            "scrap_location_id": line.operation_id.scrap_location_id.id,
             "uom_id": line.uom_id.id,
             "qty_to_scrap": line.qty_to_scrap,
             "line_id": line.id,
@@ -57,11 +58,11 @@ class RmaMakeScrap(models.TransientModel):
                 raise ValidationError(_("RMA %s is not approved") % line.name)
             scrap = self._prepare_scrap(item)
             scraps.append(scrap)
+            item.line_id.scrap_ids |= scrap
         return scraps
 
     def action_create_scrap(self):
         self._create_scrap()
-        self.item_ids[0].line_id._compute_qty_in_scrap()
         return self.item_ids[0].line_id.action_view_scrap_transfers()
 
     @api.model
@@ -74,12 +75,12 @@ class RmaMakeScrap(models.TransientModel):
                 "product_id": item.line_id.product_id.id,
                 "scrap_qty": item.qty_to_scrap,
                 "product_uom_id": item.line_id.product_id.product_tmpl_id.uom_id.id,
-                "scrap_location_id": line.operation_id.scrap_location_id.id,
+                "location_id": item.location_id.id,
+                "scrap_location_id": item.scrap_location_id.id,
                 "rma_line_id": line.id,
                 "create_date": fields.Datetime.now(),
                 "company_id": line.company_id.id,
                 "is_rma_scrap": True,
-                "location_id": line.location_id.id,
             }
         )
         return scrap
@@ -91,19 +92,27 @@ class RmaMakeScrapItem(models.TransientModel):
 
     wiz_id = fields.Many2one("rma_make_scrap.wizard", string="Wizard", required=True)
     line_id = fields.Many2one(
-        "rma.order.line", string="RMA order Line", ondelete="cascade"
+        "rma.order.line", string="RMA order Line", ondelete="cascade", required=True
     )
     rma_id = fields.Many2one("rma.order", related="line_id.rma_id", string="RMA Group")
-    product_id = fields.Many2one("product.product", string="Product")
+    product_id = fields.Many2one("product.product", string="Product", required=True)
     product_qty = fields.Float(
         related="line_id.product_qty",
         string="Quantity Ordered",
         copy=False,
         digits="Product Unit of Measure",
     )
+    company_id = fields.Many2one("res.company", related="line_id.company_id")
     location_id = fields.Many2one(
         "stock.location",
+        string="Source Location",
+        required=True,
+        domain="[('usage', '=', 'internal'), ('company_id', 'in', [company_id, False])]",
+    )
+    scrap_location_id = fields.Many2one(
+        "stock.location",
         string="Scrap Location",
+        required=True,
         domain="[('scrap_location', '=', True)]",
     )
     qty_to_scrap = fields.Float(

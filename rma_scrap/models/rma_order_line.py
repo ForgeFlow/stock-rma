@@ -13,6 +13,9 @@ class RmaOrderLine(models.Model):
         "qty_scrap",
         "scrap_policy",
         "product_qty",
+        "scrap_ids",
+        "scrap_ids.state",
+        "scrap_ids.is_rma_scrap",
     )
     def _compute_qty_to_scrap(self):
         for rec in self:
@@ -22,18 +25,23 @@ class RmaOrderLine(models.Model):
             elif rec.scrap_policy == "received":
                 rec.qty_to_scrap = rec.qty_received - rec.qty_scrap
 
-    @api.depends("move_ids", "move_ids.state", "move_ids.is_rma_scrap")
+    @api.depends(
+        "move_ids",
+        "move_ids.state",
+        "move_ids.is_rma_scrap",
+        "scrap_ids",
+        "scrap_ids.state",
+        "scrap_ids.is_rma_scrap",
+    )
     def _compute_qty_in_scrap(self):
         product_obj = self.env["uom.uom"]
         for rec in self:
             qty = 0.0
-            for move in self.env["stock.scrap"].search(
-                [("origin", "=", rec.name), ("state", "=", "draft")]
-            ):
+            for move in self.scrap_ids.filtered(lambda m: m.state in ["draft"]):
                 qty += product_obj._compute_quantity(move.scrap_qty, rec.uom_id)
             rec.qty_in_scrap = qty
 
-    @api.depends("move_ids", "move_ids.state", "move_ids.is_rma_scrap")
+    @api.depends("scrap_ids", "scrap_ids.state", "scrap_ids.is_rma_scrap")
     def _compute_qty_scrap(self):
         product_obj = self.env["uom.uom"]
         for rec in self:
@@ -46,8 +54,7 @@ class RmaOrderLine(models.Model):
 
     def _compute_scrap_count(self):
         for line in self:
-            scraps = self.env["stock.scrap"].search([("origin", "=", line.name)])
-            line.scrap_count = len(scraps)
+            line.scrap_count = len(self.scrap_ids)
 
     qty_to_scrap = fields.Float(
         string="Qty To Scrap",
@@ -85,6 +92,7 @@ class RmaOrderLine(models.Model):
         readonly=False,
     )
     scrap_count = fields.Integer(compute="_compute_scrap_count", string="# Scraps")
+    scrap_ids = fields.One2many("stock.scrap", "rma_line_id")
 
     @api.onchange("operation_id")
     def _onchange_operation_id(self):
@@ -96,11 +104,10 @@ class RmaOrderLine(models.Model):
     def action_view_scrap_transfers(self):
         action = self.env.ref("stock.action_stock_scrap")
         result = action.sudo().read()[0]
-        scraps = self.env["stock.scrap"].search([("origin", "=", self.name)])
-        if len(scraps) > 1:
-            result["domain"] = [("id", "in", scraps.ids)]
-        elif len(scraps) == 1:
+        if len(self.scrap_ids) > 1:
+            result["domain"] = [("id", "in", self.scrap_ids.ids)]
+        elif len(self.scrap_ids) == 1:
             res = self.env.ref("stock.stock_scrap_form_view", False)
             result["views"] = [(res and res.id or False, "form")]
-            result["res_id"] = scraps.ids[0]
+            result["res_id"] = self.scrap_ids.ids[0]
         return result
