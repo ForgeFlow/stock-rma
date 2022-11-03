@@ -13,6 +13,8 @@
                         <field name="product_qty" />
                         <field name="qty_to_scrap" />
                         <field name="location_id" />
+                        <field name="scrap_location_id" />
+                        <field name="company_id" invisible="1" />
                         <field name="line_id" invisible="1" />
                         <field name="uom_id" groups="uom.group_uom" />
                     </tree>
