@@ -36,7 +36,8 @@ Credits
 Contributors
 ------------
 
-* David Jimenez <david.jimenez@ForgeFlow.com>
+* Jordi Ballester Alomar <jordi.ballester@forgeflow.com>
+* David Jimenez <david.jimenez@forgeflow.com>
 
 
 Maintainer
