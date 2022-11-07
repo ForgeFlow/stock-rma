@@ -1,3 +1,4 @@
+
 [MASTER]
 load-plugins=pylint_odoo
 score=n
@@ -32,6 +33,7 @@ enable=anomalous-backslash-in-string,
     license-allowed,
     manifest-author-string,
     manifest-deprecated-key,
+    manifest-required-author,
     manifest-required-key,
     manifest-version-format,
     method-compute,
