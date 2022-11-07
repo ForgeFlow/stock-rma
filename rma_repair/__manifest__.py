@@ -6,7 +6,7 @@
     "license": "AGPL-3",
     "category": "RMA",
     "summary": "Links RMA with Repairs.",
-    "author": "ForgeFlow S.L., Odoo Community Association (OCA)",
+    "author": "ForgeFlow",
     "website": "https://github.com/ForgeFlow/stock-rma",
     "depends": ["rma_account", "repair_refurbish"],
     "data": [
