@@ -34,20 +34,30 @@ class StockRule(models.Model):
             if line.reference_move_id:
                 return res
             if line.sale_line_id:
-                moves = line.sale_line_id.move_ids
+                moves = line.sale_line_id.move_ids.filtered(
+                    lambda x: x.state == "done"
+                    and x.location_id.usage in ("internal", "supplier")
+                    and x.location_dest_id.usage == "customer"
+                )
                 if moves:
-                    # TODO: Should we be smart in the choice of the move?
                     layers = moves.mapped("stock_valuation_layer_ids")
                     if layers:
-                        cost = layers[-1].unit_cost
-                        res["price_unit"] = cost
+                        price_unit = sum(layers.mapped("value")) / sum(
+                            layers.mapped("quantity")
+                        )
+                        res["price_unit"] = price_unit
             elif line.account_move_line_id:
                 sale_lines = line.account_move_line_id.sale_line_ids
-                moves = sale_lines.mapped("move_ids")
+                moves = sale_lines.mapped("move_ids").filtered(
+                    lambda x: x.state == "done"
+                    and x.location_id.usage in ("internal", "supplier")
+                    and x.location_dest_id.usage == "customer"
+                )
                 if moves:
                     layers = moves.mapped("stock_valuation_layer_ids")
                     if layers:
-                        cost = layers[-1].unit_cost
-                        # TODO: Should we be smart in the choice of the move?
-                        res["price_unit"] = cost
+                        price_unit = sum(layers.mapped("value")) / sum(
+                            layers.mapped("quantity")
+                        )
+                        res["price_unit"] = price_unit
         return res
