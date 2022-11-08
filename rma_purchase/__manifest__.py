@@ -6,7 +6,7 @@
     "category": "RMA",
     "summary": "RMA from PO",
     "license": "LGPL-3",
-    "author": "ForgeFlow",
+    "author": "ForgeFlow, Odoo Community Association (OCA)",
     "website": "https://github.com/ForgeFlow/stock-rma",
     "depends": ["rma_account", "purchase"],
     "data": [
