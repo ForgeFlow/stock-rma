@@ -52,7 +52,7 @@
                     context="{'rma': True}"
                     domain="[('type', '=', 'supplier'),('partner_id', '=', partner_id)]"
                     attrs="{'readonly': [('state','not in',['draft'])],
-                         'invisible': ['|', ('state', '=', 'paid'),
+                         'invisible': ['|', ('payment_state', '=', 'paid'),
                           ('move_type', '!=', 'in_refund')]}"
                     class="oe_edit_only"
                     options="{'no_create': True}"
