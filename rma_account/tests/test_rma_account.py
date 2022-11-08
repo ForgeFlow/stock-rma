@@ -231,7 +231,7 @@ class TestRmaAccount(common.SingleTransactionCase):
         self.assertEqual(rma.qty_refunded, 2.0)
 
     def test_05_fill_rma_from_inv_line(self):
-        """Test filling a RMA (line) from a invoice line."""
+        """Test filling a RMA (line) from an invoice line."""
         rma = self.rma_line_obj.new(
             {
                 "partner_id": self.inv_customer.partner_id.id,
@@ -271,3 +271,29 @@ class TestRmaAccount(common.SingleTransactionCase):
         self.assertEqual(
             self.operation_1.refund_journal_id, rma.refund_line_ids.journal_id
         )
+
+    def test_07_add_lines_from_rma(self):
+        """Test adding line from rma to supplier refund"""
+        add_inv = self.rma_add_invoice_wiz.with_context(
+            **{
+                "supplier": True,
+                "active_ids": self.rma_group_supplier.id,
+                "active_model": "rma.order",
+            }
+        ).create({"line_ids": [(6, 0, self.inv_supplier.line_ids.ids)]})
+        add_inv.add_lines()
+        rma_1 = self.rma_group_supplier.rma_line_ids.filtered(
+            lambda r: r.product_id == self.product_1
+        )
+        inv = self.inv_obj.with_context(
+            **{
+                "default_move_type": "in_refund",
+                "default_partner_id": self.inv_supplier.partner_id,
+            }
+        ).create({"add_rma_line_id": rma_1})
+        line = inv.on_change_add_rma_line_id()
+        inv.invoice_line_ids = [(0, 0, line)]
+        inv_product = inv.invoice_line_ids.filtered(
+            lambda x: x.product_id == self.product_1
+        ).mapped("product_id")
+        self.assertEqual(rma_1.product_id.id, inv_product.id)
