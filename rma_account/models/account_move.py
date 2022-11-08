@@ -1,4 +1,4 @@
-# Copyright 2017 ForgeFlow S.L.
+# Copyright 2017-22 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from odoo import api, fields, models
@@ -14,28 +14,35 @@ class AccountMove(models.Model):
             rmas = self.mapped("line_ids.rma_line_ids")
             inv.rma_count = len(rmas)
 
-    def _prepare_invoice_line_from_rma_line(self, line):
-        qty = line.qty_to_refund
-        if float_compare(qty, 0.0, precision_rounding=line.uom_id.rounding) <= 0:
+    def _prepare_invoice_line_from_rma_line(self, rma_line):
+        sequence = max(self.line_ids.mapped("sequence")) + 1 if self.line_ids else 10
+        qty = rma_line.qty_to_refund
+        if float_compare(qty, 0.0, precision_rounding=rma_line.uom_id.rounding) <= 0:
             qty = 0.0
         # Todo fill taxes from somewhere
-        invoice_line = self.env["account.move.line"]
         data = {
-            "purchase_line_id": line.id,
-            "name": line.name + ": " + line.name,
-            "product_uom_id": line.uom_id.id,
-            "product_id": line.product_id.id,
-            "account_id": invoice_line.with_context(
-                {"journal_id": self.journal_id.id, "type": "in_invoice"}
-            )._default_account(),
-            "price_unit": line.company_id.currency_id.with_context(
+            "move_id": self.id,
+            "product_uom_id": rma_line.uom_id.id,
+            "product_id": rma_line.product_id.id,
+            "price_unit": rma_line.company_id.currency_id.with_context(
                 date=self.date
-            ).compute(line.price_unit, self.currency_id, round=False),
+            ).compute(rma_line.price_unit, self.currency_id, round=False),
             "quantity": qty,
             "discount": 0.0,
-            "rma_line_ids": [(4, line.id)],
+            "rma_line_ids": [(4, rma_line.id)],
+            "sequence": sequence + 1,
         }
         return data
+
+    def _post_process_invoice_line_from_rma_line(self, new_line, rma_line):
+        new_line.name = "%s: %s" % (
+            self.add_rma_line_id.name,
+            new_line._get_computed_name(),
+        )
+        new_line.account_id = new_line._get_computed_account()
+        new_line._onchange_price_subtotal()
+        new_line._onchange_mark_recompute_taxes()
+        return True
 
     @api.onchange("add_rma_line_id")
     def on_change_add_rma_line_id(self):
@@ -48,10 +55,18 @@ class AccountMove(models.Model):
         if self.add_rma_line_id not in (self.line_ids.mapped("rma_line_id")):
             data = self._prepare_invoice_line_from_rma_line(self.add_rma_line_id)
             new_line = new_line.new(data)
-            new_line._set_additional_fields(self)
-        self.line_ids += new_line
+            self._post_process_invoice_line_from_rma_line(
+                new_line, self.add_rma_line_id
+            )
+        line = new_line._convert_to_write(
+            {name: new_line[name] for name in new_line._cache}
+        )
+        # Compute invoice_origin.
+        origins = set(self.line_ids.mapped("rma_line_id.name"))
+        self.invoice_origin = ",".join(list(origins))
         self.add_rma_line_id = False
-        return {}
+        self._onchange_currency()
+        return line
 
     rma_count = fields.Integer(compute="_compute_rma_count", string="# of RMA")
 
@@ -62,32 +77,24 @@ class AccountMove(models.Model):
         help="Create a refund in based on an existing rma_line",
     )
 
-    def action_view_rma_supplier(self):
-        action = self.env.ref("rma.action_rma_supplier_lines")
+    def action_view_rma(self):
+        if self.move_type in ["in_invoice", "in_refund"]:
+            action = self.env.ref("rma.action_rma_supplier_lines")
+            form_view = self.env.ref("rma.view_rma_line_supplier_form", False)
+        else:
+            action = self.env.ref("rma.action_rma_customer_lines")
+            form_view = self.env.ref("rma.view_rma_line_form", False)
         result = action.sudo().read()[0]
         rma_ids = self.mapped("line_ids.rma_line_ids").ids
-        if rma_ids:
-            # choose the view_mode accordingly
-            if len(rma_ids) > 1:
-                result["domain"] = [("id", "in", rma_ids)]
-            else:
-                res = self.env.ref("rma.view_rma_line_supplier_form", False)
-                result["views"] = [(res and res.id or False, "form")]
-                result["res_id"] = rma_ids[0]
-        return result
-
-    def action_view_rma_customer(self):
-        action = self.env.ref("rma.action_rma_customer_lines")
-        result = action.sudo().read()[0]
-        rma_ids = self.mapped("line_ids.rma_line_ids").ids
-        if rma_ids:
-            # choose the view_mode accordingly
-            if len(rma_ids) > 1:
-                result["domain"] = [("id", "in", rma_ids)]
-            else:
-                res = self.env.ref("rma.view_rma_line_form", False)
-                result["views"] = [(res and res.id or False, "form")]
-                result["res_id"] = rma_ids[0]
+        # choose the view_mode accordingly
+        if not rma_ids:
+            result["domain"] = [("id", "in", [])]
+        elif len(rma_ids) > 1:
+            result["domain"] = [("id", "in", rma_ids)]
+        else:
+            res = form_view
+            result["views"] = [(res and res.id or False, "form")]
+            result["res_id"] = rma_ids and rma_ids[0] or False
         return result
 
 

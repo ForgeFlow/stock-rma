@@ -5,22 +5,17 @@
         <field name="model">account.move</field>
         <field name="inherit_id" ref="account.view_move_form" />
         <field name="arch" type="xml">
-            <field name="name" position="before">
-                <div
-                    class="oe_button_box"
-                    attrs="{'invisible': [('rma_count', '=', 0)]}"
+            <div name="button_box" position="inside">
+                <button
+                    type="object"
+                    name="action_view_rma"
+                    class="oe_stat_button"
+                    icon="fa-eject"
+                    groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"
                 >
-                    <button
-                        type="object"
-                        name="action_view_rma_customer"
-                        class="oe_stat_button"
-                        icon="fa-eject"
-                        groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"
-                    >
-                        <field name="rma_count" widget="statinfo" string="RMA" />
-                    </button>
-                </div>
-            </field>
+                    <field name="rma_count" widget="statinfo" string="RMA" />
+                </button>
+            </div>
         </field>
     </record>
 
@@ -55,10 +50,10 @@
                  <field
                     name="add_rma_line_id"
                     context="{'rma': True}"
-                    domain="[('type', '=', 'customer'),('partner_id', '=', partner_id)]"
+                    domain="[('type', '=', 'supplier'),('partner_id', '=', partner_id)]"
                     attrs="{'readonly': [('state','not in',['draft'])],
-                         'invisible': ['|', ('state', '=', 'paid'),
-                          ('move_type', '=', 'in_invoice')]}"
+                         'invisible': ['|', ('payment_state', '=', 'paid'),
+                          ('move_type', '!=', 'in_refund')]}"
                     class="oe_edit_only"
                     options="{'no_create': True}"
                 />
