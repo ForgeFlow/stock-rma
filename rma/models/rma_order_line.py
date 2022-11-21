@@ -59,6 +59,18 @@ class RmaOrderLine(models.Model):
         return pickings
 
     @api.model
+    def _get_in_moves(self):
+        moves = self.env["stock.move"]
+        for move in self.move_ids:
+            first_usage = move._get_first_usage()
+            last_usage = move._get_last_usage()
+            if last_usage == "internal" and first_usage != "internal":
+                moves |= move
+            elif last_usage == "supplier" and first_usage == "customer":
+                moves |= moves
+        return moves
+
+    @api.model
     def _get_out_pickings(self):
         pickings = self.env["stock.picking"]
         for move in self.move_ids:
