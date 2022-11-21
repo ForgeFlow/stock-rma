@@ -96,25 +96,6 @@ class TestRmaAccountUnreconciled(TestRma):
             lambda x: x.state != "posted"
         ).action_post()
         for rma_line in self.rma_customer_id.rma_line_ids:
-            rma_line._compute_unreconciled()
-            self.assertTrue(rma_line.unreconciled)
-
-        self.assertEqual(
-            self.env["rma.order.line"].search_count(
-                [
-                    ("type", "=", "customer"),
-                    ("unreconciled", "=", True),
-                    ("rma_id", "=", self.rma_customer_id.id),
-                ]
-            ),
-            3,
-        )
-        for rma_line in self.rma_customer_id.rma_line_ids:
-            aml_domain = rma_line.sudo().action_view_unreconciled().get("domain")
-            aml_lines = (
-                aml_domain and self.env["account.move.line"].search(aml_domain) or False
-            )
-            if aml_lines:
-                aml_lines.reconcile()
+            # The debits and credits are reconciled automatically
             rma_line._compute_unreconciled()
             self.assertFalse(rma_line.unreconciled)
