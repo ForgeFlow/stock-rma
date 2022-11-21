@@ -234,8 +234,15 @@ class AccountMoveLine(models.Model):
                 and bool(l.move_id.reversed_entry_id) == is_line_reversing
             )
             qty_refunded = sum(
+<<<<<<< HEAD
                 x.product_uom_id._compute_quantity(x.quantity, x.product_id.uom_id)
                 for x in posted_invoice_lines
+=======
+                [
+                    x.product_uom_id._compute_quantity(x.quantity, x.product_id.uom_id)
+                    for x in posted_invoice_lines
+                ]
+>>>>>>> 614c98c ([FIX] include anglo-saxon price unit calculation in refunds.)
             )
             product = self.product_id.with_company(self.company_id).with_context(
                 is_returned=is_line_reversing
