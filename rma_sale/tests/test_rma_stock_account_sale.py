@@ -70,5 +70,5 @@ class TestRmaStockAccountSale(TestRmaStockAccount):
         # Test the accounts used
         account_move = picking.move_lines.stock_valuation_layer_ids.account_move_id
         self.check_accounts_used(
-            account_move, debit_account="inventory", credit_account="cogs"
+            account_move, debit_account="inventory", credit_account="gdni"
         )

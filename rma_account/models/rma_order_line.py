@@ -307,3 +307,29 @@ class RmaOrderLine(models.Model):
             return res
         else:
             return super(RmaOrderLine, self).name_get()
+
+    def _stock_account_anglo_saxon_reconcile_valuation(self):
+        for rma in self:
+            prod = rma.product_id
+            if rma.product_id.valuation != "real_time":
+                continue
+            if not rma.company_id.anglo_saxon_accounting:
+                continue
+            product_accounts = prod.product_tmpl_id._get_product_accounts()
+            if rma.type == "customer":
+                product_interim_account = product_accounts["stock_output"]
+            else:
+                product_interim_account = product_accounts["stock_input"]
+            if product_interim_account.reconcile:
+                # Get the in and out moves
+                amls = rma.move_ids.mapped(
+                    "stock_valuation_layer_ids.account_move_id.line_ids"
+                )
+                # Search for anglo-saxon lines linked to the product in the journal entry.
+                amls = amls.filtered(
+                    lambda line: line.product_id == prod
+                    and line.account_id == product_interim_account
+                    and not line.reconciled
+                )
+                # Reconcile.
+                amls.reconcile()

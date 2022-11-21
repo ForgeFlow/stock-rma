@@ -121,6 +121,19 @@ class AccountMove(models.Model):
                             line.update({"rma_line_id": find_with_label_rma.id})
         return res
 
+    def _stock_account_get_last_step_stock_moves(self):
+        rslt = super(AccountMove, self)._stock_account_get_last_step_stock_moves()
+        for invoice in self.filtered(lambda x: x.move_type == "out_invoice"):
+            rslt += invoice.mapped("line_ids.rma_line_id.move_ids").filtered(
+                lambda x: x.state == "done" and x.location_dest_id.usage == "customer"
+            )
+        for invoice in self.filtered(lambda x: x.move_type == "out_refund"):
+            # Add refunds generated from the RMA
+            rslt += invoice.mapped("line_ids.rma_line_id.move_ids").filtered(
+                lambda x: x.state == "done" and x.location_id.usage == "customer"
+            )
+        return rslt
+
 
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
@@ -203,3 +216,35 @@ class AccountMoveLine(models.Model):
         ondelete="set null",
         help="This will contain the rma line that originated this line",
     )
+
+    def _stock_account_get_anglo_saxon_price_unit(self):
+        self.ensure_one()
+        price_unit = super(
+            AccountMoveLine, self
+        )._stock_account_get_anglo_saxon_price_unit()
+        rma_line = self.rma_line_id or self.env["rma.order.line"]
+        if rma_line:
+            is_line_reversing = bool(self.move_id.reversed_entry_id)
+            qty_to_refund = self.product_uom_id._compute_quantity(
+                self.quantity, self.product_id.uom_id
+            )
+            posted_invoice_lines = rma_line.move_line_ids.filtered(
+                lambda l: l.move_id.move_type == "out_refund"
+                and l.move_id.state == "posted"
+                and bool(l.move_id.reversed_entry_id) == is_line_reversing
+            )
+            qty_refunded = sum(
+                x.product_uom_id._compute_quantity(x.quantity, x.product_id.uom_id)
+                for x in posted_invoice_lines
+            )
+            product = self.product_id.with_company(self.company_id).with_context(
+                is_returned=is_line_reversing
+            )
+            average_price_unit = product._compute_average_price(
+                qty_refunded, qty_to_refund, rma_line._get_in_moves()
+            )
+            if average_price_unit:
+                price_unit = self.product_id.uom_id.with_company(
+                    self.company_id
+                )._compute_price(average_price_unit, self.product_uom_id)
+        return price_unit
