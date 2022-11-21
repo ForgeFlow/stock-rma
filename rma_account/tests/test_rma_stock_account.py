@@ -14,11 +14,16 @@ class TestRmaStockAccount(TestRma):
         cls.acc_type_model = cls.env["account.account.type"]
         cls.account_model = cls.env["account.account"]
         cls.g_account_user = cls.env.ref("account.group_account_user")
+        cls.rma_refund_wiz = cls.env["rma.refund"]
         # we create new products to ensure previous layers do not affect when
         # running FIFO
         cls.product_fifo_1 = cls._create_product("product_fifo1")
         cls.product_fifo_2 = cls._create_product("product_fifo2")
         cls.product_fifo_3 = cls._create_product("product_fifo3")
+        # Refs
+        cls.rma_operation_customer_refund_id = cls.env.ref(
+            "rma_account.rma_operation_customer_refund"
+        )
         cls.rma_basic_user.write({"groups_id": [(4, cls.g_account_user.id)]})
         # The product category created in the base module is not automated valuation
         # we have to create a new category here
@@ -27,11 +32,11 @@ class TestRmaStockAccount(TestRma):
         name = "Goods Received Not Invoiced"
         code = "grni"
         cls.account_grni = cls._create_account(acc_type, name, code, cls.company, True)
-        # Create account for Cost of Goods Sold
-        acc_type = cls._create_account_type("expense", "other")
-        name = "Cost of Goods Sold"
-        code = "cogs"
-        cls.account_cogs = cls._create_account(acc_type, name, code, cls.company, False)
+        # Create account for Goods Delievered
+        acc_type = cls._create_account_type("asset", "other")
+        name = "Goods Delivered Not Invoiced"
+        code = "gdni"
+        cls.account_gdni = cls._create_account(acc_type, name, code, cls.company, True)
         # Create account for Inventory
         acc_type = cls._create_account_type("asset", "other")
         name = "Inventory"
@@ -45,9 +50,9 @@ class TestRmaStockAccount(TestRma):
                 "property_stock_valuation_account_id": cls.account_inventory.id,
                 "property_valuation": "real_time",
                 "property_stock_account_input_categ_id": cls.account_grni.id,
-                "property_stock_account_output_categ_id": cls.account_cogs.id,
+                "property_stock_account_output_categ_id": cls.account_gdni.id,
                 "rma_approval_policy": "one_step",
-                "rma_customer_operation_id": cls.rma_cust_replace_op_id.id,
+                "rma_customer_operation_id": cls.rma_operation_customer_refund_id.id,
                 "rma_supplier_operation_id": cls.rma_sup_replace_op_id.id,
                 "property_cost_method": "fifo",
             }
@@ -103,7 +108,7 @@ class TestRmaStockAccount(TestRma):
         self.assertEqual(picking.move_lines.stock_valuation_layer_ids.value, 15.0)
         account_move = picking.move_lines.stock_valuation_layer_ids.account_move_id
         self.check_accounts_used(
-            account_move, debit_account="inventory", credit_account="cogs"
+            account_move, debit_account="inventory", credit_account="gdni"
         )
 
     def test_02_cost_from_move(self):
@@ -130,8 +135,9 @@ class TestRmaStockAccount(TestRma):
             dropship=False,
         )
         # Set an incorrect price in the RMA (this should not affect cost)
-        rma_customer_id.rma_line_ids.price_unit = 999
-        rma_customer_id.rma_line_ids.action_rma_to_approve()
+        rma_lines = rma_customer_id.rma_line_ids
+        rma_lines.price_unit = 999
+        rma_lines.action_rma_to_approve()
         picking = self._receive_rma(rma_customer_id.rma_line_ids)
         # Test the value in the layers of the incoming stock move is used
         for rma_line in rma_customer_id.rma_line_ids:
@@ -141,3 +147,104 @@ class TestRmaStockAccount(TestRma):
             )
             value_used = move_product.stock_valuation_layer_ids.value
             self.assertEqual(value_used, -value_origin)
+        # Create a refund for the first line
+        rma = rma_lines[0]
+        make_refund = self.rma_refund_wiz.with_context(
+            **{
+                "customer": True,
+                "active_ids": rma.ids,
+                "active_model": "rma.order.line",
+            }
+        ).create({"description": "Test refund"})
+        make_refund.item_ids.qty_to_refund = 1
+        make_refund.invoice_refund()
+        rma.refund_line_ids.move_id.action_post()
+        rma._compute_refund_count()
+        gdni_amls = rma.refund_line_ids.move_id.line_ids.filtered(
+            lambda l: l.account_id == self.account_gdni
+        )
+        gdni_amls |= (
+            rma.move_ids.stock_valuation_layer_ids.account_move_id.line_ids.filtered(
+                lambda l: l.account_id == self.account_gdni
+            )
+        )
+        gdni_balance = sum(gdni_amls.mapped("balance"))
+        # When we received we Credited to GDNI 30
+        # When we refund we Debit to GDNI 10
+        self.assertEqual(gdni_balance, -20.0)
+        make_refund = self.rma_refund_wizwith_context(
+            **{
+                "customer": True,
+                "active_ids": rma.ids,
+                "active_model": "rma.order.line",
+            }
+        ).create({"description": "Test refund"})
+        make_refund.item_ids.qty_to_refund = 2
+        make_refund.invoice_refund()
+        rma.refund_line_ids.move_id.filtered(
+            lambda m: m.state != "posted"
+        ).action_post()
+        rma._compute_refund_count()
+        gdni_amls = rma.refund_line_ids.move_id.line_ids.filtered(
+            lambda l: l.account_id == self.account_gdni
+        )
+        gdni_amls |= (
+            rma.move_ids.stock_valuation_layer_ids.account_move_id.line_ids.filtered(
+                lambda l: l.account_id == self.account_gdni
+            )
+        )
+        gdni_balance = sum(gdni_amls.mapped("balance"))
+        # When we received we Credited to GDNI 30
+        # When we refund we Debit to GDNI 30
+        self.assertEqual(gdni_balance, 0.0)
+        # Ensure that the GDNI move lines are all reconciled
+        self.assertEqual(all(gdni_amls.mapped("reconciled")), True)
+
+    def test_03_cost_from_move(self):
+        """
+        Receive a product and then return it. The Goods Delivered Not Invoiced
+        should result in 0
+        """
+        # Set a standard price on the products
+        self.product_fifo_1.standard_price = 10
+        self._create_inventory(
+            self.product_fifo_1, 20.0, self.env.ref("stock.stock_location_customers")
+        )
+        products2move = [
+            (self.product_fifo_1, 3),
+        ]
+        self.product_fifo_1.categ_id.rma_customer_operation_id = (
+            self.rma_cust_replace_op_id
+        )
+        rma_customer_id = self._create_rma_from_move(
+            products2move,
+            "customer",
+            self.env.ref("base.res_partner_2"),
+            dropship=False,
+        )
+        # Set an incorrect price in the RMA (this should not affect cost)
+        rma = rma_customer_id.rma_line_ids
+        rma.price_unit = 999
+        rma.action_rma_to_approve()
+        self._receive_rma(rma_customer_id.rma_line_ids)
+        gdni_amls = (
+            rma.move_ids.stock_valuation_layer_ids.account_move_id.line_ids.filtered(
+                lambda l: l.account_id == self.account_gdni
+            )
+        )
+        gdni_balance = sum(gdni_amls.mapped("balance"))
+        self.assertEqual(len(gdni_amls), 1)
+        # Balance should be -30, as we have only received
+        self.assertEqual(gdni_balance, -30.0)
+        self._deliver_rma(rma_customer_id.rma_line_ids)
+        gdni_amls = (
+            rma.move_ids.stock_valuation_layer_ids.account_move_id.line_ids.filtered(
+                lambda l: l.account_id == self.account_gdni
+            )
+        )
+        gdni_balance = sum(gdni_amls.mapped("balance"))
+        self.assertEqual(len(gdni_amls), 2)
+        # Balance should be 0, as we have received and shipped
+        self.assertEqual(gdni_balance, 0.0)
+        # The GDNI entries should be now reconciled
+        self.assertEqual(all(gdni_amls.mapped("reconciled")), True)
