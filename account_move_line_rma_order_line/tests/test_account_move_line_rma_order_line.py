@@ -42,8 +42,8 @@ class TestAccountMoveLineRmaOrderLine(common.SavepointCase):
 
         # Create account for Cost of Goods Sold
         acc_type = cls._create_account_type("expense", "other", "expense")
-        name = "Cost of Goods Sold"
-        code = "cogs"
+        name = "Goods Delivered Not Invoiced"
+        code = "gdni"
         cls.account_cogs = cls._create_account(acc_type, name, code, cls.company)
         # Create account for Inventory
         acc_type = cls._create_account_type("asset", "other", "asset")
