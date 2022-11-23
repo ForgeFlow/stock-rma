@@ -333,3 +333,19 @@ class RmaOrderLine(models.Model):
                 )
                 # Reconcile.
                 amls.reconcile()
+
+    def _get_price_unit(self):
+        self.ensure_one()
+        price_unit = super(RmaOrderLine, self)._get_price_unit()
+        if self.reference_move_id:
+            move = self.reference_move_id
+            layers = move.sudo().stock_valuation_layer_ids
+            if layers:
+                price_unit = sum(layers.mapped("value")) / sum(
+                    layers.mapped("quantity")
+                )
+                price_unit = price_unit
+        elif self.account_move_line_id and self.type == "supplier":
+            # We get the cost from the original invoice line
+            price_unit = self.account_move_line_id.price_unit
+        return price_unit

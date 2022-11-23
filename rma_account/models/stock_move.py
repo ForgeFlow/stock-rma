@@ -20,6 +20,7 @@ class StockMove(models.Model):
                 != self.product_id.categ_id.property_stock_valuation_account_id.id
             ):
                 line[2]["rma_line_id"] = self.rma_line_id.id
+        return res
 
     def _account_entry_move(self, qty, description, svl_id, cost):
         res = super(StockMove, self)._account_entry_move(qty, description, svl_id, cost)
