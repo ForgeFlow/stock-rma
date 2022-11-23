@@ -33,31 +33,5 @@ class StockRule(models.Model):
             line = self.env["rma.order.line"].browse([line])
             if line.reference_move_id:
                 return res
-            if line.sale_line_id:
-                moves = line.sale_line_id.move_ids.filtered(
-                    lambda x: x.state == "done"
-                    and x.location_id.usage in ("internal", "supplier")
-                    and x.location_dest_id.usage == "customer"
-                )
-                if moves:
-                    layers = moves.mapped("stock_valuation_layer_ids")
-                    if layers:
-                        price_unit = sum(layers.mapped("value")) / sum(
-                            layers.mapped("quantity")
-                        )
-                        res["price_unit"] = price_unit
-            elif line.account_move_line_id:
-                sale_lines = line.account_move_line_id.sale_line_ids
-                moves = sale_lines.mapped("move_ids").filtered(
-                    lambda x: x.state == "done"
-                    and x.location_id.usage in ("internal", "supplier")
-                    and x.location_dest_id.usage == "customer"
-                )
-                if moves:
-                    layers = moves.mapped("stock_valuation_layer_ids")
-                    if layers:
-                        price_unit = sum(layers.mapped("value")) / sum(
-                            layers.mapped("quantity")
-                        )
-                        res["price_unit"] = price_unit
+            res["price_unit"] = line._get_price_unit()
         return res
