@@ -36,11 +36,5 @@ class StockRule(models.Model):
                 res["partner_id"] = line.delivery_address_id.id
             else:
                 res["partner_id"] = line.rma_id.partner_id.id
-            # We are not checking the reference move here because if stock account
-            # is not installed, there is no way to know the cost of the stock move
-            # so better use the standard cost in this case.
-            company_id = res["company_id"]
-            company = self.env["res.company"].browse(company_id)
-            cost = product_id.with_company(company).standard_price
-            res["price_unit"] = cost
+            res["price_unit"] = line._get_price_unit()
         return res
