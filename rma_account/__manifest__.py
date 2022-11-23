@@ -3,7 +3,7 @@
 
 {
     'name': 'RMA Account',
-    'version': '12.0.1.0.0',
+    'version': '12.0.1.0.1',
     'license': 'LGPL-3',
     'category': 'RMA',
     'summary': 'Integrates RMA with Invoice Processing',

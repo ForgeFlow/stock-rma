@@ -2,7 +2,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 {
     'name': 'RMA Purchase',
-    'version': '12.0.1.0.0',
+    'version': '12.0.1.0.1',
     'category': 'RMA',
     'summary': 'RMA from PO',
     'license': 'LGPL-3',

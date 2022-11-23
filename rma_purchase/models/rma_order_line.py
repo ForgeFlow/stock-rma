@@ -201,3 +201,21 @@ class RmaOrderLine(models.Model):
             qty += self.uom_id._compute_quantity(
                 line.product_qty, line.product_uom)
         return qty
+
+    def _get_price_unit(self):
+        self.ensure_one()
+        price_unit = super(RmaOrderLine, self)._get_price_unit()
+        if self.purchase_order_line_id:
+            moves = self.purchase_order_line_id.move_ids
+            if moves:
+                price_unit = sum(moves.mapped("value")) / sum(
+                    moves.mapped("product_qty")
+                )
+        elif self.invoice_line_id.purchase_line_id:
+            purchase_lines = self.invoice_line_id.purchase_line_id
+            moves = purchase_lines.mapped("move_ids")
+            if moves:
+                price_unit = sum(moves.mapped("value")) / sum(
+                    moves.mapped("product_qty")
+                )
+        return price_unit

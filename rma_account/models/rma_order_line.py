@@ -236,3 +236,13 @@ class RmaOrderLine(models.Model):
             return res
         else:
             return super(RmaOrderLine, self).name_get()
+
+    def _get_price_unit(self):
+        self.ensure_one()
+        price_unit = super(RmaOrderLine, self)._get_price_unit()
+        if self.reference_move_id and self.reference_move_id.value:
+            price_unit = self.reference_move_id.value / self.reference_move_id.product_qty
+        elif self.invoice_line_id and self.type == "supplier":
+            # We get the cost from the original invoice line
+            price_unit = self.invoice_line_id.price_unit
+        return price_unit

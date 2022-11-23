@@ -27,10 +27,7 @@ class StockRule(models.Model):
                 res['partner_id'] = line.delivery_address_id.id
             else:
                 res["partner_id"] = line.rma_id.partner_id.id
-            company_id = res["company_id"]
-            company = self.env["res.company"].browse(company_id)
-            cost = product_id.with_company(company).standard_price
-            res["price_unit"] = cost
+            res["price_unit"] = line._get_price_unit()
         return res
 
 
