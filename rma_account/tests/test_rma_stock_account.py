@@ -172,7 +172,7 @@ class TestRmaStockAccount(TestRma):
         # When we received we Credited to GDNI 30
         # When we refund we Debit to GDNI 10
         self.assertEqual(gdni_balance, -20.0)
-        make_refund = self.rma_refund_wizwith_context(
+        make_refund = self.rma_refund_wiz.with_context(
             **{
                 "customer": True,
                 "active_ids": rma.ids,
