@@ -28,9 +28,14 @@ class StockRule(models.Model):
             company_id,
             values,
         )
+        line = self.env["rma.order.line"]
         if "rma_line_id" in values:
             line = values.get("rma_line_id")
             line = self.env["rma.order.line"].browse([line])
+        elif "group_id" in values:
+            pg = values["group_id"]
+            line = pg.rma_line_id
+        if line:
             res["rma_line_id"] = line.id
             if line.delivery_address_id:
                 res["partner_id"] = line.delivery_address_id.id

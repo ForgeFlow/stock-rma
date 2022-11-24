@@ -51,7 +51,7 @@ Authors
 Contributors
 ------------
 
--  David Jiménez <david.jimenez@forgeflow.com>
+- David Jiménez <david.jimenez@forgeflow.com>
 
 Maintainers
 -----------
