@@ -71,6 +71,18 @@ class RmaOrderLine(models.Model):
         return moves
 
     @api.model
+    def _get_out_moves(self):
+        moves = self.env["stock.move"]
+        for move in self.move_ids:
+            first_usage = move._get_first_usage()
+            last_usage = move._get_last_usage()
+            if first_usage == "internal" and last_usage != "internal":
+                moves |= move
+            elif first_usage == "supplier" and last_usage == "customer":
+                moves |= moves
+        return moves
+
+    @api.model
     def _get_out_pickings(self):
         pickings = self.env["stock.picking"]
         for move in self.move_ids:
@@ -97,12 +109,10 @@ class RmaOrderLine(models.Model):
             product_obj = self.env["uom.uom"]
             qty = 0.0
             if direction == "in":
-                op = ops["="]
+                moves = rec._get_in_moves()
             else:
-                op = ops["!="]
-            for move in rec.move_ids.filtered(
-                lambda m: m.state in states and op(m.location_id.usage, rec.type)
-            ):
+                moves = rec._get_out_moves()
+            for move in moves.filtered(lambda m: m.state in states):
                 # If the move is part of a chain don't count it
                 if direction == "out" and move.move_orig_ids:
                     continue
@@ -308,7 +318,10 @@ class RmaOrderLine(models.Model):
         states={"draft": [("readonly", False)]},
     )
     price_unit = fields.Monetary(
-        string="Price Unit", readonly=True, states={"draft": [("readonly", False)]}
+        string="Unit cost",
+        readonly=True,
+        states={"draft": [("readonly", False)]},
+        help="Unit cost of the items under RMA",
     )
     in_shipment_count = fields.Integer(
         compute="_compute_in_shipment_count", string="# of Shipments"
@@ -651,15 +664,24 @@ class RmaOrderLine(models.Model):
                 )
         return super(RmaOrderLine, self).create(vals)
 
+    def _get_price_unit(self):
+        """The price unit corresponds to the cost of that product"""
+        self.ensure_one()
+        if self.reference_move_id:
+            price_unit = self.reference_move_id.price_unit
+        else:
+            price_unit = self.product_id.with_company(self.company_id).standard_price
+        return price_unit
+
     @api.onchange("product_id")
     def _onchange_product_id(self):
         result = {}
         if not self.product_id:
             return result
         self.uom_id = self.product_id.uom_id.id
-        self.price_unit = self.product_id.standard_price
         if not self.type:
             self.type = self._get_default_type()
+        self.price_unit = self._get_price_unit()
         if self.type == "customer":
             self.operation_id = (
                 self.product_id.rma_customer_operation_id

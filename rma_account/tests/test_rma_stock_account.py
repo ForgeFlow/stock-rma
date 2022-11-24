@@ -240,3 +240,87 @@ class TestRmaStockAccount(TestRma):
         self.assertEqual(gdni_balance, 0.0)
         # The GDNI entries should be now reconciled
         self.assertEqual(all(gdni_amls.mapped("reconciled")), True)
+
+    def test_04_cost_from_move_multi_step(self):
+        """
+        Receive a product and then return it using a multi-step route.
+        The Goods Delivered Not Invoiced should result in 0
+        """
+        # Alter the customer RMA route to make it multi-step
+        # Get rid of the duplicated rule
+        self.env.ref("rma.rule_rma_customer_out_pull").active = False
+        self.env.ref("rma.rule_rma_customer_in_pull").active = False
+        cust_in_pull_rule = self.customer_route.rule_ids.filtered(
+            lambda r: r.location_id == self.stock_rma_location
+        )
+        cust_in_pull_rule.location_id = self.input_location
+        cust_out_pull_rule = self.customer_route.rule_ids.filtered(
+            lambda r: r.location_src_id == self.env.ref("rma.location_rma")
+        )
+        cust_out_pull_rule.location_src_id = self.output_location
+        cust_out_pull_rule.procure_method = "make_to_order"
+        self.env["stock.rule"].create(
+            {
+                "name": "RMA->Output",
+                "action": "pull",
+                "warehouse_id": self.wh.id,
+                "location_src_id": self.env.ref("rma.location_rma").id,
+                "location_id": self.output_location.id,
+                "procure_method": "make_to_stock",
+                "route_id": self.customer_route.id,
+                "picking_type_id": self.env.ref("stock.picking_type_internal").id,
+            }
+        )
+        self.env["stock.rule"].create(
+            {
+                "name": "Output->RMA",
+                "action": "pull",
+                "warehouse_id": self.wh.id,
+                "location_src_id": self.input_location.id,
+                "location_id": self.env.ref("rma.location_rma").id,
+                "procure_method": "make_to_order",
+                "route_id": self.customer_route.id,
+                "picking_type_id": self.env.ref("stock.picking_type_internal").id,
+            }
+        )
+        # Set a standard price on the products
+        self.product_fifo_1.standard_price = 10
+        self._create_inventory(
+            self.product_fifo_1, 20.0, self.env.ref("stock.stock_location_customers")
+        )
+        products2move = [
+            (self.product_fifo_1, 3),
+        ]
+        self.product_fifo_1.categ_id.rma_customer_operation_id = (
+            self.rma_cust_replace_op_id
+        )
+        rma_customer_id = self._create_rma_from_move(
+            products2move,
+            "customer",
+            self.env.ref("base.res_partner_2"),
+            dropship=False,
+        )
+        # Set an incorrect price in the RMA (this should not affect cost)
+        rma = rma_customer_id.rma_line_ids
+        rma.price_unit = 999
+        rma.action_rma_to_approve()
+        self._receive_rma(rma)
+        layers = rma.move_ids.sudo().stock_valuation_layer_ids
+        gdni_amls = layers.account_move_id.line_ids.filtered(
+            lambda l: l.account_id == self.account_gdni
+        )
+        gdni_balance = sum(gdni_amls.mapped("balance"))
+        self.assertEqual(len(gdni_amls), 1)
+        # Balance should be -30, as we have only received
+        self.assertEqual(gdni_balance, -30.0)
+        self._deliver_rma(rma)
+        layers = rma.move_ids.sudo().stock_valuation_layer_ids
+        gdni_amls = layers.account_move_id.line_ids.filtered(
+            lambda l: l.account_id == self.account_gdni
+        )
+        gdni_balance = sum(gdni_amls.mapped("balance"))
+        self.assertEqual(len(gdni_amls), 2)
+        # Balance should be 0, as we have received and shipped
+        self.assertEqual(gdni_balance, 0.0)
+        # The GDNI entries should be now reconciled
+        self.assertEqual(all(gdni_amls.mapped("reconciled")), True)

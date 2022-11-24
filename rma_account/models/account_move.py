@@ -99,14 +99,18 @@ class AccountMove(models.Model):
 
     def _stock_account_get_last_step_stock_moves(self):
         rslt = super(AccountMove, self)._stock_account_get_last_step_stock_moves()
-        for invoice in self.filtered(lambda x: x.move_type == "out_invoice"):
-            rslt += invoice.mapped("line_ids.rma_line_id.move_ids").filtered(
-                lambda x: x.state == "done" and x.location_dest_id.usage == "customer"
-            )
-        for invoice in self.filtered(lambda x: x.move_type == "out_refund"):
-            # Add refunds generated from the RMA
+        for invoice in self.filtered(
+            lambda x: x.move_type in ("out_invoice", "out_refund")
+        ):
             rslt += invoice.mapped("line_ids.rma_line_id.move_ids").filtered(
                 lambda x: x.state == "done" and x.location_id.usage == "customer"
+            )
+        for invoice in self.filtered(
+            lambda x: x.move_type in ("in_invoice", "in_refund")
+        ):
+            # Add refunds generated from the RMA
+            rslt += invoice.mapped("line_ids.rma_line_id.move_ids").filtered(
+                lambda x: x.state == "done" and x.location_dest_id.usage == "supplier"
             )
         return rslt
 
