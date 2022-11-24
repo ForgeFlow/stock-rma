@@ -73,8 +73,9 @@ class RmaMakePicking(models.TransientModel):
             "partner_id": item.line_id.partner_id.id,
             "name": item.line_id.rma_id.name or item.line_id.name,
             "rma_id": item.line_id.rma_id and item.line_id.rma_id.id or False,
-            "rma_line_id": item.line_id.id if not item.line_id.rma_id else False,
         }
+        if not item.line_id.rma_id:
+            group_data["rma_line_id"] = item.line_id and item.line_id.id or False
         return group_data
 
     @api.model
