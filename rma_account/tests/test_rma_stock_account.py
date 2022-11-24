@@ -252,7 +252,7 @@ class TestRmaStockAccount(TestRma):
         # The GDNI entries should be now reconciled
         self.assertEqual(all(gdni_amls.mapped("reconciled")), True)
 
-    def test_08_cost_from_move_multi_step(self):
+    def test_04_cost_from_move_multi_step(self):
         """
         Receive a product and then return it using a multi-step route.
         The Goods Delivered Not Invoiced should result in 0
@@ -284,14 +284,14 @@ class TestRmaStockAccount(TestRma):
         )
         self.env["stock.rule"].create(
             {
-                "name": "Customers->RMA",
+                "name": "Output->RMA",
                 "action": "pull",
                 "warehouse_id": self.wh.id,
-                "location_src_id": self.customer_location.id,
+                "location_src_id": self.input_location.id,
                 "location_id": self.env.ref("rma.location_rma").id,
                 "procure_method": "make_to_order",
                 "route_id": self.customer_route.id,
-                "picking_type_id": self.env.ref("stock.picking_type_in").id,
+                "picking_type_id": self.env.ref("stock.picking_type_internal").id,
             }
         )
         # Set a standard price on the products

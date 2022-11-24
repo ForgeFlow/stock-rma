@@ -104,3 +104,9 @@ class StockMove(models.Model):
     def _prepare_merge_moves_distinct_fields(self):
         res = super()._prepare_merge_moves_distinct_fields()
         return res + ["rma_line_id"]
+
+    def _prepare_procurement_values(self):
+        self.ensure_one()
+        res = super(StockMove, self)._prepare_procurement_values()
+        res["rma_line_id"] = self.rma_line_id.id
+        return res
