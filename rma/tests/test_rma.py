@@ -26,6 +26,9 @@ class TestRma(common.TransactionCase):
         cls.rma_cust_replace_op_id = cls.env.ref("rma.rma_operation_customer_replace")
         cls.rma_sup_replace_op_id = cls.env.ref("rma.rma_operation_supplier_replace")
         cls.rma_ds_replace_op_id = cls.env.ref("rma.rma_operation_ds_replace")
+        cls.customer_route = cls.env.ref("rma.route_rma_customer")
+        cls.input_location = cls.env.ref("stock.stock_location_company")
+        cls.output_location = cls.env.ref("stock.stock_location_output")
         cls.category = cls._create_product_category(
             "one_step", cls.rma_cust_replace_op_id, cls.rma_sup_replace_op_id
         )
@@ -82,7 +85,7 @@ class TestRma(common.TransactionCase):
     @classmethod
     def _create_user(cls, login, groups, company):
         group_ids = [group.id for group in groups]
-        user = cls.res_users_model.create(
+        user = cls.res_users_model.with_context(no_reset_password=True).create(
             {
                 "name": login,
                 "login": login,
@@ -105,14 +108,16 @@ class TestRma(common.TransactionCase):
             }
         ).create({})
         wizard._create_picking()
-        res = rma_line_ids.action_view_in_shipments()
-        picking = cls.env["stock.picking"].browse(res["res_id"])
-        picking.action_assign()
-        for mv in picking.move_ids:
-            mv.quantity = mv.product_uom_qty
-            mv.picked = True
-        picking._action_done()
-        return picking
+        pickings = rma_line_ids._get_in_pickings()
+        pickings.action_assign()
+        for picking in pickings:
+            for mv in picking.move_ids:
+                mv.quantity = mv.product_uom_qty
+                mv.picked = True
+        # In case of two step pickings, ship in two steps:
+        while pickings.filtered(lambda p: p.state == "assigned"):
+            pickings._action_done()
+        return pickings
 
     @classmethod
     def _deliver_rma(cls, rma_line_ids):
@@ -125,14 +130,14 @@ class TestRma(common.TransactionCase):
             }
         ).create({})
         wizard._create_picking()
-        res = rma_line_ids.action_view_out_shipments()
-        picking = cls.env["stock.picking"].browse(res["res_id"])
-        picking.action_assign()
-        for mv in picking.move_ids:
-            mv.quantity = mv.product_uom_qty
-            mv.picked = True
-        picking._action_done()
-        return picking
+        pickings = rma_line_ids._get_out_pickings()
+        pickings.action_assign()
+        for picking in pickings:
+            for mv in picking.move_ids:
+                mv.quantity = mv.product_uom_qty
+                mv.picked = True
+        pickings._action_done()
+        return pickings
 
     @classmethod
     def _create_product_category(
@@ -766,8 +771,6 @@ class TestRma(common.TransactionCase):
             }
         ).create({})
         wizard._create_picking()
-        res = self.rma_supplier_id.rma_line_ids.action_view_out_shipments()
-        self.assertTrue("res_id" in res, "Incorrect number of pickings" "created")
         picking = self.rma_supplier_id.rma_line_ids._get_out_pickings()
         partner = picking.partner_id
         self.assertTrue(partner, "Partner is not defined or False")
@@ -1188,3 +1191,73 @@ class TestRma(common.TransactionCase):
         self.assertEqual(second_rma_out_move_orig.state, "cancel")
         # check picking is not canceled because third line has not been yet.
         self.assertEqual(second_rma_out_move.picking_id.state, "waiting")
+
+    def test_11_customer_rma_multi_step(self):
+        """
+        Receive a product and then return it using a multi-step route.
+        """
+        # Alter the customer RMA route to make it multi-step
+        # Get rid of the duplicated rule
+        self.env.ref("rma.rule_rma_customer_out_pull").active = False
+        self.env.ref("rma.rule_rma_customer_in_pull").active = False
+        cust_in_pull_rule = self.customer_route.rule_ids.filtered(
+            lambda r: r.location_dest_id == self.stock_rma_location
+        )
+        cust_in_pull_rule.location_dest_id = self.input_location
+        cust_out_pull_rule = self.customer_route.rule_ids.filtered(
+            lambda r: r.location_src_id == self.env.ref("rma.location_rma")
+        )
+        cust_out_pull_rule.location_src_id = self.output_location
+        cust_out_pull_rule.procure_method = "make_to_order"
+        self.env["stock.rule"].create(
+            {
+                "name": "RMA->Output",
+                "action": "pull",
+                "warehouse_id": self.wh.id,
+                "location_src_id": self.env.ref("rma.location_rma").id,
+                "location_dest_id": self.output_location.id,
+                "procure_method": "make_to_stock",
+                "route_id": self.customer_route.id,
+                "picking_type_id": self.env.ref("stock.picking_type_internal").id,
+            }
+        )
+        self.env["stock.rule"].create(
+            {
+                "name": "Output->RMA",
+                "action": "pull",
+                "warehouse_id": self.wh.id,
+                "location_src_id": self.input_location.id,
+                "location_dest_id": self.env.ref("rma.location_rma").id,
+                "procure_method": "make_to_order",
+                "route_id": self.customer_route.id,
+                "picking_type_id": self.env.ref("stock.picking_type_internal").id,
+            }
+        )
+        # Set a standard price on the products
+        self.product_1.standard_price = 10
+        self._create_inventory(
+            self.product_1, 20.0, self.env.ref("stock.stock_location_customers")
+        )
+        products2move = [
+            (self.product_1, 3),
+        ]
+        self.product_1.categ_id.rma_customer_operation_id = self.rma_cust_replace_op_id
+        rma_customer_id = self._create_rma_from_move(
+            products2move,
+            "customer",
+            self.env.ref("base.res_partner_2"),
+            dropship=False,
+        )
+        rma = rma_customer_id.rma_line_ids
+        rma.action_rma_to_approve()
+        self.assertEqual(rma.qty_to_receive, 3)
+        self.assertEqual(rma.qty_received, 0)
+        self._receive_rma(rma)
+        self.assertEqual(len(rma.move_ids), 2)
+        self.assertEqual(rma.qty_to_receive, 0)
+        self.assertEqual(rma.qty_received, 3)
+        self.assertEqual(rma.qty_to_deliver, 3)
+        self._deliver_rma(rma)
+        self.assertEqual(rma.qty_to_deliver, 0)
+        self.assertEqual(rma.qty_delivered, 3)
+        self.assertEqual(len(rma.move_ids), 4)
