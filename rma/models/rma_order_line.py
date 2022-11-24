@@ -303,7 +303,12 @@ class RmaOrderLine(models.Model):
         readonly=True,
         states={"draft": [("readonly", False)]},
     )
-    price_unit = fields.Monetary(readonly=True, states={"draft": [("readonly", False)]})
+    price_unit = fields.Monetary(
+        string="Unit cost",
+        readonly=True,
+        states={"draft": [("readonly", False)]},
+        help="Unit cost of the items under RMA",
+    )
     in_shipment_count = fields.Integer(
         compute="_compute_in_shipment_count", string="# of Shipments"
     )
@@ -636,15 +641,24 @@ class RmaOrderLine(models.Model):
                 )
         return super(RmaOrderLine, self).create(vals)
 
+    def _get_price_unit(self):
+        """The price unit corresponds to the cost of that product"""
+        self.ensure_one()
+        if self.reference_move_id:
+            price_unit = self.reference_move_id.price_unit
+        else:
+            price_unit = self.product_id.with_company(self.company_id).standard_price
+        return price_unit
+
     @api.onchange("product_id")
     def _onchange_product_id(self):
         result = {}
         if not self.product_id:
             return result
         self.uom_id = self.product_id.uom_id.id
-        self.price_unit = self.product_id.standard_price
         if not self.type:
             self.type = self._get_default_type()
+        self.price_unit = self._get_price_unit()
         if self.type == "customer":
             self.operation_id = (
                 self.product_id.rma_customer_operation_id

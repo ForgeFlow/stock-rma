@@ -21,3 +21,11 @@ class StockMove(models.Model):
             ):
                 line[2]["rma_line_id"] = self.rma_line_id.id
         return res
+
+    def _account_entry_move(self, qty, description, svl_id, cost):
+        res = super(StockMove, self)._account_entry_move(qty, description, svl_id, cost)
+        if self.company_id.anglo_saxon_accounting:
+            # Eventually reconcile together the invoice and valuation accounting
+            # entries on the stock interim accounts
+            self.rma_line_id._stock_account_anglo_saxon_reconcile_valuation()
+        return res
