@@ -71,6 +71,18 @@ class RmaOrderLine(models.Model):
         return moves
 
     @api.model
+    def _get_out_moves(self):
+        moves = self.env["stock.move"]
+        for move in self.move_ids:
+            first_usage = move._get_first_usage()
+            last_usage = move._get_last_usage()
+            if first_usage == "internal" and last_usage != "internal":
+                moves |= move
+            elif first_usage == "supplier" and last_usage == "customer":
+                moves |= moves
+        return moves
+
+    @api.model
     def _get_out_pickings(self):
         pickings = self.env["stock.picking"]
         for move in self.move_ids:
@@ -97,12 +109,10 @@ class RmaOrderLine(models.Model):
             product_obj = self.env["uom.uom"]
             qty = 0.0
             if direction == "in":
-                op = ops["="]
+                moves = rec._get_in_moves()
             else:
-                op = ops["!="]
-            for move in rec.move_ids.filtered(
-                lambda m: m.state in states and op(m.location_id.usage, rec.type)
-            ):
+                moves = rec._get_out_moves()
+            for move in moves.filtered(lambda m: m.state in states):
                 # If the move is part of a chain don't count it
                 if direction == "out" and move.move_orig_ids:
                     continue
