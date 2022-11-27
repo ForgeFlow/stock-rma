@@ -322,7 +322,15 @@ class RmaOrderLine(models.Model):
                 product_interim_account = product_accounts["stock_input"]
             if product_interim_account.reconcile:
                 # Get the in and out moves
-                amls = rma.move_ids.mapped(
+                amls = self.env["account.move.line"].search(
+                    [
+                        ("rma_line_id", "=", rma.id),
+                        ("account_id", "=", product_interim_account.id),
+                        ("parent_state", "=", "posted"),
+                        ("reconciled", "=", False),
+                    ]
+                )
+                amls |= rma.move_ids.mapped(
                     "stock_valuation_layer_ids.account_move_id.line_ids"
                 )
                 # Search for anglo-saxon lines linked to the product in the journal entry.
