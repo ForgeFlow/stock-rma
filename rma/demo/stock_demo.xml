@@ -57,7 +57,7 @@
     </record>
 
     <!--Routes-->
-    <record id="route_rma_customer" model="stock.location.route">
+    <record id="route_rma_customer" model="stock.route">
         <field name="name">RMA Customer</field>
         <field name="sequence">10</field>
         <field name="product_selectable" eval="False" />
@@ -66,7 +66,7 @@
         <field name="rma_selectable" eval="True" />
     </record>
 
-    <record id="route_rma_supplier" model="stock.location.route">
+    <record id="route_rma_supplier" model="stock.route">
         <field name="name">RMA Supplier</field>
         <field name="sequence">10</field>
         <field name="product_selectable" eval="False" />
@@ -75,7 +75,7 @@
         <field name="rma_selectable" eval="True" />
     </record>
 
-    <record id="route_rma_dropship" model="stock.location.route">
+    <record id="route_rma_dropship" model="stock.route">
         <field name="name">RMA Dropship</field>
         <field name="sequence">10</field>
         <field name="product_selectable" eval="False" />
@@ -89,7 +89,7 @@
         <field name="name">Customer → Supplier</field>
         <field name="action">pull</field>
         <field name="warehouse_id" ref="stock.warehouse0" />
-        <field name="location_id" ref="stock.stock_location_suppliers" />
+        <field name="location_dest_id" ref="stock.stock_location_suppliers" />
         <field name="location_src_id" ref="stock.stock_location_customers" />
         <field name="procure_method">make_to_stock</field>
         <field name="route_id" ref="rma.route_rma_dropship" />
@@ -100,7 +100,7 @@
         <field name="name">Supplier → Customer</field>
         <field name="action">pull</field>
         <field name="warehouse_id" ref="stock.warehouse0" />
-        <field name="location_id" ref="stock.stock_location_customers" />
+        <field name="location_dest_id" ref="stock.stock_location_customers" />
         <field name="location_src_id" ref="stock.stock_location_suppliers" />
         <field name="procure_method">make_to_stock</field>
         <field name="route_id" ref="rma.route_rma_dropship" />
