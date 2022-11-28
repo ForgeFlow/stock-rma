@@ -122,9 +122,7 @@ class RmaAddAccountMove(models.TransientModel):
     def add_lines(self):
         rma_line_obj = self.env["rma.order.line"]
         existing_invoice_lines = self._get_existing_invoice_lines()
-        for line in self.line_ids.filtered(
-            lambda aml: aml.exclude_from_invoice_tab is False
-        ):
+        for line in self.line_ids.filtered(lambda aml: aml.display_type == "product"):
             # Load a PO line only once
             if line not in existing_invoice_lines:
                 data = self._prepare_rma_line_from_inv_line(line)

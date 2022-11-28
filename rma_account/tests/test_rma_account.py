@@ -24,7 +24,6 @@ class TestRmaAccount(common.SingleTransactionCase):
         customer1_obj = cls.env["res.partner"]
 
         cls.rma_route_cust = cls.env.ref("rma.route_rma_customer")
-        receivable_type = cls.env.ref("account.data_account_type_receivable")
         cls.cust_refund_op = cls.env.ref("rma_account.rma_operation_customer_refund")
         cls.sup_refund_op = cls.env.ref("rma_account.rma_operation_supplier_refund")
         cls.company_id = cls.env.user.company_id
@@ -88,7 +87,7 @@ class TestRmaAccount(common.SingleTransactionCase):
 
         # Create Invoices:
         cls.customer_account = cls.acc_obj.search(
-            [("user_type_id", "=", receivable_type.id)], limit=1
+            [("account_type", "=", "asset_receivable")], limit=1
         ).id
 
         cls.invoices = cls.env["account.move"].create(
