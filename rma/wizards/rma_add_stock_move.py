@@ -41,7 +41,7 @@ class RmaAddStockMove(models.TransientModel):
         compute="_compute_lot_domain",
     )
     lot_domain_ids = fields.Many2many(
-        comodel_name="stock.production.lot",
+        comodel_name="stock.lot",
         string="Lots Domain",
         compute="_compute_lot_domain",
     )
@@ -54,9 +54,7 @@ class RmaAddStockMove(models.TransientModel):
             rec.lot_domain_ids = rec.mapped("move_ids.move_line_ids.lot_id").ids
             rec.show_lot_filter = bool(rec.lot_domain_ids)
 
-    lot_ids = fields.Many2many(
-        comodel_name="stock.production.lot", string="Lots/Serials selected"
-    )
+    lot_ids = fields.Many2many(comodel_name="stock.lot", string="Lots/Serials selected")
 
     def select_all(self):
         self.ensure_one()
@@ -93,7 +91,7 @@ class RmaAddStockMove(models.TransientModel):
                 raise ValidationError(_("Please define an operation first"))
 
         if not operation.in_route_id or not operation.out_route_id:
-            route = self.env["stock.location.route"].search(
+            route = self.env["stock.route"].search(
                 [("rma_selectable", "=", True)], limit=1
             )
             if not route:

@@ -185,7 +185,7 @@ class StockWarehouse(models.Model):
             "warehouse_id": self.id,
             "company_id": self.company_id.id,
             "location_src_id": customer_loc.id,
-            "location_id": self.lot_rma_id.id,
+            "location_dest_id": self.lot_rma_id.id,
             "procure_method": "make_to_stock",
             "route_id": self.env.ref("rma.route_rma_customer").id,
             "picking_type_id": self.rma_cust_in_type_id.id,
@@ -197,7 +197,7 @@ class StockWarehouse(models.Model):
             "warehouse_id": self.id,
             "company_id": self.company_id.id,
             "location_src_id": self.lot_rma_id.id,
-            "location_id": customer_loc.id,
+            "location_dest_id": customer_loc.id,
             "procure_method": "make_to_stock",
             "route_id": self.env.ref("rma.route_rma_customer").id,
             "picking_type_id": self.rma_cust_out_type_id.id,
@@ -209,7 +209,7 @@ class StockWarehouse(models.Model):
             "warehouse_id": self.id,
             "company_id": self.company_id.id,
             "location_src_id": supplier_loc.id,
-            "location_id": self.lot_rma_id.id,
+            "location_dest_id": self.lot_rma_id.id,
             "procure_method": "make_to_stock",
             "route_id": self.env.ref("rma.route_rma_supplier").id,
             "picking_type_id": self.rma_sup_in_type_id.id,
@@ -221,7 +221,7 @@ class StockWarehouse(models.Model):
             "warehouse_id": self.id,
             "company_id": self.company_id.id,
             "location_src_id": self.lot_rma_id.id,
-            "location_id": supplier_loc.id,
+            "location_dest_id": supplier_loc.id,
             "procure_method": "make_to_stock",
             "route_id": self.env.ref("rma.route_rma_supplier").id,
             "picking_type_id": self.rma_sup_out_type_id.id,
@@ -264,6 +264,6 @@ class StockWarehouse(models.Model):
 
 
 class StockLocationRoute(models.Model):
-    _inherit = "stock.location.route"
+    _inherit = "stock.route"
 
     rma_selectable = fields.Boolean(string="Selectable on RMA Lines")
