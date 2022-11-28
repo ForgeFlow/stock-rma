@@ -283,7 +283,7 @@ class RmaOrderLine(models.Model):
     )
     product_tracking = fields.Selection(related="product_id.tracking")
     lot_id = fields.Many2one(
-        comodel_name="stock.production.lot",
+        comodel_name="stock.lot",
         string="Lot/Serial Number",
         readonly=True,
         states={"draft": [("readonly", False)]},
@@ -372,7 +372,7 @@ class RmaOrderLine(models.Model):
         ondelete="cascade",
     )
     in_route_id = fields.Many2one(
-        "stock.location.route",
+        "stock.route",
         string="Inbound Route",
         required=True,
         domain=[("rma_selectable", "=", True)],
@@ -380,7 +380,7 @@ class RmaOrderLine(models.Model):
         states={"draft": [("readonly", False)]},
     )
     out_route_id = fields.Many2one(
-        "stock.location.route",
+        "stock.route",
         string="Outbound Route",
         required=True,
         domain=[("rma_selectable", "=", True)],
@@ -513,7 +513,7 @@ class RmaOrderLine(models.Model):
                 raise ValidationError(_("Please define an operation first."))
 
         if not operation.in_route_id or not operation.out_route_id:
-            route = self.env["stock.location.route"].search(
+            route = self.env["stock.route"].search(
                 [("rma_selectable", "=", True)], limit=1
             )
             if not route:
@@ -597,7 +597,7 @@ class RmaOrderLine(models.Model):
             self.reference_move_id = False
         return True
 
-    def _check_production_lot_assigned(self):
+    def _check_lot_assigned(self):
         for rec in self:
             if rec.product_id.tracking == "serial" and rec.product_qty != 1:
                 raise ValidationError(
@@ -609,7 +609,7 @@ class RmaOrderLine(models.Model):
                 )
 
     def action_rma_to_approve(self):
-        self._check_production_lot_assigned()
+        self._check_lot_assigned()
         self.write({"state": "to_approve"})
         for rec in self:
             if rec.product_id.rma_approval_policy == "one_step":
@@ -628,18 +628,19 @@ class RmaOrderLine(models.Model):
         self.write({"state": "done"})
         return True
 
-    @api.model
-    def create(self, vals):
-        if not vals.get("name") or vals.get("name") == "/":
-            if self.env.context.get("supplier"):
-                vals["name"] = self.env["ir.sequence"].next_by_code(
-                    "rma.order.line.supplier"
-                )
-            else:
-                vals["name"] = self.env["ir.sequence"].next_by_code(
-                    "rma.order.line.customer"
-                )
-        return super(RmaOrderLine, self).create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if not vals.get("name") or vals.get("name") == "/":
+                if self.env.context.get("supplier"):
+                    vals["name"] = self.env["ir.sequence"].next_by_code(
+                        "rma.order.line.supplier"
+                    )
+                else:
+                    vals["name"] = self.env["ir.sequence"].next_by_code(
+                        "rma.order.line.customer"
+                    )
+        return super().create(vals_list)
 
     def _get_price_unit(self):
         """The price unit corresponds to the cost of that product"""

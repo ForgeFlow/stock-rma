@@ -8,7 +8,7 @@
         >
             <t
                 t-set="has_rma"
-                t-value="bool(o.move_lines.filtered(lambda m: m.rma_line_id))"
+                t-value="bool(o.move_ids.filtered(lambda m: m.rma_line_id))"
             />
             <th t-if="has_rma" name="th_sm_rma_line"><strong>RMA</strong></th>
         </xpath>

@@ -108,7 +108,7 @@ class TestRma(common.TransactionCase):
         res = rma_line_ids.action_view_in_shipments()
         picking = cls.env["stock.picking"].browse(res["res_id"])
         picking.action_assign()
-        for mv in picking.move_lines:
+        for mv in picking.move_ids:
             mv.quantity_done = mv.product_uom_qty
         picking._action_done()
         return picking
@@ -127,7 +127,7 @@ class TestRma(common.TransactionCase):
         res = rma_line_ids.action_view_out_shipments()
         picking = cls.env["stock.picking"].browse(res["res_id"])
         picking.action_assign()
-        for mv in picking.move_lines:
+        for mv in picking.move_ids:
             mv.quantity_done = mv.product_uom_qty
         picking._action_done()
         return picking
@@ -167,7 +167,7 @@ class TestRma(common.TransactionCase):
         """Do picking with only one move on the given date."""
         picking.action_confirm()
         picking.action_assign()
-        for ml in picking.move_lines:
+        for ml in picking.move_ids:
             ml.filtered(
                 lambda m: m.state != "waiting"
             ).quantity_done = ml.product_uom_qty
@@ -414,7 +414,7 @@ class TestRma(common.TransactionCase):
         self.assertTrue("res_id" in res, "Incorrect number of pickings" "created")
         picking = self.env["stock.picking"].browse(res["res_id"])
         self.assertEqual(len(picking), 1, "Incorrect number of pickings created")
-        moves = picking.move_lines
+        moves = picking.move_ids
         self.assertEqual(len(moves), 3, "Incorrect number of moves created")
         lines = self.rma_customer_id.rma_line_ids
         lines.refresh()
@@ -474,7 +474,7 @@ class TestRma(common.TransactionCase):
             "Wrong qty incoming",
         )
         picking.action_assign()
-        for mv in picking.move_lines:
+        for mv in picking.move_ids:
             mv.quantity_done = mv.product_uom_qty
         picking._action_done()
         lines = self.rma_customer_id.rma_line_ids
@@ -534,7 +534,7 @@ class TestRma(common.TransactionCase):
         res = self.rma_customer_id.rma_line_ids.action_view_out_shipments()
         self.assertTrue("res_id" in res, "Incorrect number of pickings" "created")
         picking = self.env["stock.picking"].browse(res["res_id"])
-        moves = picking.move_lines
+        moves = picking.move_ids
         self.assertEqual(len(moves), 3, "Incorrect number of moves created")
         lines = self.rma_customer_id.rma_line_ids
         lines.refresh()
@@ -593,7 +593,7 @@ class TestRma(common.TransactionCase):
             "Wrong qty outgoing",
         )
         picking.action_assign()
-        for mv in picking.move_lines:
+        for mv in picking.move_ids:
             mv.quantity_done = mv.product_uom_qty
         picking._action_done()
         lines = self.rma_customer_id.rma_line_ids
@@ -668,7 +668,7 @@ class TestRma(common.TransactionCase):
         self.assertTrue("res_id" in res, "Incorrect number of pickings created")
         picking = self.env["stock.picking"].browse(res["res_id"])
         self.assertEqual(len(picking), 1, "Incorrect number of pickings created")
-        moves = picking.move_lines
+        moves = picking.move_ids
         self.assertEqual(len(moves), 3, "Incorrect number of moves created")
         lines = self.rma_droship_id.rma_line_ids
         lines.refresh()
@@ -767,7 +767,7 @@ class TestRma(common.TransactionCase):
         res = self.rma_supplier_id.rma_line_ids.action_view_out_shipments()
         self.assertTrue("res_id" in res, "Incorrect number of pickings" "created")
         picking = self.env["stock.picking"].browse(res["res_id"])
-        moves = picking.move_lines
+        moves = picking.move_ids
         self.assertEqual(len(moves), 3, "Incorrect number of moves created")
 
         lines = self.rma_supplier_id.rma_line_ids
@@ -823,7 +823,7 @@ class TestRma(common.TransactionCase):
             list(set(lines.mapped("qty_incoming"))), [0], "Wrong qty_incoming"
         )
         picking.action_assign()
-        for mv in picking.move_lines:
+        for mv in picking.move_ids:
             mv.quantity_done = mv.product_uom_qty
         picking._action_done()
         self.assertEqual(
@@ -886,7 +886,7 @@ class TestRma(common.TransactionCase):
         pickings = self.env["stock.picking"].browse(res["res_id"])
         self.assertEqual(len(pickings), 1, "Incorrect number of pickings created")
         picking_in = pickings[0]
-        moves = picking_in.move_lines
+        moves = picking_in.move_ids
         self.assertEqual(len(moves), 3, "Incorrect number of moves created")
 
         lines = self.rma_supplier_id.rma_line_ids
@@ -925,7 +925,7 @@ class TestRma(common.TransactionCase):
         picking_in.action_confirm()
         picking_in.action_assign()
         for mv in picking_in.move_line_ids:
-            mv.qty_done = mv.product_uom_qty
+            mv.qty_done = mv.reserved_uom_qty
         picking_in._action_done()
         self.assertEqual(
             list(set(lines.mapped("qty_outgoing"))), [0], "Wrong qty_outgoing"
