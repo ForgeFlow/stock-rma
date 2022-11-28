@@ -11,16 +11,17 @@ class StockMove(models.Model):
         "rma.order.line", string="RMA line", ondelete="restrict"
     )
 
-    @api.model
-    def create(self, vals):
-        if vals.get("group_id"):
-            group = self.env["procurement.group"].browse(vals["group_id"])
-            if group.rma_line_id:
-                vals["rma_line_id"] = group.rma_line_id.id
-        return super(StockMove, self).create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get("group_id"):
+                group = self.env["procurement.group"].browse(vals["group_id"])
+                if group.rma_line_id:
+                    vals["rma_line_id"] = group.rma_line_id.id
+        return super().create(vals_list)
 
-    def _action_assign(self):
-        res = super(StockMove, self)._action_assign()
+    def _action_assign(self, force_qty=False):
+        res = super()._action_assign(force_qty=force_qty)
         for move in self:
             if move.rma_line_id:
                 move.partner_id = move.rma_line_id.partner_id.id or False

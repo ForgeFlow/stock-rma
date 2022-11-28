@@ -52,13 +52,13 @@ class RmaOperation(models.Model):
         default="no",
     )
     in_route_id = fields.Many2one(
-        comodel_name="stock.location.route",
+        comodel_name="stock.route",
         string="Inbound Route",
         domain=[("rma_selectable", "=", True)],
         default=lambda self: self._default_routes(),
     )
     out_route_id = fields.Many2one(
-        comodel_name="stock.location.route",
+        comodel_name="stock.route",
         string="Outbound Route",
         domain=[("rma_selectable", "=", True)],
         default=lambda self: self._default_routes(),

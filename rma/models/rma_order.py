@@ -157,13 +157,18 @@ class RmaOrder(models.Model):
         if len(self.mapped("rma_line_ids.partner_id")) > 1:
             raise UserError(_("All grouped RMA's should have same partner."))
 
-    @api.model
-    def create(self, vals):
-        if self.env.context.get("supplier") or vals.get("type") == "supplier":
-            vals["name"] = self.env["ir.sequence"].next_by_code("rma.order.supplier")
-        else:
-            vals["name"] = self.env["ir.sequence"].next_by_code("rma.order.customer")
-        return super(RmaOrder, self).create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if self.env.context.get("supplier") or vals.get("type") == "supplier":
+                vals["name"] = self.env["ir.sequence"].next_by_code(
+                    "rma.order.supplier"
+                )
+            else:
+                vals["name"] = self.env["ir.sequence"].next_by_code(
+                    "rma.order.customer"
+                )
+        return super().create(vals_list)
 
     def _view_shipments(self, result, shipments):
         # choose the view_mode accordingly
