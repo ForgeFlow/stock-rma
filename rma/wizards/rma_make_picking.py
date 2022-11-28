@@ -211,7 +211,7 @@ class RmaMakePicking(models.TransientModel):
         if picking_type == "incoming":
             # Force the reservation of the RMA specific lot for incoming shipments.
             # FIXME: still needs fixing, not reserving appropriate serials.
-            for move in pickings.move_lines.filtered(
+            for move in pickings.move_ids.filtered(
                 lambda x: x.state not in ("draft", "cancel", "done")
                 and x.rma_line_id
                 and x.product_id.tracking in ("lot", "serial")
