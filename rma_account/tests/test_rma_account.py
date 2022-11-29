@@ -2,7 +2,9 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from odoo import fields
+from odoo.fields import Date
 from odoo.tests import common
+from odoo.tests.common import Form
 
 
 class TestRmaAccount(common.SingleTransactionCase):
@@ -230,18 +232,20 @@ class TestRmaAccount(common.SingleTransactionCase):
         self.assertEqual(rma.qty_to_refund, 0.0)
         self.assertEqual(rma.qty_refunded, 2.0)
 
-    def test_05_fill_rma_from_inv_line(self):
-        """Test filling a RMA (line) from an invoice line."""
-        rma = self.rma_line_obj.new(
-            {
-                "partner_id": self.inv_customer.partner_id.id,
-                "account_move_line_id": self.inv_supplier.line_ids.ids[0],
-            }
-        )
-        self.assertFalse(rma.product_id)
-        rma._onchange_account_move_line_id()
+    def test_05_fill_rma_from_supplier_inv_line(self):
+        """Test filling a RMA (line) from a invoice line."""
+        with Form(
+            self.rma_line_obj.with_context(default_type="supplier")
+        ) as rma_line_form:
+            rma_line_form.partner_id = self.inv_supplier.partner_id
+            rma_line_form.account_move_line_id = self.inv_supplier.line_ids[0]
+        rma = rma_line_form.save()
         self.assertEqual(rma.product_id, self.product_1)
         self.assertEqual(rma.product_qty, 3.0)
+        # Remember that the test is SingleTransactionCase.
+        # This supplier invoice has been referenced in 3 RMA lines.
+        self.assertEqual(self.inv_supplier.used_in_rma_count, 3)
+        self.assertEqual(self.inv_supplier.rma_count, 0)
 
     def test_06_default_journal(self):
         self.operation_1.write({"refund_journal_id": self.journal_sale.id})
@@ -285,15 +289,17 @@ class TestRmaAccount(common.SingleTransactionCase):
         rma_1 = self.rma_group_supplier.rma_line_ids.filtered(
             lambda r: r.product_id == self.product_1
         )
-        inv = self.inv_obj.with_context(
-            **{
-                "default_move_type": "in_refund",
-                "default_partner_id": self.inv_supplier.partner_id,
-            }
-        ).create({"add_rma_line_id": rma_1})
-        line = inv.on_change_add_rma_line_id()
-        inv.invoice_line_ids = [(0, 0, line)]
-        inv_product = inv.invoice_line_ids.filtered(
+        with Form(
+            self.env["account.move"].with_context(default_move_type="in_refund")
+        ) as bill_form:
+            bill_form.partner_id = rma_1.partner_id
+            bill_form.invoice_date = Date.today()
+            bill_form.add_rma_line_id = rma_1
+        bill = bill_form.save()
+        bill.action_post()
+        bill_product = bill.invoice_line_ids.filtered(
             lambda x: x.product_id == self.product_1
         ).mapped("product_id")
-        self.assertEqual(rma_1.product_id.id, inv_product.id)
+        self.assertEqual(rma_1.product_id.id, bill_product.id)
+        self.assertEqual(bill.rma_count, 1)
+        self.assertEqual(bill.used_in_rma_count, 0)

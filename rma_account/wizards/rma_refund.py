@@ -110,11 +110,24 @@ class RmaRefund(models.TransientModel):
         result["res_id"] = new_invoice.id
         return result
 
+    def _get_refund_price_unit(self, rma):
+        price_unit = rma.price_unit
+        # If this references a previous invoice/bill, use the same unit price
+        if rma.account_move_line_id:
+            price_unit = rma.account_move_line_id.price_unit
+        return price_unit
+
+    def _get_refund_currency(self, rma):
+        currency = rma.currency_id
+        if rma.account_move_line_id:
+            currency = rma.account_move_line_id.currency_id
+        return currency
+
     @api.model
     def prepare_refund_line(self, item):
         values = {
             "name": item.line_id.name or item.rma_id.name,
-            "price_unit": item.line_id.price_unit,
+            "price_unit": self._get_refund_price_unit(item.line_id),
             "product_uom_id": item.line_id.uom_id.id,
             "product_id": item.product.id,
             "rma_line_id": item.line_id.id,
@@ -143,7 +156,7 @@ class RmaRefund(models.TransientModel):
             "journal_id": journal.id,
             "fiscal_position_id": rma_line.partner_id.property_account_position_id.id,
             "state": "draft",
-            "currency_id": rma_line.currency_id.id,
+            "currency_id": self._get_refund_currency(rma_line),
             "date": wizard.date,
             "invoice_date": wizard.date_invoice,
             "partner_id": rma_line.invoice_address_id.id or rma_line.partner_id.id,
