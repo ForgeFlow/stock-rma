@@ -11,6 +11,9 @@ class TestRmaStockAccountSale(TestRmaStockAccount):
     @classmethod
     def setUpClass(cls):
         super(TestRmaStockAccountSale, cls).setUpClass()
+        cls.operation_receive_refund = cls.env.ref(
+            "rma_account.rma_operation_customer_refund"
+        )
         customer1 = cls.env["res.partner"].create({"name": "Customer 1"})
         cls.product_fifo_1.standard_price = 1234
         cls._create_inventory(cls.product_fifo_1, 20.0, cls.env.ref("rma.location_rma"))
@@ -72,3 +75,87 @@ class TestRmaStockAccountSale(TestRmaStockAccount):
         self.check_accounts_used(
             account_move, debit_account="inventory", credit_account="gdni"
         )
+
+    def test_02_return_and_refund_ref_so(self):
+        """
+        Sell a product. Create a customer invoice.
+        Then create an RMA to return it and refund to the customer
+        """
+        customer_view = self.env.ref("rma_sale.view_rma_line_form")
+        so_line = self.so1.order_line.filtered(
+            lambda r: r.product_id == self.product_fifo_1
+        )
+        rma_line = Form(
+            self.rma_line.with_context(customer=1).with_user(self.rma_basic_user),
+            view=customer_view.id,
+        )
+        rma_line.partner_id = self.so1.partner_id
+        rma_line.sale_line_id = so_line
+        rma_line.operation_id = self.operation_receive_refund
+        rma_line.price_unit = 4356  # This should never be used
+        rma_line = rma_line.save()
+        rma_line.action_rma_to_approve()
+        self._receive_rma(rma_line)
+        make_refund = self.rma_refund_wiz.with_context(
+            **{
+                "customer": True,
+                "active_ids": rma_line.ids,
+                "active_model": "rma.order.line",
+            }
+        ).create({"description": "Test refund"})
+        make_refund.item_ids.qty_to_refund = 20
+        make_refund.invoice_refund()
+        refund = rma_line.refund_line_ids.move_id
+        refund.action_post()
+        self.assertEqual(refund.invoice_line_ids[0].price_unit, so_line.price_unit)
+        self.assertEqual(refund.invoice_line_ids[0].currency_id, so_line.currency_id)
+        gdni_amls = self.env["account.move.line"].search(
+            [
+                ("account_id", "=", self.account_gdni.id),
+                ("rma_line_id", "=", rma_line.id),
+            ]
+        )
+        self.assertEqual(sum(gdni_amls.mapped("balance")), 0.0)
+        self.assertTrue(all(gdni_amls.mapped("reconciled")))
+
+    def test_03_return_and_refund_ref_inv(self):
+        """
+        Sell a product. Then create an RMA to return it and refund to the customer
+        """
+        customer_invoice = self.so1._create_invoices()
+        customer_view = self.env.ref("rma_sale.view_rma_line_form")
+        so_line = self.so1.order_line.filtered(
+            lambda r: r.product_id == self.product_fifo_1
+        )
+        rma_line = Form(
+            self.rma_line.with_context(customer=1).with_user(self.rma_basic_user),
+            view=customer_view.id,
+        )
+        rma_line.partner_id = self.so1.partner_id
+        rma_line.account_move_line_id = customer_invoice.invoice_line_ids[0]
+        rma_line.operation_id = self.operation_receive_refund
+        rma_line.price_unit = 4356  # This should never be used
+        rma_line = rma_line.save()
+        rma_line.action_rma_to_approve()
+        self._receive_rma(rma_line)
+        make_refund = self.rma_refund_wiz.with_context(
+            **{
+                "customer": True,
+                "active_ids": rma_line.ids,
+                "active_model": "rma.order.line",
+            }
+        ).create({"description": "Test refund"})
+        make_refund.item_ids.qty_to_refund = 20
+        make_refund.invoice_refund()
+        refund = rma_line.refund_line_ids.move_id
+        refund.action_post()
+        self.assertEqual(refund.invoice_line_ids[0].price_unit, so_line.price_unit)
+        self.assertEqual(refund.invoice_line_ids[0].currency_id, so_line.currency_id)
+        gdni_amls = self.env["account.move.line"].search(
+            [
+                ("account_id", "=", self.account_gdni.id),
+                ("rma_line_id", "=", rma_line.id),
+            ]
+        )
+        self.assertEqual(sum(gdni_amls.mapped("balance")), 0.0)
+        self.assertTrue(all(gdni_amls.mapped("reconciled")))
