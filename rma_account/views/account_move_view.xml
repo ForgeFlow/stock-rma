@@ -8,14 +8,38 @@
             <div name="button_box" position="inside">
                 <button
                     type="object"
-                    name="action_view_rma"
+                    name="action_view_used_in_rma"
                     class="oe_stat_button"
                     icon="fa-eject"
+                    attrs="{'invisible': [('used_in_rma_count', '=', 0)]}"
+                    groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"
+                >
+                    <field name="used_in_rma_count" widget="statinfo" string="RMA" />
+                </button>
+                <button
+                    type="object"
+                    name="action_view_rma"
+                    class="oe_stat_button"
+                    icon="fa-list"
+                    attrs="{'invisible': [('rma_count', '=', 0)]}"
                     groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"
                 >
                     <field name="rma_count" widget="statinfo" string="RMA" />
                 </button>
             </div>
+            <!-- Add link to rma_line_id to account.move.line -->
+            <xpath
+                expr="//field[@name='invoice_line_ids']/tree/field[@name='company_id']"
+                position="after"
+            >
+                <field name="rma_line_id" invisible="1" />
+            </xpath>
+            <xpath
+                expr="//field[@name='line_ids']/tree/field[@name='company_id']"
+                position="after"
+            >
+                <field name="rma_line_id" invisible="1" />
+            </xpath>
         </field>
     </record>
 
@@ -33,6 +57,7 @@
                     <notebook attrs="{'invisible': [('rma_line_count', '=', 0)]}">
                         <page string="RMA Lines">
                             <field name="rma_line_ids" />
+                            <field name="rma_line_id" />
                         </page>
                     </notebook>
                 </field>
