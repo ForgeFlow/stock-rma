@@ -9,9 +9,15 @@ class AccountMove(models.Model):
     _inherit = "account.move"
 
     @api.depends("line_ids.rma_line_ids")
-    def _compute_rma_count(self):
+    def _compute_used_in_rma_count(self):
         for inv in self:
             rmas = self.mapped("line_ids.rma_line_ids")
+            inv.used_in_rma_count = len(rmas)
+
+    @api.depends("line_ids.rma_line_id")
+    def _compute_rma_count(self):
+        for inv in self:
+            rmas = self.mapped("line_ids.rma_line_id")
             inv.rma_count = len(rmas)
 
     def _prepare_invoice_line_from_rma_line(self, rma_line):
@@ -19,22 +25,26 @@ class AccountMove(models.Model):
         qty = rma_line.qty_to_refund
         if float_compare(qty, 0.0, precision_rounding=rma_line.uom_id.rounding) <= 0:
             qty = 0.0
-        # Todo fill taxes from somewhere
         data = {
             "move_id": self.id,
             "product_uom_id": rma_line.uom_id.id,
             "product_id": rma_line.product_id.id,
-            "price_unit": rma_line.company_id.currency_id.with_context(
-                date=self.date
-            ).compute(rma_line.price_unit, self.currency_id, round=False),
+            "price_unit": rma_line.company_id.currency_id._convert(
+                rma_line._get_price_unit(),
+                self.currency_id,
+                self.company_id,
+                self.date,
+                round=False,
+            ),
             "quantity": qty,
             "discount": 0.0,
-            "rma_line_ids": [(4, rma_line.id)],
+            "rma_line_id": rma_line.id,
             "sequence": sequence + 1,
         }
         return data
 
     def _post_process_invoice_line_from_rma_line(self, new_line, rma_line):
+        new_line.rma_line_id = rma_line
         new_line.name = "%s: %s" % (
             self.add_rma_line_id.name,
             new_line._get_computed_name(),
@@ -58,17 +68,16 @@ class AccountMove(models.Model):
             self._post_process_invoice_line_from_rma_line(
                 new_line, self.add_rma_line_id
             )
-        line = new_line._convert_to_write(
-            {name: new_line[name] for name in new_line._cache}
-        )
         # Compute invoice_origin.
         origins = set(self.line_ids.mapped("rma_line_id.name"))
         self.invoice_origin = ",".join(list(origins))
         self.add_rma_line_id = False
         self._onchange_currency()
-        return line
 
     rma_count = fields.Integer(compute="_compute_rma_count", string="# of RMA")
+    used_in_rma_count = fields.Integer(
+        compute="_compute_used_in_rma_count", string="# of Used in RMA"
+    )
 
     add_rma_line_id = fields.Many2one(
         comodel_name="rma.order.line",
@@ -77,7 +86,15 @@ class AccountMove(models.Model):
         help="Create a refund in based on an existing rma_line",
     )
 
+    def action_view_used_in_rma(self):
+        rmas = self.mapped("line_ids.rma_line_ids")
+        return self._prepare_action_view_rma(rmas)
+
     def action_view_rma(self):
+        rmas = self.mapped("line_ids.rma_line_id")
+        return self._prepare_action_view_rma(rmas)
+
+    def _prepare_action_view_rma(self, rmas):
         if self.move_type in ["in_invoice", "in_refund"]:
             action = self.env.ref("rma.action_rma_supplier_lines")
             form_view = self.env.ref("rma.view_rma_line_supplier_form", False)
@@ -85,7 +102,7 @@ class AccountMove(models.Model):
             action = self.env.ref("rma.action_rma_customer_lines")
             form_view = self.env.ref("rma.view_rma_line_form", False)
         result = action.sudo().read()[0]
-        rma_ids = self.mapped("line_ids.rma_line_ids").ids
+        rma_ids = rmas.ids
         # choose the view_mode accordingly
         if not rma_ids:
             result["domain"] = [("id", "in", [])]
@@ -196,11 +213,19 @@ class AccountMoveLine(models.Model):
         else:
             return super(AccountMoveLine, self).name_get()
 
-    def _compute_rma_count(self):
+    def _compute_used_in_rma_count(self):
         for invl in self:
             rma_lines = invl.mapped("rma_line_ids")
+            invl.used_in_rma_line_count = len(rma_lines)
+
+    def _compute_rma_count(self):
+        for invl in self:
+            rma_lines = invl.mapped("rma_line_id")
             invl.rma_line_count = len(rma_lines)
 
+    used_in_rma_line_count = fields.Integer(
+        compute="_compute_used_in_rma_line_count", string="# of RMA"
+    )
     rma_line_count = fields.Integer(compute="_compute_rma_count", string="# of RMA")
     rma_line_ids = fields.One2many(
         comodel_name="rma.order.line",
@@ -209,7 +234,6 @@ class AccountMoveLine(models.Model):
         readonly=True,
         help="This will contain the RMA lines for the invoice line",
     )
-
     rma_line_id = fields.Many2one(
         comodel_name="rma.order.line",
         string="RMA line",
