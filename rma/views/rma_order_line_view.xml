@@ -8,7 +8,11 @@
                     <field name="name" />
                     <field name="partner_id" />
                     <field name="product_id" />
-                    <field name="lot_id" groups="stock.group_production_lot" />
+                    <field
+                    name="lot_id"
+                    groups="stock.group_production_lot"
+                    context="{'default_product_id': product_id,}"
+                />
                     <field name="rma_id" groups="rma.group_rma_groups" />
                     <field name="origin" />
                     <field name="operation_id" />
@@ -29,7 +33,11 @@
                     <field name="name" />
                     <field name="partner_id" />
                     <field name="product_id" />
-                    <field name="lot_id" groups="stock.group_production_lot" />
+                    <field
+                    name="lot_id"
+                    groups="stock.group_production_lot"
+                    context="{'default_product_id': product_id,}"
+                />
                     <field name="rma_id" groups="rma.group_rma_groups" />
                     <field name="origin" />
                     <field name="operation_id" domain="[('type','=','supplier')]" />
@@ -179,6 +187,7 @@
                                 name="lot_id"
                                 groups="stock.group_production_lot"
                                 attrs="{'required': [('product_tracking', 'in', ('serial', 'lot'))]}"
+                                context="{'default_product_id': product_id,}"
                             />
                                 <field name="under_warranty" />
                             </group>
