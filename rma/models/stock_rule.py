@@ -34,7 +34,7 @@ class StockRule(models.Model):
             res["rma_line_id"] = line.id
             if line.delivery_address_id:
                 res["partner_id"] = line.delivery_address_id.id
-            else:
+            elif line.rma_id.partner_id:
                 res["partner_id"] = line.rma_id.partner_id.id
             res["price_unit"] = line._get_price_unit()
         return res
