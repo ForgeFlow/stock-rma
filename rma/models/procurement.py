@@ -25,7 +25,7 @@ class StockRule(models.Model):
             res['rma_line_id'] = line.id
             if line.delivery_address_id:
                 res['partner_id'] = line.delivery_address_id.id
-            else:
+            elif line.rma_id.partner_id:
                 res['partner_id'] = line.rma_id.partner_id.id
             dest_loc = self.env["stock.location"].browse([
                 res["location_dest_id"]])[0]
