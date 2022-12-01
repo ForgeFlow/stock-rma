@@ -302,6 +302,9 @@ class RmaOrderLine(models.Model):
         string="Unit of Measure",
         required=True,
         readonly=True,
+        compute="_compute_uom_id",
+        precompute=True,
+        store=True,
         states={"draft": [("readonly", False)]},
     )
     price_unit = fields.Monetary(
@@ -378,6 +381,9 @@ class RmaOrderLine(models.Model):
         required=True,
         domain=[("rma_selectable", "=", True)],
         readonly=True,
+        compute="_compute_in_route_id",
+        precompute=True,
+        store=True,
         states={"draft": [("readonly", False)]},
     )
     out_route_id = fields.Many2one(
@@ -386,6 +392,9 @@ class RmaOrderLine(models.Model):
         required=True,
         domain=[("rma_selectable", "=", True)],
         readonly=True,
+        compute="_compute_out_route_id",
+        precompute=True,
+        store=True,
         states={"draft": [("readonly", False)]},
     )
     in_warehouse_id = fields.Many2one(
@@ -689,9 +698,17 @@ class RmaOrderLine(models.Model):
         )
         self.customer_to_supplier = self.operation_id.customer_to_supplier
         self.supplier_to_customer = self.operation_id.supplier_to_customer
-        self.in_route_id = self.operation_id.in_route_id
-        self.out_route_id = self.operation_id.out_route_id
         return result
+
+    @api.depends("operation_id")
+    def _compute_in_route_id(self):
+        for rec in self:
+            rec.in_route_id = rec.operation_id.in_route_id
+
+    @api.depends("operation_id")
+    def _compute_out_route_id(self):
+        for rec in self:
+            rec.out_route_id = rec.operation_id.out_route_id
 
     @api.onchange("customer_to_supplier", "type")
     def _onchange_receipt_policy(self):
@@ -705,7 +722,12 @@ class RmaOrderLine(models.Model):
         product = self.lot_id.product_id
         if product:
             self.product_id = product
-            self.uom_id = product.uom_id
+
+    @api.depends("product_id")
+    def _compute_uom_id(self):
+        for rec in self:
+            if rec.product_id:
+                rec.uom_id = rec.product_id.uom_id
 
     def action_view_in_shipments(self):
         action = self.env.ref("stock.action_picking_tree_all")
