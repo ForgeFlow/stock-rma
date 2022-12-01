@@ -96,7 +96,6 @@
                                 name="partner_id"
                                 context="{'res_partner_search_mode': 'customer'}"
                                 string="Customer"
-                                colspan="4"
                             />
                         <field
                                 name="reference"
