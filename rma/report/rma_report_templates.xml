@@ -84,19 +84,23 @@
                 <table class="table table-condensed">
                     <thead>
                         <tr>
-                            <th>Product</th>
-                            <th class="text-right">Quantity</th>
-                            <th class="text-right">Unit Price</th>
+                            <th name="product" invisible="1">Product</th>
+                            <th name="lot" t-if="doc.lot_id">Lot/Serial Number</th>
+                            <th name="quantity" class="text-right">Quantity</th>
+                            <th name="unit_price" class="text-right">Unit Price</th>
                         </tr>
                    </thead>
                    <tbody>
                         <tr>
-                            <td><span t-field="doc.product_id" /></td>
-                            <td class="text-right">
+                            <td name="product"><span t-field="doc.product_id" /></td>
+                            <td name="lot" t-if="doc.lot_id"><span
+                                    t-field="doc.lot_id"
+                                /></td>
+                            <td name="quantity" class="text-right">
                                 <span t-field="doc.product_qty" />
                                 <span t-field="doc.uom_id" groups="uom.group_uom" />
                             </td>
-                            <td class="text-right">
+                            <td name="unit_price" class="text-right">
                                 <span
                                     t-field="doc.price_unit"
                                     t-options='{"widget": "monetary", "display_currency": doc.currency_id}'
