@@ -9,7 +9,8 @@ class AccountMove(models.Model):
 
     def _prepare_invoice_line_from_rma_line(self, line):
         data = super(AccountMove, self)._prepare_invoice_line_from_rma_line(line)
-        data["purchase_line_id"]: line.id
+        if line.purchase_order_line_id:
+            data["purchase_line_id"]: line.purchase_order_line_id.id
         return data
 
     def action_post(self):
