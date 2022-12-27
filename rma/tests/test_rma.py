@@ -20,6 +20,7 @@ class TestRma(common.SavepointCase):
         cls.rma_line = cls.env["rma.order.line"]
         cls.rma_op = cls.env["rma.operation"]
         cls.product_product_model = cls.env["product.product"]
+        cls.res_users_model = cls.env["res.users"]
         cls.rma_cust_replace_op_id = cls.env.ref("rma.rma_operation_customer_replace")
         cls.rma_sup_replace_op_id = cls.env.ref("rma.rma_operation_supplier_replace")
         cls.rma_ds_replace_op_id = cls.env.ref("rma.rma_operation_ds_replace")
@@ -31,6 +32,7 @@ class TestRma(common.SavepointCase):
         cls.product_2 = cls._create_product("PT2")
         cls.product_3 = cls._create_product("PT3")
         cls.uom_unit = cls.env.ref("uom.product_uom_unit")
+        cls.company = cls.env.company
         cls.env.user.company_id.group_rma_delivery_address = True
         cls.env.user.company_id.group_rma_lines = True
 
@@ -41,6 +43,22 @@ class TestRma(common.SavepointCase):
         cls.customer_location = cls.env.ref("stock.stock_location_customers")
         cls.supplier_location = cls.env.ref("stock.stock_location_suppliers")
         cls.product_uom_id = cls.env.ref("uom.product_uom_unit")
+        cls.g_rma_customer_user = cls.env.ref("rma.group_rma_customer_user")
+        cls.g_rma_manager = cls.env.ref("rma.group_rma_manager")
+        cls.g_rma_supplier_user = cls.env.ref("rma.group_rma_supplier_user")
+        cls.g_stock_user = cls.env.ref("stock.group_stock_user")
+        cls.g_stock_manager = cls.env.ref("stock.group_stock_manager")
+
+        cls.rma_basic_user = cls._create_user(
+            "rma worker",
+            [cls.g_stock_user, cls.g_rma_customer_user, cls.g_rma_supplier_user],
+            cls.company,
+        )
+        cls.rma_manager_user = cls._create_user(
+            "rma manager",
+            [cls.g_stock_manager, cls.g_rma_manager],
+            cls.company,
+        )
         # Customer RMA:
         products2move = [(cls.product_1, 3), (cls.product_2, 5), (cls.product_3, 2)]
         cls.rma_customer_id = cls._create_rma_from_move(
@@ -58,6 +76,21 @@ class TestRma(common.SavepointCase):
         cls.rma_supplier_id = cls._create_rma_from_move(
             products2move, "supplier", cls.env.ref("base.res_partner_2"), dropship=False
         )
+
+    @classmethod
+    def _create_user(cls, login, groups, company):
+        group_ids = [group.id for group in groups]
+        user = cls.res_users_model.create(
+            {
+                "name": login,
+                "login": login,
+                "email": "example@yourcompany.com",
+                "company_id": company.id,
+                "company_ids": [(4, company.id)],
+                "groups_id": [(6, 0, group_ids)],
+            }
+        )
+        return user
 
     @classmethod
     def _create_product_category(
