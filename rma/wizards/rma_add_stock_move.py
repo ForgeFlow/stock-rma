@@ -158,9 +158,15 @@ class RmaAddStockMove(models.TransientModel):
             if sm not in existing_stock_moves or tracking_move:
                 if sm.product_id.tracking == "none":
                     data = self._prepare_rma_line_from_stock_move(sm, lot=False)
-                    rma_line_obj.with_context(default_rma_id=self.rma_id.id).create(
-                        data
-                    )
+                    rec = rma_line_obj.with_context(
+                        default_rma_id=self.rma_id.id
+                    ).create(data)
+                    # Ensure that configuration on the operation is applied (like
+                    #  policies).
+                    # TODO MIG: in v16 the usage of such onchange can be removed in
+                    #  favor of (pre)computed stored editable fields for all policies
+                    #  and configuration in the RMA operation.
+                    rec._onchange_operation_id()
                 else:
                     for lot in sm.move_line_ids.mapped("lot_id").filtered(
                         lambda x: x.id in self.lot_ids.ids
@@ -168,7 +174,13 @@ class RmaAddStockMove(models.TransientModel):
                         if lot.id in self.rma_id.rma_line_ids.mapped("lot_id").ids:
                             continue
                         data = self._prepare_rma_line_from_stock_move(sm, lot)
-                        rma_line_obj.with_context(default_rma_id=self.rma_id.id).create(
-                            data
-                        )
+                        rec = rma_line_obj.with_context(
+                            default_rma_id=self.rma_id.id
+                        ).create(data)
+                        # Ensure that configuration on the operation is applied (like
+                        #  policies).
+                        # TODO MIG: in v16 the usage of such onchange can be removed in
+                        #  favor of (pre)computed stored editable fields for all policies
+                        #  and configuration in the RMA operation.
+                        rec._onchange_operation_id()
         return {"type": "ir.actions.act_window_close"}
