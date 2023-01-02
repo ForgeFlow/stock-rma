@@ -98,6 +98,10 @@
                                 colspan="4"
                             />
                         <field
+                                name="reference"
+                                attrs="{'invisible':[('type', '!=', 'supplier')]}"
+                            />
+                        <field
                                 name="date_rma"
                                 attrs="{'readonly':[('state', '!=', 'draft')]}"
                             />
@@ -115,9 +119,10 @@
                             />
                         <field
                                 name="customer_to_supplier"
-                                attrs="{'readonly':[('state', '!=', 'draft')]}"
+                                attrs="{'readonly':[('state', '!=', 'draft')],
+                                'invisible':[('type', '!=', 'customer')]}"
                             />
-                        <field name="state" invisible="True" />
+                        <field name="state" invisible="1" />
                         <field
                                 name="supplier_address_id"
                                 context="{'show_address': 1}"
@@ -167,6 +172,8 @@
                                 <field name="out_warehouse_id" invisible="True" />
                                 <field name="customer_to_supplier" invisible="True" />
                                 <field name="supplier_address_id" invisible="True" />
+                                <field name="supplier_to_customer" invisible="True" />
+                                <field name="customer_address_id" invisible="True" />
                                 <field name="receipt_policy" invisible="True" />
                                 <field name="delivery_policy" invisible="True" />
                                 <field name="delivery_address_id" invisible="True" />
@@ -192,151 +199,43 @@
     <record id="view_rma_supplier_form" model="ir.ui.view">
         <field name="name">rma.order.supplier.form</field>
         <field name="model">rma.order</field>
+        <field name="inherit_id" ref="rma.view_rma_form" />
+        <field name="mode">primary</field>
         <field name="arch" type="xml">
-            <form string="RMA">
-            <header />
-            <sheet string="RMA">
-                <div class="oe_button_box" name="button_box">
-                    <button
-                            type="object"
-                            name="action_view_in_shipments"
-                            class="oe_stat_button"
-                            icon="fa-truck"
-                            groups="stock.group_stock_user"
-                        >
-                        <field
-                                name="in_shipment_count"
-                                widget="statinfo"
-                                string="Shipments"
-                            />
-                    </button>
-                    <button
-                            type="object"
-                            name="action_view_out_shipments"
-                            class="oe_stat_button"
-                            icon="fa-truck"
-                            groups="stock.group_stock_user"
-                        >
-                        <field
-                                name="out_shipment_count"
-                                widget="statinfo"
-                                string="Deliveries"
-                            />
-                    </button>
-                    <button
-                            type="object"
-                            name="action_view_lines"
-                            class="oe_stat_button"
-                            icon="fa-list"
-                            groups="rma.group_rma_supplier_user"
-                        >
-                        <field name="line_count" widget="statinfo" string="RMA Lines" />
-                    </button>
-                </div>
-                <div class="oe_title" name="title">
-                    <h1>
-                        <field name="name" readonly="1" />
-                    </h1>
-                </div>
-                <group>
-                    <group name="partner">
-                        <field name="state" invisible="1" />
-                        <field
-                                name="partner_id"
-                                context="{'res_partner_search_mode': 'supplier'}"
-                                string="Supplier"
-                                attrs="{'readonly':[('state', '!=', 'draft')]}"
-                            />
-                        <field name="reference" />
-                        <field
-                                name="date_rma"
-                                attrs="{'readonly':[('state', '!=', 'draft')]}"
-                            />
-                    </group>
-                    <group>
-                        <field name="comment" />
-                        <field name="type" readonly="1" invisible="1" />
-                    </group>
-                </group>
-                <group name="route">
-                    <group name="inbound_route" string="Inbound">
-                        <field
-                                name="in_warehouse_id"
-                                attrs="{'readonly':[('state', '!=', 'draft')]}"
-                            />
-                    </group>
-                    <group name="outbound_route" string="Outbound">
-                        <field
-                                name="supplier_to_customer"
-                                attrs="{'readonly':[('state', '!=', 'draft')]}"
-                            />
-                        <field
-                                name="customer_address_id"
-                                context="{'show_address': 1}"
-                                options="{'always_reload': 1}"
-                                attrs="{'required':[('supplier_to_customer', '=', True)],
-                                       'invisible':[('supplier_to_customer', '=', False)],
-                                       'readonly':[('state', '!=', 'draft')]}"
-                            />
-                    </group>
-                </group>
-                <group>
-                    <group name="contact" string="Contact">
-                        <field name="requested_by" readonly="1" />
-                        <field
-                                name="assigned_to"
-                                attrs="{'readonly':[('state', '!=', 'draft')]}"
-                            />
-                        <field name="company_id" groups="base.group_multi_company" />
-                    </group>
-                </group>
-                <notebook colspan="4">
-                    <page string="RMA Lines" name="lines">
-                        <field
-                                name="rma_line_ids"
-                                context="{'form_view_ref':'rma.view_rma_line_supplier_form',
-                                         'default_rma_id': active_id,
-                                         'default_partner_id': partner_id,
-                                         'supplier': 1,
-                                         'hide_title': True}"
-                            >
-                            <tree name="RMA Lines" editable="bottom">
-                                <field name="sequence" widget="handle" />
-                                <field name="state" invisible="True" />
-                                <field name="name" />
-                                <field name="partner_id" invisible="True" />
-                                <field name="product_id" />
-                                <field
-                                        name="lot_id"
-                                        groups="stock.group_production_lot"
-                                        domain="[('product_id', '=', product_id)]"
-                                        context="{'default_product_id': product_id}"
-                                    />
-                                <field name="uom_id" groups="uom.group_uom" />
-                                <field name="operation_id" />
-                                <field name="location_id" invisible="True" />
-                                <field name="in_route_id" invisible="True" />
-                                <field name="out_route_id" invisible="True" />
-                                <field name="in_warehouse_id" invisible="True" />
-                                <field name="out_warehouse_id" invisible="True" />
-                                <field name="supplier_to_customer" invisible="True" />
-                                <field name="customer_address_id" invisible="True" />
-                                <field name="product_qty" />
-                                <field name="price_unit" />
-                            </tree>
-                        </field>
-                    </page>
-                </notebook>
-            </sheet>
-            <div class="oe_chatter">
-                <field
-                        name="message_follower_ids"
-                        widget="mail_followers"
-                        groups="base.group_user"
+            <xpath expr="//button[@name='action_view_lines']" position="attributes">
+                <attribute name="groups">rma.group_rma_supplier_user</attribute>
+            </xpath>
+            <field name="partner_id" position="attributes">
+                <attribute name="string">Supplier</attribute>
+                <attribute
+                    name="context"
+                >{'res_partner_search_mode': 'supplier'}</attribute>
+            </field>
+            <group name="inbound_route" position="after">
+                <group name="outbound_route" string="Outbound">
+                    <field
+                        name="supplier_to_customer"
+                        attrs="{'readonly':[('state', '!=', 'draft')]}"
                     />
-                <field name="message_ids" widget="mail_thread" />
-            </div>
-            </form>
+                    <field
+                        name="customer_address_id"
+                        context="{'show_address': 1}"
+                        options="{'always_reload': 1}"
+                        attrs="{'required':[('supplier_to_customer', '=', True)],
+                                   'invisible':[('supplier_to_customer', '=', False)],
+                                   'readonly':[('state', '!=', 'draft')]}"
+                    />
+                </group>
+            </group>
+            <field name="rma_line_ids" position="attributes">
+                <attribute name="context">{
+                    'form_view_ref':'rma.view_rma_line_supplier_form',
+                    'default_rma_id': active_id,
+                    'default_partner_id': partner_id,
+                    'supplier': 1,
+                    'hide_title': True}
+                </attribute>
+            </field>
         </field>
     </record>
 

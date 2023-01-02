@@ -101,6 +101,7 @@
                     name="%(action_rma_add_stock_move_customer)d"
                     string="Add From Stock Move"
                     type="action"
+                    attrs="{'invisible':[('type', '!=', 'customer')]}"
                 />
             </xpath>
         </field>
@@ -155,6 +156,7 @@
                     name="%(action_rma_add_stock_move_supplier)d"
                     string="Add From Stock Move"
                     type="action"
+                    attrs="{'invisible':[('type', '!=', 'supplier')]}"
                 />
             </xpath>
         </field>
