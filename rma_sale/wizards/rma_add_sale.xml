@@ -114,6 +114,7 @@
                     name="%(action_rma_add_sale)d"
                     string="Add From Sale Order"
                     type="action"
+                    attrs="{'invisible':[('type', '!=', 'customer')]}"
                 />
             </xpath>
         </field>
