@@ -13,6 +13,7 @@
                     class="oe_stat_button"
                     icon="fa-wrench"
                     groups="stock.group_stock_user"
+                    attrs="{'invisible':[('type', '!=', 'customer')]}"
                 >
                     <field
                         name="repair_count"
