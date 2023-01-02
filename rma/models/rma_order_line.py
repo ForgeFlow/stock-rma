@@ -13,6 +13,7 @@ class RmaOrderLine(models.Model):
     _name = "rma.order.line"
     _description = "RMA"
     _inherit = ["mail.thread"]
+    _order = "id desc"
 
     @api.model
     def _get_default_type(self):
