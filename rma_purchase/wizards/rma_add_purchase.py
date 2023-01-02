@@ -78,6 +78,7 @@ class RmaAddPurchase(models.TransientModel):
                 )
         data = {
             "partner_id": self.partner_id.id,
+            "description": self.rma_id.description,
             "purchase_order_line_id": line.id,
             "product_id": line.product_id.id,
             "origin": line.order_id.name,
