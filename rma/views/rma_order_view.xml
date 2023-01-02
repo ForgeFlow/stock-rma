@@ -158,7 +158,11 @@
                                                              'default_partner_id': partner_id,
                                                              'hide_title': True}"
                             >
-                            <tree name="lines" editable="bottom">
+                            <tree
+                                    name="lines"
+                                    editable="bottom"
+                                    default_order="id asc"
+                                >
                                 <field name="sequence" widget="handle" />
                                 <field name="state" invisible="True" />
                                 <field name="partner_id" invisible="True" />
