@@ -120,6 +120,7 @@ class RmaAddStockMove(models.TransientModel):
             )
         data = {
             "partner_id": self.partner_id.id,
+            "description": self.rma_id.description,
             "reference_move_id": sm.id,
             "product_id": sm.product_id.id,
             "lot_id": lot and lot.id or False,

@@ -91,6 +91,7 @@
                 </div>
                 <group>
                     <group name="info">
+                        <field name="type" readonly="1" invisible="1" />
                         <field
                                 name="partner_id"
                                 context="{'res_partner_search_mode': 'customer'}"
@@ -106,9 +107,13 @@
                                 attrs="{'readonly':[('state', '!=', 'draft')]}"
                             />
                     </group>
-                    <group name="comments">
-                        <field name="comment" />
-                        <field name="type" readonly="1" invisible="1" />
+                    <group name="contact">
+                        <field name="requested_by" readonly="1" />
+                        <field
+                                name="assigned_to"
+                                attrs="{'readonly':[('state', '!=', 'draft')]}"
+                            />
+                        <field name="company_id" groups="base.group_multi_company" />
                     </group>
                 </group>
                 <group>
@@ -134,13 +139,15 @@
                     </group>
                 </group>
                 <group>
-                    <group name="contact" string="Contact">
-                        <field name="requested_by" readonly="1" />
+                    <group name="comments" string="Description" colspan="2">
                         <field
-                                name="assigned_to"
-                                attrs="{'readonly':[('state', '!=', 'draft')]}"
+                                name="description"
+                                placeholder="This description will be copied to RMA lines."
                             />
-                        <field name="company_id" groups="base.group_multi_company" />
+                        <field
+                                name="comment"
+                                placeholder="Additional information will be printed in RMA group report."
+                            />
                     </group>
                 </group>
                 <notebook colspan="4">
