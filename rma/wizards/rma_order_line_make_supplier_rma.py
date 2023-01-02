@@ -113,6 +113,7 @@ class RmaLineMakeSupplierRma(models.TransientModel):
                 )
         data = {
             "partner_id": self.partner_id.id,
+            "description": self.supplier_rma_id.description,
             "type": "supplier",
             "origin": item.line_id.rma_id.name,
             "customer_address_id": item.line_id.delivery_address_id.id

@@ -84,6 +84,7 @@ class RmaOrder(models.Model):
     reference = fields.Char(
         string="Partner Reference", help="The partner reference of this RMA order."
     )
+    description = fields.Text()
     comment = fields.Text("Additional Information")
     date_rma = fields.Datetime(
         string="Order Date", index=True, default=lambda self: self._default_date_rma()
