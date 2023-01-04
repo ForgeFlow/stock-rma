@@ -21,6 +21,10 @@
                 <field name="valid_refund_journal_ids" invisible="1" />
                 <field name="refund_journal_id" />
             </field>
+            <field name="customer_to_supplier" position="before">
+                <field name="automated_refund" />
+                <field name="refund_free_of_charge" />
+            </field>
         </field>
     </record>
 </odoo>
