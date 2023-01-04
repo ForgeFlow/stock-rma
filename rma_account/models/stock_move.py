@@ -28,4 +28,5 @@ class StockMove(models.Model):
             # Eventually reconcile together the invoice and valuation accounting
             # entries on the stock interim accounts
             self.rma_line_id._stock_account_anglo_saxon_reconcile_valuation()
+            self.rma_line_id._check_refund_zero_cost()
         return res

@@ -92,10 +92,6 @@ class RmaRefund(models.TransientModel):
     def invoice_refund(self):
         rma_line_ids = self.env["rma.order.line"].browse(self.env.context["active_ids"])
         for line in rma_line_ids:
-            if line.refund_policy == "no":
-                raise ValidationError(
-                    _("The operation is not refund for at least one line")
-                )
             if line.state != "approved":
                 raise ValidationError(_("RMA %s is not approved") % line.name)
         new_invoice = self.compute_refund()
@@ -111,6 +107,8 @@ class RmaRefund(models.TransientModel):
         return result
 
     def _get_refund_price_unit(self, rma):
+        if rma.operation_id.refund_free_of_charge:
+            return 0.0
         price_unit = rma.price_unit
         # If this references a previous invoice/bill, use the same unit price
         if rma.account_move_line_id:
