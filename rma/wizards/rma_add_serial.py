@@ -102,6 +102,7 @@ class RmaAddSerialWiz(models.TransientModel):
 
         vals = {
             "partner_id": self.partner_id.id,
+            "description": self.rma_id.description,
             "product_id": lot.product_id.id,
             "lot_id": lot.id,
             "uom_id": lot.product_id.uom_id.id,
