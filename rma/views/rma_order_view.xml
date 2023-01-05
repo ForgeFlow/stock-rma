@@ -162,6 +162,7 @@
                                     name="lines"
                                     editable="bottom"
                                     default_order="id asc"
+                                    create="0"
                                 >
                                 <field name="sequence" widget="handle" />
                                 <field name="state" invisible="True" />
