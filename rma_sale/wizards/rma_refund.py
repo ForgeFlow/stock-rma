@@ -14,6 +14,8 @@ class RmaRefund(models.TransientModel):
 
     def _get_refund_price_unit(self, rma):
         price_unit = super(RmaRefund, self)._get_refund_price_unit(rma)
+        if rma.operation_id.refund_free_of_charge:
+            return price_unit
         if rma.type == "customer":
             if rma.account_move_line_id:
                 price_unit = rma.account_move_line_id.price_unit
