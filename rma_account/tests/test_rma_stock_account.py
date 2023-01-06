@@ -324,3 +324,26 @@ class TestRmaStockAccount(TestRma):
         self.assertEqual(gdni_balance, 0.0)
         # The GDNI entries should be now reconciled
         self.assertEqual(all(gdni_amls.mapped("reconciled")), True)
+
+    def test_05_reconcile_grni_when_no_refund(self):
+        """
+        Test that receive and send a replacement order leaves GDNI reconciled
+        """
+        self.product_fifo_1.standard_price = 15
+        rma_line = Form(self.rma_line)
+        rma_line.partner_id = self.partner_id
+        rma_line.product_id = self.product_fifo_1
+        rma_line.operation_id.automated_refund = True
+        rma_line = rma_line.save()
+        rma_line.action_rma_to_approve()
+        # receiving should trigger the refund at zero cost
+        self._receive_rma(rma_line)
+        gdni_amls = self.env["account.move.line"].search(
+            [
+                ("rma_line_id", "in", rma_line.ids),
+                ("account_id", "=", self.account_gdni.id),
+            ]
+        ) + rma_line.refund_line_ids.filtered(
+            lambda l: l.account_id == self.account_gdni
+        )
+        self.assertEqual(all(gdni_amls.mapped("reconciled")), True)
