@@ -11,6 +11,7 @@ class RmaOrder(models.Model):
     _name = "rma.order"
     _description = "RMA Group"
     _inherit = ["mail.thread"]
+    _order = "id desc"
 
     @api.model
     def _get_default_type(self):
@@ -84,6 +85,7 @@ class RmaOrder(models.Model):
     reference = fields.Char(
         string="Partner Reference", help="The partner reference of this RMA order."
     )
+    description = fields.Text()
     comment = fields.Text("Additional Information")
     date_rma = fields.Datetime(
         string="Order Date", index=True, default=lambda self: self._default_date_rma()

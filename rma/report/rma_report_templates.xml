@@ -212,11 +212,19 @@
                 </div>
 
                 <table class="table table-condensed">
+                    <t
+                        t-set="print_lot_column"
+                        t-value="any(l.lot_id for l in doc.rma_line_ids)"
+                    />
                     <thead>
                         <tr>
                             <th>Origin</th>
                             <th>Operation</th>
                             <th>Product</th>
+                            <th
+                                name="lot"
+                                t-if="print_lot_column"
+                            >Lot/Serial Number</th>
                             <th class="text-right">Quantity</th>
                             <th class="text-right">Unit Price</th>
                         </tr>
@@ -226,6 +234,9 @@
                             <td><span t-field="l.origin" /></td>
                             <td><span t-field="l.operation_id.name" /></td>
                             <td><span t-field="l.product_id" /></td>
+                            <td name="lot" t-if="print_lot_column"><span
+                                    t-field="l.lot_id"
+                                /></td>
                             <td class="text-right">
                                 <span t-field="l.product_qty" />
                                 <span t-field="l.uom_id" groups="uom.group_uom" />
