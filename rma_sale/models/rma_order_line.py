@@ -85,21 +85,25 @@ class RmaOrderLine(models.Model):
     )
     sales_count = fields.Integer(compute="_compute_sales_count", string="# of Sales")
 
-    @api.onchange("product_id", "partner_id")
-    def _onchange_product_id(self):
-        """Domain for sale_line_id is computed here to make it dynamic."""
-        res = super(RmaOrderLine, self)._onchange_product_id()
-        if not res.get("domain"):
-            res["domain"] = {}
-        domain = [
-            "|",
-            ("order_id.partner_id", "=", self.partner_id.id),
-            ("order_id.partner_id", "child_of", self.partner_id.id),
-        ]
-        if self.product_id:
-            domain.append(("product_id", "=", self.product_id.id))
-        res["domain"]["sale_line_id"] = domain
-        return res
+    sale_line_domain_ids = fields.Many2many(
+        comodel_name="sale.order.line", compute="_compute_sale_line_domain"
+    )
+
+    @api.depends("product_id", "partner_id")
+    def _compute_sale_line_domain(self):
+        line_model = self.env["sale.order.line"]
+        for rec in self:
+            domain = []
+            if rec.partner_id:
+                domain = [
+                    "|",
+                    ("order_id.partner_id", "=", rec.partner_id.id),
+                    ("order_id.partner_id", "child_of", rec.partner_id.id),
+                ]
+            if rec.product_id:
+                domain.append(("product_id", "=", rec.product_id.id))
+            lines = domain and line_model.search(domain) or line_model.browse()
+            rec.sale_line_domain_ids = lines.ids
 
     @api.onchange("operation_id")
     def _onchange_operation_id(self):

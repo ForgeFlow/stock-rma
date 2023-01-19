@@ -34,10 +34,16 @@
                 <group name="main_info" position="inside">
                     <field name="sale_id" invisible="1" />
                     <field
+                    name="sale_line_domain_ids"
+                    invisible="1"
+                    widget="many2many_tags"
+                />
+                    <field
                     name="sale_line_id"
                     context="{'rma': True}"
                     options="{'no_create': True}"
                     attrs="{'invisible':[('type', '!=', 'customer')]}"
+                    domain="[('id', 'in', sale_line_domain_ids)]"
                 />
                 </group>
                 <group name="quantities" position="inside">
