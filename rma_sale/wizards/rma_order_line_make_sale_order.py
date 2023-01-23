@@ -97,7 +97,7 @@ class RmaLineMakeSaleOrder(models.TransientModel):
     def _prepare_sale_order_line(self, so, item):
         product = item.product_id
         vals = {
-            "name": product.name,
+            "name": item.name,
             "order_id": so.id,
             "product_id": product.id,
             "product_uom": product.uom_po_id.id,
