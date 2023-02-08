@@ -362,7 +362,7 @@ class RmaOrderLine(models.Model):
         make_refund = (
             self.env["rma.refund"]
             .with_context(
-                {
+                **{
                     "customer": True,
                     "active_ids": self.ids,
                     "active_model": "rma.order.line",
