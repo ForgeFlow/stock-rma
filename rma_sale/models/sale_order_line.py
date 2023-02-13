@@ -62,7 +62,7 @@ class SaleOrderLine(models.Model):
             return super(SaleOrderLine, self).name_get()
 
     rma_line_id = fields.Many2one(
-        comodel_name="rma.order.line", string="RMA", ondelete="restrict"
+        comodel_name="rma.order.line", string="RMA", ondelete="restrict", copy=False
     )
 
     def _prepare_order_line_procurement(self, group_id=False):
