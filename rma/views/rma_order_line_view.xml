@@ -89,7 +89,14 @@
                         name="action_rma_done"
                         type="object"
                         string="Done"
-                        attrs="{'invisible':[('state', 'in', ('done', 'draft'))]}"
+                        attrs="{'invisible':[('state', 'in', ('done', 'draft', 'canceled'))]}"
+                        groups="rma.group_rma_customer_user"
+                    />
+                        <button
+                        name="action_rma_cancel"
+                        type="object"
+                        string="Cancel"
+                        attrs="{'invisible':[('state', 'in', ('done', 'canceled'))]}"
                         groups="rma.group_rma_customer_user"
                     />
                         <field name="state" widget="statusbar" nolabel="1" />
@@ -485,4 +492,13 @@ if records.filtered(lambda x: x.state == "draft"):
             </field>
          </record>
 
+        <record model="ir.actions.server" id="action_request_cancel_rma_order_line">
+            <field name="name">Cancel</field>
+            <field name="model_id" ref="rma.model_rma_order_line" />
+            <field name="binding_model_id" ref="rma.model_rma_order_line" />
+            <field name="state">code</field>
+            <field name="code">
+    records.action_rma_cancel()
+            </field>
+     </record>
 </odoo>
