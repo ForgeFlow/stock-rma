@@ -213,6 +213,12 @@ class RmaOrderLine(models.Model):
         result["domain"] = [("id", "in", orders.ids)]
         return result
 
+    def action_rma_cancel(self):
+        res = super().action_rma_cancel()
+        for line in self:
+            line.purchase_order_line_ids.mapped("order_id").button_cancel()
+        return res
+
     def _get_rma_purchased_qty(self):
         self.ensure_one()
         qty = 0.0
