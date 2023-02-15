@@ -120,6 +120,12 @@ class RmaOrderLine(models.Model):
             result["res_id"] = repair_ids[0]
         return result
 
+    def action_rma_cancel(self):
+        res = super().action_rma_cancel()
+        for line in self:
+            line.repair_ids.action_repair_cancel()
+        return res
+
     def _get_rma_repaired_qty(self):
         self.ensure_one()
         qty = 0.0
