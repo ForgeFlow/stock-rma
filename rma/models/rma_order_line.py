@@ -244,6 +244,7 @@ class RmaOrderLine(models.Model):
             ("to_approve", "To Approve"),
             ("approved", "Approved"),
             ("done", "Done"),
+            ("canceled", "Canceled"),
         ],
         default="draft",
         tracking=True,
@@ -627,6 +628,25 @@ class RmaOrderLine(models.Model):
 
     def action_rma_done(self):
         self.write({"state": "done"})
+        return True
+
+    def check_cancel(self):
+        for move in self.move_ids:
+            if move.state == "done":
+                raise UserError(
+                    _("Unable to cancel %s as some receptions have already been done.")
+                    % (self.name)
+                )
+
+    def action_rma_cancel(self):
+        for order in self:
+            order.check_cancel()
+            order.write({"state": "canceled"})
+            order.move_ids._action_cancel()
+            shipments = order._get_in_pickings()
+            shipments |= order._get_out_pickings()
+            for ship in shipments:
+                ship.action_cancel()
         return True
 
     @api.model
