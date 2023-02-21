@@ -328,7 +328,12 @@
                             attrs="{'invisible':[('state', 'in', ('done', 'canceled'))]}"
                             groups="rma.group_rma_customer_user"
                         />
-                        <field name="state" widget="statusbar" nolabel="1" />
+                        <field
+                            name="state"
+                            widget="statusbar"
+                            statusbar_visible="draft,to_approve,approved,done"
+                            nolabel="1"
+                        />
                     </header>
                     <sheet>
                         <div name="button_box" class="oe_button_box">
