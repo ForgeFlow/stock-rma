@@ -417,7 +417,7 @@ class TestRma(common.TransactionCase):
         moves = picking.move_ids
         self.assertEqual(len(moves), 3, "Incorrect number of moves created")
         lines = self.rma_customer_id.rma_line_ids
-        lines.refresh()
+        lines.env.invalidate_all()
         self.assertEqual(
             list(set(lines.mapped("qty_received"))), [0], "Wrong qty received"
         )
@@ -537,7 +537,7 @@ class TestRma(common.TransactionCase):
         moves = picking.move_ids
         self.assertEqual(len(moves), 3, "Incorrect number of moves created")
         lines = self.rma_customer_id.rma_line_ids
-        lines.refresh()
+        lines.env.invalidate_all()
         self.assertEqual(
             list(set(lines.mapped("qty_to_receive"))), [0], "Wrong qty to_receive"
         )
@@ -671,7 +671,7 @@ class TestRma(common.TransactionCase):
         moves = picking.move_ids
         self.assertEqual(len(moves), 3, "Incorrect number of moves created")
         lines = self.rma_droship_id.rma_line_ids
-        lines.refresh()
+        lines.env.invalidate_all()
         self.assertEqual(
             sum(lines.mapped("in_shipment_count")), 3, "Incorrect In Shipment Count"
         )
@@ -693,7 +693,7 @@ class TestRma(common.TransactionCase):
         ).create({})
         wizard.make_supplier_rma()
         lines = self.rma_droship_id.rma_line_ids.mapped("supplier_rma_line_ids")
-        lines.refresh()
+        lines.env.invalidate_all()
         self.assertEqual(
             list(set(lines.mapped("qty_received"))), [0], "Wrong qty_received"
         )
@@ -718,7 +718,7 @@ class TestRma(common.TransactionCase):
             "Wrong qty_to_deliver",
         )
         lines = self.rma_droship_id.rma_line_ids
-        lines.refresh()
+        lines.env.invalidate_all()
         self._check_equal_quantity(
             lines.filtered(
                 lambda l: l.product_id == self.product_1
@@ -771,7 +771,7 @@ class TestRma(common.TransactionCase):
         self.assertEqual(len(moves), 3, "Incorrect number of moves created")
 
         lines = self.rma_supplier_id.rma_line_ids
-        lines.refresh()
+        lines.env.invalidate_all()
         self.assertEqual(
             list(set(lines.mapped("qty_received"))), [0], "Wrong qty_received"
         )
@@ -890,7 +890,7 @@ class TestRma(common.TransactionCase):
         self.assertEqual(len(moves), 3, "Incorrect number of moves created")
 
         lines = self.rma_supplier_id.rma_line_ids
-        lines.refresh()
+        lines.env.invalidate_all()
         self.assertEqual(
             list(set(lines.mapped("qty_to_deliver"))), [0], "qty_to_deliver"
         )
