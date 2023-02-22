@@ -86,6 +86,13 @@
                         groups="rma.group_rma_customer_user"
                     />
                         <button
+                        name="action_rma_done"
+                        type="object"
+                        string="Done"
+                        attrs="{'invisible':[('state', 'in', ('done', 'draft', 'canceled'))]}"
+                        groups="rma.group_rma_customer_user"
+                    />
+                        <button
                         name="action_rma_cancel"
                         type="object"
                         string="Cancel"
