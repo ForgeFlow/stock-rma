@@ -47,11 +47,9 @@ class AccountMove(models.Model):
         new_line.rma_line_id = rma_line
         new_line.name = "%s: %s" % (
             self.add_rma_line_id.name,
-            new_line._get_computed_name(),
+            new_line.name,
         )
-        new_line.account_id = new_line._get_computed_account()
-        new_line._onchange_price_subtotal()
-        new_line._onchange_mark_recompute_taxes()
+        new_line.account_id = new_line.account_id
         return True
 
     @api.onchange("add_rma_line_id")
@@ -72,7 +70,6 @@ class AccountMove(models.Model):
         origins = set(self.line_ids.mapped("rma_line_id.name"))
         self.invoice_origin = ",".join(list(origins))
         self.add_rma_line_id = False
-        self._onchange_currency()
 
     rma_count = fields.Integer(compute="_compute_rma_count", string="# of RMA")
     used_in_rma_count = fields.Integer(
@@ -224,7 +221,7 @@ class AccountMoveLine(models.Model):
             invl.rma_line_count = len(rma_lines)
 
     used_in_rma_line_count = fields.Integer(
-        compute="_compute_used_in_rma_line_count", string="# of RMA"
+        compute="_compute_used_in_rma_count", string="# of RMA"
     )
     rma_line_count = fields.Integer(compute="_compute_rma_count", string="# of RMA")
     rma_line_ids = fields.One2many(
