@@ -18,7 +18,6 @@ class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
         cls.invoice_line_model = cls.env["account.move.line"]
         cls.product_model = cls.env["product.product"]
         cls.product_ctg_model = cls.env["product.category"]
-        cls.acc_type_model = cls.env["account.account.type"]
         cls.account_model = cls.env["account.account"]
         cls.aml_model = cls.env["account.move.line"]
         cls.res_users_model = cls.env["res.users"]
@@ -35,21 +34,20 @@ class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
         cls.customer_location = cls.env.ref("stock.stock_location_customers")
         cls.supplier_location = cls.env.ref("stock.stock_location_suppliers")
         # Create account for Goods Received Not Invoiced
-        acc_type = cls._create_account_type("equity", "other", "equity")
         name = "Goods Received Not Invoiced"
         code = "grni"
-        cls.account_grni = cls._create_account(acc_type, name, code, cls.company)
+        cls.account_grni = cls._create_account("equity", name, code, cls.company)
 
         # Create account for Cost of Goods Sold
-        acc_type = cls._create_account_type("expense", "other", "expense")
         name = "Goods Delivered Not Invoiced"
         code = "gdni"
-        cls.account_cogs = cls._create_account(acc_type, name, code, cls.company)
+        cls.account_cogs = cls._create_account("expense", name, code, cls.company)
         # Create account for Inventory
-        acc_type = cls._create_account_type("asset", "other", "asset")
         name = "Inventory"
         code = "inventory"
-        cls.account_inventory = cls._create_account(acc_type, name, code, cls.company)
+        cls.account_inventory = cls._create_account(
+            "asset_current", name, code, cls.company
+        )  # TODO: poner asset de inventario
         # Create Product
         cls.product = cls._create_product()
         cls.product_uom_id = cls.env.ref("uom.product_uom_unit")
@@ -82,20 +80,13 @@ class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
         return user.id
 
     @classmethod
-    def _create_account_type(cls, name, account_type, internal_group):
-        acc_type = cls.acc_type_model.create(
-            {"name": name, "type": account_type, "internal_group": internal_group}
-        )
-        return acc_type
-
-    @classmethod
     def _create_account(cls, acc_type, name, code, company, reconcile=False):
         """Create an account."""
         account = cls.account_model.create(
             {
                 "name": name,
                 "code": code,
-                "user_type_id": acc_type.id,
+                "account_type": acc_type,
                 "company_id": company.id,
                 "reconcile": reconcile,
             }
@@ -254,7 +245,7 @@ class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
         else:
             picking_ids = self.env["stock.picking"].search(res["domain"])
             picking = self.env["stock.picking"].browse(picking_ids)
-        picking.move_lines.write({"quantity_done": 1.0})
+        picking.move_line_ids.write({"qty_done": 1.0})
         picking.button_validate()
         # decreasing cogs
         expected_balance = -1.0
