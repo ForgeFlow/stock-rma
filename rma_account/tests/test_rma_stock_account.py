@@ -11,7 +11,6 @@ class TestRmaStockAccount(TestRma):
     @classmethod
     def setUpClass(cls):
         super(TestRmaStockAccount, cls).setUpClass()
-        cls.acc_type_model = cls.env["account.account.type"]
         cls.account_model = cls.env["account.account"]
         cls.g_account_user = cls.env.ref("account.group_account_user")
         cls.rma_refund_wiz = cls.env["rma.refund"]
@@ -31,21 +30,20 @@ class TestRmaStockAccount(TestRma):
         # The product category created in the base module is not automated valuation
         # we have to create a new category here
         # Create account for Goods Received Not Invoiced
-        acc_type = cls._create_account_type("equity", "other")
         name = "Goods Received Not Invoiced"
         code = "grni"
-        cls.account_grni = cls._create_account(acc_type, name, code, cls.company, True)
+        cls.account_grni = cls._create_account("equity", name, code, cls.company, True)
         # Create account for Goods Delievered
-        acc_type = cls._create_account_type("asset", "other")
         name = "Goods Delivered Not Invoiced"
         code = "gdni"
-        cls.account_gdni = cls._create_account(acc_type, name, code, cls.company, True)
+        cls.account_gdni = cls._create_account(
+            "asset_current", name, code, cls.company, True
+        )
         # Create account for Inventory
-        acc_type = cls._create_account_type("asset", "other")
         name = "Inventory"
         code = "inventory"
         cls.account_inventory = cls._create_account(
-            acc_type, name, code, cls.company, False
+            "asset_current", name, code, cls.company, False
         )
         product_ctg = cls.product_ctg_model.create(
             {
@@ -66,20 +64,13 @@ class TestRmaStockAccount(TestRma):
         cls.product_fifo_3.categ_id = product_ctg
 
     @classmethod
-    def _create_account_type(cls, name, a_type):
-        acc_type = cls.acc_type_model.create(
-            {"name": name, "type": a_type, "internal_group": name}
-        )
-        return acc_type
-
-    @classmethod
     def _create_account(cls, acc_type, name, code, company, reconcile):
         """Create an account."""
         account = cls.account_model.create(
             {
                 "name": name,
                 "code": code,
-                "user_type_id": acc_type.id,
+                "account_type": acc_type,
                 "company_id": company.id,
                 "reconcile": reconcile,
             }
@@ -92,9 +83,9 @@ class TestRmaStockAccount(TestRma):
         debit_line = account_move.mapped("line_ids").filtered(lambda l: l.debit)
         credit_line = account_move.mapped("line_ids").filtered(lambda l: l.credit)
         if debit_account:
-            self.assertEqual(debit_line.account_id.code, debit_account)
+            self.assertEqual(debit_line.account_id[0].code, debit_account)
         if credit_account:
-            self.assertEqual(credit_line.account_id.code, credit_account)
+            self.assertEqual(credit_line.account_id[0].code, credit_account)
 
     def test_01_cost_from_standard(self):
         """
@@ -108,8 +99,12 @@ class TestRmaStockAccount(TestRma):
         rma_line = rma_line.save()
         rma_line.action_rma_to_approve()
         picking = self._receive_rma(rma_line)
-        self.assertEqual(picking.move_lines.stock_valuation_layer_ids.value, 15.0)
-        account_move = picking.move_lines.stock_valuation_layer_ids.account_move_id
+        self.assertEqual(
+            picking.move_line_ids.move_id.stock_valuation_layer_ids.value, 15.0
+        )
+        account_move = (
+            picking.move_line_ids.move_id.stock_valuation_layer_ids.account_move_id
+        )
         self.check_accounts_used(
             account_move, debit_account="inventory", credit_account="gdni"
         )
@@ -145,10 +140,10 @@ class TestRmaStockAccount(TestRma):
         # Test the value in the layers of the incoming stock move is used
         for rma_line in rma_customer_id.rma_line_ids:
             value_origin = rma_line.reference_move_id.stock_valuation_layer_ids.value
-            move_product = picking.move_lines.filtered(
+            move_product = picking.move_line_ids.filtered(
                 lambda l: l.product_id == rma_line.product_id
             )
-            value_used = move_product.stock_valuation_layer_ids.value
+            value_used = move_product.move_id.stock_valuation_layer_ids.value
             self.assertEqual(value_used, -value_origin)
         # Create a refund for the first line
         rma = rma_lines[0]
@@ -262,9 +257,9 @@ class TestRmaStockAccount(TestRma):
         self.env.ref("rma.rule_rma_customer_out_pull").active = False
         self.env.ref("rma.rule_rma_customer_in_pull").active = False
         cust_in_pull_rule = self.customer_route.rule_ids.filtered(
-            lambda r: r.location_id == self.stock_rma_location
+            lambda r: r.location_dest_id == self.stock_rma_location
         )
-        cust_in_pull_rule.location_id = self.input_location
+        cust_in_pull_rule.location_dest_id = self.input_location
         cust_out_pull_rule = self.customer_route.rule_ids.filtered(
             lambda r: r.location_src_id == self.env.ref("rma.location_rma")
         )
@@ -276,7 +271,7 @@ class TestRmaStockAccount(TestRma):
                 "action": "pull",
                 "warehouse_id": self.wh.id,
                 "location_src_id": self.env.ref("rma.location_rma").id,
-                "location_id": self.output_location.id,
+                "location_dest_id": self.output_location.id,
                 "procure_method": "make_to_stock",
                 "route_id": self.customer_route.id,
                 "picking_type_id": self.env.ref("stock.picking_type_internal").id,
@@ -288,7 +283,7 @@ class TestRmaStockAccount(TestRma):
                 "action": "pull",
                 "warehouse_id": self.wh.id,
                 "location_src_id": self.customer_location.id,
-                "location_id": self.env.ref("rma.location_rma").id,
+                "location_dest_id": self.env.ref("rma.location_rma").id,
                 "procure_method": "make_to_order",
                 "route_id": self.customer_route.id,
                 "picking_type_id": self.env.ref("stock.picking_type_in").id,

@@ -82,7 +82,7 @@ class RmaOrderLine(models.Model):
         string="Refund Lines",
         domain=[
             ("move_id.move_type", "in", ["in_refund", "out_refund"]),
-            ("exclude_from_invoice_tab", "=", False),
+            ("display_type", "=", "product"),
         ],
         copy=False,
         index=True,
@@ -129,21 +129,19 @@ class RmaOrderLine(models.Model):
             res["domain"] = {}
         if not self.product_id:
             domain = [
-                "&",
                 "|",
                 ("move_id.partner_id", "=", self.partner_id.id),
                 ("move_id.partner_id", "child_of", self.partner_id.id),
-                ("exclude_from_invoice_tab", "=", False),
+                ("display_type", "=", "product"),
             ]
             res["domain"]["account_move_line_id"] = domain
         else:
             domain = [
                 "&",
-                "&",
                 "|",
                 ("move_id.partner_id", "=", self.partner_id.id),
                 ("move_id.partner_id", "child_of", self.partner_id.id),
-                ("exclude_from_invoice_tab", "=", False),
+                ("display_type", "=", "product"),
                 ("product_id", "=", self.product_id.id),
             ]
             res["domain"]["account_move_line_id"] = domain

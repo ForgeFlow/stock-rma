@@ -154,7 +154,7 @@ class RmaRefund(models.TransientModel):
             "journal_id": journal.id,
             "fiscal_position_id": rma_line.partner_id.property_account_position_id.id,
             "state": "draft",
-            "currency_id": self._get_refund_currency(rma_line),
+            "currency_id": self._get_refund_currency(rma_line).id,
             "date": wizard.date,
             "invoice_date": wizard.date_invoice,
             "partner_id": rma_line.invoice_address_id.id or rma_line.partner_id.id,
