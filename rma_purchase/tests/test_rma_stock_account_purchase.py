@@ -57,13 +57,15 @@ class TestRmaStockAccountPurchase(TestRmaStockAccount):
         picking = self._deliver_rma(rma_line)
         # The price is not the standard price, is the value of the incoming layer
         # of the PO
-        rma_move_value = picking.move_lines.stock_valuation_layer_ids.value
-        po_move_value = po.picking_ids.mapped("move_lines.stock_valuation_layer_ids")[
-            -1
-        ].value
+        rma_move_value = picking.move_line_ids.move_id.stock_valuation_layer_ids.value
+        po_move_value = po.picking_ids.mapped(
+            "move_line_ids.move_id.stock_valuation_layer_ids"
+        )[-1].value
         self.assertEqual(-rma_move_value, po_move_value)
         # Test the accounts used
-        account_move = picking.move_lines.stock_valuation_layer_ids.account_move_id
+        account_move = (
+            picking.move_line_ids.move_id.stock_valuation_layer_ids.account_move_id
+        )
         self.check_accounts_used(account_move, "grni", "inventory")
         # Now forcing a refund to check the stock journals
         rma_line.refund_policy = "ordered"
