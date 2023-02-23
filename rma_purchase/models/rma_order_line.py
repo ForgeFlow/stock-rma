@@ -24,6 +24,7 @@ class RmaOrderLine(models.Model):
                 purchase_list.append(line.id)
             rec.purchase_order_line_ids = [(6, 0, purchase_list)]
 
+    @api.depends("operation_id", "purchase_policy")
     def _compute_qty_purchase(self):
         for rec in self:
             rec.qty_purchased = rec._get_rma_purchased_qty()
