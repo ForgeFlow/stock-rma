@@ -40,7 +40,7 @@ class TestRmaStockAccountSale(TestRmaStockAccount):
         )
         cls.so1.action_confirm()
         for ml in cls.so1.picking_ids.move_line_ids:
-            ml.qty_done = ml.product_uom_qty
+            ml.qty_done = ml.reserved_uom_qty
         cls.so1.picking_ids.button_validate()
 
     def test_01_cost_from_so_move(self):
@@ -65,13 +65,13 @@ class TestRmaStockAccountSale(TestRmaStockAccount):
         picking = self._receive_rma(rma_line)
         # The price is not the standard price, is the value of the outgoing layer
         # of the SO
-        rma_move_value = picking.move_lines.stock_valuation_layer_ids.value
+        rma_move_value = picking.move_ids.stock_valuation_layer_ids.value
         so_move_value = self.so1.picking_ids.mapped(
-            "move_lines.stock_valuation_layer_ids"
+            "move_ids.stock_valuation_layer_ids"
         )[-1].value
         self.assertEqual(rma_move_value, -so_move_value)
         # Test the accounts used
-        account_move = picking.move_lines.stock_valuation_layer_ids.account_move_id
+        account_move = picking.move_ids.stock_valuation_layer_ids.account_move_id
         self.check_accounts_used(
             account_move, debit_account="inventory", credit_account="gdni"
         )

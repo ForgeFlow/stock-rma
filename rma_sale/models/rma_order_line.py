@@ -201,7 +201,7 @@ class RmaOrderLine(models.Model):
         return result
 
     def action_view_origin_sale_order(self):
-        action = self.env.ref("sale.action_orders_salesteams")
+        action = self.env.ref("sale.action_orders")
         result = action.sudo().read()[0]
         order_ids = self.sale_id.ids
         result["domain"] = [("id", "in", order_ids)]

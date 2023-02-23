@@ -46,7 +46,7 @@ class RmaAddSale(models.TransientModel):
         compute="_compute_lot_domain",
     )
     lot_domain_ids = fields.Many2many(
-        comodel_name="stock.production.lot",
+        comodel_name="stock.lot",
         string="Lots Domain",
         compute="_compute_lot_domain",
     )
@@ -64,7 +64,7 @@ class RmaAddSale(models.TransientModel):
             )
             rec.show_lot_filter = bool(rec.lot_domain_ids)
 
-    lot_ids = fields.Many2many(comodel_name="stock.production.lot", string="Lots/Serials selected")
+    lot_ids = fields.Many2many(comodel_name="stock.lot", string="Lots/Serials selected")
 
     def select_all(self):
         self.ensure_one()
