@@ -37,6 +37,7 @@
                     class="oe_stat_button"
                     icon="fa-shopping-cart"
                     groups="purchase.group_purchase_user"
+                    attrs="{'invisible':[('purchase_count','=',0)]}"
                 >
                         <field
                         name="purchase_count"
@@ -56,7 +57,7 @@
                 />
             </group>
             <group name="quantities" position="inside">
-                <group>
+                <group attrs="{'invisible': [('purchase_policy', '=', 'no')]}">
                     <field name="qty_to_purchase" />
                     <field name="qty_purchased" />
                 </group>
