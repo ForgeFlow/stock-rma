@@ -3,7 +3,7 @@
 
 {
     "name": "RMA Sale",
-    "version": "15.0.1.0.1",
+    "version": "16.0.1.0.0",
     "license": "LGPL-3",
     "category": "RMA",
     "summary": "Links RMA with Sales Orders",
