@@ -94,7 +94,7 @@ class RmaLineMakeRepairItem(models.TransientModel):
         comodel_name="uom.uom", string="UoM", readonly=True
     )
     out_route_id = fields.Many2one(
-        comodel_name="stock.location.route",
+        comodel_name="stock.route",
         string="Outbound Route",
         domain=[("rma_selectable", "=", True)],
     )
