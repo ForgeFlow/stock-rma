@@ -17,9 +17,8 @@ class TestRmaStockAccountPurchase(TestRmaStockAccount):
         cls.rma_operation_supplier_refund = cls.env.ref(
             "rma_account.rma_operation_supplier_refund"
         )
-        acc_type = cls._create_account_type("expense", "other")
         cls.account_price_diff = cls._create_account(
-            acc_type, "Refund Price Difference Expense", "rpde", cls.company, False
+            "expense", "Refund Price Difference Expense", "rpde", cls.company, False
         )
 
     def test_01_cost_from_po_move(self):
@@ -203,8 +202,7 @@ class TestRmaStockAccountPurchase(TestRmaStockAccount):
             line_form.price_unit = 110
         bill = bill_form.save()
         bill.action_post()
-        self.assertEquals(len(bill.invoice_line_ids), 1)
-        self.assertEquals(bill.invoice_line_ids.rma_line_id, rma_line)
+        self.assertEqual(bill.invoice_line_ids.rma_line_id, rma_line)
         grni_amls = self.env["account.move.line"].search(
             [
                 ("account_id", "=", self.account_grni.id),
