@@ -235,6 +235,7 @@ class AccountMoveLine(models.Model):
         comodel_name="rma.order.line",
         string="RMA line",
         ondelete="set null",
+        index=True,
         help="This will contain the rma line that originated this line",
     )
 
