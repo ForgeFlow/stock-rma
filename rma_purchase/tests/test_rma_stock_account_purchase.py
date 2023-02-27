@@ -17,7 +17,7 @@ class TestRmaStockAccountPurchase(TestRmaStockAccount):
         cls.rma_operation_supplier_refund = cls.env.ref(
             "rma_account.rma_operation_supplier_refund"
         )
-        acc_type = cls._create_account_type("expense", "other")
+        acc_type = "expense"
         cls.account_price_diff = cls._create_account(
             acc_type, "Refund Price Difference Expense", "rpde", cls.company, False
         )
