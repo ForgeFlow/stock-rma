@@ -170,5 +170,6 @@ class AccountMoveLine(models.Model):
         comodel_name="rma.order.line",
         string="RMA line refund",
         ondelete="set null",
-        help="This will contain the rma line that originated the refund line",
+        index=True,
+        help="This will contain the rma line that originated this line",
     )
