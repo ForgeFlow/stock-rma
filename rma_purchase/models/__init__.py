@@ -5,3 +5,4 @@ from . import purchase_order_line
 from . import rma_operation
 from . import procurement
 from . import account_move
+from . import account_move_line

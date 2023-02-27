@@ -17,7 +17,7 @@ class TestRmaStockAccountPurchase(TestRmaStockAccount):
         cls.rma_operation_supplier_refund = cls.env.ref(
             "rma_account.rma_operation_supplier_refund"
         )
-        acc_type = cls._create_account_type("expense", "other")
+        acc_type = "expense"
         cls.account_price_diff = cls._create_account(
             acc_type, "Refund Price Difference Expense", "rpde", cls.company, False
         )
@@ -157,10 +157,10 @@ class TestRmaStockAccountPurchase(TestRmaStockAccount):
         Then create an RMA to return it and get the refund from the supplier with
         a different price than the original purchase price
         """
+        # extra variable to pass pre-commit
+        account_pd = self.account_price_diff
         self.product_fifo_1.categ_id.update(
-            {
-                "property_account_creditor_price_difference_categ": self.account_price_diff
-            }
+            {"property_account_creditor_price_difference_categ": account_pd}
         )
         self.product_fifo_1.standard_price = 1234
         po = self.po_model.create(
