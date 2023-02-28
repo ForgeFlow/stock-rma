@@ -121,6 +121,20 @@ class RmaOrderLine(models.Model):
         store=True,
     )
 
+    commercial_partner_id = fields.Many2one(
+        "res.partner",
+        string="Commercial Entity",
+        store=True,
+        readonly=True,
+        compute="_compute_commercial_partner_id",
+        ondelete="restrict",
+    )
+
+    @api.depends("partner_id")
+    def _compute_commercial_partner_id(self):
+        for rma_line in self:
+            rma_line.commercial_partner_id = rma_line.partner_id.commercial_partner_id
+
     @api.onchange("product_id", "partner_id")
     def _onchange_product_id(self):
         """Domain for sale_line_id is computed here to make it dynamic."""
