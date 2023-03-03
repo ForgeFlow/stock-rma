@@ -13,7 +13,6 @@ class RmaOperation(models.Model):
             ("ordered", "Based on Ordered Quantities"),
             ("received", "Based on Received Quantities"),
         ],
-        string="Put Away Policy",
         default="no",
     )
     put_away_route_id = fields.Many2one(
