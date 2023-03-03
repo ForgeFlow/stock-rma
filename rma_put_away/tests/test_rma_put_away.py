@@ -118,7 +118,7 @@ class TestRmaPutAway(common.SingleTransactionCase):
         rma._onchange_operation_id()
         rma.action_rma_to_approve()
         wizard = self.rma_make_picking.with_context(
-            {
+            **{
                 "active_ids": rma.id,
                 "active_model": "rma.order.line",
                 "picking_type": "incoming",
@@ -127,7 +127,7 @@ class TestRmaPutAway(common.SingleTransactionCase):
         ).create({})
         wizard._create_picking()
         wizard = self.rma_make_put_away_wiz.with_context(
-            {
+            **{
                 "active_ids": rma.id,
                 "active_model": "rma.order.line",
                 "item_ids": [
@@ -174,7 +174,7 @@ class TestRmaPutAway(common.SingleTransactionCase):
         rma._onchange_lot_id()
         rma.action_rma_to_approve()
         wizard = self.rma_make_picking.with_context(
-            {
+            **{
                 "active_ids": rma.id,
                 "active_model": "rma.order.line",
                 "picking_type": "incoming",
@@ -189,7 +189,7 @@ class TestRmaPutAway(common.SingleTransactionCase):
             mv.quantity_done = mv.product_uom_qty
         picking._action_done()
         wizard = self.rma_make_put_away_wiz.with_context(
-            {
+            **{
                 "active_ids": rma.id,
                 "active_model": "rma.order.line",
                 "item_ids": [

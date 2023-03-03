@@ -53,7 +53,6 @@ class RmaOrderLine(models.Model):
             line.put_away_count = len(pickings)
 
     qty_to_put_away = fields.Float(
-        string="Qty To Put Away",
         copy=False,
         digits="Product Unit of Measure",
         readonly=True,
@@ -61,7 +60,6 @@ class RmaOrderLine(models.Model):
         store=True,
     )
     qty_in_put_away = fields.Float(
-        string="Qty In Put Away",
         copy=False,
         digits="Product Unit of Measure",
         readonly=True,
@@ -69,7 +67,6 @@ class RmaOrderLine(models.Model):
         store=True,
     )
     qty_put_away = fields.Float(
-        string="Qty Put Away",
         copy=False,
         digits="Product Unit of Measure",
         readonly=True,
@@ -82,7 +79,6 @@ class RmaOrderLine(models.Model):
             ("ordered", "Based on Ordered Quantities"),
             ("received", "Based on Received Quantities"),
         ],
-        string="Put Away Policy",
         default="no",
         required=True,
         readonly=False,
