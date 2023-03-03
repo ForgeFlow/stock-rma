@@ -16,7 +16,7 @@ class RmaOperation(models.Model):
         default="no",
     )
     put_away_route_id = fields.Many2one(
-        comodel_name="stock.location.route",
+        comodel_name="stock.route",
         string="Put Away Route",
         domain=[("rma_selectable", "=", True)],
         default=lambda self: self._default_routes(),

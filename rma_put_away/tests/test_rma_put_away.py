@@ -33,7 +33,7 @@ class TestRmaPutAway(common.SingleTransactionCase):
             }
         )
 
-        cls.lot = cls.env["stock.production.lot"].create(
+        cls.lot = cls.env["stock.lot"].create(
             {
                 "name": "Lot for tests",
                 "product_id": cls.product_2.id,
@@ -49,7 +49,7 @@ class TestRmaPutAway(common.SingleTransactionCase):
             }
         )
 
-        cls.route1 = cls.env["stock.location.route"].create(
+        cls.route1 = cls.env["stock.route"].create(
             {
                 "name": "Transfer WH1",
                 "rma_selectable": True,
@@ -62,7 +62,7 @@ class TestRmaPutAway(common.SingleTransactionCase):
                 "name": "Transfer",
                 "route_id": cls.route1.id,
                 "location_src_id": cls.stock_rma_location.id,
-                "location_id": cls.put_away_loc.id,
+                "location_dest_id": cls.put_away_loc.id,
                 "action": "pull",
                 "picking_type_id": cls.wh.int_type_id.id,
                 "procure_method": "make_to_stock",
@@ -185,7 +185,7 @@ class TestRmaPutAway(common.SingleTransactionCase):
         res = rma.action_view_in_shipments()
         picking = self.env["stock.picking"].browse(res["res_id"])
         picking.action_assign()
-        for mv in picking.move_lines:
+        for mv in picking.move_ids:
             mv.quantity_done = mv.product_uom_qty
         picking._action_done()
         wizard = self.rma_make_put_away_wiz.with_context(
