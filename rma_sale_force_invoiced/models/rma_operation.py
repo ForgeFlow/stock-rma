@@ -7,7 +7,6 @@ class RmaOperation(models.Model):
     _inherit = "rma.operation"
 
     sale_force_invoiced = fields.Boolean(
-        string="Sale Force Invoiced",
         help="Forces the sales order created from RMA to be flagged invoiced. "
         "This is useful when the sales order is free of charge.",
     )
