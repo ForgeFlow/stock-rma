@@ -246,7 +246,7 @@ class RmaMakePicking(models.TransientModel):
                             "lot_id": move.rma_line_id.lot_id.id,
                             "product_uom_id": move.product_id.uom_id.id,
                             "qty_done": 0,
-                            "product_uom_qty": qty,
+                            "reserved_uom_qty": qty,
                         }
                     )
                     move_line_model.create(move_line_data)
