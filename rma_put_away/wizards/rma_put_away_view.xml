@@ -1,0 +1,72 @@
+<?xml version="1.0" ?>
+<odoo>
+    <record id="view_rma_put_away" model="ir.ui.view">
+        <field name="name">Create Put Away</field>
+        <field name="model">rma_make_put_away.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Select lines for picking" name="lines">
+                <separator string="Select lines for put away" />
+                <field name="item_ids">
+                    <tree editable="bottom" create="false">
+                        <field name="rma_id" groups="rma.group_rma_groups" />
+                        <field name="product_id" />
+                        <field name="product_qty" />
+                        <field name="qty_to_put_away" />
+                        <field name="location_id" />
+                        <field name="line_id" invisible="1" />
+                        <field name="uom_id" groups="uom.group_uom" />
+                    </tree>
+                </field>
+                <footer>
+                    <button
+                        string="Confirm"
+                        name="action_create_put_away"
+                        type="object"
+                        class="oe_highlight"
+                    />
+                    or
+                    <button
+                        name="action_cancel"
+                        string="Cancel"
+                        class="oe_link"
+                        special="cancel"
+                    />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_rma_put_away" model="ir.actions.act_window">
+        <field name="name">Create Put Away</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">rma_make_put_away.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="view_rma_put_away" />
+        <field name="groups_id" eval="[(4, ref('stock.group_stock_user'))]" />
+        <field name="binding_model_id" ref="rma.model_rma_order_line" />
+    </record>
+
+    <record id="view_rma_line_button_put_away_form" model="ir.ui.view">
+        <field name="name">rma.order.line.form</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_line_button_form" />
+        <field name="arch" type="xml">
+            <header position="inside">
+                <button
+                    name="%(action_rma_put_away)d"
+                    string="Put Away"
+                    class="oe_highlight"
+                    attrs="{'invisible':['|', ('qty_to_put_away', '=', 0), ('state', '!=', 'approved')]}"
+                    type="action"
+                />
+                <button
+                    name="%(action_rma_put_away)d"
+                    string="Put Away"
+                    attrs="{'invisible':['|', ('qty_to_put_away', '!=', 0), ('state', '!=', 'approved')]}"
+                    type="action"
+                />
+            </header>
+        </field>
+    </record>
+</odoo>
