@@ -15,6 +15,7 @@ class TestRmaRepair(common.SingleTransactionCase):
         cls.rma_op = cls.env["rma.operation"]
         cls.rma_add_invoice_wiz = cls.env["rma_add_account_move"]
         cls.rma_make_repair_wiz = cls.env["rma.order.line.make.repair"]
+        cls.rma_make_picking = cls.env["rma_make_picking.wizard"]
         cls.repair_line_obj = cls.env["repair.line"]
         cls.acc_obj = cls.env["account.account"]
         cls.inv_obj = cls.env["account.move"]
@@ -153,6 +154,14 @@ class TestRmaRepair(common.SingleTransactionCase):
         cls.material.product_tmpl_id.standard_price = 10
         cls.stock_location = cls.env.ref("stock.stock_location_stock")
 
+        cls.env["stock.quant"].create(
+            {
+                "product_id": cls.material.id,
+                "location_id": cls.stock_location.id,
+                "quantity": 10,
+            }
+        )
+
     def test_01_add_from_invoice_customer(self):
         """Test wizard to create RMA from a customer invoice."""
         add_inv = self.rma_add_invoice_wiz.with_context(
@@ -239,6 +248,21 @@ class TestRmaRepair(common.SingleTransactionCase):
         rma._onchange_operation_id()
         rma.action_rma_to_approve()
         rma.action_rma_approve()
+        wizard = self.rma_make_picking.with_context(
+            **{
+                "active_ids": rma.id,
+                "active_model": "rma.order.line",
+                "picking_type": "incoming",
+                "active_id": 1,
+            }
+        ).create({})
+        wizard._create_picking()
+        res = rma.action_view_in_shipments()
+        picking = self.env["stock.picking"].browse(res["res_id"])
+        picking.action_assign()
+        for mv in picking.move_ids:
+            mv.quantity_done = mv.product_uom_qty
+        picking._action_done()
         self.assertEqual(rma.qty_to_deliver, 0.0)
         make_repair = self.rma_make_repair_wiz.with_context(
             **{
