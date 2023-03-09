@@ -13,6 +13,7 @@
                     class="oe_stat_button"
                     icon="fa-wrench"
                     groups="stock.group_stock_user"
+                    attrs="{'invisible':[('repair_count','=',0)]}"
                 >
                         <field
                         name="repair_count"
@@ -22,7 +23,7 @@
                 </button>
             </div>
             <group name="quantities" position="inside">
-                <group>
+                <group attrs="{'invisible': [('repair_type', '=', 'no')]}">
                     <field name="qty_to_repair" />
                     <field name="qty_under_repair" />
                     <field name="qty_to_pay" />
