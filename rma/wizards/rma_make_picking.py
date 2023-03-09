@@ -227,7 +227,7 @@ class RmaMakePicking(models.TransientModel):
                     )
                     move.move_line_ids.write(
                         {
-                            "product_uom_qty": 1,
+                            "reserved_uom_qty": 1,
                             "qty_done": 0,
                         }
                     )
