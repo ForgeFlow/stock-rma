@@ -387,7 +387,7 @@
                     <field name="lot_id" />
                     <separator />
                     <filter
-                    name="assigned_to"
+                    name="assigned_to_filter"
                     domain="[('assigned_to','=',uid)]"
                     help="My RMAs"
                 />
@@ -457,7 +457,7 @@
             <field name="name">Customer RMA</field>
             <field name="res_model">rma.order.line</field>
             <field name="domain">[('type','=', 'customer')]</field>
-            <field name="context">{"search_default_assigned_to":uid}</field>
+            <field name="context">{"search_default_assigned_to_filter":1}</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="view_rma_line_tree" />
         </record>
@@ -468,7 +468,7 @@
             <field name="domain">[('type','=', 'supplier')]</field>
             <field
             name="context"
-        >{"search_default_assigned_to":uid, "supplier":1}</field>
+        >{"search_default_assigned_to_filter":1, "supplier":1}</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="view_rma_line_supplier_tree" />
         </record>
