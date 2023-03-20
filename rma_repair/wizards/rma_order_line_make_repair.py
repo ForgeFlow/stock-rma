@@ -1,8 +1,10 @@
 # Copyright 2020 ForgeFlow S.L.
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
+import time
 
 from odoo import _, api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
+from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FORMAT
 
 
 class RmaLineMakeRepair(models.TransientModel):
@@ -56,6 +58,13 @@ class RmaLineMakeRepair(models.TransientModel):
             data = item._prepare_repair_order(rma_line)
             repair = repair_obj.create(data)
             res.append(repair.id)
+            if rma_line.location_id != repair.location_id:
+                item._run_procurement(
+                    rma_line.operation_id.repair_route_id, repair.location_id
+                )
+                item._run_procurement(
+                    rma_line.operation_id.repair_route_id, rma_line.location_id
+                )
         return {
             "domain": [("id", "in", res)],
             "name": _("Repairs"),
@@ -72,7 +81,7 @@ class RmaLineMakeRepairItem(models.TransientModel):
     _description = "RMA Line Make Repair Item"
 
     @api.constrains("product_qty")
-    def _check_prodcut_qty(self):
+    def _check_product_qty(self):
         for rec in self:
             if rec.product_qty <= 0.0:
                 raise ValidationError(_("Quantity must be positive."))
@@ -138,3 +147,76 @@ class RmaLineMakeRepairItem(models.TransientModel):
             "partner_invoice_id": addr["invoice"],
             "lot_id": rma_line.lot_id.id,
         }
+
+    def _run_procurement(self, route, dest_location):
+        procurements = []
+        errors = []
+        procurement = self._prepare_procurement(route, dest_location)
+        procurements.append(procurement)
+        try:
+            self.env["procurement.group"].with_context(picking_type="internal").run(
+                procurements
+            )
+        except UserError as error:
+            errors.append(error.args[0])
+        if errors:
+            raise UserError("\n".join(errors))
+        return procurements
+
+    def find_procurement_group(self):
+        if self.line_id.rma_id:
+            return self.env["procurement.group"].search(
+                [("rma_id", "=", self.line_id.rma_id.id)], limit=1
+            )
+        else:
+            return self.env["procurement.group"].search(
+                [("rma_line_id", "=", self.line_id.id)], limit=1
+            )
+
+    def _get_procurement_group(self):
+        group_data = {
+            "partner_id": self.line_id.partner_id.id,
+            "name": self.line_id.rma_id.name or self.line_id.name,
+            "rma_id": self.line_id.rma_id and self.line_id.rma_id.id or False,
+            "rma_line_id": self.line_id.id if not self.line_id.rma_id else False,
+        }
+        return self.env["procurement.group"].create(group_data)
+
+    @api.model
+    def _get_procurement_data(self, route, dest_location):
+        if not route:
+            raise ValidationError(_("No route specified"))
+        group = self.find_procurement_group()
+        if not group:
+            group = self._get_procurement_group()
+        procurement_data = {
+            "name": self.line_id and self.line_id.name,
+            "group_id": group,
+            "warehouse": dest_location.warehouse_id,
+            "origin": self.line_id.name,
+            "date_planned": time.strftime(DT_FORMAT),
+            "product_id": self.product_id,
+            "product_qty": self.product_qty,
+            "product_uom": self.product_id.product_tmpl_id.uom_id.id,
+            "location_id": dest_location,
+            "partner_id": self.partner_id.id,
+            "route_ids": route,
+            "rma_line_id": self.line_id.id,
+            "is_rma_repair_transfer": True,
+        }
+        return procurement_data
+
+    @api.model
+    def _prepare_procurement(self, route, dest_location):
+        values = self._get_procurement_data(route, dest_location)
+        procurement = self.env["procurement.group"].Procurement(
+            self.product_id,
+            self.product_qty,
+            self.product_id.product_tmpl_id.uom_id,
+            dest_location,
+            values.get("origin"),
+            values.get("origin"),
+            self.env.company,
+            values,
+        )
+        return procurement
