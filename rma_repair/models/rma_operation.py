@@ -35,3 +35,8 @@ class RmaOperation(models.Model):
         "respectively. 'No invoice' means you don't want to generate "
         "invoice for this repair order.",
     )
+    repair_route_id = fields.Many2one(
+        comodel_name="stock.route",
+        string="Repair Route",
+        domain=[("rma_selectable", "=", True)],
+    )

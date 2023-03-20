@@ -21,6 +21,20 @@
                         string="Repair Orders"
                     />
                 </button>
+                <button
+                    type="object"
+                    name="action_view_repair_transfers"
+                    class="oe_stat_button"
+                    icon="fa-truck"
+                    groups="stock.group_stock_user"
+                    attrs="{'invisible': [('repair_transfer_count', '=', 0)]}"
+                >
+                        <field
+                        name="repair_transfer_count"
+                        widget="statinfo"
+                        string="Repair Transfers"
+                    />
+                    </button>
             </div>
             <xpath expr="//field[@name='rma_line_ids']/tree" position="inside">
                 <field name="repair_type" invisible="True" />
