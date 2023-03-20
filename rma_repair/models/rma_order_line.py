@@ -36,6 +36,13 @@ class RmaOrderLine(models.Model):
         for line in self:
             line.repair_count = len(line.repair_ids)
 
+    def _compute_repair_transfer_count(self):
+        for line in self:
+            pickings = line.move_ids.filtered(
+                lambda m: m.is_rma_repair_transfer
+            ).mapped("picking_id")
+            line.repair_transfer_count = len(pickings)
+
     repair_ids = fields.One2many(
         comodel_name="repair.order",
         inverse_name="rma_line_id",
@@ -78,6 +85,10 @@ class RmaOrderLine(models.Model):
     )
     repair_count = fields.Integer(
         compute="_compute_repair_count", string="# of Repairs"
+    )
+
+    repair_transfer_count = fields.Integer(
+        compute="_compute_repair_transfer_count", string="# of Repair Transfers"
     )
 
     delivery_policy = fields.Selection(
@@ -182,3 +193,20 @@ class RmaOrderLine(models.Model):
         for rec in self.filtered(lambda l: l.delivery_policy == "repair"):
             rec.qty_to_deliver = rec.qty_repaired - rec.qty_delivered
         return res
+
+    def action_view_repair_transfers(self):
+        action = self.env.ref("stock.action_picking_tree_all")
+        result = action.sudo().read()[0]
+        pickings = self.env["stock.picking"]
+        for line in self:
+            pickings |= line.move_ids.filtered(
+                lambda m: m.is_rma_repair_transfer
+            ).mapped("picking_id")
+        # choose the view_mode accordingly
+        if len(pickings) != 1:
+            result["domain"] = "[('id', 'in', " + str(pickings.ids) + ")]"
+        elif len(pickings) == 1:
+            res = self.env.ref("stock.view_picking_form", False)
+            result["views"] = [(res and res.id or False, "form")]
+            result["res_id"] = pickings.ids[0]
+        return result

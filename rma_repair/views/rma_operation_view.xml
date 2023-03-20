@@ -21,6 +21,7 @@
                 <group name="repair" string="Repair">
                     <field name="repair_location_id" />
                     <field name="repair_invoice_method" />
+                    <field name="repair_route_id" />
                 </group>
             </group>
             <field name="delivery_policy" position="after">
