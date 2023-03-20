@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<!-- Copyright 2017-19 Eficent Business and IT Consulting Services S.L.
+<!-- Copyright 2017-19 ForgeFlow S.L.
      License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl-3.0) -->
 <odoo>
     <record id="view_rma_tree" model="ir.ui.view">
@@ -35,14 +35,16 @@
         <field name="model">rma.order</field>
         <field name="inherit_id" ref="rma.view_rma_supplier_form" />
         <field name="arch" type="xml">
-            <group name="company" position="inside">
-                <field name="company_id" invisible="True" />
-                <field
-                    name="operating_unit_id"
-                    domain="[('company_id','=', company_id)]"
-                    options="{'no_create': True}"
-                    groups="operating_unit.group_multi_operating_unit"
-                />
+            <group name="comments" position="before">
+                <group name="company">
+                    <field name="company_id" invisible="True" />
+                    <field
+                        name="operating_unit_id"
+                        domain="[('company_id','=', company_id)]"
+                        options="{'no_create': True}"
+                        groups="operating_unit.group_multi_operating_unit"
+                    />
+                </group>
             </group>
         </field>
     </record>
@@ -52,14 +54,16 @@
         <field name="model">rma.order</field>
         <field name="inherit_id" ref="rma.view_rma_form" />
         <field name="arch" type="xml">
-            <group name="company" position="inside">
-                <field name="company_id" invisible="True" />
-                <field
-                    name="operating_unit_id"
-                    domain="[('company_id','=', company_id)]"
-                    options="{'no_create': True}"
-                    groups="operating_unit.group_multi_operating_unit"
-                />
+            <group name="comments" position="before">
+                <group name="company">
+                    <field name="company_id" invisible="True" />
+                    <field
+                        name="operating_unit_id"
+                        domain="[('company_id','=', company_id)]"
+                        options="{'no_create': True}"
+                        groups="operating_unit.group_multi_operating_unit"
+                    />
+                </group>
             </group>
         </field>
     </record>

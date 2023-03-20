@@ -24,10 +24,11 @@ Usage
 Contributors
 ------------
 
-* Aaron Henriquez <ahenriquez@eficent.com>
-* Beñat Jimenez <benat.jimenez@eficent.com>
+* Aaron Henriquez <ahenriquez@forgeflow.com>
+* Beñat Jimenez <benat.jimenez@forgeflow.com>
+* Juany Davila <juany.davila@forgeflow.com>
 
 Maintainer
 ----------
 
-This module is maintained by Eficent.
+This module is maintained by ForgeFlow.
