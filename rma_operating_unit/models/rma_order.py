@@ -1,4 +1,4 @@
-# © 2017-19 Eficent Business and IT Consulting Services S.L.
+# Copyright 2017-23 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 
 from odoo import _, api, fields, models
@@ -9,7 +9,6 @@ class RmaOrder(models.Model):
 
     _inherit = "rma.order"
 
-    @api.multi
     @api.constrains("rma_line_ids", "rma_line_ids.operating_unit_id")
     def _check_operating_unit(self):
         for rma in self:

@@ -1,4 +1,4 @@
-# © 2017-19 Eficent Business and IT Consulting Services S.L.
+# Copyright 2017-19 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 from odoo import exceptions
 from odoo.tests import common
@@ -68,45 +68,61 @@ class TestRmaOperatingUnit(common.TransactionCase):
     def _create_rma(self, uid, operating_unit=False):
         """Creates an RMA"""
         if not operating_unit:
-            operating_unit = self.rma_model.sudo(uid)._default_operating_unit()
-        rma_order = self.rma_model.sudo(uid).create(
-            {
-                "operating_unit_id": operating_unit.id,
-                "partner_id": self.partner.id,
-                "user_id": uid,
-            }
+            operating_unit = (
+                self.rma_model.sudo().with_user(uid)._default_operating_unit()
+            )
+        rma_order = (
+            self.rma_model.sudo()
+            .with_user(uid)
+            .create(
+                {
+                    "operating_unit_id": operating_unit.id,
+                    "partner_id": self.partner.id,
+                }
+            )
         )
         return rma_order
 
     def _create_rma_line(self, rma, uid, operating_unit):
         """Creates an RMA"""
-        rma_order_line = self.rma_line_model.sudo(uid).create(
-            {
-                "operating_unit_id": operating_unit.id,
-                "rma_id": rma.id,
-                "partner_id": self.partner.id,
-                "in_route_id": 1,
-                "out_route_id": 1,
-                "in_warehouse_id": 1,
-                "out_warehouse_id": 1,
-                "location_id": 1,
-                "receipt_policy": "ordered",
-                "delivery_policy": "ordered",
-                "name": self.product.name,
-                "product_id": self.product.id,
-                "uom_id": self.product.uom_id.id,
-            }
+        rma_order_line = (
+            self.rma_line_model.sudo()
+            .with_user(uid)
+            .create(
+                {
+                    "operating_unit_id": operating_unit.id,
+                    "operation_id": self.env.ref(
+                        "rma.rma_operation_supplier_replace"
+                    ).id,
+                    "rma_id": rma.id,
+                    "partner_id": self.partner.id,
+                    "in_route_id": 1,
+                    "out_route_id": 1,
+                    "in_warehouse_id": 1,
+                    "out_warehouse_id": 1,
+                    "location_id": 1,
+                    "receipt_policy": "ordered",
+                    "delivery_policy": "ordered",
+                    "name": self.product.name,
+                    "product_id": self.product.id,
+                    "uom_id": self.product.uom_id.id,
+                }
+            )
         )
         return rma_order_line
 
     def test_security(self):
         # User 2 is only assigned to Operating Unit B2C, and cannot
         # access RMA of Main Operating Unit.
-        record = self.rma_model.sudo(self.user2.id).search(
-            [
-                ("id", "=", self.rma_order1.id),
-                ("operating_unit_id", "=", self.main_OU.id),
-            ]
+        record = (
+            self.rma_model.sudo()
+            .with_user(self.user2.id)
+            .search(
+                [
+                    ("id", "=", self.rma_order1.id),
+                    ("operating_unit_id", "=", self.main_OU.id),
+                ]
+            )
         )
         self.assertEqual(
             record.ids,
