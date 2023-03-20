@@ -128,10 +128,10 @@ class TestRmaStockAccountPurchase(TestRmaStockAccount):
             bill_form.add_rma_line_id = rma_line
         bill = bill_form.save()
         bill.action_post()
-        self.assertEquals(len(bill.invoice_line_ids), 1)
-        self.assertEquals(bill.invoice_line_ids.rma_line_id, rma_line)
-        self.assertEquals(bill.invoice_line_ids.price_unit, pol_1.price_unit)
-        self.assertEquals(bill.invoice_line_ids.quantity, 20)
+        self.assertEqual(len(bill.invoice_line_ids), 1)
+        self.assertEqual(bill.invoice_line_ids.rma_line_id, rma_line)
+        self.assertEqual(bill.invoice_line_ids.price_unit, pol_1.price_unit)
+        self.assertEqual(bill.invoice_line_ids.quantity, 20)
         grni_amls = self.env["account.move.line"].search(
             [
                 ("account_id", "=", self.account_grni.id),
