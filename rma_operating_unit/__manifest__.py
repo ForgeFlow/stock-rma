@@ -6,7 +6,7 @@
     "version": "12.0.1.0.0",
     "author": "Eficent",
     "license": "LGPL-3",
-    "website": "https://www.eficent.com",
+    "website": "https://github.com/ForgeFlow/stock-rma",
     "category": "Operating Units",
     "depends": ["rma", "stock_operating_unit"],
     "data": [
