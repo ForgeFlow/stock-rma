@@ -2,6 +2,7 @@
 # This file contains the translation of the following modules:
 # 	* rma
 #
+
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0\n"
