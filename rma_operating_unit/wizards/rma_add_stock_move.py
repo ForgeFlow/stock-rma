@@ -1,5 +1,5 @@
-# Copyright 2017 ForgeFlow S.L.
-# License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
+# Copyright 2017-23 ForgeFlow S.L.
+# License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 
 from odoo import _, models
 from odoo.exceptions import ValidationError

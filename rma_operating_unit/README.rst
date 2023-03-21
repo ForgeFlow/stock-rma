@@ -2,9 +2,9 @@
    :target: https://www.gnu.org/licenses/lgpl.html
    :alt: License: LGPL-3
 
-==============================
+========================
 RMA with Operating Units
-==============================
+========================
 
 This module introduces the following features:
 
