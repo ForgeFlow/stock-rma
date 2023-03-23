@@ -1,4 +1,4 @@
-# Copyright 2017 Eficent Business and IT Consulting Services S.L.
+# Copyright 2017-23 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from odoo.addons.rma.tests import test_rma
@@ -8,14 +8,13 @@ class TestRmaAnalytic(test_rma.TestRma):
     @classmethod
     def setUpClass(cls):
         super(TestRmaAnalytic, cls).setUpClass()
-        cls.rma_add_invoice_wiz = cls.env["rma_add_invoice"]
+        cls.rma_add_invoice_wiz = cls.env["rma_add_account_move"]
         cls.rma_refund_wiz = cls.env["rma.refund"]
         products2move = [
             (cls.product_1, 3),
             (cls.product_2, 5),
             (cls.product_3, 2),
         ]
-        cls.rma_add_invoice_wiz = cls.env["rma_add_invoice"]
         cls.rma_ana_id = cls._create_rma_from_move(
             products2move,
             "supplier",
@@ -29,23 +28,22 @@ class TestRmaAnalytic(test_rma.TestRma):
             .search([("user_type_id", "=", receivable_type.id)], limit=1)
             .id
         )
-        cls.inv_customer = cls.env["account.invoice"].create(
+        cls.inv_customer = cls.env["account.move"].create(
             {
                 "partner_id": cls.partner_id.id,
-                "account_id": customer_account,
-                "type": "out_invoice",
+                "move_type": "out_invoice",
             }
         )
         cls.anal = cls.env["account.analytic.account"].create({"name": "Name"})
-        cls.inv_line_1 = cls.env["account.invoice.line"].create(
+        cls.inv_line_1 = cls.env["account.move.line"].create(
             {
                 "name": cls.partner_id.name,
                 "product_id": cls.product_1.id,
                 "quantity": 12.0,
                 "price_unit": 100.0,
-                "account_analytic_id": cls.anal.id,
-                "invoice_id": cls.inv_customer.id,
-                "uom_id": cls.product_1.uom_id.id,
+                "analytic_account_id": cls.anal.id,
+                "move_id": cls.inv_customer.id,
+                "product_uom_id": cls.product_1.uom_id.id,
                 "account_id": customer_account,
             }
         )
@@ -88,15 +86,15 @@ class TestRmaAnalytic(test_rma.TestRma):
                     "out_warehouse_id": self.env.ref("stock.warehouse0"),
                     "location_id": self.env.ref("stock.stock_location_stock"),
                     "type": "customer",
-                    "invoice_line_id": self.inv_line_1.id,
+                    "account_move_line_id": self.inv_line_1.id,
                     "uom_id": self.product_1.uom_id.id,
                 }
             )
         )
-        rma_line._onchange_invoice_line_id()
+        rma_line._onchange_account_move_line_id()
         self.assertEqual(
             rma_line.analytic_account_id,
-            self.inv_line_1.account_analytic_id,
+            self.inv_line_1.analytic_account_id,
         )
 
     def test_invoice_analytic02(self):
@@ -121,12 +119,12 @@ class TestRmaAnalytic(test_rma.TestRma):
                 "active_ids": [rma_order.id],
                 "active_model": "rma.order",
             }
-        ).create({"invoice_line_ids": [(6, 0, self.inv_customer.invoice_line_ids.ids)]})
+        ).create({"line_ids": [(6, 0, self.inv_customer.invoice_line_ids.ids)]})
         add_inv.add_lines()
 
         self.assertEqual(
             rma_order.mapped("rma_line_ids.analytic_account_id"),
-            self.inv_line_1.account_analytic_id,
+            self.inv_line_1.analytic_account_id,
         )
 
     def test_refund_analytic(self):
@@ -149,12 +147,12 @@ class TestRmaAnalytic(test_rma.TestRma):
                     "out_warehouse_id": self.env.ref("stock.warehouse0").id,
                     "location_id": self.env.ref("stock.stock_location_stock").id,
                     "type": "customer",
-                    "invoice_line_id": self.inv_line_1.id,
+                    "account_move_line_id": self.inv_line_1.id,
                     "uom_id": self.product_1.uom_id.id,
                 }
             )
         )
-        rma_line._onchange_invoice_line_id()
+        rma_line._onchange_account_move_line_id()
         rma_line.action_rma_to_approve()
         rma_line.action_rma_approve()
         make_refund = self.rma_refund_wiz.with_context(
@@ -167,5 +165,5 @@ class TestRmaAnalytic(test_rma.TestRma):
         make_refund.invoice_refund()
         self.assertEqual(
             rma_line.mapped("analytic_account_id"),
-            rma_line.mapped("refund_line_ids.account_analytic_id"),
+            rma_line.mapped("refund_line_ids.analytic_account_id"),
         )
