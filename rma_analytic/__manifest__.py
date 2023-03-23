@@ -6,7 +6,7 @@
     "version": "12.0.1.0.0",
     "author": "Eficent," "Odoo Community Association (OCA)",
     "license": "LGPL-3",
-    "website": "http://www.eficent.com",
+    "website": "https://github.com/ForgeFlow/stock-rma",
     "category": "Analytic",
     "depends": [
         "rma_account",

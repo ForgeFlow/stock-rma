@@ -9,9 +9,5 @@ class StockMove(models.Model):
 
     def _prepare_procurement_values(self):
         res = super(StockMove, self)._prepare_procurement_values()
-        res.update(
-            {
-                "account_analytic_id": self.rma_line_id.analytic_account_id.id
-            }
-        )
+        res.update({"account_analytic_id": self.rma_line_id.analytic_account_id.id})
         return res

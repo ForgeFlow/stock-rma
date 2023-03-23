@@ -1,7 +1,7 @@
 # Copyright 2018 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo import models, api
+from odoo import api, models
 
 
 class RmaMakePicking(models.TransientModel):
@@ -9,10 +9,8 @@ class RmaMakePicking(models.TransientModel):
 
     @api.model
     def _get_procurement_data(self, item, group, qty, picking_type):
-        procurement_data = super(
-            RmaMakePicking, self
-        )._get_procurement_data(item, group, qty, picking_type)
-        procurement_data.update(
-            analytic_account_id=item.line_id.analytic_account_id.id
+        procurement_data = super(RmaMakePicking, self)._get_procurement_data(
+            item, group, qty, picking_type
         )
+        procurement_data.update(analytic_account_id=item.line_id.analytic_account_id.id)
         return procurement_data
