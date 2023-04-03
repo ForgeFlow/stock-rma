@@ -32,7 +32,7 @@ class StockRule(models.Model):
         if "rma_line_id" in values:
             line = values.get("rma_line_id")
             line = self.env["rma.order.line"].browse([line])
-        elif "group_id" in values:
+        elif "group_id" in values and values["group_id"]:
             pg = values["group_id"]
             line = pg.rma_line_id
         if line:
