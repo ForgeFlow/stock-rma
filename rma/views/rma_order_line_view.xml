@@ -76,7 +76,7 @@
                         string="Approve"
                         attrs="{'invisible':[('state', '!=', 'to_approve')]}"
                         class="oe_highlight"
-                        groups="rma.group_rma_customer_user"
+                        groups="rma.group_rma_manager"
                     />
                         <button
                         name="action_rma_approve"
