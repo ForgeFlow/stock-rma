@@ -666,10 +666,6 @@ class RmaOrderLine(models.Model):
             order.check_cancel()
             order.write({"state": "canceled"})
             order.move_ids._action_cancel()
-            shipments = order._get_in_pickings()
-            shipments |= order._get_out_pickings()
-            for ship in shipments:
-                ship.action_cancel()
         return True
 
     def _get_price_unit(self):
