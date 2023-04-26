@@ -10,6 +10,10 @@
                     <tree string="RMA Lines" editable="bottom" create="false">
                         <field name="rma_id" groups="rma.group_rma_groups" />
                         <field name="product_id" />
+                        <field
+                            name="lot_id"
+                            attrs="{'invisible':[('lot_id', '=', False)]}"
+                        />
                         <field name="product_qty" />
                         <field name="qty_to_scrap" />
                         <field name="location_id" />
