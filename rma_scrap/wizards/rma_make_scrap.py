@@ -28,6 +28,8 @@ class RmaMakeScrap(models.TransientModel):
             "line_id": line.id,
             "rma_id": line.rma_id and line.rma_id.id or False,
         }
+        if line.lot_id:
+            values["lot_id"] = line.lot_id.id
         return values
 
     @api.model
@@ -73,6 +75,7 @@ class RmaMakeScrap(models.TransientModel):
                 "name": line.rma_id.id and line.rma_id.name or line.name,
                 "origin": line.name,
                 "product_id": item.line_id.product_id.id,
+                "lot_id": item.lot_id.id or False,
                 "scrap_qty": item.qty_to_scrap,
                 "product_uom_id": item.line_id.product_id.product_tmpl_id.uom_id.id,
                 "location_id": item.location_id.id,
@@ -96,6 +99,7 @@ class RmaMakeScrapItem(models.TransientModel):
     )
     rma_id = fields.Many2one("rma.order", related="line_id.rma_id", string="RMA Group")
     product_id = fields.Many2one("product.product", string="Product", required=True)
+    lot_id = fields.Many2one("stock.production.lot", string="Lot/Serial Number")
     product_qty = fields.Float(
         related="line_id.product_qty",
         string="Quantity Ordered",
