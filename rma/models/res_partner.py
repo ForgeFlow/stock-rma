@@ -22,4 +22,6 @@ class ResPartner(models.Model):
         action = self.env.ref("rma.action_rma_customer_lines")
         result = action.sudo().read()[0]
         result["context"] = {"search_default_partner_id": self.id}
+        result["domain"] = []
+        result["display_name"] = "Partner RMAs"
         return result
