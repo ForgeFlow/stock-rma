@@ -68,7 +68,7 @@ class RmaOrderLine(models.Model):
             if last_usage == "internal" and first_usage != "internal":
                 moves |= move
             elif last_usage == "supplier" and first_usage == "customer":
-                moves |= moves
+                moves |= move
         return moves
 
     @api.model
@@ -107,7 +107,10 @@ class RmaOrderLine(models.Model):
                         m.location_id.usage == "supplier"
                         or m.location_id.usage == "customer"
                     )
-                    and m.location_dest_id.usage == "internal"
+                    and (
+                        m.location_dest_id.usage == "internal"
+                        or m.location_dest_id.usage == "supplier"
+                    )
                 )
             elif direction == "out":
                 moves = rec.move_ids.filtered(
@@ -116,7 +119,10 @@ class RmaOrderLine(models.Model):
                         m.location_dest_id.usage == "supplier"
                         or m.location_dest_id.usage == "customer"
                     )
-                    and m.location_id.usage == "internal"
+                    and (
+                        m.location_id.usage == "internal"
+                        or m.location_id.usage == "supplier"
+                    )
                 )
             for move in moves:
                 # If the move is part of a chain don't count it
