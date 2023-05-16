@@ -33,5 +33,7 @@ class StockRule(models.Model):
             line = self.env["rma.order.line"].browse([line])
             if line.reference_move_id:
                 return res
-            res["price_unit"] = line._get_price_unit()
+            res["price_unit"] = line.with_context(
+                product_required=product_id
+            )._get_price_unit()
         return res
