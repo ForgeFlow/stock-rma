@@ -124,7 +124,7 @@ class RmaMakePicking(models.TransientModel):
         procurement_data = {
             "name": line.rma_id and line.rma_id.name or line.name,
             "group_id": group,
-            "origin": line.name,
+            "origin": group and group.name or line.name,
             "warehouse_id": warehouse,
             "date_planned": time.strftime(DT_FORMAT),
             "product_id": item.product_id,
