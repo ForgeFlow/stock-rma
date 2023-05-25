@@ -766,7 +766,9 @@ class TestRma(common.TransactionCase):
         wizard._create_picking()
         res = self.rma_supplier_id.rma_line_ids.action_view_out_shipments()
         self.assertTrue("res_id" in res, "Incorrect number of pickings" "created")
-        picking = self.env["stock.picking"].browse(res["res_id"])
+        picking = self.rma_supplier_id.rma_line_ids._get_out_pickings()
+        partner = picking.partner_id
+        self.assertTrue(partner, "Partner is not defined or False")
         moves = picking.move_ids
         self.assertEqual(len(moves), 3, "Incorrect number of moves created")
 
@@ -886,7 +888,9 @@ class TestRma(common.TransactionCase):
         pickings = self.env["stock.picking"].browse(res["res_id"])
         self.assertEqual(len(pickings), 1, "Incorrect number of pickings created")
         picking_in = pickings[0]
-        moves = picking_in.move_ids
+        partner = picking_in.partner_id
+        self.assertTrue(partner, "Partner is not defined or False")
+        moves = picking.move_ids
         self.assertEqual(len(moves), 3, "Incorrect number of moves created")
 
         lines = self.rma_supplier_id.rma_line_ids
@@ -1064,3 +1068,18 @@ class TestRma(common.TransactionCase):
         ).create({})
         with self.assertRaisesRegex(ValidationError, "No quantity to transfer"):
             wizard._create_picking()
+
+    def test_08_supplier_rma_single_line(self):
+        rma_line_id = self.rma_supplier_id.rma_line_ids[0].id
+        wizard = self.rma_make_picking.with_context(
+            active_ids=[rma_line_id],
+            active_model="rma.order.line",
+            picking_type="outgoing",
+            active_id=2,
+        ).create({})
+        wizard._create_picking()
+        picking = self.rma_supplier_id.rma_line_ids[0]._get_out_pickings()
+        partner = picking.partner_id
+        self.assertTrue(partner, "Partner is not defined or False")
+        moves = picking.move_ids
+        self.assertEqual(len(moves), 1, "Incorrect number of moves created")
