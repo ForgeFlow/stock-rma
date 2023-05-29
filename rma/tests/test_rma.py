@@ -779,6 +779,8 @@ class TestRma(common.SavepointCase):
         ).create({})
         wizard._create_picking()
         picking = self.rma_supplier_id.rma_line_ids._get_out_pickings()
+        partner = picking.partner_id
+        self.assertTrue(partner, "Partner is not defined or False")
         moves = picking.move_lines
         self.assertEqual(len(moves), 3, "Incorrect number of moves created")
 
@@ -898,6 +900,8 @@ class TestRma(common.SavepointCase):
         pickings = self.env["stock.picking"].browse(res["res_id"])
         self.assertEqual(len(pickings), 1, "Incorrect number of pickings created")
         picking_in = pickings[0]
+        partner = picking_in.partner_id
+        self.assertTrue(partner, "Partner is not defined or False")
         moves = picking_in.move_lines
         self.assertEqual(len(moves), 3, "Incorrect number of moves created")
 
@@ -1146,3 +1150,20 @@ class TestRma(common.SavepointCase):
         self.assertEqual(rma.qty_to_deliver, 0)
         self.assertEqual(rma.qty_delivered, 3)
         self.assertEqual(len(rma.move_ids), 4)
+
+    def test_09_supplier_rma_single_line(self):
+        rma_line_id = self.rma_supplier_id.rma_line_ids[0].id
+        wizard = self.rma_make_picking.with_context(
+            {
+                "active_ids": [rma_line_id],
+                "active_model": "rma.order.line",
+                "picking_type": "outgoing",
+                "active_id": 2,
+            }
+        ).create({})
+        wizard._create_picking()
+        picking = self.rma_supplier_id.rma_line_ids[0]._get_out_pickings()
+        partner = picking.partner_id
+        self.assertTrue(partner, "Partner is not defined or False")
+        moves = picking.move_lines
+        self.assertEqual(len(moves), 1, "Incorrect number of moves created")
