@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="rma_operation_form_view" model="ir.ui.view">
+        <field name="name">rma.operation.form.view</field>
+        <field name="model">rma.operation</field>
+        <field name="inherit_id" ref="rma_account.rma_operation_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='refund_journal_id']" position="after">
+                <field name="refund_reason_id" />
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
