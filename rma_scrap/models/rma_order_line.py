@@ -57,7 +57,6 @@ class RmaOrderLine(models.Model):
             line.scrap_count = len(self.scrap_ids)
 
     qty_to_scrap = fields.Float(
-        string="Qty To Scrap",
         copy=False,
         digits="Product Unit of Measure",
         readonly=True,
@@ -65,7 +64,6 @@ class RmaOrderLine(models.Model):
         store=True,
     )
     qty_in_scrap = fields.Float(
-        string="Qty In Scrap",
         copy=False,
         digits="Product Unit of Measure",
         readonly=True,
@@ -73,7 +71,6 @@ class RmaOrderLine(models.Model):
         store=True,
     )
     qty_scrap = fields.Float(
-        string="Qty Scrap",
         copy=False,
         digits="Product Unit of Measure",
         readonly=True,
@@ -86,7 +83,6 @@ class RmaOrderLine(models.Model):
             ("ordered", "Based on Ordered Quantities"),
             ("received", "Based on Received Quantities"),
         ],
-        string="Scrap Policy",
         default="no",
         required=True,
         readonly=False,
