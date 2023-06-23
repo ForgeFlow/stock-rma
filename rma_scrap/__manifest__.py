@@ -1,6 +1,6 @@
 {
     "name": "RMA Scrap",
-    "version": "14.0.1.0.0",
+    "version": "16.0.1.0.0",
     "license": "LGPL-3",
     "category": "RMA",
     "summary": "Allows to scrap the received/ordered products in odoo",
