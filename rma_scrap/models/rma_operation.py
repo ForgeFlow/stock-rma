@@ -13,7 +13,6 @@ class RmaOperation(models.Model):
             ("ordered", "Based on Ordered Quantities"),
             ("received", "Based on Received Quantities"),
         ],
-        string="Scrap Policy",
         default="no",
     )
 
