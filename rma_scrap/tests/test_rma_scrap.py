@@ -33,7 +33,7 @@ class TestRmaScrap(common.SingleTransactionCase):
             }
         )
 
-        cls.lot = cls.env["stock.production.lot"].create(
+        cls.lot = cls.env["stock.lot"].create(
             {
                 "name": "Lot for tests",
                 "product_id": cls.product_2.id,
@@ -95,17 +95,29 @@ class TestRmaScrap(common.SingleTransactionCase):
         rma._onchange_operation_id()
         rma.action_rma_to_approve()
         wizard = self.rma_make_picking.with_context(
-            {
+            **{
                 "active_ids": rma.id,
                 "active_model": "rma.order.line",
                 "picking_type": "incoming",
                 "active_id": 1,
             }
         ).create({})
-        wizard._create_picking()
+
+        self.assertEqual(rma.qty_to_receive, 1.00)
+        self.assertFalse(rma.qty_to_scrap)
+
+        action_picking = wizard.action_create_picking()
+        picking = self.env["stock.picking"].browse([action_picking["res_id"]])
+        picking.move_line_ids[0].qty_done = rma.qty_to_receive
+
+        picking.button_validate()
         rma._compute_qty_to_scrap()
+
+        self.assertFalse(rma.qty_to_receive)
+        self.assertEqual(rma.qty_received, 1.00)
+        self.assertEqual(rma.qty_to_scrap, 1.00)
         wizard = self.rma_make_scrap_wiz.with_context(
-            {
+            **{
                 "active_ids": rma.id,
                 "active_model": "rma.order.line",
                 "item_ids": [
@@ -129,6 +141,8 @@ class TestRmaScrap(common.SingleTransactionCase):
         scrap.action_validate()
         move = scrap.move_id
         self.assertEqual(move.product_id.id, self.product_1.id)
+        self.assertFalse(rma.qty_to_scrap)
+        self.assertEqual(rma.qty_scrap, 1.00)
 
     def test_02_rma_scrap_ordered(self):
         rma = self.rma_line_obj.create(
@@ -147,8 +161,13 @@ class TestRmaScrap(common.SingleTransactionCase):
         rma._onchange_operation_id()
         rma.action_rma_to_approve()
         rma._compute_qty_to_scrap()
+
+        self.assertEqual(rma.qty_to_receive, 1.00)
+        self.assertEqual(rma.qty_to_scrap, 1.00)
+        self.assertFalse(rma.qty_in_scrap)
+
         wizard = self.rma_make_scrap_wiz.with_context(
-            {
+            **{
                 "active_ids": rma.id,
                 "active_model": "rma.order.line",
                 "item_ids": [
@@ -169,4 +188,8 @@ class TestRmaScrap(common.SingleTransactionCase):
         scrap = self.env["stock.scrap"].browse([action["res_id"]])
         self.assertEqual(scrap.location_id.id, self.stock_rma_location.id)
         self.assertEqual(scrap.move_id.id, False)
-        self.assertTrue(scrap.action_validate())
+        self.assertEqual(rma.qty_in_scrap, 1.00)
+        res = scrap.action_validate()
+        scrap.do_scrap()
+        self.assertTrue(res)
+        self.assertEqual(rma.qty_scrap, 1.00)
