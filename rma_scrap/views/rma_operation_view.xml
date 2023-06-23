@@ -22,6 +22,7 @@
             </field>
             <group name="outbound" position="after">
                 <group name="scrap" string="Scrap">
+                    <field name="company_id" invisible="1" />
                     <field
                         name="scrap_location_id"
                         string="Destination Scrap Location"
