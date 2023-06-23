@@ -12,18 +12,25 @@ class RmaAddSale(models.TransientModel):
     @api.model
     def default_get(self, fields_list):
         res = super(RmaAddSale, self).default_get(fields_list)
-        rma_obj = self.env["rma.order"]
-        rma_id = self.env.context["active_ids"] or []
+        active_id = self.env.context["active_ids"] or []
         active_model = self.env.context["active_model"]
-        if not rma_id:
+        if not active_id:
             return res
-        assert active_model == "rma.order", "Bad context propagation"
+        assert active_model in ["rma.order", "sale.order"], "Bad context propagation"
 
-        rma = rma_obj.browse(rma_id)
-        res["rma_id"] = rma.id
-        res["partner_id"] = rma.partner_id.id
-        res["sale_id"] = False
-        res["sale_line_ids"] = False
+        if active_model == "rma.order":
+            rma = self.env["rma.order"].browse(active_id)
+            res["rma_id"] = rma.id
+            res["partner_id"] = rma.partner_id.id
+            res["sale_id"] = False
+            res["sale_line_ids"] = False
+        elif active_model == "sale.order":
+            sale = self.env["sale.order"].browse(active_id)
+            res["rma_id"] = False
+            res["partner_id"] = sale.partner_id.id
+            res["sale_id"] = sale.id
+            res["sale_line_ids"] = False
+
         return res
 
     rma_id = fields.Many2one(
@@ -167,7 +174,21 @@ class RmaAddSale(models.TransientModel):
             existing_sale_lines.append(rma_line.sale_line_id)
         return existing_sale_lines
 
+    def _prepare_rma_from_sale_order(self):
+
+        return {
+            "partner_id": self.partner_id.id,
+            "company_id": self.sale_id.company_id.id,
+            "in_warehouse_id": self.sale_id.warehouse_id.id,
+            "type": "customer",
+        }
+
     def add_lines(self):
+        redirect_to_rma = False
+        if not self.rma_id:
+            redirect_to_rma = True
+            vals = self._prepare_rma_from_sale_order()
+            self.rma_id = self.env["rma.order"].create(vals)
         rma_line_obj = self.env["rma.order.line"]
         existing_sale_lines = self._get_existing_sale_lines()
         for line in self.sale_line_ids:
@@ -198,4 +219,7 @@ class RmaAddSale(models.TransientModel):
         rma = self.rma_id
         data_rma = self._get_rma_data()
         rma.write(data_rma)
-        return {"type": "ir.actions.act_window_close"}
+        if self.env.context["active_model"] == "rma.order":
+            return {"type": "ir.actions.act_window_close"}
+        elif redirect_to_rma:
+            return self.rma_id.get_formview_action()
