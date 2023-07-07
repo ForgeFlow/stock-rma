@@ -68,7 +68,7 @@ class RmaOrderLine(models.Model):
             if last_usage == "internal" and first_usage != "internal":
                 moves |= move
             elif last_usage == "supplier" and first_usage == "customer":
-                moves |= moves
+                moves |= move
         return moves
 
     @api.model
@@ -77,7 +77,10 @@ class RmaOrderLine(models.Model):
         for move in self.move_ids:
             first_usage = move._get_first_usage()
             last_usage = move._get_last_usage()
-            if first_usage in ("internal", "production") and last_usage != "internal":
+            if first_usage in ("internal", "production") and last_usage in (
+                "customer",
+                "supplier",
+            ):
                 pickings |= move.picking_id
             elif last_usage == "customer" and first_usage == "supplier":
                 pickings |= move.picking_id
@@ -98,12 +101,30 @@ class RmaOrderLine(models.Model):
             product_obj = self.env["uom.uom"]
             qty = 0.0
             if direction == "in":
-                op = ops["="]
-            else:
-                op = ops["!="]
-            for move in rec.move_ids.filtered(
-                lambda m: m.state in states and op(m.location_id.usage, rec.type)
-            ):
+                moves = rec.move_ids.filtered(
+                    lambda m: m.state in states
+                    and (
+                        m.location_id.usage == "supplier"
+                        or m.location_id.usage == "customer"
+                    )
+                    and (
+                        m.location_dest_id.usage == "internal"
+                        or m.location_dest_id.usage == "supplier"
+                    )
+                )
+            elif direction == "out":
+                moves = rec.move_ids.filtered(
+                    lambda m: m.state in states
+                    and (
+                        m.location_dest_id.usage == "supplier"
+                        or m.location_dest_id.usage == "customer"
+                    )
+                    and (
+                        m.location_id.usage == "internal"
+                        or m.location_id.usage == "supplier"
+                    )
+                )
+            for move in moves:
                 # If the move is part of a chain don't count it
                 if direction == "out" and move.move_orig_ids:
                     continue
