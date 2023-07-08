@@ -62,9 +62,6 @@ class RmaLineMakeRepair(models.TransientModel):
                 item._run_procurement(
                     rma_line.operation_id.repair_route_id, repair.location_id
                 )
-                item._run_procurement(
-                    rma_line.operation_id.repair_route_id, rma_line.location_id
-                )
         return {
             "domain": [("id", "in", res)],
             "name": _("Repairs"),
