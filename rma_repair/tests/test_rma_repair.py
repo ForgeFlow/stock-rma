@@ -28,6 +28,36 @@ class TestRmaRepair(common.SingleTransactionCase):
         # Create partners
         cls.customer1 = cls.partner_obj.create({"name": "Customer 1"})
 
+        # Create routes
+        cls.wh = cls.env.ref("stock.warehouse0")
+        cls.stock_rma_location = cls.wh.lot_rma_id
+        cls.repair_loc = cls.env["stock.location"].create(
+            {
+                "name": "WH Repair Location",
+                "location_id": cls.wh.view_location_id.id,
+            }
+        )
+        cls.repair_route = cls.env["stock.route"].create(
+            {
+                "name": "Transfer RMA to Repair",
+                "rma_selectable": True,
+                "sequence": 10,
+            }
+        )
+
+        cls.env["stock.rule"].create(
+            {
+                "name": "Transfer",
+                "route_id": cls.repair_route.id,
+                "location_src_id": cls.stock_rma_location.id,
+                "location_dest_id": cls.repair_loc.id,
+                "action": "pull",
+                "picking_type_id": cls.wh.int_type_id.id,
+                "procure_method": "make_to_stock",
+                "warehouse_id": cls.wh.id,
+            }
+        )
+
         # Create RMA group and operation:
         cls.rma_group_customer = cls.rma_obj.create(
             {"partner_id": cls.customer1.id, "type": "customer"}
@@ -41,6 +71,8 @@ class TestRmaRepair(common.SingleTransactionCase):
                 "repair_type": "received",
                 "in_route_id": cls.rma_route_cust.id,
                 "out_route_id": cls.rma_route_cust.id,
+                "repair_location_id": cls.repair_loc.id,
+                "repair_route_id": cls.repair_route.id,
             }
         )
         cls.operation_2 = cls.rma_op.create(
@@ -52,6 +84,8 @@ class TestRmaRepair(common.SingleTransactionCase):
                 "repair_type": "ordered",
                 "in_route_id": cls.rma_route_cust.id,
                 "out_route_id": cls.rma_route_cust.id,
+                "repair_location_id": cls.repair_loc.id,
+                "repair_route_id": cls.repair_route.id,
             }
         )
         cls.operation_3 = cls.rma_op.create(
@@ -64,6 +98,8 @@ class TestRmaRepair(common.SingleTransactionCase):
                 "delivery_policy": "repair",
                 "in_route_id": cls.rma_route_cust.id,
                 "out_route_id": cls.rma_route_cust.id,
+                "repair_location_id": cls.repair_loc.id,
+                "repair_route_id": cls.repair_route.id,
             }
         )
         # Create products
@@ -154,14 +190,6 @@ class TestRmaRepair(common.SingleTransactionCase):
         cls.material.product_tmpl_id.standard_price = 10
         cls.stock_location = cls.env.ref("stock.stock_location_stock")
 
-        cls.env["stock.quant"].create(
-            {
-                "product_id": cls.material.id,
-                "location_id": cls.stock_location.id,
-                "quantity": 10,
-            }
-        )
-
     def test_01_add_from_invoice_customer(self):
         """Test wizard to create RMA from a customer invoice."""
         add_inv = self.rma_add_invoice_wiz.with_context(
@@ -217,6 +245,7 @@ class TestRmaRepair(common.SingleTransactionCase):
         self.assertEqual(rma.repair_count, 0)
         self.assertEqual(rma.qty_to_repair, 15.0)
         self.assertEqual(rma.qty_repaired, 0.0)
+        self.assertEqual(rma.repair_transfer_count, 0)
         make_repair = self.rma_make_repair_wiz.with_context(
             **{
                 "customer": True,
@@ -225,6 +254,14 @@ class TestRmaRepair(common.SingleTransactionCase):
             }
         ).new()
         make_repair.make_repair_order()
+        rma._compute_repair_transfer_count()
+        self.assertEqual(rma.repair_transfer_count, 1)
+        repair_transfer_move = rma.move_ids.filtered(
+            lambda x: x.location_dest_id == self.repair_loc
+        )
+        self.assertEqual(repair_transfer_move.location_id, self.stock_rma_location)
+        self.assertEqual(repair_transfer_move.product_qty, 15.0)
+        self.assertEqual(repair_transfer_move.product_id, rma.product_id)
         rma.repair_ids.action_repair_confirm()
         self.assertEqual(rma.repair_count, 1)
         self.assertEqual(rma.qty_to_repair, 0.0)
@@ -263,6 +300,7 @@ class TestRmaRepair(common.SingleTransactionCase):
         for mv in picking.move_ids:
             mv.quantity_done = mv.product_uom_qty
         picking._action_done()
+        self.assertEqual(rma.repair_transfer_count, 0)
         self.assertEqual(rma.qty_to_deliver, 0.0)
         make_repair = self.rma_make_repair_wiz.with_context(
             **{
@@ -272,6 +310,13 @@ class TestRmaRepair(common.SingleTransactionCase):
             }
         ).new()
         make_repair.make_repair_order()
+        rma._compute_repair_transfer_count()
+        self.assertEqual(rma.repair_transfer_count, 1)
+        repair_transfer_move = rma.move_ids.filtered(
+            lambda x: x.location_dest_id == self.repair_loc
+        )
+        self.assertEqual(repair_transfer_move.location_id, self.stock_rma_location)
+        self.assertEqual(repair_transfer_move.product_id, rma.product_id)
         repair = rma.repair_ids
         line = self.repair_line_obj.create(
             {

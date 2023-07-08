@@ -12,14 +12,23 @@
                  <group>
                      <field name="item_ids" nolabel="1" colspan="2">
                           <tree name="Details" editable="bottom" create="false">
-                              <field name="line_id" options="{'no_open': true}" />
-                              <field name="product_id" />
+                              <field
+                                name="line_id"
+                                force_save="1"
+                                options="{'no_open': true}"
+                            />
+                              <field name="product_id" force_save="1" />
                               <field name="product_qty" />
-                              <field name="product_uom_id" groups="uom.group_uom" />
-                              <field name="partner_id" />
+                              <field
+                                name="product_uom_id"
+                                force_save="1"
+                                groups="uom.group_uom"
+                            />
+                              <field name="partner_id" force_save="1" />
                               <field
                                 name="location_id"
                                 groups="stock.group_stock_multi_locations"
+                                force_save="1"
                             />
                               <field name="invoice_method" />
                           </tree>
