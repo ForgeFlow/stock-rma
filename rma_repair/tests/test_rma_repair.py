@@ -335,7 +335,6 @@ class TestRmaRepair(common.SingleTransactionCase):
         repair.invoice_method = "after_repair"
         repair.action_repair_confirm()
         repair.action_repair_start()
-        repair.action_force_availability()
         repair.action_repair_end()
         self.assertEqual(rma.qty_to_pay, 0.0)
         repair.action_repair_invoice_create()
