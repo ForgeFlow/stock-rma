@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # © 2017 Eficent Business and IT Consulting Services S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
@@ -6,7 +5,6 @@ from odoo.addons.rma.tests import test_rma
 
 
 class TestRmaAnalytic(test_rma.TestRma):
-
     @classmethod
     def setUpClass(cls):
         super(TestRmaAnalytic, cls).setUpClass()
@@ -24,15 +22,11 @@ class TestRmaAnalytic(test_rma.TestRma):
             cls.env.ref("base.res_partner_2"),
             dropship=False,
         )
-        receivable_type = cls.env.ref(
-            "account.data_account_type_receivable"
-        )
+        receivable_type = cls.env.ref("account.data_account_type_receivable")
         # Create Invoices:
         customer_account = (
             cls.env["account.account"]
-            .search(
-                [("user_type_id", "=", receivable_type.id)], limit=1
-            )
+            .search([("user_type_id", "=", receivable_type.id)], limit=1)
             .id
         )
         cls.inv_customer = cls.env["account.invoice"].create(
@@ -42,9 +36,7 @@ class TestRmaAnalytic(test_rma.TestRma):
                 "type": "out_invoice",
             }
         )
-        cls.anal = cls.env["account.analytic.account"].create(
-            {"name": "Name"}
-        )
+        cls.anal = cls.env["account.analytic.account"].create({"name": "Name"})
         cls.inv_line_1 = cls.env["account.invoice.line"].create(
             {
                 "name": cls.partner_id.name,
@@ -133,21 +125,11 @@ class TestRmaAnalytic(test_rma.TestRma):
                     "operation_id": self.env.ref(
                         "rma.rma_operation_customer_replace"
                     ).id,
-                    "in_route_id": self.env.ref(
-                        "rma.route_rma_customer"
-                    ),
-                    "out_route_id": self.env.ref(
-                        "rma.route_rma_customer"
-                    ),
-                    "in_warehouse_id": self.env.ref(
-                        "stock.warehouse0"
-                    ),
-                    "out_warehouse_id": self.env.ref(
-                        "stock.warehouse0"
-                    ),
-                    "location_id": self.env.ref(
-                        "stock.stock_location_stock"
-                    ),
+                    "in_route_id": self.env.ref("rma.route_rma_customer"),
+                    "out_route_id": self.env.ref("rma.route_rma_customer"),
+                    "in_warehouse_id": self.env.ref("stock.warehouse0"),
+                    "out_warehouse_id": self.env.ref("stock.warehouse0"),
+                    "location_id": self.env.ref("stock.stock_location_stock"),
                     "type": "customer",
                     "invoice_line_id": self.inv_line_1.id,
                     "uom_id": self.product_1.uom_id.id,
@@ -182,13 +164,7 @@ class TestRmaAnalytic(test_rma.TestRma):
                 "active_ids": [rma_order.id],
                 "active_model": "rma.order",
             }
-        ).create(
-            {
-                "invoice_line_ids": [
-                    (6, 0, self.inv_customer.invoice_line_ids.ids)
-                ]
-            }
-        )
+        ).create({"invoice_line_ids": [(6, 0, self.inv_customer.invoice_line_ids.ids)]})
         add_inv.add_lines()
 
         self.assertEqual(
@@ -210,21 +186,11 @@ class TestRmaAnalytic(test_rma.TestRma):
                     "operation_id": self.env.ref(
                         "rma_account.rma_operation_customer_refund"
                     ).id,
-                    "in_route_id": self.env.ref(
-                        "rma.route_rma_customer"
-                    ).id,
-                    "out_route_id": self.env.ref(
-                        "rma.route_rma_customer"
-                    ).id,
-                    "in_warehouse_id": self.env.ref(
-                        "stock.warehouse0"
-                    ).id,
-                    "out_warehouse_id": self.env.ref(
-                        "stock.warehouse0"
-                    ).id,
-                    "location_id": self.env.ref(
-                        "stock.stock_location_stock"
-                    ).id,
+                    "in_route_id": self.env.ref("rma.route_rma_customer").id,
+                    "out_route_id": self.env.ref("rma.route_rma_customer").id,
+                    "in_warehouse_id": self.env.ref("stock.warehouse0").id,
+                    "out_warehouse_id": self.env.ref("stock.warehouse0").id,
+                    "location_id": self.env.ref("stock.stock_location_stock").id,
                     "type": "customer",
                     "invoice_line_id": self.inv_line_1.id,
                     "delivery_policy": "no",
