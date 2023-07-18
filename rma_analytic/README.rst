@@ -1,5 +1,5 @@
-.. image:: https://img.shields.io/badge/license-LGPLv3-blue.svg
-   :target: https://www.gnu.org/licenses/lgpl.html
+.. image:: https://img.shields.io/badge/license-LGPL--3-blue.png
+   :target: https://www.gnu.org/licenses/lgpl
    :alt: License: LGPL-3
 
 ==========================
@@ -25,11 +25,12 @@ Usage
 Contributors
 ------------
 
-* Aaron Henriquez <ahenriquez@eficent.com>
+* Aaron Henriquez <ahenriquez@forgeflow.com>
+* Juany Davila <juany.davila@forgeflow.com>
 * Serpent Consulting Services Pvt. Ltd. <support@serpentcs.com>
 
 
 Maintainer
 ----------
 
-This module is maintained by Eficent.
+This module is maintained by ForgeFlow.
