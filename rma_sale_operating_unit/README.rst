@@ -19,10 +19,10 @@ Usage
 Contributors
 ------------
 
-* Aaron Henriquez <ahenriquez@eficent.com>
+* Aaron Henriquez <aaron.henriquez@forgeflow.com>
 
 
 Maintainer
 ----------
 
-This module is maintained by Eficent.
+This module is maintained by ForgeFlow.
