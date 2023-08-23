@@ -112,7 +112,7 @@ class TestRmaMrp(TransactionCase):
                 "picking_type_id": self.stock_picking_type_in.id,
                 "location_id": self.stock_location_supplier_id.id,
                 "location_dest_id": self.stock_location_id.id,
-                "move_lines": [
+                "move_ids": [
                     (
                         0,
                         0,
@@ -135,7 +135,7 @@ class TestRmaMrp(TransactionCase):
         """Do picking with only one move on the given date."""
         picking.action_confirm()
         picking.action_assign()
-        picking.move_lines.quantity_done = qty
+        picking.move_ids.quantity_done = qty
         res = picking.button_validate()
         if isinstance(res, dict) and res:
             backorder_wiz_id = res["res_id"]
@@ -158,18 +158,16 @@ class TestRmaMrp(TransactionCase):
 
     def _receive_rma(self, rma_line_ids):
         wizard = self.rma_make_picking.with_context(
-            {
-                "active_ids": rma_line_ids.ids,
-                "active_model": "rma.order.line",
-                "picking_type": "incoming",
-                "active_id": 1,
-            }
+            active_ids=rma_line_ids.ids,
+            active_model="rma.order.line",
+            picking_type="incoming",
+            active_id=1,
         ).create({})
         wizard._create_picking()
         pickings = rma_line_ids._get_in_pickings()
         pickings.action_assign()
         for picking in pickings:
-            for mv in picking.move_lines:
+            for mv in picking.move_ids:
                 mv.quantity_done = mv.product_uom_qty
         # In case of two step pickings, ship in two steps:
         while pickings.filtered(lambda p: p.state == "assigned"):
@@ -211,10 +209,10 @@ class TestRmaMrp(TransactionCase):
             order_01.order_line, order_01.order_line.price_unit
         )
 
-        component_1_sm = rma_picking_01.move_lines.filtered(
+        component_1_sm = rma_picking_01.move_ids.filtered(
             lambda x: x.product_id == self.component_product_1
         )
-        component_2_sm = rma_picking_01.move_lines.filtered(
+        component_2_sm = rma_picking_01.move_ids.filtered(
             lambda x: x.product_id == self.component_product_2
         )
 
@@ -235,10 +233,10 @@ class TestRmaMrp(TransactionCase):
             order_02.order_line, order_02.order_line.price_unit
         )
 
-        component_1_sm = rma_picking_02.move_lines.filtered(
+        component_1_sm = rma_picking_02.move_ids.filtered(
             lambda x: x.product_id == self.component_product_1
         )
-        component_2_sm = rma_picking_02.move_lines.filtered(
+        component_2_sm = rma_picking_02.move_ids.filtered(
             lambda x: x.product_id == self.component_product_2
         )
 
