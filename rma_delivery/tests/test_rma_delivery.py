@@ -33,27 +33,23 @@ class TestRmaDelivery(TestRma):
     def test_rma_delivery(self):
         self.rma_customer_id.rma_line_ids.action_rma_to_approve()
         wizard = self.rma_make_picking.with_context(
-            {
-                "active_ids": self.rma_customer_id.rma_line_ids.ids,
-                "active_model": "rma.order.line",
-                "picking_type": "incoming",
-                "active_id": self.rma_customer_id.rma_line_ids.ids[0],
-            }
+            active_ids=self.rma_customer_id.rma_line_ids.ids,
+            active_model="rma.order.line",
+            picking_type="incoming",
+            active_id=self.rma_customer_id.rma_line_ids.ids[0],
         ).create({})
         wizard._create_picking()
         res = self.rma_customer_id.rma_line_ids.action_view_in_shipments()
         picking = self.env["stock.picking"].browse(res["res_id"])
         picking.action_assign()
-        for mv in picking.move_lines:
+        for mv in picking.move_ids:
             mv.quantity_done = mv.product_uom_qty
         picking._action_done()
         wizard = self.rma_make_picking.with_context(
-            {
-                "active_id": self.rma_customer_id.rma_line_ids.ids[0],
-                "active_ids": self.rma_customer_id.rma_line_ids.ids,
-                "active_model": "rma.order.line",
-                "picking_type": "outgoing",
-            }
+            active_id=self.rma_customer_id.rma_line_ids.ids[0],
+            active_ids=self.rma_customer_id.rma_line_ids.ids,
+            active_model="rma.order.line",
+            picking_type="outgoing",
         ).create({})
         wizard._create_picking()
         res = self.rma_customer_id.rma_line_ids.action_view_out_shipments()
