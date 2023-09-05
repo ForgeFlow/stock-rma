@@ -119,6 +119,10 @@
                 <group>
                     <group name="inbound_route" string="Inbound">
                         <field
+                                name="operation_default_id"
+                                domain="[('type','=','customer')]"
+                            />
+                        <field
                                 name="in_warehouse_id"
                                 attrs="{'readonly':[('state', '!=', 'draft')]}"
                             />
@@ -248,6 +252,9 @@
                     'supplier': 1,
                     'hide_title': True}
                 </attribute>
+            </field>
+            <field name="operation_default_id" position="attributes">
+                <attribute name="domain">[('type','=','supplier')]</attribute>
             </field>
         </field>
     </record>

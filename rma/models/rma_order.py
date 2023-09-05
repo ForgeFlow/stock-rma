@@ -151,6 +151,11 @@ class RmaOrder(models.Model):
         default="draft",
         store=True,
     )
+    operation_default_id = fields.Many2one(
+        comodel_name="rma.operation",
+        required=False,
+        string="Default Operation Type",
+    )
 
     @api.constrains("partner_id", "rma_line_ids")
     def _check_partner_id(self):

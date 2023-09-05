@@ -75,16 +75,18 @@ class RmaAddStockMove(models.TransientModel):
         }
 
     def _prepare_rma_line_from_stock_move(self, sm, lot=False):
-        if self.env.context.get("customer"):
-            operation = (
-                sm.product_id.rma_customer_operation_id
-                or sm.product_id.categ_id.rma_customer_operation_id
-            )
-        else:
-            operation = (
-                sm.product_id.rma_supplier_operation_id
-                or sm.product_id.categ_id.rma_supplier_operation_id
-            )
+        operation = self.rma_id.operation_default_id
+        if not operation:
+            if self.env.context.get("customer"):
+                operation = (
+                    sm.product_id.rma_customer_operation_id
+                    or sm.product_id.categ_id.rma_customer_operation_id
+                )
+            else:
+                operation = (
+                    sm.product_id.rma_supplier_operation_id
+                    or sm.product_id.categ_id.rma_supplier_operation_id
+                )
         if not operation:
             operation = self.env["rma.operation"].search(
                 [("type", "=", self.rma_id.type)], limit=1

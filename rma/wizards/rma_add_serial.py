@@ -58,16 +58,18 @@ class RmaAddSerialWiz(models.TransientModel):
         )
 
     def _prepare_rma_line_from_lot_vals(self, lot):
-        if self.env.context.get("customer"):
-            operation = (
-                lot.product_id.rma_customer_operation_id
-                or lot.product_id.categ_id.rma_customer_operation_id
-            )
-        else:
-            operation = (
-                lot.product_id.rma_supplier_operation_id
-                or lot.product_id.categ_id.rma_supplier_operation_id
-            )
+        operation = self.rma_id.operation_default_id
+        if not operation:
+            if self.env.context.get("customer"):
+                operation = (
+                    lot.product_id.rma_customer_operation_id
+                    or lot.product_id.categ_id.rma_customer_operation_id
+                )
+            else:
+                operation = (
+                    lot.product_id.rma_supplier_operation_id
+                    or lot.product_id.categ_id.rma_supplier_operation_id
+                )
         if not operation:
             operation = self.env["rma.operation"].search(
                 [("type", "=", self.rma_id.type)], limit=1
