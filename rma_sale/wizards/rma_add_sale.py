@@ -102,18 +102,27 @@ class RmaAddSale(models.TransientModel):
             )
             if not route:
                 raise ValidationError(_("Please define an rma route"))
-        if not operation.in_warehouse_id or not operation.out_warehouse_id:
-            warehouse = self.env["stock.warehouse"].search(
-                [
-                    ("company_id", "=", self.rma_id.company_id.id),
-                    ("lot_rma_id", "!=", False),
-                ],
-                limit=1,
-            )
-            if not warehouse:
-                raise ValidationError(
-                    _("Please define a warehouse with a " "default rma location.")
+        warehouse = self.rma_id.in_warehouse_id
+        if not warehouse:
+            if not operation.in_warehouse_id or not operation.out_warehouse_id:
+                warehouse = self.env["stock.warehouse"].search(
+                    [
+                        ("company_id", "=", self.rma_id.company_id.id),
+                        ("lot_rma_id", "!=", False),
+                    ],
+                    limit=1,
                 )
+                if not warehouse:
+                    raise ValidationError(
+                        _("Please define a warehouse with a " "default rma location.")
+                    )
+        location = self.rma_id.location_id
+        if not location:
+            location = (
+                operation.location_id
+                or operation.in_warehouse_id.lot_rma_id
+                or warehouse.lot_rma_id
+            )
         product_qty = line.product_uom_qty
         if line.product_id.tracking == "serial":
             product_qty = 1
@@ -145,15 +154,11 @@ class RmaAddSale(models.TransientModel):
             "in_route_id": operation.in_route_id.id or route.id,
             "out_route_id": operation.out_route_id.id or route.id,
             "receipt_policy": operation.receipt_policy,
-            "location_id": (
-                operation.location_id.id
-                or operation.in_warehouse_id.lot_rma_id.id
-                or warehouse.lot_rma_id.id
-            ),
+            "location_id": location.id,
             "refund_policy": operation.refund_policy,
             "delivery_policy": operation.delivery_policy,
-            "in_warehouse_id": operation.in_warehouse_id.id or warehouse.id,
-            "out_warehouse_id": operation.out_warehouse_id.id or warehouse.id,
+            "in_warehouse_id": warehouse.id or operation.in_warehouse_id.id,
+            "out_warehouse_id": warehouse.id or operation.out_warehouse_id.id,
         }
         return data
 

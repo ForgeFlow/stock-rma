@@ -100,8 +100,11 @@ class RmaAddStockMove(models.TransientModel):
             )
             if not route:
                 raise ValidationError(_("Please define an RMA route"))
-
-        if not operation.in_warehouse_id or not operation.out_warehouse_id:
+        in_warehouse = self.rma_id.in_warehouse_id or operation.in_warehouse_id
+        in_route = self.rma_id.in_route_id or operation.in_route_id
+        out_warehouse = self.rma_id.out_warehouse_id or operation.out_warehouse_id
+        out_route = self.rma_id.out_route_id or operation.out_route_id
+        if not in_warehouse or not out_warehouse:
             warehouse = self.env["stock.warehouse"].search(
                 [
                     ("company_id", "=", self.rma_id.company_id.id),
@@ -113,6 +116,16 @@ class RmaAddStockMove(models.TransientModel):
                 raise ValidationError(
                     _("Please define a warehouse with a default RMA location")
                 )
+            in_warehouse = in_warehouse or warehouse
+            out_warehouse = out_warehouse or warehouse
+        location = self.rma_id.location_id
+        if not location:
+            location = (
+                operation.location_id
+                or operation.in_warehouse_id.lot_rma_id
+                or in_warehouse.lot_rma_id
+                or out_warehouse.lot_rma_id
+            )
         product_qty = sm.product_uom_qty
         if sm.product_id.tracking == "serial":
             product_qty = 1
@@ -136,15 +149,11 @@ class RmaAddStockMove(models.TransientModel):
             "rma_id": self.rma_id.id,
             "receipt_policy": operation.receipt_policy,
             "delivery_policy": operation.delivery_policy,
-            "in_warehouse_id": operation.in_warehouse_id.id or warehouse.id,
-            "out_warehouse_id": operation.out_warehouse_id.id or warehouse.id,
-            "in_route_id": operation.in_route_id.id or route.id,
-            "out_route_id": operation.out_route_id.id or route.id,
-            "location_id": (
-                operation.location_id.id
-                or operation.in_warehouse_id.lot_rma_id.id
-                or warehouse.lot_rma_id.id
-            ),
+            "in_warehouse_id": in_warehouse.id,
+            "out_warehouse_id": out_warehouse.id,
+            "in_route_id": in_route.id,
+            "out_route_id": out_route.id,
+            "location_id": location.id,
         }
         return data
 

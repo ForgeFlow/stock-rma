@@ -127,6 +127,24 @@
                                 attrs="{'readonly':[('state', '!=', 'draft')]}"
                             />
                         <field
+                                name="in_route_id"
+                                attrs="{'readonly':[('state', '!=', 'draft')]}"
+                            />
+                        <field
+                                name="out_warehouse_id"
+                                invisible="1"
+                                attrs="{'readonly':[('state', '!=', 'draft')]}"
+                            />
+                        <field
+                                name="location_id"
+                                attrs="{'readonly':[('state', '!=', 'draft')]}"
+                            />
+                        <field
+                                name="out_route_id"
+                                invisible="1"
+                                attrs="{'readonly':[('state', '!=', 'draft')]}"
+                            />
+                        <field
                                 name="customer_to_supplier"
                                 attrs="{'readonly':[('state', '!=', 'draft')],
                                 'invisible':[('type', '!=', 'customer')]}"
@@ -255,6 +273,18 @@
             </field>
             <field name="operation_default_id" position="attributes">
                 <attribute name="domain">[('type','=','supplier')]</attribute>
+            </field>
+            <field name="in_warehouse_id" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+            <field name="out_warehouse_id" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+            <field name="in_route_id" position="attributes">
+                <attribute name="invisible">0</attribute>
+            </field>
+            <field name="out_route_id" position="attributes">
+                <attribute name="invisible">0</attribute>
             </field>
         </field>
     </record>
