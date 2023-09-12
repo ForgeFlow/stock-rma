@@ -4,7 +4,7 @@
 from odoo.tests import common
 
 
-class TestAccountMoveLineRmaOrderLine(common.SavepointCase):
+class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
     @classmethod
     def setUpClass(cls):
         super(TestAccountMoveLineRmaOrderLine, cls).setUpClass()
@@ -18,7 +18,6 @@ class TestAccountMoveLineRmaOrderLine(common.SavepointCase):
         cls.invoice_line_model = cls.env["account.move.line"]
         cls.product_model = cls.env["product.product"]
         cls.product_ctg_model = cls.env["product.category"]
-        cls.acc_type_model = cls.env["account.account.type"]
         cls.account_model = cls.env["account.account"]
         cls.aml_model = cls.env["account.move.line"]
         cls.res_users_model = cls.env["res.users"]
@@ -35,18 +34,18 @@ class TestAccountMoveLineRmaOrderLine(common.SavepointCase):
         cls.customer_location = cls.env.ref("stock.stock_location_customers")
         cls.supplier_location = cls.env.ref("stock.stock_location_suppliers")
         # Create account for Goods Received Not Invoiced
-        acc_type = cls._create_account_type("equity", "other", "equity")
+        acc_type = "equity"
         name = "Goods Received Not Invoiced"
         code = "grni"
         cls.account_grni = cls._create_account(acc_type, name, code, cls.company)
 
         # Create account for Cost of Goods Sold
-        acc_type = cls._create_account_type("expense", "other", "expense")
+        acc_type = "expense"
         name = "Goods Delivered Not Invoiced"
         code = "gdni"
         cls.account_cogs = cls._create_account(acc_type, name, code, cls.company)
         # Create account for Inventory
-        acc_type = cls._create_account_type("asset", "other", "asset")
+        acc_type = "asset_cash"
         name = "Inventory"
         code = "inventory"
         cls.account_inventory = cls._create_account(acc_type, name, code, cls.company)
@@ -68,7 +67,7 @@ class TestAccountMoveLineRmaOrderLine(common.SavepointCase):
     def _create_user(cls, login, groups, company):
         """Create a user."""
         group_ids = [group.id for group in groups]
-        user = cls.res_users_model.with_context({"no_reset_password": True}).create(
+        user = cls.res_users_model.with_context(**{"no_reset_password": True}).create(
             {
                 "name": "Test User",
                 "login": login,
@@ -82,20 +81,13 @@ class TestAccountMoveLineRmaOrderLine(common.SavepointCase):
         return user.id
 
     @classmethod
-    def _create_account_type(cls, name, account_type, internal_group):
-        acc_type = cls.acc_type_model.create(
-            {"name": name, "type": account_type, "internal_group": internal_group}
-        )
-        return acc_type
-
-    @classmethod
     def _create_account(cls, acc_type, name, code, company, reconcile=False):
         """Create an account."""
         account = cls.account_model.create(
             {
                 "name": name,
                 "code": code,
-                "user_type_id": acc_type.id,
+                "account_type": acc_type,
                 "company_id": company.id,
                 "reconcile": reconcile,
             }
@@ -234,7 +226,7 @@ class TestAccountMoveLineRmaOrderLine(common.SavepointCase):
                 rma.price_unit = 1.0
         rma_line.action_rma_approve()
         wizard = self.rma_make_picking.with_context(
-            {
+            **{
                 "active_id": 1,
                 "active_ids": rma_line.ids,
                 "active_model": "rma.order.line",
@@ -254,7 +246,7 @@ class TestAccountMoveLineRmaOrderLine(common.SavepointCase):
         else:
             picking_ids = self.env["stock.picking"].search(res["domain"])
             picking = self.env["stock.picking"].browse(picking_ids)
-        picking.move_lines.write({"quantity_done": 1.0})
+        picking.move_ids.write({"quantity_done": 1.0})
         picking.button_validate()
         # decreasing cogs
         expected_balance = -1.0
@@ -263,7 +255,7 @@ class TestAccountMoveLineRmaOrderLine(common.SavepointCase):
                 self.account_cogs.id, rma_line=record, expected_balance=expected_balance
             )
         make_refund = self.rma_refund_wiz.with_context(
-            {
+            **{
                 "customer": True,
                 "active_ids": rma_line.ids,
                 "active_model": "rma.order.line",
