@@ -13,6 +13,7 @@
     "data": [
         "views/rma_operation_view.xml",
         "views/rma_order_line_view.xml",
+        "wizard/rma_refund_view.xml",
     ],
     "installable": True,
     "auto_install": True,
