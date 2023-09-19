@@ -202,6 +202,7 @@ class RmaAddSale(models.TransientModel):
                         #  favor of (pre)computed stored editable fields for all policies
                         #  and configuration in the RMA operation.
                         rec._onchange_operation_id()
+                        rec.price_unit = rec._get_price_unit()
         rma = self.rma_id
         data_rma = self._get_rma_data()
         rma.write(data_rma)
