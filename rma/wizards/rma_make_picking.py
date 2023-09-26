@@ -222,14 +222,14 @@ class RmaMakePicking(models.TransientModel):
                         "lot_ids": [(6, 0, move.rma_line_id.lot_id.ids)],
                     }
                 )
-                quant = self.env["stock.quant"]._gather(
+                quants = self.env["stock.quant"]._gather(
                     move.product_id, move.location_id, lot_id=move.rma_line_id.lot_id
                 )
                 move.move_line_ids.write(
                     {
                         "product_uom_qty": 1 if picking_type == "incoming" else 0,
                         "qty_done": 0,
-                        "package_id": quant.package_id.id if quant.package_id else None,
+                        "package_id": len(quants) == 1 and quants.package_id.id,
                     }
                 )
             elif move.product_id.tracking == "lot":
