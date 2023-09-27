@@ -1,7 +1,7 @@
 # Copyright (C) 2017-20 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo import _, fields, models
+from odoo import _, api, fields, models
 
 
 class StockWarehouse(models.Model):
@@ -28,18 +28,21 @@ class StockWarehouse(models.Model):
         help="If set, it will create RMA location, picking types and routes "
         "for this warehouse.",
     )
-    rma_customer_in_pull_id = fields.Many2one(
-        comodel_name="stock.rule", string="RMA Customer In Rule"
+    rma_customer_pull_id = fields.Many2one(
+        comodel_name="stock.location.route",
+        string="RMA Customer Route",
     )
-    rma_customer_out_pull_id = fields.Many2one(
-        comodel_name="stock.rule", string="RMA Customer Out Rule"
+    rma_supplier_pull_id = fields.Many2one(
+        comodel_name="stock.location.route",
+        string="RMA Supplier Route",
     )
-    rma_supplier_in_pull_id = fields.Many2one(
-        comodel_name="stock.rule", string="RMA Supplier In Rule"
-    )
-    rma_supplier_out_pull_id = fields.Many2one(
-        comodel_name="stock.rule", string="RMA Supplier Out Rule"
-    )
+
+    @api.returns("self")
+    def _get_all_routes(self):
+        routes = super()._get_all_routes()
+        routes |= self.rma_customer_pull_id
+        routes |= self.rma_supplier_pull_id
+        return routes
 
     def _get_rma_types(self):
         return [
@@ -79,18 +82,16 @@ class StockWarehouse(models.Model):
                         for r_type in wh._get_rma_types():
                             if r_type:
                                 r_type.active = True
-                    # RMA rules:
-                    wh._create_or_update_rma_pull()
+                    # RMA routes:
+                    wh._create_rma_pull()
             else:
                 for wh in self:
                     for r_type in wh._get_rma_types():
                         if r_type:
                             r_type.active = False
                 # Unlink rules:
-                self.mapped("rma_customer_in_pull_id").unlink()
-                self.mapped("rma_customer_out_pull_id").unlink()
-                self.mapped("rma_supplier_in_pull_id").unlink()
-                self.mapped("rma_supplier_out_pull_id").unlink()
+                self.mapped("rma_customer_pull_id").unlink()
+                self.mapped("rma_supplier_pull_id").unlink()
         return super(StockWarehouse, self).write(vals)
 
     def _create_rma_picking_types(self):
@@ -176,90 +177,121 @@ class StockWarehouse(models.Model):
             )
         return True
 
-    def get_rma_rules_dict(self):
+    def get_rma_route_customer(self):
         self.ensure_one()
-        rma_rules = dict()
-        customer_loc, supplier_loc = self._get_partner_locations()
-        rma_rules["rma_customer_in"] = {
-            "name": self._format_rulename(self, customer_loc, self.lot_rma_id.name),
-            "action": "pull",
-            "warehouse_id": self.id,
-            "company_id": self.company_id.id,
-            "location_src_id": customer_loc.id,
-            "location_dest_id": self.lot_rma_id.id,
-            "procure_method": "make_to_stock",
-            "route_id": self.env.ref("rma.route_rma_customer").id,
-            "picking_type_id": self.rma_cust_in_type_id.id,
-            "active": True,
-        }
-        rma_rules["rma_customer_out"] = {
-            "name": self._format_rulename(self, self.lot_rma_id, customer_loc.name),
-            "action": "pull",
-            "warehouse_id": self.id,
-            "company_id": self.company_id.id,
-            "location_src_id": self.lot_rma_id.id,
-            "location_dest_id": customer_loc.id,
-            "procure_method": "make_to_stock",
-            "route_id": self.env.ref("rma.route_rma_customer").id,
-            "picking_type_id": self.rma_cust_out_type_id.id,
-            "active": True,
-        }
-        rma_rules["rma_supplier_in"] = {
-            "name": self._format_rulename(self, supplier_loc, self.lot_rma_id.name),
-            "action": "pull",
-            "warehouse_id": self.id,
-            "company_id": self.company_id.id,
-            "location_src_id": supplier_loc.id,
-            "location_dest_id": self.lot_rma_id.id,
-            "procure_method": "make_to_stock",
-            "route_id": self.env.ref("rma.route_rma_supplier").id,
-            "picking_type_id": self.rma_sup_in_type_id.id,
-            "active": True,
-        }
-        rma_rules["rma_supplier_out"] = {
-            "name": self._format_rulename(self, self.lot_rma_id, supplier_loc.name),
-            "action": "pull",
-            "warehouse_id": self.id,
-            "company_id": self.company_id.id,
-            "location_src_id": self.lot_rma_id.id,
-            "location_dest_id": supplier_loc.id,
-            "procure_method": "make_to_stock",
-            "route_id": self.env.ref("rma.route_rma_supplier").id,
-            "picking_type_id": self.rma_sup_out_type_id.id,
-            "active": True,
-        }
+        customer_loc, _ = self._get_partner_locations()
+        rma_rules = [
+            {
+                "name": self.name + ": Customer RMA",
+                "rma_selectable": True,
+                "rule_ids": [
+                    (
+                        0,
+                        0,
+                        {
+                            "name": self._format_rulename(
+                                self, customer_loc, self.lot_rma_id.name
+                            ),
+                            "action": "pull",
+                            "warehouse_id": self.id,
+                            "company_id": self.company_id.id,
+                            "location_src_id": customer_loc.id,
+                            "location_id": self.lot_rma_id.id,
+                            "procure_method": "make_to_stock",
+                            "picking_type_id": self.rma_cust_in_type_id.id,
+                            "active": True,
+                        },
+                    ),
+                    (
+                        0,
+                        0,
+                        {
+                            "name": self._format_rulename(
+                                self, self.lot_rma_id, customer_loc.name
+                            ),
+                            "action": "pull",
+                            "warehouse_id": self.id,
+                            "company_id": self.company_id.id,
+                            "location_src_id": self.lot_rma_id.id,
+                            "location_id": customer_loc.id,
+                            "procure_method": "make_to_stock",
+                            "picking_type_id": self.rma_cust_out_type_id.id,
+                            "active": True,
+                        },
+                    ),
+                ],
+            }
+        ]
         return rma_rules
 
-    def _create_or_update_rma_pull(self):
-        rule_obj = self.env["stock.rule"]
+    def get_rma_route_supplier(self):
+        self.ensure_one()
+        _, supplier_loc = self._get_partner_locations()
+        rma_route = [
+            {
+                "name": self.name + ": Supplier RMA",
+                "rma_selectable": True,
+                "rule_ids": [
+                    (
+                        0,
+                        0,
+                        {
+                            "name": self._format_rulename(
+                                self, supplier_loc, self.lot_rma_id.name
+                            ),
+                            "action": "pull",
+                            "warehouse_id": self.id,
+                            "company_id": self.company_id.id,
+                            "location_src_id": supplier_loc.id,
+                            "location_id": self.lot_rma_id.id,
+                            "procure_method": "make_to_stock",
+                            "picking_type_id": self.rma_sup_in_type_id.id,
+                            "active": True,
+                        },
+                    ),
+                    (
+                        0,
+                        0,
+                        {
+                            "name": self._format_rulename(
+                                self, self.lot_rma_id, supplier_loc.name
+                            ),
+                            "action": "pull",
+                            "warehouse_id": self.id,
+                            "company_id": self.company_id.id,
+                            "location_src_id": self.lot_rma_id.id,
+                            "location_id": supplier_loc.id,
+                            "procure_method": "make_to_stock",
+                            "picking_type_id": self.rma_sup_out_type_id.id,
+                            "active": True,
+                        },
+                    ),
+                ],
+            }
+        ]
+        return rma_route
+
+    def _create_rma_pull(self):
+        route_obj = self.env["stock.location.route"]
         for wh in self:
-            rules_dict = wh.get_rma_rules_dict()
-            if wh.rma_customer_in_pull_id:
-                wh.rma_customer_in_pull_id.write(rules_dict["rma_customer_in"])
-            else:
-                wh.rma_customer_in_pull_id = rule_obj.create(
-                    rules_dict["rma_customer_in"]
+            if not wh.rma_customer_pull_id:
+                wh.rma_customer_pull_id = (
+                    route_obj.create(self.get_rma_route_customer())
+                    if wh
+                    not in self.env.ref("rma.route_rma_customer").rule_ids.mapped(
+                        "warehouse_id"
+                    )
+                    else self.env.ref("rma.route_rma_customer")
                 )
 
-            if wh.rma_customer_out_pull_id:
-                wh.rma_customer_out_pull_id.write(rules_dict["rma_customer_out"])
-            else:
-                wh.rma_customer_out_pull_id = rule_obj.create(
-                    rules_dict["rma_customer_out"]
-                )
-
-            if wh.rma_supplier_in_pull_id:
-                wh.rma_supplier_in_pull_id.write(rules_dict["rma_supplier_in"])
-            else:
-                wh.rma_supplier_in_pull_id = rule_obj.create(
-                    rules_dict["rma_supplier_in"]
-                )
-
-            if wh.rma_supplier_out_pull_id:
-                wh.rma_supplier_out_pull_id.write(rules_dict["rma_supplier_out"])
-            else:
-                wh.rma_supplier_out_pull_id = rule_obj.create(
-                    rules_dict["rma_supplier_out"]
+            if not wh.rma_supplier_pull_id:
+                wh.rma_supplier_pull_id = (
+                    route_obj.create(self.get_rma_route_supplier())
+                    if wh
+                    not in self.env.ref("rma.route_rma_supplier").rule_ids.mapped(
+                        "warehouse_id"
+                    )
+                    else self.env.ref("rma.route_rma_supplier")
                 )
         return True
 
