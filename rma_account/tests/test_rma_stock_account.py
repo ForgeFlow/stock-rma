@@ -279,7 +279,31 @@ class TestRmaStockAccount(TestRma):
         )
         self.env["stock.rule"].create(
             {
-                "name": "Customers->RMA",
+                "name": "Output->Customer",
+                "action": "pull",
+                "warehouse_id": self.wh.id,
+                "location_src_id": self.output_location.id,
+                "location_id": self.customer_location.id,
+                "procure_method": "make_to_order",
+                "route_id": self.customer_route.id,
+                "picking_type_id": self.env.ref("stock.picking_type_internal").id,
+            }
+        )
+        self.env["stock.rule"].create(
+            {
+                "name": "Customer->Input",
+                "action": "pull",
+                "warehouse_id": self.wh.id,
+                "location_src_id": self.customer_location.id,
+                "location_id": self.input_location.id,
+                "procure_method": "make_to_stock",
+                "route_id": self.customer_route.id,
+                "picking_type_id": self.env.ref("stock.picking_type_internal").id,
+            }
+        )
+        self.env["stock.rule"].create(
+            {
+                "name": "Input->RMA",
                 "action": "pull",
                 "warehouse_id": self.wh.id,
                 "location_src_id": self.customer_location.id,
