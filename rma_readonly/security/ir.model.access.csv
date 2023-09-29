@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_rma_user_customer,rma.order.customer.user,rma.model_rma_order,rma_readonly.group_rma_readonly,1,0,0,0
+access_rma_line_customer_user,rma.order.line.customer.user,rma.model_rma_order_line,rma_readonly.group_rma_readonly,1,0,0,0
+access_rma_operation_customer_user,access_rma_operation,rma.model_rma_operation,rma_readonly.group_rma_readonly,1,0,0,0
+access_rma_operation_supplier_user,access_rma_operation,rma.model_rma_operation,rma_readonly.group_rma_readonly,1,0,0,0
+access_rma_order_line_user,access_rma_order_line,rma.model_rma_order_line,rma_readonly.group_rma_readonly,1,0,0,0

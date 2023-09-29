@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<odoo noupdate="0">
+
+  <record id="group_rma_readonly" model="res.groups">
+      <field name="name">RMA Readonly</field>
+      <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]" />
+      <field name="category_id" ref="rma.module_category_rma" />
+  </record>
+
+</odoo>
