@@ -84,8 +84,10 @@ class RmaOrderLine(models.Model):
             "active_model": "account.move.line",
             "active_ids": amls.ids,
         }
-        return {
-            "type": "ir.actions.client",
-            "tag": "manual_reconciliation_view",
-            "context": action_context,
-        }
+        action_def = self.env["ir.actions.act_window"]._for_xml_id(
+            "account_reconcile_oca.account_account_reconcile_act_window"
+        )
+        action_def["context"] = action_context
+        action_def["domain"] = [("id", "in", amls.ids)]
+        action_def["context"]["default_account_move_lines"] = amls.ids
+        return action_def

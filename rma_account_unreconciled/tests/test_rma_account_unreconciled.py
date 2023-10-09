@@ -55,7 +55,7 @@ class TestRmaAccountUnreconciled(TestRma):
             self.assertFalse(rma_line.unreconciled)
         self.rma_customer_id.rma_line_ids.action_rma_to_approve()
         wizard = self.rma_make_picking.with_context(
-            {
+            **{
                 "active_ids": self.rma_customer_id.rma_line_ids.ids,
                 "active_model": "rma.order.line",
                 "picking_type": "incoming",
@@ -66,14 +66,14 @@ class TestRmaAccountUnreconciled(TestRma):
         res = self.rma_customer_id.rma_line_ids.action_view_in_shipments()
         picking = self.env["stock.picking"].browse(res["res_id"])
         picking.action_assign()
-        for mv in picking.move_lines:
+        for mv in picking.move_ids:
             mv.quantity_done = mv.product_uom_qty
         picking.button_validate()
         for rma_line in self.rma_customer_id.rma_line_ids:
             rma_line._compute_unreconciled()
             self.assertTrue(rma_line.unreconciled)
         make_refund = self.rma_refund_wiz.with_context(
-            {
+            **{
                 "customer": True,
                 "active_ids": self.rma_customer_id.rma_line_ids.ids,
                 "active_model": "rma.order.line",

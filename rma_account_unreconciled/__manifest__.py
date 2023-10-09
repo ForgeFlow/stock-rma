@@ -3,13 +3,13 @@
 
 {
     "name": "RMA Account Unreconcile",
-    "version": "14.0.1.0.0",
+    "version": "16.0.1.0.0",
     "license": "AGPL-3",
     "category": "RMA",
     "summary": "Integrates RMA with Invoice Processing",
     "author": "ForgeFlow",
     "website": "https://github.com/ForgeFlow/stock-rma",
-    "depends": ["account_move_line_rma_order_line", "rma"],
+    "depends": ["account_move_line_rma_order_line", "rma", "account_reconcile_oca"],
     "data": [
         "views/rma_line_view.xml",
     ],
