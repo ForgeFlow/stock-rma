@@ -3,10 +3,10 @@
 
 {
     "name": "RMA Refund Reason Integration",
-    "version": "14.0.1.0.0",
+    "version": "16.0.1.0.0",
     "summary": "RMA Refund Reason Integration",
     "category": "RMA",
-    "author": "ForgeFlow S.L.",
+    "author": "ForgeFlow",
     "website": "https://github.com/ForgeFlow/stock-rma",
     "license": "AGPL-3",
     "depends": ["rma_account", "account_invoice_refund_reason"],
