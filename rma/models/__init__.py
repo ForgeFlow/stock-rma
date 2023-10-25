@@ -2,6 +2,7 @@ from . import rma_order
 from . import rma_order_line
 from . import rma_operation
 from . import stock_move
+from . import stock_quant_package
 from . import stock_warehouse
 from . import product
 from . import product_category

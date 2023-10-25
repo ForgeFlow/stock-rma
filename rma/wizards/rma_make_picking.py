@@ -212,7 +212,7 @@ class RmaMakePicking(models.TransientModel):
             action = self.item_ids.line_id.action_view_in_shipments()
         # Force the reservation of the RMA specific lot for incoming shipments.
         # FIXME: still needs fixing, not reserving appropriate serials.
-        for move in pickings.move_lines.filtered(
+        for move in pickings.move_ids.filtered(
             lambda x: x.state not in ("draft", "cancel", "done", "waiting")
             and x.rma_line_id
             and x.product_id.tracking in ("lot", "serial")
@@ -231,7 +231,7 @@ class RmaMakePicking(models.TransientModel):
                 )
                 move.move_line_ids.write(
                     {
-                        "product_uom_qty": 1 if picking_type == "incoming" else 0,
+                        "reserved_uom_qty": 1 if picking_type == "incoming" else 0,
                         "qty_done": 0,
                         "package_id": len(quants) == 1 and quants.package_id.id,
                     }
@@ -251,7 +251,7 @@ class RmaMakePicking(models.TransientModel):
                         "lot_id": move.rma_line_id.lot_id.id,
                         "product_uom_id": move.product_id.uom_id.id,
                         "qty_done": 0,
-                        "product_uom_qty": qty if picking_type == "incoming" else 0,
+                        "reserved_uom_qty": qty if picking_type == "incoming" else 0,
                     }
                 )
                 move_line_model.create(move_line_data)
