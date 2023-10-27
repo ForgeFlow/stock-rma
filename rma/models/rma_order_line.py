@@ -701,15 +701,25 @@ class RmaOrderLine(models.Model):
             return result
         self.receipt_policy = self.operation_id.receipt_policy
         self.delivery_policy = self.operation_id.delivery_policy
-        self.in_warehouse_id = self.operation_id.in_warehouse_id
-        self.out_warehouse_id = self.operation_id.out_warehouse_id
-        self.location_id = (
-            self.operation_id.location_id or self.in_warehouse_id.lot_rma_id
+        self.customer_to_supplier = (
+            self.rma_id.customer_to_supplier or self.operation_id.customer_to_supplier
         )
-        self.customer_to_supplier = self.operation_id.customer_to_supplier
-        self.supplier_to_customer = self.operation_id.supplier_to_customer
-        self.in_route_id = self.operation_id.in_route_id
-        self.out_route_id = self.operation_id.out_route_id
+        self.supplier_to_customer = (
+            self.rma_id.supplier_to_customer or self.operation_id.supplier_to_customer
+        )
+        self.in_warehouse_id = (
+            self.rma_id.in_warehouse_id or self.operation_id.in_warehouse_id
+        )
+        self.out_warehouse_id = (
+            self.rma_id.out_warehouse_id or self.operation_id.out_warehouse_id
+        )
+        self.location_id = (
+            self.rma_id.location_id
+            or self.operation_id.location_id
+            or self.in_warehouse_id.lot_rma_id
+        )
+        self.in_route_id = self.rma_id.in_route_id or self.operation_id.in_route_id
+        self.out_route_id = self.rma_id.out_route_id or self.operation_id.out_route_id
         return result
 
     @api.onchange("customer_to_supplier", "type")
