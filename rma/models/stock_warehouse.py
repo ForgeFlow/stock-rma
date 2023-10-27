@@ -89,8 +89,8 @@ class StockWarehouse(models.Model):
                         if r_type:
                             r_type.active = False
                 # Unlink rules:
-                self.mapped("rma_customer_pull_id").unlink()
-                self.mapped("rma_supplier_pull_id").unlink()
+                self.mapped("rma_customer_pull_id").active = False
+                self.mapped("rma_supplier_pull_id").active = False
         return super(StockWarehouse, self).write(vals)
 
     def _create_rma_picking_types(self):
