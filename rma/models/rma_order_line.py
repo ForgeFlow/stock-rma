@@ -252,7 +252,7 @@ class RmaOrderLine(models.Model):
         states={"draft": [("readonly", False)]},
         help="Reference of the document that produced this rma.",
     )
-    date = fields.Datetime(
+    date_rma = fields.Datetime(
         string="Order Date", index=True, default=lambda self: self._default_date_rma()
     )
     state = fields.Selection(
