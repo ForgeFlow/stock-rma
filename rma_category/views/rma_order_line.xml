@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<odoo>
+    <record id="view_rma_line_form" model="ir.ui.view">
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_line_form" />
+        <field name="arch" type="xml">
+            <field name="description" position="after">
+            <field
+                    name="category_ids"
+                    widget="many2many_tags"
+                    options="{'no_create': True}"
+                    placeholder="Categories..."
+                    colspan="4"
+                />
+            </field>
+        </field>
+    </record>
+</odoo>
