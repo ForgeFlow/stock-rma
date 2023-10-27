@@ -15,6 +15,7 @@
                 />
                     <field name="rma_id" groups="rma.group_rma_groups" />
                     <field name="origin" />
+                    <field name="date_rma" />
                     <field name="operation_id" />
                     <field name="supplier_address_id" />
                     <field name="uom_id" groups="uom.group_uom" />
@@ -40,6 +41,7 @@
                 />
                     <field name="rma_id" groups="rma.group_rma_groups" />
                     <field name="origin" />
+                    <field name="date_rma" />
                     <field name="operation_id" domain="[('type','=','supplier')]" />
                     <field name="uom_id" groups="uom.group_uom" />
                     <field name="product_qty" />
@@ -184,6 +186,7 @@
                             </group>
                             <group>
                                 <group name="contact">
+                                    <field name="date_rma" />
                                     <field name="requested_by" readonly="1" />
                                     <field name="assigned_to" />
                                     <field name="type" invisible="1" />
@@ -385,6 +388,7 @@
                     <field name="assigned_to" />
                     <field name="product_id" />
                     <field name="lot_id" />
+                    <field name="date_rma" />
                     <separator />
                     <filter
                     name="assigned_to_filter"
