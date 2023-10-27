@@ -12,7 +12,7 @@ class RmaOperation(models.Model):
     def _default_warehouse_id(self):
         company_id = self.env.user.company_id.id
         warehouse = self.env["stock.warehouse"].search(
-            [("company_id", "=", company_id)], limit=1
+            [("company_id", "=", company_id)], order="sequence asc", limit=1
         )
         return warehouse
 
@@ -24,13 +24,33 @@ class RmaOperation(models.Model):
     def _default_supplier_location_id(self):
         return self.env.ref("stock.stock_location_suppliers") or False
 
-    @api.model
-    def _default_routes(self):
+    @api.onchange("in_warehouse_id")
+    def onchange_warehouse_id(self):
         op_type = self.env.context.get("default_type")
         if op_type == "customer":
-            return self.env.ref("rma.route_rma_customer")
+            warehouse = self.in_warehouse_id
+            if not warehouse or not warehouse.rma_customer_pull_id:
+                return
+            self.in_route_id = warehouse.rma_customer_pull_id
+            self.out_route_id = warehouse.rma_customer_pull_id
         elif op_type == "supplier":
-            return self.env.ref("rma.route_rma_supplier")
+            warehouse = self.out_warehouse_id
+            if not warehouse or not warehouse.rma_supplier_pull_id:
+                return
+            self.in_route_id = warehouse.rma_supplier_pull_id
+            self.out_route_id = warehouse.rma_supplier_pull_id
+
+    @api.model
+    def _default_routes(self):
+        company_id = self.env.user.company_id.id
+        warehouse = self.env["stock.warehouse"].search(
+            [("company_id", "=", company_id)], limit=1
+        )
+        op_type = self.env.context.get("default_type")
+        if op_type == "customer":
+            return warehouse.rma_customer_pull_id.id
+        elif op_type == "supplier":
+            return warehouse.rma_supplier_pull_id.id
 
     name = fields.Char("Description", required=True)
     code = fields.Char(required=True)
