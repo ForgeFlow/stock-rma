@@ -10,6 +10,9 @@
             </xpath>
             <field name="resupply_wh_ids" position="after">
                 <field name="rma_in_this_wh" />
+                <field name="rma_customer_pull_id" />
+                <field name="rma_supplier_pull_id" />
+
             </field>
             <xpath expr="//field[@name='out_type_id']" position="after">
                 <field name="rma_cust_in_type_id" />

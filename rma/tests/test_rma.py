@@ -26,6 +26,8 @@ class TestRma(common.TransactionCase):
         cls.rma_cust_replace_op_id = cls.env.ref("rma.rma_operation_customer_replace")
         cls.rma_sup_replace_op_id = cls.env.ref("rma.rma_operation_supplier_replace")
         cls.rma_ds_replace_op_id = cls.env.ref("rma.rma_operation_ds_replace")
+        cls.input_location = cls.env.ref("stock.stock_location_company")
+        cls.output_location = cls.env.ref("stock.stock_location_output")
         cls.category = cls._create_product_category(
             "one_step", cls.rma_cust_replace_op_id, cls.rma_sup_replace_op_id
         )
@@ -41,7 +43,10 @@ class TestRma(common.TransactionCase):
         cls.partner_id = cls.env.ref("base.res_partner_2")
         cls.stock_location = cls.env.ref("stock.stock_location_stock")
         cls.wh = cls.env.ref("stock.warehouse0")
+        cls.wh.rma_in_this_wh = False
+        cls.wh.rma_in_this_wh = True
         cls.stock_rma_location = cls.wh.lot_rma_id
+        cls.customer_route = cls.wh.rma_customer_pull_id
         cls.customer_location = cls.env.ref("stock.stock_location_customers")
         cls.supplier_location = cls.env.ref("stock.stock_location_suppliers")
         cls.product_uom_id = cls.env.ref("uom.product_uom_unit")
@@ -366,9 +371,7 @@ class TestRma(common.TransactionCase):
             # check assert if call reference_move_id onchange
             self.assertEqual(line.product_id, line.reference_move_id.product_id)
             self.assertEqual(line.product_qty, line.reference_move_id.product_uom_qty)
-            self.assertEqual(
-                line.location_id.location_id, line.reference_move_id.location_id
-            )
+            self.assertEqual(line.location_id, line.in_warehouse_id.lot_rma_id)
             self.assertEqual(line.origin, line.reference_move_id.picking_id.name)
             self.assertEqual(
                 line.delivery_address_id, line.reference_move_id.picking_id.partner_id
@@ -1075,8 +1078,10 @@ class TestRma(common.TransactionCase):
         """
         # Alter the customer RMA route to make it multi-step
         # Get rid of the duplicated rule
-        self.env.ref("rma.rule_rma_customer_out_pull").active = False
-        self.env.ref("rma.rule_rma_customer_in_pull").active = False
+        self.customer_route.rule_ids.active = False
+        # to be able to receive in in WH
+        self.wh.reception_steps = "two_steps"
+        self.wh.delivery_steps = "pick_ship"
         cust_in_pull_rule = self.customer_route.rule_ids.filtered(
             lambda r: r.location_id == self.stock_rma_location
         )
@@ -1091,7 +1096,7 @@ class TestRma(common.TransactionCase):
                 "name": "RMA->Output",
                 "action": "pull",
                 "warehouse_id": self.wh.id,
-                "location_src_id": self.env.ref("rma.location_rma").id,
+                "location_src_id": self.wh.lot_rma_id.id,
                 "location_id": self.output_location.id,
                 "procure_method": "make_to_stock",
                 "route_id": self.customer_route.id,
@@ -1128,7 +1133,7 @@ class TestRma(common.TransactionCase):
                 "action": "pull",
                 "warehouse_id": self.wh.id,
                 "location_src_id": self.input_location.id,
-                "location_id": self.env.ref("rma.location_rma").id,
+                "location_id": self.wh.lot_rma_id.id,
                 "procure_method": "make_to_order",
                 "route_id": self.customer_route.id,
                 "picking_type_id": self.env.ref("stock.picking_type_internal").id,
