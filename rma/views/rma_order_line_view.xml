@@ -228,7 +228,7 @@
                                 <field name="delivery_policy" />
                             </group>
                             <group name="description" string="Description">
-                                    <field name="description" nolabel="1" />
+                                    <field name="description" nolabel="1" colspan="4" />
                             </group>
                         </group>
                         <notebook>
