@@ -1,8 +1,9 @@
-==============
-RMA Filter Lot
-==============
+============
+RMA Category
+============
 
-Filter RMA lots in customer RMA to only allow lots sent to customer.
+This module allow to create categories for RMA and assign these categories to the RMA.
+The goal is to be able to classify/organise the RMAs.
 
 Bug Tracker
 ===========
@@ -20,18 +21,17 @@ Credits
 Authors
 ~~~~~~~
 
-* ForgeFlow S.L.
+* Akretion
 
 Contributors
 ~~~~~~~~~~~~
 
-* Mateu Griful <mateu.griful@forgeflow.com>
-* Lois Rilo <lois.rilo@forgeflow.com>
+* Florian da Costa <florian.dacosta@akretion.com>
 
 Maintainers
 ~~~~~~~~~~~
 
 This module is maintained by the ForgeFlow.
 
-This module is part of the `ForgeFlow/stock-rma <https://github.com/ForgeFlow/stock-rma/tree/13.0/rma>`_ project on GitHub.
+This module is part of the `ForgeFlow/stock-rma <https://github.com/ForgeFlow/stock-rma/tree/16.0/rma>`_ project on GitHub.
 

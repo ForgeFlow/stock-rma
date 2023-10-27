@@ -2,11 +2,11 @@
 
 {
     "name": "RMA Category",
-    "version": "14.0.1.0.0",
+    "version": "16.0.1.0.0",
     "license": "LGPL-3",
     "category": "RMA",
     "summary": "Add RMA categories to classify RMAs",
-    "author": "Akretion",
+    "author": "Akretion,ForgeFlow",
     "website": "https://github.com/ForgeFlow/stock-rma",
     "depends": ["rma"],
     "data": [

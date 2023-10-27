@@ -7,7 +7,6 @@
             <field name="description" position="after">
             <field
                     name="category_ids"
-                    nolabel="1"
                     widget="many2many_tags"
                     options="{'no_create': True}"
                     placeholder="Categories..."
