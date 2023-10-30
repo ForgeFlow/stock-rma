@@ -183,7 +183,7 @@ class RmaOrderLine(models.Model):
                 raise ValidationError(_("Please define an operation first"))
 
         if not operation.in_route_id or not operation.out_route_id:
-            route = self.env["stock.location.route"].search(
+            route = self.env["stock.route"].search(
                 [("rma_selectable", "=", True)], limit=1
             )
             if not route:
@@ -222,9 +222,7 @@ class RmaOrderLine(models.Model):
             "in_route_id": operation.in_route_id.id or route.id,
             "out_route_id": operation.out_route_id.id or route.id,
             "location_id": (
-                operation.location_id.id
-                or operation.in_warehouse_id.lot_rma_id.id
-                or warehouse.lot_rma_id.id
+                operation.location_id.id or operation.in_warehouse_id.lot_rma_id.id
             ),
         }
         return data

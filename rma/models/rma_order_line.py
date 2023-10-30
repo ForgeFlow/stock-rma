@@ -596,7 +596,6 @@ class RmaOrderLine(models.Model):
                 operation.location_id.id
                 or operation.in_warehouse_id.lot_rma_id.id
                 or operation.out_warehouse_id.lot_rma_id.id
-                or warehouse.lot_rma_id.id
             ),
         }
         return data

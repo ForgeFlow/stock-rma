@@ -1083,9 +1083,9 @@ class TestRma(common.TransactionCase):
         self.wh.reception_steps = "two_steps"
         self.wh.delivery_steps = "pick_ship"
         cust_in_pull_rule = self.customer_route.rule_ids.filtered(
-            lambda r: r.location_id == self.stock_rma_location
+            lambda r: r.location_dest_id == self.stock_rma_location
         )
-        cust_in_pull_rule.location_id = self.input_location
+        cust_in_pull_rule.location_dest_id = self.input_location
         cust_out_pull_rule = self.customer_route.rule_ids.filtered(
             lambda r: r.location_src_id == self.env.ref("rma.location_rma")
         )
@@ -1097,7 +1097,7 @@ class TestRma(common.TransactionCase):
                 "action": "pull",
                 "warehouse_id": self.wh.id,
                 "location_src_id": self.wh.lot_rma_id.id,
-                "location_id": self.output_location.id,
+                "location_dest_id": self.output_location.id,
                 "procure_method": "make_to_stock",
                 "route_id": self.customer_route.id,
                 "picking_type_id": self.env.ref("stock.picking_type_internal").id,
@@ -1109,7 +1109,7 @@ class TestRma(common.TransactionCase):
                 "action": "pull",
                 "warehouse_id": self.wh.id,
                 "location_src_id": self.output_location.id,
-                "location_id": self.customer_location.id,
+                "location_dest_id": self.customer_location.id,
                 "procure_method": "make_to_order",
                 "route_id": self.customer_route.id,
                 "picking_type_id": self.env.ref("stock.picking_type_internal").id,
@@ -1121,7 +1121,7 @@ class TestRma(common.TransactionCase):
                 "action": "pull",
                 "warehouse_id": self.wh.id,
                 "location_src_id": self.customer_location.id,
-                "location_id": self.input_location.id,
+                "location_dest_id": self.input_location.id,
                 "procure_method": "make_to_stock",
                 "route_id": self.customer_route.id,
                 "picking_type_id": self.env.ref("stock.picking_type_internal").id,
@@ -1133,7 +1133,7 @@ class TestRma(common.TransactionCase):
                 "action": "pull",
                 "warehouse_id": self.wh.id,
                 "location_src_id": self.input_location.id,
-                "location_id": self.wh.lot_rma_id.id,
+                "location_dest_id": self.wh.lot_rma_id.id,
                 "procure_method": "make_to_order",
                 "route_id": self.customer_route.id,
                 "picking_type_id": self.env.ref("stock.picking_type_internal").id,

@@ -7,14 +7,11 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='wh_output_stock_loc_id']" position="after">
                 <field name="lot_rma_id" />
-            </xpath>
-            <field name="resupply_wh_ids" position="after">
                 <field name="rma_in_this_wh" />
+            </xpath>
+            <xpath expr="//field[@name='out_type_id']" position="after">
                 <field name="rma_customer_pull_id" />
                 <field name="rma_supplier_pull_id" />
-
-            </field>
-            <xpath expr="//field[@name='out_type_id']" position="after">
                 <field name="rma_cust_in_type_id" />
                 <field name="rma_cust_out_type_id" />
                 <field name="rma_sup_in_type_id" />
