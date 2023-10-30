@@ -59,7 +59,7 @@ class RmaAddPurchase(models.TransientModel):
             if not operation:
                 raise ValidationError(_("Please define an operation first"))
         if not operation.in_route_id or not operation.out_route_id:
-            route = self.env["stock.location.route"].search(
+            route = self.env["stock.route"].search(
                 [("rma_selectable", "=", True)], limit=1
             )
             if not route:
@@ -97,9 +97,7 @@ class RmaAddPurchase(models.TransientModel):
             "out_route_id": operation.out_route_id.id or route,
             "receipt_policy": operation.receipt_policy,
             "location_id": (
-                operation.location_id.id
-                or operation.in_warehouse_id.lot_rma_id.id
-                or warehouse.lot_rma_id.id
+                operation.location_id.id or operation.in_warehouse_id.lot_rma_id.id
             ),
             "refund_policy": operation.refund_policy,
             "delivery_policy": operation.delivery_policy,
