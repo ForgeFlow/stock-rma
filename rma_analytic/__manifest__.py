@@ -3,7 +3,7 @@
 
 {
     "name": "Analytic Account in RMA",
-    "version": "15.0.1.0.0",
+    "version": "16.0.1.0.0",
     "author": "ForgeFlow," "Odoo Community Association (OCA)",
     "license": "AGPL-3",
     "website": "https://github.com/ForgeFlow/stock-rma",
