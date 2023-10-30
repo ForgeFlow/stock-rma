@@ -19,7 +19,7 @@ class RmaOrder(models.Model):
                 .filtered(lambda m: m.is_rma_put_away)
                 .mapped("picking_id")
             )
-            order.put_away_count = len(pickings)
+            order.repair_transfer_count = len(pickings)
 
     repair_count = fields.Integer(
         compute="_compute_repair_count", string="# of Repairs"
