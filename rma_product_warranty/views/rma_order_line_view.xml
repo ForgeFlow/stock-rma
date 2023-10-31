@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+        <record id="view_rma_line_warranty_form" model="ir.ui.view">
+            <field name="name">rma.order.line.warranty.form</field>
+            <field name="model">rma.order.line</field>
+            <field name="inherit_id" ref="rma.view_rma_line_form" />
+            <field name="arch" type="xml">
+                <field name="under_warranty" position="after">
+                    <field name="warranty_end_date" />
+                </field>
+            </field>
+        </record>
+
+</odoo>
