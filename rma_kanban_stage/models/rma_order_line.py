@@ -1,4 +1,4 @@
-# Copyright 2019 Eficent Business and IT Consulting Services S.L.
+# Copyright 2019-23 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 from odoo import api, fields, models
 
@@ -9,12 +9,11 @@ class RmaOrderLine(models.Model):
 
     user_id = fields.Many2one(comodel_name="res.users", related="assigned_to")
     kanban_color = fields.Integer(
-        compute="compute_color",
+        compute="_compute_color",
         string="Base - Background Color",
         help="Default color for the background.",
     )
 
-    @api.multi
     def copy(self, default=None):
         self.ensure_one()
         default = default or {}
@@ -23,8 +22,7 @@ class RmaOrderLine(models.Model):
         return super(RmaOrderLine, self).copy(default=default)
 
     @api.depends("state")
-    @api.multi
-    def compute_color(self):
+    def _compute_color(self):
         for rec in self.filtered(lambda l: l.state == "draft"):
             rec.kanban_color = 1
         for rec in self.filtered(lambda l: l.state == "approved"):

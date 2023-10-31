@@ -13,6 +13,8 @@
         <field name="arch" type="xml">
             <xpath expr="//div[@name='card_body']">
                 <div name="main">
+                    <strong><field name="name" /></strong>
+                    <br />
                     <strong>Partner</strong>:<field name="partner_id" />
                     <br />
                     <t t-if="origin">
@@ -48,9 +50,15 @@
         <field name="model">rma.order.line</field>
         <field name="inherit_id" ref="rma.view_rma_rma_line_filter" />
         <field name="arch" type="xml">
-            <filter name="assigned_to" position="after">
-                <filter string="Stage" name="stage" context="{'group_by':'stage_id'}" />
-            </filter>
+            <group name="stock_quantities" position="after">
+                <group name="rma_stages" groups="stock.group_stock_user">
+                    <filter
+                        string="Stage"
+                        name="stage"
+                        context="{'group_by':'stage_id'}"
+                    />
+                </group>
+            </group>
         </field>
     </record>
 
