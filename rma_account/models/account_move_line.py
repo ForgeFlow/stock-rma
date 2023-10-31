@@ -76,7 +76,7 @@ class AccountMoveLine(models.Model):
             invl.rma_line_count = len(rma_lines)
 
     used_in_rma_line_count = fields.Integer(
-        compute="_compute_used_in_rma_count", string="# of RMA"
+        compute="_compute_used_in_rma_count", string="# of used RMA"
     )
     rma_line_count = fields.Integer(compute="_compute_rma_count", string="# of RMA")
     rma_line_ids = fields.One2many(
