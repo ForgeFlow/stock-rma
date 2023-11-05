@@ -31,4 +31,8 @@ class RmaOrderLine(models.Model):
                     rec.warranty_end_date = (
                         rec.account_move_line_id.date + relativedelta(years=warranty)
                     )
+            elif rec.sale_line_id and rec.sale_line_id.invoice_lines:
+                rec.warranty_end_date = rec.sale_line_id.invoice_lines[
+                    0
+                ].date + relativedelta(years=warranty)
         return res
