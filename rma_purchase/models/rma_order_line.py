@@ -172,9 +172,7 @@ class RmaOrderLine(models.Model):
             "receipt_policy": operation.receipt_policy,
             "currency_id": line.currency_id.id,
             "location_id": (
-                operation.location_id.id
-                or operation.in_warehouse_id.lot_rma_id.id
-                or warehouse.lot_rma_id.id
+                operation.location_id.id or operation.in_warehouse_id.lot_rma_id.id
             ),
             "refund_policy": operation.refund_policy,
             "delivery_policy": operation.delivery_policy,

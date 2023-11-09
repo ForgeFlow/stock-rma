@@ -97,9 +97,7 @@ class RmaAddPurchase(models.TransientModel):
             "out_route_id": operation.out_route_id.id or route,
             "receipt_policy": operation.receipt_policy,
             "location_id": (
-                operation.location_id.id
-                or operation.in_warehouse_id.lot_rma_id.id
-                or warehouse.lot_rma_id.id
+                operation.location_id.id or operation.in_warehouse_id.lot_rma_id.id
             ),
             "refund_policy": operation.refund_policy,
             "delivery_policy": operation.delivery_policy,
