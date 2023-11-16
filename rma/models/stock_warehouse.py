@@ -67,7 +67,7 @@ class StockWarehouse(models.Model):
                             {
                                 "name": "RMA",
                                 "usage": "internal",
-                                "location_id": wh.lot_stock_id.id,
+                                "location_id": wh.view_location_id.id,
                                 "company_id": wh.company_id.id,
                             }
                         )
