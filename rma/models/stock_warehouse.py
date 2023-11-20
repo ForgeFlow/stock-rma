@@ -69,6 +69,7 @@ class StockWarehouse(models.Model):
                                 "usage": "internal",
                                 "location_id": wh.view_location_id.id,
                                 "company_id": wh.company_id.id,
+                                "return_location": True,
                             }
                         )
                     # RMA types
