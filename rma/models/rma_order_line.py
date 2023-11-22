@@ -207,6 +207,10 @@ class RmaOrderLine(models.Model):
         for rec in self.filtered(lambda r: r.type == "supplier"):
             rec.rma_line_count = len(rec.customer_rma_id)
 
+    @api.model
+    def _default_date_rma(self):
+        return fields.Datetime.now()
+
     delivery_address_id = fields.Many2one(
         comodel_name="res.partner",
         string="Partner delivery address",
@@ -237,6 +241,9 @@ class RmaOrderLine(models.Model):
         readonly=True,
         states={"draft": [("readonly", False)]},
         help="Reference of the document that produced this rma.",
+    )
+    date_rma = fields.Datetime(
+        string="Order Date", index=True, default=lambda self: self._default_date_rma()
     )
     state = fields.Selection(
         selection=[

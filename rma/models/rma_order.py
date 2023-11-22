@@ -88,7 +88,11 @@ class RmaOrder(models.Model):
     description = fields.Text()
     comment = fields.Text("Additional Information")
     date_rma = fields.Datetime(
-        string="Order Date", index=True, default=lambda self: self._default_date_rma()
+        compute="_compute_date_rma",
+        inverse="_inverse_date_rma",
+        string="Order Date",
+        index=True,
+        default=lambda self: self._default_date_rma(),
     )
     partner_id = fields.Many2one(
         comodel_name="res.partner", string="Partner", required=True
@@ -189,6 +193,26 @@ class RmaOrder(models.Model):
             self.supplier_to_customer = self.operation_default_id.supplier_to_customer
             self.in_route_id = self.operation_default_id.in_route_id
             self.out_route_id = self.operation_default_id.out_route_id
+
+    @api.depends("rma_line_ids.date_rma")
+    def _compute_date_rma(self):
+        """If all order line have same date set date_rma.
+        If no lines, respect value given by the user.
+        """
+        for rma in self:
+            if rma.rma_line_ids:
+                date_rma = rma.rma_line_ids[0].date_rma or False
+                for rma_line in rma.rma_line_ids:
+                    if rma_line.date_rma != date_rma:
+                        date_rma = False
+                        break
+                rma.date_rma = date_rma
+
+    def _inverse_date_rma(self):
+        """When set date_rma set date_rma on all order lines"""
+        for po in self:
+            if po.date_rma:
+                po.rma_line_ids.write({"date_rma": po.date_rma})
 
     @api.constrains("partner_id", "rma_line_ids")
     def _check_partner_id(self):
