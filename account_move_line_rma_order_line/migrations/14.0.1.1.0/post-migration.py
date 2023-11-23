@@ -4,7 +4,7 @@ import logging
 
 from odoo import SUPERUSER_ID, api
 
-from . import post_init_hook
+from odoo.addons.account_move_line_rma_order_line import post_init_hook
 
 _logger = logging.getLogger(__name__)
 
