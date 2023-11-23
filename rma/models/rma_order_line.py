@@ -111,7 +111,17 @@ class RmaOrderLine(models.Model):
                 if direction == "out" and move.move_orig_ids:
                     continue
                 elif direction == "in" and move.move_dest_ids:
-                    continue
+                    sub_move = move.move_dest_ids
+                    count_move = False
+                    while sub_move:
+                        if sub_move.mapped("move_dest_ids"):
+                            sub_move = sub_move.mapped("move_dest_ids")
+                        else:
+                            if all(sm.state in states for sm in sub_move):
+                                count_move = True
+                            sub_move = False
+                    if not count_move:
+                        continue
                 qty += product_obj._compute_quantity(move.product_uom_qty, rec.uom_id)
             return qty
 
