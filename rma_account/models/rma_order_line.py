@@ -224,9 +224,7 @@ class RmaOrderLine(models.Model):
             "in_route_id": operation.in_route_id.id or route.id,
             "out_route_id": operation.out_route_id.id or route.id,
             "location_id": (
-                operation.location_id.id
-                or operation.in_warehouse_id.lot_rma_id.id
-                or warehouse.lot_rma_id.id
+                operation.location_id.id or operation.in_warehouse_id.lot_rma_id.id
             ),
         }
         return data

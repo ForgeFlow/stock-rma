@@ -259,8 +259,10 @@ class TestRmaStockAccount(TestRma):
         """
         # Alter the customer RMA route to make it multi-step
         # Get rid of the duplicated rule
-        self.env.ref("rma.rule_rma_customer_out_pull").active = False
-        self.env.ref("rma.rule_rma_customer_in_pull").active = False
+        self.customer_route.rule_ids.active = False
+        self.env["stock.location.route"].search([]).active = False
+        self.customer_route.active = True
+        # to be able to receive in in WH
         cust_in_pull_rule = self.customer_route.rule_ids.filtered(
             lambda r: r.location_id == self.stock_rma_location
         )
@@ -275,23 +277,51 @@ class TestRmaStockAccount(TestRma):
                 "name": "RMA->Output",
                 "action": "pull",
                 "warehouse_id": self.wh.id,
-                "location_src_id": self.env.ref("rma.location_rma").id,
+                "location_src_id": self.wh.lot_rma_id.id,
                 "location_id": self.output_location.id,
                 "procure_method": "make_to_stock",
                 "route_id": self.customer_route.id,
                 "picking_type_id": self.env.ref("stock.picking_type_internal").id,
+                "group_propagation_option": "propagate",
             }
         )
         self.env["stock.rule"].create(
             {
-                "name": "Customers->RMA",
+                "name": "Output->Customer",
+                "action": "pull",
+                "warehouse_id": self.wh.id,
+                "location_src_id": self.output_location.id,
+                "location_id": self.customer_location.id,
+                "procure_method": "make_to_order",
+                "route_id": self.customer_route.id,
+                "picking_type_id": self.env.ref("stock.picking_type_out").id,
+                "group_propagation_option": "propagate",
+            }
+        )
+        self.env["stock.rule"].create(
+            {
+                "name": "Customer->Input",
                 "action": "pull",
                 "warehouse_id": self.wh.id,
                 "location_src_id": self.customer_location.id,
-                "location_id": self.env.ref("rma.location_rma").id,
-                "procure_method": "make_to_order",
+                "location_id": self.input_location.id,
+                "procure_method": "make_to_stock",
                 "route_id": self.customer_route.id,
                 "picking_type_id": self.env.ref("stock.picking_type_in").id,
+                "group_propagation_option": "propagate",
+            }
+        )
+        self.env["stock.rule"].create(
+            {
+                "name": "Input->RMA",
+                "action": "pull",
+                "warehouse_id": self.wh.id,
+                "location_src_id": self.input_location.id,
+                "location_id": self.wh.lot_rma_id.id,
+                "procure_method": "make_to_order",
+                "route_id": self.customer_route.id,
+                "picking_type_id": self.env.ref("stock.picking_type_internal").id,
+                "group_propagation_option": "propagate",
             }
         )
         # Set a standard price on the products
