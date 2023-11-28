@@ -203,6 +203,7 @@
                                 groups="stock.group_production_lot"
                                 attrs="{'required': [('product_tracking', 'in', ('serial', 'lot'))]}"
                                 context="{'default_product_id': product_id,}"
+                                domain="[('product_id', '=', product_id)]"
                             />
                                 <field name="under_warranty" />
                             </group>
