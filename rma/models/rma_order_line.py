@@ -730,7 +730,7 @@ class RmaOrderLine(models.Model):
             )
         if self.lot_id.product_id != self.product_id:
             self.lot_id = False
-        return {"domain": {"lot_id": [("product_id", "=", self.product_id.id)]}}
+        return result
 
     @api.onchange("operation_id")
     def _onchange_operation_id(self):
