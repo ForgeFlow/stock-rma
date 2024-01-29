@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <menuitem
+        id="rma.menu_rma_root"
+        name="RMA"
+        groups="rma.group_rma_customer_user,rma.group_rma_supplier_user,rma.group_rma_manager,rma_readonly.group_rma_readonly"
+        web_icon="rma,static/description/icon.png"
+        sequence="100"
+    />
+
+    <!-- Customer RMA -->
+    <menuitem
+        id="rma.menu_customer_rma"
+        name="Customer RMA"
+        groups="rma.group_rma_customer_user,rma.group_rma_supplier_user,rma_readonly.group_rma_readonly"
+        sequence="30"
+        parent="rma.menu_rma_root"
+    />
+
+    <menuitem
+        id="rma.menu_rma_line_customer"
+        sequence="20"
+        parent="rma.menu_customer_rma"
+        groups="rma.group_rma_customer_user,rma_readonly.group_rma_readonly"
+        action="rma.action_rma_customer_lines"
+    />
+
+    <!-- Supplier RMA -->
+    <menuitem
+        id="rma.menu_supplier_rma"
+        name="Supplier RMA"
+        groups="rma.group_rma_customer_user,rma.group_rma_supplier_user,rma_readonly.group_rma_readonly"
+        sequence="31"
+        parent="rma.menu_rma_root"
+    />
+
+    <menuitem
+        id="rma.menu_rma_act_supplier"
+        sequence="50"
+        parent="rma.menu_supplier_rma"
+        groups="rma.group_rma_groups,rma_readonly.group_rma_readonly"
+        action="rma.action_rma_supplier"
+    />
+
+    <menuitem
+        id="rma.menu_rma_line_supplier"
+        sequence="20"
+        parent="rma.menu_supplier_rma"
+        groups="rma.group_rma_supplier_user,rma_readonly.group_rma_readonly"
+        action="rma.action_rma_supplier_lines"
+    />
+
+</odoo>

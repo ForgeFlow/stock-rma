@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <menuitem
+        id="rma_account.menu_rma_customer_refunds"
+        name="Customer RMA to Refund"
+        sequence="20"
+        parent="rma_account.menu_rma_account"
+        groups="rma.group_rma_customer_user,rma_readonly.group_rma_readonly"
+        action="rma_account.action_rma_account_customer_lines"
+    />
+
+    <menuitem
+        id="rma_account.menu_rma_line_supplier_refunds"
+        name="Supplier RMA to Refund"
+        sequence="20"
+        parent="rma_account.menu_rma_account"
+        groups="rma.group_rma_customer_user,rma_readonly.group_rma_readonly"
+        action="rma_account.action_rma_supplier_lines"
+    />
+
+
+    <menuitem
+        id="rma_account.menu_rma_line_account_customer"
+        name="Customer RMA to Refund"
+        sequence="20"
+        parent="account.menu_finance_receivables"
+        groups="rma.group_rma_customer_user,rma_readonly.group_rma_readonly"
+        action="rma_account.action_rma_account_customer_lines"
+    />
+
+    <menuitem
+        id="rma_accountmenu_rma_line_account_supplier"
+        name="Supplier RMA to Refund"
+        sequence="20"
+        parent="account.menu_finance_payables"
+        groups="rma.group_rma_supplier_user,rma_readonly.group_rma_readonly"
+        action="rma_account.action_rma_supplier_lines"
+    />
+
+</odoo>
