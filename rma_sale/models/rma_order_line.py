@@ -81,6 +81,9 @@ class RmaOrderLine(models.Model):
         readonly=False,
     )
     sales_count = fields.Integer(compute="_compute_sales_count", string="# of Sales")
+    sale_line_domain_ids = fields.Many2many(
+        comodel_name="sale.order.line", compute="_compute_sale_line_domain"
+    )
 
     @api.onchange("product_id", "partner_id")
     def _onchange_product_id(self):
@@ -97,6 +100,34 @@ class RmaOrderLine(models.Model):
             domain.append(("product_id", "=", self.product_id.id))
         res["domain"]["sale_line_id"] = domain
         return res
+
+    def _get_stock_move_reference(self):
+        self.ensure_one()
+        move = self.reference_move_id
+        if self.sale_line_id:
+            # CHECK ME: backorder cases can be more than one move
+            sale_moves = self.sale_line_id.move_ids.filtered(
+                lambda x: x.location_dest_id.usage == "customer" and x.state == "done"
+            )
+            if sale_moves:
+                return sale_moves
+        return move
+
+    @api.depends("product_id", "partner_id")
+    def _compute_sale_line_domain(self):
+        line_model = self.env["sale.order.line"]
+        for rec in self:
+            domain = []
+            if rec.partner_id:
+                domain = [
+                    "|",
+                    ("order_id.partner_id", "=", rec.partner_id.id),
+                    ("order_id.partner_id", "child_of", rec.partner_id.id),
+                ]
+            if rec.product_id:
+                domain.append(("product_id", "=", rec.product_id.id))
+            lines = domain and line_model.search(domain) or line_model.browse()
+            rec.sale_line_domain_ids = lines.ids
 
     @api.onchange("operation_id")
     def _onchange_operation_id(self):
