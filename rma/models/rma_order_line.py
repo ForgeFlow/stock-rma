@@ -523,6 +523,10 @@ class RmaOrderLine(models.Model):
         string="Under Warranty?", readonly=True, states={"draft": [("readonly", False)]}
     )
 
+    def _get_stock_move_reference(self):
+        self.ensure_one()
+        return self.reference_move_id
+
     def _prepare_rma_line_from_stock_move(self, sm, lot=False):
         if not self.type:
             self.type = self._get_default_type()
