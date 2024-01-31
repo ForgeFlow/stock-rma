@@ -136,7 +136,7 @@ class RmaMakePicking(models.TransientModel):
             "location_id": location,
             "rma_line_id": line.id,
             "route_ids": route,
-            "lot_id": line.lot_id.id,
+            "restrict_lot_id": line.lot_id.id,
         }
         return procurement_data
 
@@ -203,6 +203,21 @@ class RmaMakePicking(models.TransientModel):
             procurements.extend(procurement)
         return procurements
 
+    def _is_final_step(self, move):
+        """This function helps to know if wizard is called to finish process of rma,
+        customer is delivery return, and supplier is receipt return"""
+        if (
+            move.rma_line_id.type == "customer"
+            and self.env.context.get("picking_type") == "outgoing"
+        ):
+            return True
+        if (
+            move.rma_line_id.type == "supplier"
+            and self.env.context.get("picking_type") == "incoming"
+        ):
+            return True
+        return False
+
     def action_create_picking(self):
         self._create_picking()
         move_line_model = self.env["stock.move.line"]
@@ -213,7 +228,7 @@ class RmaMakePicking(models.TransientModel):
             pickings = self.mapped("item_ids.line_id")._get_in_pickings()
             action = self.item_ids.line_id.action_view_in_shipments()
             # Force the reservation of the RMA specific lot for incoming shipments.
-            for move in pickings.move_lines.filtered(
+            for move in pickings.move_ids.filtered(
                 lambda x: x.state not in ("draft", "cancel", "done", "waiting")
                 and x.rma_line_id
                 and x.product_id.tracking in ("lot", "serial")
@@ -237,12 +252,9 @@ class RmaMakePicking(models.TransientModel):
                 move_line_data = move._prepare_move_line_vals(
                     reserved_quant=(len(quants) == 1) and quants or False
                 )
-                quants = self.env["stock.quant"]._gather(
-                    move.product_id, move.location_id, lot_id=move.rma_line_id.lot_id
-                )
-                move.move_line_ids.write(
+                move_line_data.update(
                     {
-                        "qty_done": 0,
+                        "quantity": 0,
                     }
                 )
                 if move.rma_line_id.lot_id and not quants:
@@ -260,7 +272,7 @@ class RmaMakePicking(models.TransientModel):
                     )
                     move_line_data.update(
                         {
-                            "product_uom_qty": 1.0,
+                            "quantity": 1.0,
                         }
                     )
                     if move.move_line_ids:
@@ -273,7 +285,7 @@ class RmaMakePicking(models.TransientModel):
                                 "result_package_id": move_line_data.get(
                                     "result_package_id", False
                                 ),
-                                "product_uom_qty": 1.0,
+                                "quantity": 1.0,
                             }
                         )
                     if (
@@ -288,15 +300,15 @@ class RmaMakePicking(models.TransientModel):
                 elif move.product_id.tracking == "lot":
                     if picking_type == "incoming":
                         qty = self.item_ids.filtered(
-                            lambda x: x.line_id.id == move.rma_line_id.id
+                            lambda x: x.line_id.id == move.rma_line_id.id  # noqa: B023
                         ).qty_to_receive
                     else:
                         qty = self.item_ids.filtered(
-                            lambda x: x.line_id.id == move.rma_line_id.id
+                            lambda x: x.line_id.id == move.rma_line_id.id  # noqa: B023
                         ).qty_to_deliver
                     move_line_data.update(
                         {
-                            "product_uom_qty": qty if picking_type == "incoming" else 0,
+                            "quantity": qty if picking_type == "incoming" else 0,
                         }
                     )
                 if not move.move_line_ids:

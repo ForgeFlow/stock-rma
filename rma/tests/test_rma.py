@@ -16,6 +16,8 @@ class TestRma(common.TransactionCase):
         cls.make_supplier_rma = cls.env["rma.order.line.make.supplier.rma"]
         cls.rma_add_stock_move = cls.env["rma_add_stock_move"]
         cls.product_ctg_model = cls.env["product.category"]
+        cls.lot_obj = cls.env["stock.lot"]
+        cls.package_obj = cls.env["stock.quant.package"]
         cls.stockpicking = cls.env["stock.picking"]
         cls.rma = cls.env["rma.order"]
         cls.rma_line = cls.env["rma.order.line"]
@@ -34,6 +36,8 @@ class TestRma(common.TransactionCase):
         )
         cls.product_id = cls._create_product("PT0")
         cls.product_1 = cls._create_product("PT1")
+        cls.product_1_serial = cls._create_product("PT1 Serial", "serial")
+        cls.product_1_lot = cls._create_product("PT1 Lot", "lot")
         cls.product_2 = cls._create_product("PT2")
         cls.product_3 = cls._create_product("PT3")
         cls.uom_unit = cls.env.ref("uom.product_uom_unit")
@@ -153,9 +157,14 @@ class TestRma(common.TransactionCase):
         )
 
     @classmethod
-    def _create_product(cls, name):
+    def _create_product(cls, name, tracking="none"):
         return cls.product_product_model.create(
-            {"name": name, "categ_id": cls.category.id, "type": "product"}
+            {
+                "name": name,
+                "categ_id": cls.category.id,
+                "type": "product",
+                "tracking": tracking,
+            }
         )
 
     @classmethod
@@ -180,7 +189,7 @@ class TestRma(common.TransactionCase):
         picking.button_validate()
 
     @classmethod
-    def _create_inventory(cls, product, qty, location):
+    def _create_inventory(cls, product, qty, location, lot_id=False, package_id=False):
         """
         Creates inventory of a product on a specific location, this will be used
         eventually to create a inventory at specific cost, that will be received in
@@ -193,6 +202,8 @@ class TestRma(common.TransactionCase):
                     "location_id": location.id,
                     "product_id": product.id,
                     "inventory_quantity": qty,
+                    "lot_id": lot_id,
+                    "package_id": package_id,
                 }
             )
             .action_apply_inventory()
@@ -236,13 +247,21 @@ class TestRma(common.TransactionCase):
             for item in products2move:
                 product = item[0]
                 product_qty = item[1]
-                cls._create_inventory(product, product_qty, cls.stock_location)
+                lot_id = len(item) >= 3 and item[2] or False
+                origin_package_id = len(item) >= 4 and item[3] or False
+                destination_package_id = len(item) >= 5 and item[4] or False
+                cls._create_inventory(
+                    product, product_qty, cls.stock_location, lot_id, origin_package_id
+                )
                 move_values = cls._prepare_move(
                     product,
                     product_qty,
                     cls.stock_location,
                     cls.customer_location,
                     picking,
+                    lot_id,
+                    origin_package_id=origin_package_id,
+                    destination_package_id=destination_package_id,
                 )
                 moves.append(cls.env["stock.move"].create(move_values))
         else:
@@ -253,13 +272,21 @@ class TestRma(common.TransactionCase):
             for item in products2move:
                 product = item[0]
                 product_qty = item[1]
-                cls._create_inventory(product, product_qty, cls.stock_location)
+                lot_id = len(item) >= 3 and item[2] or False
+                origin_package_id = len(item) >= 4 and item[3] or False
+                destination_package_id = len(item) >= 5 and item[4] or False
+                cls._create_inventory(
+                    product, product_qty, cls.stock_location, lot_id, origin_package_id
+                )
                 move_values = cls._prepare_move(
                     product,
                     product_qty,
                     cls.supplier_location,
                     cls.stock_rma_location,
                     picking,
+                    lot_id,
+                    origin_package_id=origin_package_id,
+                    destination_package_id=destination_package_id,
                 )
                 moves.append(cls.env["stock.move"].create(move_values))
         # Process the picking
@@ -295,7 +322,9 @@ class TestRma(common.TransactionCase):
                 data = (
                     wizard.with_user(cls.rma_basic_user)
                     .with_context(customer=1)
-                    ._prepare_rma_line_from_stock_move(move)
+                    ._prepare_rma_line_from_stock_move(
+                        move, lot=len(move.lot_ids) == 1 and move.lot_ids[0] or False
+                    )
                 )
 
             else:
@@ -339,10 +368,20 @@ class TestRma(common.TransactionCase):
         return rma_id
 
     @classmethod
-    def _prepare_move(cls, product, qty, src, dest, picking_in):
+    def _prepare_move(
+        cls,
+        product,
+        qty,
+        src,
+        dest,
+        picking_in,
+        lot_id=False,
+        origin_package_id=False,
+        destination_package_id=False,
+    ):
         location_id = src.id
 
-        return {
+        res = {
             "name": product.name,
             "partner_id": picking_in.partner_id.id,
             "origin": picking_in.name,
@@ -356,6 +395,29 @@ class TestRma(common.TransactionCase):
             "picking_id": picking_in.id,
             "price_unit": product.standard_price,
         }
+        if lot_id or origin_package_id or destination_package_id:
+            res.update(
+                {
+                    "move_line_ids": [
+                        (
+                            0,
+                            0,
+                            {
+                                "picking_id": picking_in.id,
+                                "product_id": product.id,
+                                "product_uom_id": product.uom_id.id,
+                                "quantity": qty,
+                                "lot_id": lot_id,
+                                "package_id": origin_package_id,
+                                "result_package_id": destination_package_id,
+                                "location_id": location_id,
+                                "location_dest_id": dest.id,
+                            },
+                        )
+                    ]
+                }
+            )
+        return res
 
     def _check_equal_quantity(self, qty1, qty2, msg):
         self.assertEqual(qty1, qty2, msg)
@@ -1269,7 +1331,7 @@ class TestRma(common.TransactionCase):
     def test_12_supplier_rma_single_line(self):
         rma_line_id = self.rma_supplier_id.rma_line_ids[0].id
         wizard = self.rma_make_picking.with_context(
-            {
+            **{
                 "active_ids": [rma_line_id],
                 "active_model": "rma.order.line",
                 "picking_type": "outgoing",
@@ -1280,7 +1342,7 @@ class TestRma(common.TransactionCase):
         picking = self.rma_supplier_id.rma_line_ids[0]._get_out_pickings()
         partner = picking.partner_id
         self.assertTrue(partner, "Partner is not defined or False")
-        moves = picking.move_lines
+        moves = picking.move_ids
         self.assertEqual(len(moves), 1, "Incorrect number of moves created")
 
     def test_13_customer_rma_tracking_lot(self):
@@ -1303,7 +1365,7 @@ class TestRma(common.TransactionCase):
         rma = rma_customer_id.rma_line_ids
         rma.action_rma_to_approve()
         wizard = self.rma_make_picking.with_context(
-            {
+            **{
                 "active_ids": rma.ids,
                 "active_model": "rma.order.line",
                 "picking_type": "incoming",
@@ -1315,22 +1377,19 @@ class TestRma(common.TransactionCase):
         self.assertTrue("res_id" in res, "Incorrect number of pickings" "created")
         picking = self.env["stock.picking"].browse(res["res_id"])
         self.assertEqual(len(picking), 1, "Incorrect number of pickings created")
-        moves = picking.move_lines
+        moves = picking.move_ids
         self.assertEqual(
             destination_package,
             moves.mapped("move_line_ids.package_id"),
             "Should have same package assigned",
         )
-        self.assertFalse(
-            bool(moves.mapped("move_line_ids.result_package_id")),
-            "Destination package should not be assigned",
-        )
         picking.action_assign()
-        for mv in picking.move_lines:
-            mv.quantity_done = mv.product_uom_qty
+        for mv in picking.move_ids:
+            mv.quantity = mv.product_uom_qty
+            mv.picked = True
         picking._action_done()
         wizard = self.rma_make_picking.with_context(
-            {
+            **{
                 "active_id": rma.ids[0],
                 "active_ids": rma.ids,
                 "active_model": "rma.order.line",
@@ -1341,8 +1400,9 @@ class TestRma(common.TransactionCase):
         res = rma.action_view_out_shipments()
         picking = self.env["stock.picking"].browse(res["res_id"])
         picking.action_assign()
-        for mv in picking.move_lines:
-            mv.quantity_done = mv.product_uom_qty
+        for mv in picking.move_ids:
+            mv.quantity = mv.product_uom_qty
+            mv.picked = True
         picking._action_done()
         self.assertEqual(picking.state, "done", "Final picking should has done state")
 
@@ -1372,7 +1432,7 @@ class TestRma(common.TransactionCase):
         rma = rma_customer_id.rma_line_ids
         rma.action_rma_to_approve()
         wizard = self.rma_make_picking.with_context(
-            {
+            **{
                 "active_ids": rma.ids,
                 "active_model": "rma.order.line",
                 "picking_type": "incoming",
@@ -1384,22 +1444,19 @@ class TestRma(common.TransactionCase):
         self.assertTrue("res_id" in res, "Incorrect number of pickings" "created")
         picking = self.env["stock.picking"].browse(res["res_id"])
         self.assertEqual(len(picking), 1, "Incorrect number of pickings created")
-        moves = picking.move_lines
+        moves = picking.move_ids
         self.assertEqual(
             destination_package,
             moves.mapped("move_line_ids.package_id"),
             "Should have same package assigned",
         )
-        self.assertFalse(
-            bool(moves.mapped("move_line_ids.result_package_id")),
-            "Destination package should not be assigned",
-        )
         picking.action_assign()
-        for mv in picking.move_lines:
-            mv.quantity_done = mv.product_uom_qty
+        for mv in picking.move_ids:
+            mv.quantity = mv.product_uom_qty
+            mv.picked = True
         picking._action_done()
         wizard = self.rma_make_picking.with_context(
-            {
+            **{
                 "active_id": rma.ids[0],
                 "active_ids": rma.ids,
                 "active_model": "rma.order.line",
@@ -1410,8 +1467,9 @@ class TestRma(common.TransactionCase):
         res = rma.action_view_out_shipments()
         picking = self.env["stock.picking"].browse(res["res_id"])
         picking.action_assign()
-        for mv in picking.move_lines:
-            mv.quantity_done = mv.product_uom_qty
+        for mv in picking.move_ids:
+            mv.quantity = mv.product_uom_qty
+            mv.picked = True
         picking._action_done()
         self.assertEqual(picking.state, "done", "Final picking should has done state")
 
@@ -1428,6 +1486,7 @@ class TestRma(common.TransactionCase):
                 "name": "LOT2",
             }
         )
+
         products2move = [
             (
                 self.product_1_serial,
@@ -1443,20 +1502,6 @@ class TestRma(common.TransactionCase):
         )
         rma = rma_supplier_id.rma_line_ids
         rma.action_rma_to_approve()
-        wizard = self.rma_make_picking.with_context(
-            {
-                "active_ids": rma.ids,
-                "active_model": "rma.order.line",
-                "picking_type": "outgoing",
-                "active_id": rma.ids[0],
-            }
-        ).create({})
-        wizard.action_create_picking()
-        res = rma.action_view_out_shipments()
-        self.assertTrue("res_id" in res, "Incorrect number of pickings" "created")
-        picking = self.env["stock.picking"].browse(res["res_id"])
-        self.assertEqual(len(picking), 1, "Incorrect number of pickings created")
-
         quant_lot1 = self.env["stock.quant"].search(
             [
                 ("product_id", "=", self.product_1_serial.id),
@@ -1473,7 +1518,20 @@ class TestRma(common.TransactionCase):
             ]
         )
         quant_lot2.quantity = 0
-        moves = picking.move_lines
+        wizard = self.rma_make_picking.with_context(
+            **{
+                "active_ids": rma.ids,
+                "active_model": "rma.order.line",
+                "picking_type": "outgoing",
+                "active_id": rma.ids[0],
+            }
+        ).create({})
+        wizard.action_create_picking()
+        res = rma.action_view_out_shipments()
+        self.assertTrue("res_id" in res, "Incorrect number of pickings" "created")
+        picking = self.env["stock.picking"].browse(res["res_id"])
+        self.assertEqual(len(picking), 1, "Incorrect number of pickings created")
+        moves = picking.move_ids
         self.assertFalse(
             moves.move_line_ids,
             "There should not be any move_line created (no quantity to reserve).",
@@ -1494,7 +1552,8 @@ class TestRma(common.TransactionCase):
         picking.action_assign()
         self.assertTrue(moves.move_line_ids)
         self.assertEqual(moves.move_line_ids.lot_id, lot1)
-        for mv in picking.move_lines.move_line_ids:
-            mv.qty_done = mv.product_uom_qty
+        for mv in picking.move_ids.move_line_ids:
+            mv.quantity = 1
+            mv.picked = True
         picking._action_done()
         self.assertEqual(picking.state, "done", "Final picking should has done state")

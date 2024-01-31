@@ -57,21 +57,21 @@ Go to Settings > Users and assign the appropiate permissions to users.
 Different security groups grant distinct levels of access to the RMA
 features.
 
--  Users in group "RMA Customer User" or "RMA Supplier User" can access
-   to, create and process RMA's associated to customers or suppliers
-   respectively.
--  Users in group "RMA Manager" can access to, create, approve and
-   process RMA's associated to both customers and suppliers.
+- Users in group "RMA Customer User" or "RMA Supplier User" can access
+  to, create and process RMA's associated to customers or suppliers
+  respectively.
+- Users in group "RMA Manager" can access to, create, approve and
+  process RMA's associated to both customers and suppliers.
 
 RMA Approval Policy
 -------------------
 
 There are two RMA approval policies in product catogories:
 
--  One step: Always auto-approve RMAs that only contain products within
-   categories with this policy.
--  Two steps: A RMA order containing a product within a category with
-   this policy will request the RMA manager approval.
+- One step: Always auto-approve RMAs that only contain products within
+  categories with this policy.
+- Two steps: A RMA order containing a product within a category with
+  this policy will request the RMA manager approval.
 
 In order to change the approval policy of a product category follow the
 next steps:
@@ -115,12 +115,12 @@ Create an RMA:
 Known issues / Roadmap
 ======================
 
--  Picking operations report in customer RMA dropshipping case is
-   showing "Vendor Address" while it should be "Customer Address".
--  Dropshipping always counted as a delivery on the smart buttons.
--  Uninstall hook.
--  Constraints instead of required fields on rma.order.line.
--  Rename type field on rma.order and rma.order.line
+- Picking operations report in customer RMA dropshipping case is showing
+  "Vendor Address" while it should be "Customer Address".
+- Dropshipping always counted as a delivery on the smart buttons.
+- Uninstall hook.
+- Constraints instead of required fields on rma.order.line.
+- Rename type field on rma.order and rma.order.line
 
 Bug Tracker
 ===========
@@ -143,14 +143,14 @@ Authors
 Contributors
 ------------
 
--  Jordi Ballester Alomar <jordi.ballester@forgeflow.com>
--  Aaron Henriquez <ahenriquez@forgeflow.com>
--  Lois Rilo <lois.rilo@forgeflow.com>
--  Bhavesh Odedra <bodedra@opensourceintegrators.com>
--  Akim Juillerat <akim.juillerat@camptocamp.com>
--  Alexandre Fayolle <alexandre.fayolle@camptocamp.com>
--  Chafique Delli <chafique.delli@akretion.com>
--  Héctor Villarreal <hector.villarreal@forgeflow.com>
+- Jordi Ballester Alomar <jordi.ballester@forgeflow.com>
+- Aaron Henriquez <ahenriquez@forgeflow.com>
+- Lois Rilo <lois.rilo@forgeflow.com>
+- Bhavesh Odedra <bodedra@opensourceintegrators.com>
+- Akim Juillerat <akim.juillerat@camptocamp.com>
+- Alexandre Fayolle <alexandre.fayolle@camptocamp.com>
+- Chafique Delli <chafique.delli@akretion.com>
+- Héctor Villarreal <hector.villarreal@forgeflow.com>
 
 Maintainers
 -----------
