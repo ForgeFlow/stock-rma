@@ -209,7 +209,7 @@ class RmaOrderLine(models.Model):
 
     def action_rma_cancel(self):
         res = super().action_rma_cancel()
-        for line in self:
+        for line in self.filtered("sale_line_ids"):
             line.sale_line_ids.mapped("order_id").action_cancel()
         return res
 
