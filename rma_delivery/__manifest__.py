@@ -3,7 +3,7 @@
 
 {
     "name": "RMA delivery integration",
-    "version": "14.0.1.0.0",
+    "version": "14.0.1.1.0",
     "license": "LGPL-3",
     "category": "RMA",
     "summary": "RMA default carrier on operation" "in odoo",
