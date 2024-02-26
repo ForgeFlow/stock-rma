@@ -210,15 +210,16 @@ class RmaMakePicking(models.TransientModel):
         else:
             pickings = self.mapped("item_ids.line_id")._get_in_pickings()
             action = self.item_ids.line_id.action_view_in_shipments()
-        # Force the reservation of the RMA specific lot for incoming shipments.
-        # FIXME: still needs fixing, not reserving appropriate serials.
+
         for move in pickings.move_ids.filtered(
             lambda x: x.state not in ("draft", "cancel", "done", "waiting")
             and x.rma_line_id
             and x.product_id.tracking in ("lot", "serial")
             and x.rma_line_id.lot_id
+            and x.rma_line_id.operation_id.in_force_same_lot
+            and x.location_dest_id.usage == "internal"
         ):
-            # Force the reservation of the RMA specific lot for incoming shipments.
+            # Force the reservation of the RMA specific lot for incoming shipments if required.
             move.move_line_ids.unlink()
             if move.product_id.tracking == "serial":
                 move.write(
@@ -226,14 +227,10 @@ class RmaMakePicking(models.TransientModel):
                         "lot_ids": [(6, 0, move.rma_line_id.lot_id.ids)],
                     }
                 )
-                quants = self.env["stock.quant"]._gather(
-                    move.product_id, move.location_id, lot_id=move.rma_line_id.lot_id
-                )
                 move.move_line_ids.write(
                     {
-                        "reserved_uom_qty": 1 if picking_type == "incoming" else 0,
+                        "reserved_uom_qty": 1,
                         "qty_done": 0,
-                        "package_id": len(quants) == 1 and quants.package_id.id,
                     }
                 )
             elif move.product_id.tracking == "lot":
@@ -251,10 +248,11 @@ class RmaMakePicking(models.TransientModel):
                         "lot_id": move.rma_line_id.lot_id.id,
                         "product_uom_id": move.product_id.uom_id.id,
                         "qty_done": 0,
-                        "reserved_uom_qty": qty if picking_type == "incoming" else 0,
+                        "reserved_uom_qty": qty,
                     }
                 )
                 move_line_model.create(move_line_data)
+
             pickings.with_context(force_no_bypass_reservation=True).action_assign()
         return action
 

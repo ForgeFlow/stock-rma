@@ -84,6 +84,8 @@ class TestRmaPutAway(common.SingleTransactionCase):
                 "put_away_location_id": cls.put_away_loc.id,
                 "in_route_id": cls.rma_route_cust.id,
                 "out_route_id": cls.rma_route_cust.id,
+                "out_force_same_lot": True,
+                "in_force_same_lot": True,
             }
         )
         cls.operation_2 = cls.rma_op_obj.create(
@@ -97,6 +99,8 @@ class TestRmaPutAway(common.SingleTransactionCase):
                 "put_away_location_id": cls.put_away_loc.id,
                 "in_route_id": cls.rma_route_cust.id,
                 "out_route_id": cls.rma_route_cust.id,
+                "out_force_same_lot": True,
+                "in_force_same_lot": True,
             }
         )
 

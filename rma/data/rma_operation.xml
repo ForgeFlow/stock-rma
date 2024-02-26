@@ -8,6 +8,8 @@
         <field name="type">customer</field>
         <field name="in_route_id" ref="rma.route_rma_customer" />
         <field name="out_route_id" ref="rma.route_rma_customer" />
+        <field name="in_force_same_lot">True</field>
+        <field name="out_force_same_lot">False</field>
     </record>
 
     <record id="rma_operation_supplier_replace" model="rma.operation">
@@ -18,6 +20,8 @@
         <field name="type">supplier</field>
         <field name="in_route_id" ref="rma.route_rma_supplier" />
         <field name="out_route_id" ref="rma.route_rma_supplier" />
+        <field name="in_force_same_lot">False</field>
+        <field name="out_force_same_lot">True</field>
     </record>
 
     <record id="rma_operation_ds_replace" model="rma.operation">
