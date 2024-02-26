@@ -94,3 +94,22 @@ class RmaOperation(models.Model):
         required=True,
         default=lambda self: self.env.user.company_id,
     )
+    in_force_same_lot = fields.Boolean(
+        string="Force same lot in incoming shipments",
+        help="Forces the same lot to be used "
+        "in incoming pickings as the one indicated in the RMA",
+    )
+    out_force_same_lot = fields.Boolean(
+        string="Force same lot in outgoing shipments",
+        help="Forces the same lot to be used "
+        "in outgoing pickings as the one indicated in the RMA",
+    )
+
+    @api.onchange("type")
+    def _onchange_type(self):
+        if self.type == "customer":
+            self.in_force_same_lot = True
+            self.out_force_same_lot = False
+        elif self.type == "supplier":
+            self.in_force_same_lot = False
+            self.out_force_same_lot = True
