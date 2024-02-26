@@ -53,6 +53,10 @@
                                 name="customer_to_supplier"
                                 attrs="{'invisible':[('type', '=', 'supplier')]}"
                             />
+                            <field
+                                name="in_force_same_lot"
+                                groups="stock.group_production_lot"
+                            />
                         </group>
                         <group name="outbound" string="Outbound">
                             <field name="out_route_id" />
@@ -60,6 +64,10 @@
                             <field
                                 name="supplier_to_customer"
                                 attrs="{'invisible':[('type', '=', 'customer')]}"
+                            />
+                            <field
+                                name="out_force_same_lot"
+                                groups="stock.group_production_lot"
                             />
                         </group>
                     </group>
