@@ -15,6 +15,12 @@ class RmaOrderLine(models.Model):
             return self.env["res.partner"].browse(partner_id)
         return self.env["res.partner"]
 
+    @api.onchange("partner_id")
+    def _onchange_invoice_address(self):
+        self.invoice_address_id = self.env["res.partner"].browse(
+            self.partner_id.address_get(["invoice"])["invoice"]
+        )
+
     @api.depends(
         "move_line_ids", "move_line_ids.move_id.state", "refund_policy", "type"
     )
