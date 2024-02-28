@@ -62,6 +62,7 @@ class StockMove(models.Model):
             not lot_id
             and self.rma_line_id.lot_id
             and self.location_id.usage == "internal"
+            and self.rma_line_id.operation_id.out_force_same_lot
         ):
             # In supplier RMA deliveries we can only send the RMA lot/serial.
             lot_id = self.rma_line_id.lot_id
@@ -88,6 +89,7 @@ class StockMove(models.Model):
             not lot_id
             and self.rma_line_id.lot_id
             and self.location_id.usage == "internal"
+            and self.rma_line_id.operation_id.out_force_same_lot
         ):
             # In supplier RMA deliveries we can only send the RMA lot/serial.
             lot_id = self.rma_line_id.lot_id
