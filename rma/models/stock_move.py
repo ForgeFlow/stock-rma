@@ -110,3 +110,16 @@ class StockMove(models.Model):
         res = super(StockMove, self)._prepare_procurement_values()
         res["rma_line_id"] = self.rma_line_id.id
         return res
+
+
+class StockMoveLine(models.Model):
+
+    _inherit = "stock.move.line"
+
+    def _should_bypass_reservation(self, location):
+        res = super(StockMoveLine, self)._should_bypass_reservation(location)
+        if self.env.context.get(
+            "force_no_bypass_reservation"
+        ) and location.usage not in ("customer", "supplier"):
+            return False
+        return res
