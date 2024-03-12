@@ -33,7 +33,7 @@ class RmaMakePicking(models.TransientModel):
         supplier.
         """
         context = self._context.copy()
-        res = super(RmaMakePicking, self).default_get(fields_list)
+        res = super().default_get(fields_list)
         rma_line_obj = self.env["rma.order.line"]
         rma_line_ids = self.env.context["active_ids"] or []
         active_model = self.env.context["active_model"]
@@ -237,11 +237,13 @@ class RmaMakePicking(models.TransientModel):
                 elif move.product_id.tracking == "lot":
                     if picking_type == "incoming":
                         qty = self.item_ids.filtered(
-                            lambda x: x.line_id.id == move.rma_line_id.id
+                            lambda x, move_rma_line_id=move.rma_line_id: x.line_id.id
+                            == move_rma_line_id.id
                         ).qty_to_receive
                     else:
                         qty = self.item_ids.filtered(
-                            lambda x: x.line_id.id == move.rma_line_id.id
+                            lambda x, move_rma_line_id=move.rma_line_id: x.line_id.id
+                            == move_rma_line_id.id
                         ).qty_to_deliver
                     move_line_data = move._prepare_move_line_vals()
                     move_line_data.update(

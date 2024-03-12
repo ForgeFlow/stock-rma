@@ -11,7 +11,7 @@ class RmaAddStockMove(models.TransientModel):
 
     @api.model
     def default_get(self, fields_list):
-        res = super(RmaAddStockMove, self).default_get(fields_list)
+        res = super().default_get(fields_list)
         rma_obj = self.env["rma.order"]
         rma_id = self.env.context["active_ids"] or []
         active_model = self.env.context["active_model"]

@@ -73,7 +73,7 @@
                             type="object"
                             name="action_view_supplier_lines"
                             class="oe_stat_button"
-                            attrs="{'invisible':[('supplier_line_count', '=', 0)]}"
+                            invisible="supplier_line_count == 0"
                             icon="fa-list"
                             groups="rma.group_rma_supplier_user"
                         >
@@ -97,21 +97,12 @@
                                 context="{'res_partner_search_mode': 'customer'}"
                                 string="Customer"
                             />
-                        <field
-                                name="reference"
-                                attrs="{'invisible':[('type', '!=', 'supplier')]}"
-                            />
-                        <field
-                                name="date_rma"
-                                attrs="{'readonly':[('state', '!=', 'draft')]}"
-                            />
+                        <field name="reference" invisible="type != 'supplier'" />
+                        <field name="date_rma" readonly="state != 'draft'" />
                     </group>
                     <group name="contact">
                         <field name="requested_by" readonly="1" />
-                        <field
-                                name="assigned_to"
-                                attrs="{'readonly':[('state', '!=', 'draft')]}"
-                            />
+                        <field name="assigned_to" readonly="state != 'draft'" />
                         <field name="company_id" groups="base.group_multi_company" />
                     </group>
                 </group>
@@ -121,41 +112,32 @@
                                 name="operation_default_id"
                                 domain="[('type','=','customer')]"
                             />
-                        <field
-                                name="in_warehouse_id"
-                                attrs="{'readonly':[('state', '!=', 'draft')]}"
-                            />
-                        <field
-                                name="in_route_id"
-                                attrs="{'readonly':[('state', '!=', 'draft')]}"
-                            />
+                        <field name="in_warehouse_id" readonly="state != 'draft'" />
+                        <field name="in_route_id" readonly="state != 'draft'" />
                         <field
                                 name="out_warehouse_id"
                                 invisible="1"
-                                attrs="{'readonly':[('state', '!=', 'draft')]}"
+                                readonly="state != 'draft'"
                             />
-                        <field
-                                name="location_id"
-                                attrs="{'readonly':[('state', '!=', 'draft')]}"
-                            />
+                        <field name="location_id" readonly="state != 'draft'" />
                         <field
                                 name="out_route_id"
                                 invisible="1"
-                                attrs="{'readonly':[('state', '!=', 'draft')]}"
+                                readonly="state != 'draft'"
                             />
                         <field
                                 name="customer_to_supplier"
-                                attrs="{'readonly':[('state', '!=', 'draft')],
-                                'invisible':[('type', '!=', 'customer')]}"
+                                readonly="state != 'draft'"
+                                invisible="type != 'customer'"
                             />
                         <field name="state" invisible="1" />
                         <field
                                 name="supplier_address_id"
                                 context="{'show_address': 1}"
                                 options="{'always_reload': 1}"
-                                attrs="{'required':[('customer_to_supplier', '=', True)],
-                                       'invisible':[('customer_to_supplier', '=', False)],
-                                       'readonly':[('state', '!=', 'draft')]}"
+                                required="customer_to_supplier == True"
+                                invisible="customer_to_supplier == False"
+                                readonly="state != 'draft'"
                             />
                     </group>
                 </group>
@@ -175,7 +157,7 @@
                     <page string="RMA Lines" name="lines">
                         <field
                                 name="rma_line_ids"
-                                context="{'default_rma_id': active_id,
+                                context="{'default_rma_id': id,
                                                              'default_partner_id': partner_id,
                                                              'hide_title': True}"
                             >
@@ -246,24 +228,21 @@
             </field>
             <group name="inbound_route" position="after">
                 <group name="outbound_route" string="Outbound">
-                    <field
-                        name="supplier_to_customer"
-                        attrs="{'readonly':[('state', '!=', 'draft')]}"
-                    />
+                    <field name="supplier_to_customer" readonly="state != 'draft'" />
                     <field
                         name="customer_address_id"
                         context="{'show_address': 1}"
                         options="{'always_reload': 1}"
-                        attrs="{'required':[('supplier_to_customer', '=', True)],
-                                   'invisible':[('supplier_to_customer', '=', False)],
-                                   'readonly':[('state', '!=', 'draft')]}"
+                        required="supplier_to_customer == True"
+                        invisible="supplier_to_customer == False"
+                        readonly="state != 'draft'"
                     />
                 </group>
             </group>
             <field name="rma_line_ids" position="attributes">
                 <attribute name="context">{
                     'form_view_ref':'rma.view_rma_line_supplier_form',
-                    'default_rma_id': active_id,
+                    'default_rma_id': id,
                     'default_partner_id': partner_id,
                     'supplier': 1,
                     'hide_title': True}
