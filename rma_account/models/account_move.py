@@ -11,13 +11,13 @@ class AccountMove(models.Model):
     @api.depends("line_ids.rma_line_ids")
     def _compute_used_in_rma_count(self):
         for inv in self:
-            rmas = self.mapped("line_ids.rma_line_ids")
+            rmas = inv.mapped("line_ids.rma_line_ids")
             inv.used_in_rma_count = len(rmas)
 
     @api.depends("line_ids.rma_line_id")
     def _compute_rma_count(self):
         for inv in self:
-            rmas = self.mapped("line_ids.rma_line_id")
+            rmas = inv.mapped("line_ids.rma_line_id")
             inv.rma_count = len(rmas)
 
     def _prepare_invoice_line_from_rma_line(self, rma_line):
@@ -45,15 +45,12 @@ class AccountMove(models.Model):
 
     def _post_process_invoice_line_from_rma_line(self, new_line, rma_line):
         new_line.rma_line_id = rma_line
-        new_line.name = "%s: %s" % (
-            self.add_rma_line_id.name,
-            new_line.name,
-        )
+        new_line.name = f"{self.add_rma_line_id.name}: {new_line.name}"
         new_line.account_id = new_line.account_id
         return True
 
     @api.onchange("add_rma_line_id")
-    def on_change_add_rma_line_id(self):
+    def onchange_add_rma_line_id(self):
         if not self.add_rma_line_id:
             return {}
         if not self.partner_id:
@@ -123,20 +120,21 @@ class AccountMove(models.Model):
                 ):
                     current_move = self.browse(line.get("move_id", False))
                     current_rma = current_move.invoice_line_ids.filtered(
-                        lambda x: x.rma_line_id and x.product_id.id == product.id
+                        lambda x, product=product: x.rma_line_id
+                        and x.product_id.id == product.id
                     ).mapped("rma_line_id")
                     if len(current_rma) == 1:
                         line.update({"rma_line_id": current_rma.id})
                     elif len(current_rma) > 1:
                         find_with_label_rma = current_rma.filtered(
-                            lambda x: x.name == line.get("name")
+                            lambda x, line=line: x.name == line.get("name")
                         )
                         if len(find_with_label_rma) == 1:
                             line.update({"rma_line_id": find_with_label_rma.id})
         return res
 
     def _stock_account_get_last_step_stock_moves(self):
-        rslt = super(AccountMove, self)._stock_account_get_last_step_stock_moves()
+        rslt = super()._stock_account_get_last_step_stock_moves()
         for invoice in self.filtered(lambda x: x.move_type == "out_invoice"):
             rslt += invoice.mapped("line_ids.rma_line_id.move_ids").filtered(
                 lambda x: x.state == "done" and x.location_dest_id.usage == "customer"
