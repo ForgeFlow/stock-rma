@@ -1,0 +1,1 @@
+odoo-addon-account_invoice_refund_reason@git+https://github.com/ForgeFlow/account-invoicing.git@16.0-mig-account_invoice_refund_reason#subdirectory=setup/account_invoice_refund_reason

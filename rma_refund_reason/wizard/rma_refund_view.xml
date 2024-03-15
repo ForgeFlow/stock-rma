@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <!-- Inherit Form View to Modify it -->
+    <record id="view_rma_refund" model="ir.ui.view">
+        <field name="name">rma.refund.form.view</field>
+        <field name="model">rma.refund</field>
+        <field name="priority">99</field>
+        <field name="inherit_id" ref="rma_account.view_rma_refund" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='description']" position="replace">
+                <field name="description" invisible="1" />
+                <field
+                    name="refund_reason_id"
+                    options="{'no_create': True}"
+                    required="1"
+                />
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

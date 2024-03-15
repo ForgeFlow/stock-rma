@@ -146,10 +146,20 @@ class RmaRefund(models.TransientModel):
             journal = self.env["account.journal"].search(
                 [("type", "=", "purchase")], limit=1
             )
+        rma_number_ref = rma_line.rma_id.name or rma_line.name
+        reason = wizard.description
+        if reason == rma_number_ref:
+            reason = False
+        ref = _("Refund created by %(rnr)s, %(r)s") % {
+            "rnr": rma_number_ref,
+            "r": reason,
+        }
+        if not reason:
+            ref = _("Refund created by %s") % rma_number_ref
         values = {
-            "payment_reference": rma_line.rma_id.name or rma_line.name,
-            "invoice_origin": rma_line.rma_id.name or rma_line.name,
-            "ref": False,
+            "payment_reference": rma_number_ref,
+            "invoice_origin": rma_number_ref,
+            "ref": ref,
             "move_type": "in_refund" if rma_line.type == "supplier" else "out_refund",
             "journal_id": journal.id,
             "fiscal_position_id": rma_line.partner_id.property_account_position_id.id,
