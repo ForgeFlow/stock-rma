@@ -104,6 +104,18 @@
     </record>
 
 
+    <record id="action_view_rma_sale" model="ir.actions.act_window">
+        <field name="name">Create RMA</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">rma_add_sale</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="view_rma_add_sale" />
+        <field name="binding_model_id" ref="sale.model_sale_order" />
+        <field name="context"> {}
+        </field>
+    </record>
+
     <record id="view_rma_add_sale_form" model="ir.ui.view">
         <field name="name">rma.order.form - sale wizard</field>
         <field name="model">rma.order</field>
