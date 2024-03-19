@@ -92,7 +92,7 @@ class RmaOrderLine(models.Model):
 
     @api.onchange("operation_id")
     def _onchange_operation_id(self):
-        res = super(RmaOrderLine, self)._onchange_operation_id()
+        res = super()._onchange_operation_id()
         if self.operation_id:
             self.scrap_policy = self.operation_id.scrap_policy or "no"
         return res

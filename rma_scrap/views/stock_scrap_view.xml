@@ -13,7 +13,7 @@
                     icon="fa-eject"
                     string="RMA Line"
                     groups="stock.group_stock_user"
-                    attrs="{'invisible': [('rma_line_id', '=', False)]}"
+                    invisible="rma_line_id == False"
                 >
                 </button>
                 <field name="rma_line_id" invisible="1" />
