@@ -54,7 +54,12 @@ class RmaOrder(models.Model):
             rma_line_to_approve = self.env["rma.order.line"].search_count(
                 [("id", "in", rec.rma_line_ids.ids), ("state", "=", "to_approve")]
             )
-            if rma_line_done != 0:
+            rma_line_no_cancel = rec.rma_line_ids.filtered(
+                lambda l: l.state != "canceled"
+            )
+            if not rma_line_no_cancel:
+                state = "canceled"
+            elif rma_line_done != 0:
                 state = "done"
             elif rma_line_approved != 0:
                 state = "approved"
@@ -169,6 +174,7 @@ class RmaOrder(models.Model):
             ("to_approve", "To Approve"),
             ("approved", "Approved"),
             ("done", "Done"),
+            ("canceled", "Canceled"),
         ],
         default="draft",
         store=True,
@@ -299,6 +305,31 @@ class RmaOrder(models.Model):
                 result["views"] = [(res and res.id or False, "form")]
                 result["res_id"] = related_lines[0]
         return result
+
+    def action_rma_to_approve(self):
+        for rec in self:
+            rec.rma_line_ids.action_rma_to_approve()
+        return True
+
+    def action_rma_draft(self):
+        for rec in self:
+            rec.rma_line_ids.action_rma_draft()
+        return True
+
+    def action_rma_approve(self):
+        for rec in self:
+            rec.rma_line_ids.action_rma_approve()
+        return True
+
+    def action_rma_done(self):
+        for rec in self:
+            rec.rma_line_ids.action_rma_done()
+        return True
+
+    def action_rma_cancel(self):
+        for rec in self:
+            rec.rma_line_ids.action_rma_cancel()
+        return True
 
     @api.onchange("in_warehouse_id")
     def _onchange_in_warehouse_id(self):
