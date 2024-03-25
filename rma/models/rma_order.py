@@ -45,23 +45,19 @@ class RmaOrder(models.Model):
     @api.depends("rma_line_ids", "rma_line_ids.state")
     def _compute_state(self):
         for rec in self:
-            rma_line_done = self.env["rma.order.line"].search_count(
-                [("id", "in", rec.rma_line_ids.ids), ("state", "=", "done")]
-            )
-            rma_line_approved = self.env["rma.order.line"].search_count(
-                [("id", "in", rec.rma_line_ids.ids), ("state", "=", "approved")]
-            )
-            rma_line_to_approve = self.env["rma.order.line"].search_count(
-                [("id", "in", rec.rma_line_ids.ids), ("state", "=", "to_approve")]
-            )
-            if rma_line_done != 0:
-                state = "done"
-            elif rma_line_approved != 0:
-                state = "approved"
-            elif rma_line_to_approve != 0:
-                state = "to_approve"
-            else:
-                state = "draft"
+            state = "draft"
+            if rec.rma_line_ids:
+                states = set(rec.rma_line_ids.mapped("state"))
+                if states == {"cancel"}:
+                    state = "cancel"
+                elif "draft" in states:
+                    state = "draft"
+                elif "to_approved" in states:
+                    state = "to_approved"
+                elif "approved" in states:
+                    state = "approved"
+                else:
+                    state = "done"
             rec.state = state
 
     @api.model
@@ -169,6 +165,7 @@ class RmaOrder(models.Model):
             ("to_approve", "To Approve"),
             ("approved", "Approved"),
             ("done", "Done"),
+            ("cancel", "Cancel"),
         ],
         default="draft",
         store=True,
@@ -299,6 +296,21 @@ class RmaOrder(models.Model):
                 result["views"] = [(res and res.id or False, "form")]
                 result["res_id"] = related_lines[0]
         return result
+
+    def action_rma_to_approve(self):
+        return self.rma_line_ids.action_rma_to_approve()
+
+    def action_rma_draft(self):
+        return self.rma_line_ids.action_rma_draft()
+
+    def action_rma_approve(self):
+        return self.rma_line_ids.action_rma_approve()
+
+    def action_rma_done(self):
+        return self.rma_line_ids.action_rma_done()
+
+    def action_rma_cancel(self):
+        return self.rma_line_ids.action_rma_cancel()
 
     @api.onchange("in_warehouse_id")
     def _onchange_in_warehouse_id(self):
