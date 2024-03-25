@@ -1083,3 +1083,13 @@ class TestRma(common.TransactionCase):
         self.assertTrue(partner, "Partner is not defined or False")
         moves = picking.move_ids
         self.assertEqual(len(moves), 1, "Incorrect number of moves created")
+
+    def test_09_rma_state(self):
+        rma = self.rma_customer_id
+        self.assertEqual(rma.state, "approved")
+        rma.rma_line_ids.action_rma_draft()
+        self.assertEqual(rma.state, "draft")
+        rma.action_rma_approve()
+        self.assertEqual(
+            rma.rma_line_ids.mapped("state"), ["approved", "approved", "approved"]
+        )
