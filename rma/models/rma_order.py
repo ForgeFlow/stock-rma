@@ -64,6 +64,11 @@ class RmaOrder(models.Model):
                 state = "draft"
             rec.state = state
 
+    @api.depends("rma_line_ids", "rma_line_ids.qty_to_receive")
+    def _compute_qty_to_receive(self):
+        for rec in self:
+            rec.qty_to_receive = sum(rec.rma_line_ids.mapped("qty_to_receive"))
+
     @api.model
     def _default_date_rma(self):
         return datetime.now()
@@ -177,6 +182,11 @@ class RmaOrder(models.Model):
         comodel_name="rma.operation",
         required=False,
         string="Default Operation Type",
+    )
+    qty_to_receive = fields.Float(
+        digits="Product Unit of Measure",
+        compute="_compute_qty_to_receive",
+        store=True,
     )
 
     @api.onchange(
