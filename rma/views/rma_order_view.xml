@@ -210,6 +210,7 @@
                                        'invisible':[('customer_to_supplier', '=', False)],
                                        'readonly':[('state', '!=', 'draft')]}"
                             />
+                        <field name="qty_to_receive" invisible="1" />
                     </group>
                 </group>
                 <group>

@@ -34,15 +34,22 @@ class RmaMakePicking(models.TransientModel):
         context = self._context.copy()
         res = super(RmaMakePicking, self).default_get(fields_list)
         rma_line_obj = self.env["rma.order.line"]
-        rma_line_ids = self.env.context["active_ids"] or []
+        rma_obj = self.env["rma.order"]
+        active_ids = self.env.context["active_ids"] or []
         active_model = self.env.context["active_model"]
-
-        if not rma_line_ids:
+        if not active_ids:
             return res
-        assert active_model == "rma.order.line", "Bad context propagation"
+        assert active_model in [
+            "rma.order.line",
+            "rma.order",
+        ], "Bad context propagation"
 
         items = []
-        lines = rma_line_obj.browse(rma_line_ids)
+        if active_model == "rma.order":
+            rma = rma_obj.browse(active_ids)
+            lines = rma.rma_line_ids.filtered(lambda x: x.qty_to_receive > 0)
+        else:
+            lines = rma_line_obj.browse(active_ids)
         if len(lines.mapped("partner_id")) > 1:
             raise ValidationError(
                 _(
