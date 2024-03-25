@@ -16,16 +16,14 @@ class SaleOrderLine(models.Model):
             (self._rec_name, operator, name),
             ("order_id.name", operator, name),
         ]
-        return super(SaleOrderLine, self).name_search(
-            name=name, args=args, operator=operator, limit=limit
-        )
+        return super().name_search(name=name, args=args, operator=operator, limit=limit)
 
     @api.model
     def _name_search(
         self, name="", args=None, operator="ilike", limit=100, name_get_uid=None
     ):
         """Typed text is cleared here for better extensibility."""
-        return super(SaleOrderLine, self)._name_search(
+        return super()._name_search(
             name="",
             args=args,
             operator=operator,
@@ -41,8 +39,7 @@ class SaleOrderLine(models.Model):
                     res.append(
                         (
                             sale.id,
-                            "SO:%s | INV: %s, | PART:%s | QTY:%s"
-                            % (
+                            "SO:{} | INV: {}, | PART:{} | QTY:{}".format(
                                 sale.order_id.name,
                                 " ".join(
                                     str(x)
@@ -59,15 +56,13 @@ class SaleOrderLine(models.Model):
                     res.append(super(SaleOrderLine, sale).name_get()[0])
             return res
         else:
-            return super(SaleOrderLine, self).name_get()
+            return super().name_get()
 
     rma_line_id = fields.Many2one(
         comodel_name="rma.order.line", string="RMA", ondelete="restrict", copy=False
     )
 
     def _prepare_order_line_procurement(self, group_id=False):
-        vals = super(SaleOrderLine, self)._prepare_order_line_procurement(
-            group_id=group_id
-        )
+        vals = super()._prepare_order_line_procurement(group_id=group_id)
         vals.update({"rma_line_id": self.rma_line_id.id})
         return vals

@@ -10,7 +10,7 @@ from odoo.addons.rma_account.tests.test_rma_stock_account import TestRmaStockAcc
 class TestRmaStockAccountSale(TestRmaStockAccount):
     @classmethod
     def setUpClass(cls):
-        super(TestRmaStockAccountSale, cls).setUpClass()
+        super().setUpClass()
         cls.operation_receive_refund = cls.env.ref(
             "rma_account.rma_operation_customer_refund"
         )
@@ -35,12 +35,12 @@ class TestRmaStockAccountSale(TestRmaStockAccount):
                         },
                     ),
                 ],
-                "pricelist_id": cls.env.ref("product.list0").id,
             }
         )
         cls.so1.action_confirm()
         for ml in cls.so1.picking_ids.move_line_ids:
-            ml.qty_done = ml.reserved_uom_qty
+            ml.quantity = ml.quantity_product_uom
+            ml.picked = True
         cls.so1.picking_ids.button_validate()
 
     def test_01_cost_from_so_move(self):
