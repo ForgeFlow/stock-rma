@@ -65,7 +65,10 @@ class TestRmaSale(common.SingleTransactionCase):
                 "pricelist_id": cls.env.ref("product.list0").id,
             }
         )
-
+        cls.so.action_confirm()
+        for move in cls.so.picking_ids.move_ids:
+            move.write({"quantity_done": move.product_uom_qty})
+        cls.so.picking_ids._action_done()
         # Create RMA group and operation:
         cls.rma_group = cls.rma_obj.create({"partner_id": customer1.id})
         cls.operation_1 = cls.rma_op_obj.create(
