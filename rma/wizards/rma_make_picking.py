@@ -10,7 +10,7 @@ from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FORMAT, float_compar
 
 class RmaMakePicking(models.TransientModel):
     _name = "rma_make_picking.wizard"
-    _description = "Wizard to create pickings from rma lines"
+    _description = "Wizard to create Pickings from rma"
 
     @api.returns("rma.order.line")
     def _prepare_item(self, line):
@@ -35,8 +35,8 @@ class RmaMakePicking(models.TransientModel):
         res = super().default_get(fields_list)
         rma_line_obj = self.env["rma.order.line"]
         rma_obj = self.env["rma.order"]
-        active_ids = self.env.context["active_ids"] or []
-        active_model = self.env.context["active_model"]
+        active_ids = context.get("active_ids") or []
+        active_model = context.get("active_model")
         if not active_ids:
             return res
         assert active_model in [

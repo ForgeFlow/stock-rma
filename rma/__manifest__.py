@@ -30,7 +30,7 @@
         "views/rma_menu.xml",
         "wizards/rma_make_picking_view.xml",
         "wizards/rma_add_stock_move_view.xml",
-        "wizards/rma_order_line_make_supplier_rma_view.xml",
+        "wizards/rma_make_supplier_rma_view.xml",
         "report/report_deliveryslip.xml",
         "wizards/rma_add_serial_views.xml",
     ],
