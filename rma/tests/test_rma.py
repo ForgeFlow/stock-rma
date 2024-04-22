@@ -13,7 +13,7 @@ class TestRma(common.TransactionCase):
         super(TestRma, cls).setUpClass()
         # models
         cls.rma_make_picking = cls.env["rma_make_picking.wizard"]
-        cls.make_supplier_rma = cls.env["rma.order.line.make.supplier.rma"]
+        cls.make_supplier_rma = cls.env["rma.make.supplier.rma"]
         cls.rma_add_stock_move = cls.env["rma_add_stock_move"]
         cls.product_ctg_model = cls.env["product.category"]
         cls.stockpicking = cls.env["stock.picking"]
