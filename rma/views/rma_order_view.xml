@@ -211,6 +211,7 @@
                                        'readonly':[('state', '!=', 'draft')]}"
                             />
                         <field name="qty_to_receive" invisible="1" />
+                        <field name="qty_to_deliver" invisible="1" />
                     </group>
                 </group>
                 <group>

@@ -65,6 +65,11 @@ class RmaOrder(models.Model):
         for rec in self:
             rec.qty_to_receive = sum(rec.rma_line_ids.mapped("qty_to_receive"))
 
+    @api.depends("rma_line_ids", "rma_line_ids.qty_to_deliver")
+    def _compute_qty_to_deliver(self):
+        for rec in self:
+            rec.qty_to_deliver = sum(rec.rma_line_ids.mapped("qty_to_deliver"))
+
     @api.model
     def _default_date_rma(self):
         return datetime.now()
@@ -183,6 +188,10 @@ class RmaOrder(models.Model):
     qty_to_receive = fields.Float(
         digits="Product Unit of Measure",
         compute="_compute_qty_to_receive",
+    )
+    qty_to_deliver = fields.Float(
+        digits="Product Unit of Measure",
+        compute="_compute_qty_to_deliver",
     )
 
     @api.onchange(
