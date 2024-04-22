@@ -147,6 +147,13 @@
                     attrs="{'invisible':['|', ('qty_to_receive', '=', 0), ('qty_to_receive', '&lt;', 0)]}"
                     type="action"
                 />
+                <button
+                    name="%(action_rma_picking_out)d"
+                    string="Create Delivery"
+                    class="oe_highlight"
+                    attrs="{'invisible':['|', ('qty_to_deliver', '=', 0), ('qty_to_deliver', '&lt;', 0)]}"
+                    type="action"
+                />
             </header>
         </field>
     </record>
