@@ -4,8 +4,8 @@
 from odoo import api, models
 
 
-class RmaLineMakeSupplierRma(models.TransientModel):
-    _inherit = "rma.order.line.make.supplier.rma"
+class RmaMakeSupplierRma(models.TransientModel):
+    _inherit = "rma.make.supplier.rma"
 
     @api.model
     def _prepare_supplier_rma_line(self, rma, item):

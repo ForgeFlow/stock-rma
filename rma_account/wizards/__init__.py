@@ -3,4 +3,4 @@
 
 from . import rma_refund
 from . import rma_add_account_move
-from . import rma_order_line_make_supplier_rma
+from . import rma_make_supplier_rma
