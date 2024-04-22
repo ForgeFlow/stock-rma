@@ -47,7 +47,10 @@ class RmaMakePicking(models.TransientModel):
         items = []
         if active_model == "rma.order":
             rma = rma_obj.browse(active_ids)
-            lines = rma.rma_line_ids.filtered(lambda x: x.qty_to_receive > 0)
+            if context.get("picking_type") == "incoming":
+                lines = rma.rma_line_ids.filtered(lambda x: x.qty_to_receive > 0)
+            if context.get("picking_type") == "outgoing":
+                lines = rma.rma_line_ids.filtered(lambda x: x.qty_to_deliver > 0)
         else:
             lines = rma_line_obj.browse(active_ids)
         if len(lines.mapped("partner_id")) > 1:
