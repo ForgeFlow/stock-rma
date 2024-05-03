@@ -33,33 +33,28 @@ class SaleOrderLine(models.Model):
             name_get_uid=name_get_uid,
         )
 
+    def _get_sale_line_rma_name_get_label(self):
+        self.ensure_one()
+        return "SO:%s | INV: %s, | PART:%s | QTY:%s" % (
+            self.order_id.name,
+            " ".join(str(x) for x in [inv.name for inv in self.order_id.invoice_ids]),
+            self.product_id.name,
+            self.product_uom_qty,
+        )
+
     def name_get(self):
         res = []
         if self.env.context.get("rma"):
-            for sale in self:
-                if sale.order_id.name:
+            for sale_line in self:
+                if sale_line.order_id.name:
                     res.append(
-                        (
-                            sale.id,
-                            "SO:%s | INV: %s, | PART:%s | QTY:%s"
-                            % (
-                                sale.order_id.name,
-                                " ".join(
-                                    str(x)
-                                    for x in [
-                                        inv.name for inv in sale.order_id.invoice_ids
-                                    ]
-                                ),
-                                sale.product_id.name,
-                                sale.product_uom_qty,
-                            ),
-                        )
+                        (sale_line.id, sale_line._get_sale_line_rma_name_get_label())
                     )
                 else:
-                    res.append(super(SaleOrderLine, sale).name_get()[0])
+                    res.append(super(SaleOrderLine, sale_line).name_get()[0])
             return res
         else:
-            return super(SaleOrderLine, self).name_get()
+            return super().name_get()
 
     rma_line_id = fields.Many2one(
         comodel_name="rma.order.line", string="RMA", ondelete="restrict", copy=False
