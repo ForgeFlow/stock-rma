@@ -55,7 +55,7 @@
                     name="%(action_rma_add_serial_wiz_customer)d"
                     string="Add Lot/Serial Numbers"
                     type="action"
-                    attrs="{'invisible':[('type', '!=', 'customer')]}"
+                    invisible="type != 'customer'"
                 />
             </xpath>
         </field>
@@ -93,7 +93,7 @@
                     name="%(action_rma_add_serial_wiz_supplier)d"
                     string="Add Lot/Serial numbers"
                     type="action"
-                    attrs="{'invisible':[('type', '!=', 'supplier')]}"
+                    invisible="type != 'supplier'"
                 />
             </xpath>
         </field>

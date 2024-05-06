@@ -24,7 +24,7 @@
                         name="web_ribbon"
                         title="Archived"
                         bg_color="bg-danger"
-                        attrs="{'invisible': [('active', '=', True)]}"
+                        invisible="active == True"
                     />
                     <div class="oe_button_box" name="button_box" />
                     <group colspan="4" col="2">
@@ -51,7 +51,7 @@
                             />
                             <field
                                 name="customer_to_supplier"
-                                attrs="{'invisible':[('type', '=', 'supplier')]}"
+                                invisible="type == 'supplier'"
                             />
                         </group>
                         <group name="outbound" string="Outbound">
@@ -59,7 +59,7 @@
                             <field name="out_warehouse_id" />
                             <field
                                 name="supplier_to_customer"
-                                attrs="{'invisible':[('type', '=', 'customer')]}"
+                                invisible="type == 'customer'"
                             />
                         </group>
                     </group>
