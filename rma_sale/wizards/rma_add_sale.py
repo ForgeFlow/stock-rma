@@ -11,7 +11,7 @@ class RmaAddSale(models.TransientModel):
 
     @api.model
     def default_get(self, fields_list):
-        res = super(RmaAddSale, self).default_get(fields_list)
+        res = super().default_get(fields_list)
         rma_obj = self.env["rma.order"]
         rma_id = self.env.context["active_ids"] or []
         active_model = self.env.context["active_model"]
@@ -197,8 +197,8 @@ class RmaAddSale(models.TransientModel):
                         rec = rma_line_obj.create(data)
                         # Ensure that configuration on the operation is applied
                         # TODO MIG: in v16 the usage of such onchange can be removed in
-                        #  favor of (pre)computed stored editable fields for all policies
-                        #  and configuration in the RMA operation.
+                        #  favor of (pre)computed stored editable fields for all
+                        # policies and configuration in the RMA operation.
                         rec._onchange_operation_id()
                         rec.price_unit = rec._get_price_unit()
         rma = self.rma_id
