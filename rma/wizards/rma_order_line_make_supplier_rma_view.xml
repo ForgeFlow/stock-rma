@@ -68,7 +68,7 @@
             <button
                     name="%(action_rma_order_line_make_supplier_rma)d"
                     string="Create Supplier RMA"
-                    attrs="{'invisible':['|', ('type', '!=', 'customer'), ('state', '!=', 'approved')]}"
+                    invisible="type != 'customer' or state != 'approved'"
                     type="action"
                 />
         </header>

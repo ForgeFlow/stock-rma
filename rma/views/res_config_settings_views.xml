@@ -7,7 +7,7 @@
         <field name="priority" eval="10" />
         <field name="inherit_id" ref="base.res_config_settings_view_form" />
         <field name="arch" type="xml">
-            <xpath expr="//div[hasclass('settings')]" position="inside">
+            <xpath expr="//form" position="inside">
                 <div
                     class="app_settings_block"
                     data-string="RMA"
@@ -27,7 +27,7 @@
                             <div class="o_setting_right_pane">
                                 <label for="group_rma_delivery_address" />
                                 <div class="text-muted">
-                                    Display 3 fields on rma: partner, invoice address, delivery address.
+                                    Display 3 fields on rma: partner, invoice address, delivery address
                                 </div>
                             </div>
                         </div>
