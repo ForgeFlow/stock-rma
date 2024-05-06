@@ -11,7 +11,7 @@ class StockMove(models.Model):
     def _prepare_account_move_line(
         self, qty, cost, credit_account_id, debit_account_id, svl_id, description
     ):
-        res = super(StockMove, self)._prepare_account_move_line(
+        res = super()._prepare_account_move_line(
             qty, cost, credit_account_id, debit_account_id, svl_id, description
         )
         for line in res:
@@ -23,7 +23,7 @@ class StockMove(models.Model):
         return res
 
     def _account_entry_move(self, qty, description, svl_id, cost):
-        res = super(StockMove, self)._account_entry_move(qty, description, svl_id, cost)
+        res = super()._account_entry_move(qty, description, svl_id, cost)
         if self.company_id.anglo_saxon_accounting:
             # Eventually reconcile together the invoice and valuation accounting
             # entries on the stock interim accounts

@@ -7,7 +7,7 @@ from odoo.tests import common
 class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
     @classmethod
     def setUpClass(cls):
-        super(TestAccountMoveLineRmaOrderLine, cls).setUpClass()
+        super().setUpClass()
         cls.rma_model = cls.env["rma.order"]
         cls.rma_line_model = cls.env["rma.order.line"]
         cls.rma_refund_wiz = cls.env["rma.refund"]
@@ -207,8 +207,7 @@ class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
             self.assertEqual(
                 balance,
                 expected_balance,
-                "Balance is not %s for rma Line %s."
-                % (str(expected_balance), rma_line.name),
+                f"Balance is not {str(expected_balance)} for rma Line {rma_line.name}.",
             )
 
     def test_rma_invoice(self):
@@ -245,7 +244,7 @@ class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
         else:
             picking_ids = self.env["stock.picking"].search(res["domain"])
             picking = self.env["stock.picking"].browse(picking_ids)
-        picking.move_line_ids.write({"qty_done": 1.0})
+        # picking.move_line_ids.write({"qty_done": 1.0})
         picking.button_validate()
         # decreasing cogs
         expected_balance = -1.0

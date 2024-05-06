@@ -8,7 +8,7 @@ class StockValuationLayer(models.Model):
     _inherit = "stock.valuation.layer"
 
     def _validate_accounting_entries(self):
-        res = super(StockValuationLayer, self)._validate_accounting_entries()
+        res = super()._validate_accounting_entries()
         for svl in self:
             # Eventually reconcile together the stock interim accounts
             if svl.company_id.anglo_saxon_accounting:

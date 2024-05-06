@@ -53,8 +53,6 @@ class RmaOrderLine(models.Model):
         "res.partner",
         string="Partner invoice address",
         default=lambda self: self._default_invoice_address(),
-        readonly=True,
-        states={"draft": [("readonly", False)]},
         help="Invoice address for current rma order.",
     )
     refund_count = fields.Integer(
@@ -65,8 +63,6 @@ class RmaOrderLine(models.Model):
         string="Originating Invoice Line",
         ondelete="restrict",
         index=True,
-        readonly=True,
-        states={"draft": [("readonly", False)]},
     )
     move_line_ids = fields.One2many(
         comodel_name="account.move.line",
@@ -138,7 +134,7 @@ class RmaOrderLine(models.Model):
     @api.onchange("product_id", "partner_id")
     def _onchange_product_id(self):
         """Domain for sale_line_id is computed here to make it dynamic."""
-        res = super(RmaOrderLine, self)._onchange_product_id()
+        res = super()._onchange_product_id()
         if not res.get("domain"):
             res["domain"] = {}
         if not self.product_id:
@@ -252,14 +248,14 @@ class RmaOrderLine(models.Model):
                 )
 
     def _remove_other_data_origin(self, exception):
-        res = super(RmaOrderLine, self)._remove_other_data_origin(exception)
+        res = super()._remove_other_data_origin(exception)
         if not exception == "account_move_line_id":
             self.account_move_line_id = False
         return res
 
     @api.onchange("operation_id")
     def _onchange_operation_id(self):
-        result = super(RmaOrderLine, self)._onchange_operation_id()
+        result = super()._onchange_operation_id()
         if self.operation_id:
             self.refund_policy = self.operation_id.refund_policy or "no"
         return result
@@ -273,7 +269,8 @@ class RmaOrderLine(models.Model):
             if len(matching_inv_lines) > 1:
                 raise UserError(
                     _(
-                        "There's an rma for the invoice line %(arg1)s and invoice %(arg2)s",
+                        "There's an rma for the "
+                        "invoice line %(arg1)s and invoice %(arg2)s",
                         arg1=line.account_move_line_id,
                         arg2=line.account_move_line_id.move_id,
                     )
@@ -305,20 +302,11 @@ class RmaOrderLine(models.Model):
             "views": [(tree_view_ref.id, "tree"), (form_view_ref.id, "form")],
         }
 
-    def name_get(self):
-        res = []
-        if self.env.context.get("rma"):
-            for rma in self:
-                res.append(
-                    (
-                        rma.id,
-                        "%s %s qty:%s"
-                        % (rma.name, rma.product_id.name, rma.product_qty),
-                    )
-                )
-            return res
-        else:
-            return super(RmaOrderLine, self).name_get()
+    def _compute_display_name(self):
+        if not self.env.context.get("rma"):
+            return super()._compute_display_name()
+        for rma in self:
+            rma.display_name = f"{rma.name} {rma.product_id.name} qty:{rma.product_qty}"
 
     def _stock_account_anglo_saxon_reconcile_valuation(self):
         for rma in self:
@@ -345,9 +333,13 @@ class RmaOrderLine(models.Model):
                 amls |= rma.move_ids.mapped(
                     "stock_valuation_layer_ids.account_move_id.line_ids"
                 )
-                # Search for anglo-saxon lines linked to the product in the journal entry.
+                # Search for anglo-saxon lines linked to the product in the journal
+                # entry.
                 amls = amls.filtered(
-                    lambda line: line.product_id == prod
+                    lambda line,
+                    prod=prod,
+                    product_interim_account=product_interim_account: line.product_id
+                    == prod
                     and line.account_id == product_interim_account
                     and not line.reconciled
                 )
@@ -356,7 +348,7 @@ class RmaOrderLine(models.Model):
 
     def _get_price_unit(self):
         self.ensure_one()
-        price_unit = super(RmaOrderLine, self)._get_price_unit()
+        price_unit = super()._get_price_unit()
         if self.reference_move_id:
             move = self.reference_move_id
             layers = move.sudo().stock_valuation_layer_ids
@@ -402,6 +394,6 @@ class RmaOrderLine(models.Model):
         """
         # For some reason api.depends on qty_received is not working. Using the
         # _account_entry_move method in stock move as trigger then
-        for rec in self.filtered(lambda l: l.operation_id.automated_refund):
+        for rec in self.filtered(lambda line: line.operation_id.automated_refund):
             if rec.qty_received > rec.qty_refunded:
                 rec._refund_at_zero_cost()

@@ -61,7 +61,7 @@ class RmaOrder(models.Model):
         return data
 
     @api.onchange("add_move_id")
-    def on_change_invoice(self):
+    def onchange_invoice(self):
         if not self.add_move_id:
             return {}
         if not self.partner_id:
@@ -84,13 +84,13 @@ class RmaOrder(models.Model):
 
     @api.model
     def prepare_rma_line(self, origin_rma, rma_id, line):
-        line_values = super(RmaOrder, self).prepare_rma_line(origin_rma, rma_id, line)
+        line_values = super().prepare_rma_line(origin_rma, rma_id, line)
         line_values["invoice_address_id"] = line.invoice_address_id.id
         return line_values
 
     @api.model
     def _prepare_rma_data(self, partner, origin_rma):
-        res = super(RmaOrder, self)._prepare_rma_data(partner, origin_rma)
+        res = super()._prepare_rma_data(partner, origin_rma)
         res["invoice_address_id"] = partner.id
         return res
 
