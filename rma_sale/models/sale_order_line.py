@@ -33,7 +33,7 @@ class SaleOrderLine(models.Model):
 
     def _get_sale_line_rma_name_get_label(self):
         self.ensure_one()
-        return "SO:%s | INV: %s, | PART:%s | QTY:%s" % (
+        return "SO:{} | INV: {}, | PART:{} | QTY:{}".format(
             self.order_id.name,
             " ".join(str(x) for x in [inv.name for inv in self.order_id.invoice_ids]),
             self.product_id.name,
