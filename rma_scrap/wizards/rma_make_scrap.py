@@ -33,7 +33,7 @@ class RmaMakeScrap(models.TransientModel):
     @api.model
     def default_get(self, fields_list):
         context = self._context.copy()
-        res = super(RmaMakeScrap, self).default_get(fields_list)
+        res = super().default_get(fields_list)
         rma_line_obj = self.env["rma.order.line"]
         rma_line_ids = self.env.context["active_ids"] or []
         active_model = self.env.context["active_model"]
@@ -107,7 +107,8 @@ class RmaMakeScrapItem(models.TransientModel):
         "stock.location",
         string="Source Location",
         required=True,
-        domain="[('usage', '=', 'internal'), ('company_id', 'in', [company_id, False])]",
+        domain="[('usage', '=', 'internal'),"
+        "('company_id', 'in', [company_id, False])]",
     )
     scrap_location_id = fields.Many2one(
         "stock.location",

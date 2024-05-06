@@ -12,7 +12,7 @@
                     class="oe_stat_button"
                     icon="fa-truck"
                     groups="stock.group_stock_user"
-                    attrs="{'invisible': [('scrap_count', '=', 0)]}"
+                    invisible="scrap_count == 0"
                 >
                     <field name="scrap_count" widget="statinfo" string="Scraps" />
                 </button>

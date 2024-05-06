@@ -4,7 +4,7 @@ from odoo.tests import common
 class TestRmaScrap(common.SingleTransactionCase):
     @classmethod
     def setUpClass(cls):
-        super(TestRmaScrap, cls).setUpClass()
+        super().setUpClass()
 
         cls.rma_obj = cls.env["rma.order"]
         cls.rma_line_obj = cls.env["rma.order.line"]
@@ -108,7 +108,7 @@ class TestRmaScrap(common.SingleTransactionCase):
 
         action_picking = wizard.action_create_picking()
         picking = self.env["stock.picking"].browse([action_picking["res_id"]])
-        picking.move_line_ids[0].qty_done = rma.qty_to_receive
+        picking.move_line_ids[0].quantity = rma.qty_to_receive
 
         picking.button_validate()
         rma._compute_qty_to_scrap()
@@ -137,9 +137,9 @@ class TestRmaScrap(common.SingleTransactionCase):
         action = wizard.action_create_scrap()
         scrap = self.env["stock.scrap"].browse([action["res_id"]])
         self.assertEqual(scrap.location_id.id, self.stock_rma_location.id)
-        self.assertEqual(scrap.move_id.id, False)
+        self.assertEqual(scrap.move_ids.id, False)
         scrap.action_validate()
-        move = scrap.move_id
+        move = scrap.move_ids
         self.assertEqual(move.product_id.id, self.product_1.id)
         self.assertFalse(rma.qty_to_scrap)
         self.assertEqual(rma.qty_scrap, 1.00)
@@ -187,7 +187,7 @@ class TestRmaScrap(common.SingleTransactionCase):
         action = wizard.action_create_scrap()
         scrap = self.env["stock.scrap"].browse([action["res_id"]])
         self.assertEqual(scrap.location_id.id, self.stock_rma_location.id)
-        self.assertEqual(scrap.move_id.id, False)
+        self.assertEqual(scrap.move_ids.id, False)
         self.assertEqual(rma.qty_in_scrap, 1.00)
         res = scrap.action_validate()
         scrap.do_scrap()
