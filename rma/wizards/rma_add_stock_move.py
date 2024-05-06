@@ -130,7 +130,7 @@ class RmaAddStockMove(models.TransientModel):
         elif sm.product_id.tracking == "lot":
             product_qty = sum(
                 sm.move_line_ids.filtered(lambda x: x.lot_id.id == lot.id).mapped(
-                    "qty_done"
+                    "quantity"
                 )
             )
         data = {
