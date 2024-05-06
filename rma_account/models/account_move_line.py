@@ -2,6 +2,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from odoo import api, fields, models
+from odoo.osv import expression
 
 
 class AccountMoveLine(models.Model):
@@ -13,6 +14,13 @@ class AccountMoveLine(models.Model):
         as Odoo adds extra args to name_search on _name_search method that
         will make impossible to get the desired result."""
         domain = domain or []
+        if self.env.context.get("rma"):
+            domain = expression.AND(
+                [
+                    domain,
+                    [("display_type", "in", ("product", "line_section", "line_note"))],
+                ]
+            )
         lines = self.search([("move_id.name", operator, name)] + domain, limit=limit)
         if limit:
             limit_rest = limit - len(lines)
@@ -20,7 +28,7 @@ class AccountMoveLine(models.Model):
             # limit can be 0 or None representing infinite
             limit_rest = limit
         if limit_rest or not limit:
-            domain += [("id", "not in", lines.ids)]
+            domain += [("id", "in", lines.ids)]
             return super()._name_search(
                 name, domain=domain, operator=operator, limit=limit_rest, order=order
             )
