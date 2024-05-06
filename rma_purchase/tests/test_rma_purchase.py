@@ -7,7 +7,7 @@ from odoo.tests import common
 
 class TestRmaPurchase(common.TransactionCase):
     def setUp(self):
-        super(TestRmaPurchase, self).setUp()
+        super().setUp()
 
         self.rma_obj = self.env["rma.order"]
         self.rma_line_obj = self.env["rma.order.line"]

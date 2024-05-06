@@ -11,7 +11,7 @@ from odoo.addons.rma_account.tests.test_rma_stock_account import TestRmaStockAcc
 class TestRmaStockAccountPurchase(TestRmaStockAccount):
     @classmethod
     def setUpClass(cls):
-        super(TestRmaStockAccountPurchase, cls).setUpClass()
+        super().setUpClass()
         cls.pol_model = cls.env["purchase.order.line"]
         cls.po_model = cls.env["purchase.order"]
         cls.rma_operation_supplier_refund = cls.env.ref(

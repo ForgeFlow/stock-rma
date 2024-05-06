@@ -8,7 +8,7 @@ class RmaRefund(models.TransientModel):
     _inherit = "rma.refund"
 
     def _get_refund_price_unit(self, rma):
-        price_unit = super(RmaRefund, self)._get_refund_price_unit(rma)
+        price_unit = super()._get_refund_price_unit(rma)
         if rma.type == "supplier":
             if rma.account_move_line_id:
                 price_unit = rma.account_move_line_id.price_unit
@@ -17,7 +17,7 @@ class RmaRefund(models.TransientModel):
         return price_unit
 
     def _get_refund_currency(self, rma):
-        currency = super(RmaRefund, self)._get_refund_currency(rma)
+        currency = super()._get_refund_currency(rma)
         if rma.type == "supplier":
             if rma.account_move_line_id:
                 currency = rma.account_move_line_id.currency_id

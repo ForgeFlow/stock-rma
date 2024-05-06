@@ -43,8 +43,6 @@ class RmaOrderLine(models.Model):
         comodel_name="purchase.order.line",
         string="Originating Purchase Line",
         ondelete="restrict",
-        readonly=True,
-        states={"draft": [("readonly", False)]},
     )
     purchase_id = fields.Many2one(
         string="Source Purchase Order",
@@ -92,7 +90,7 @@ class RmaOrderLine(models.Model):
     def _onchange_product_id(self):
         """Domain for purchase_order_line_id is computed here to make
         it dynamic."""
-        res = super(RmaOrderLine, self)._onchange_product_id()
+        res = super()._onchange_product_id()
         if not res.get("domain"):
             res["domain"] = {}
         domain = [
@@ -107,7 +105,7 @@ class RmaOrderLine(models.Model):
 
     @api.onchange("operation_id")
     def _onchange_operation_id(self):
-        res = super(RmaOrderLine, self)._onchange_operation_id()
+        res = super()._onchange_operation_id()
         if self.operation_id:
             self.purchase_policy = self.operation_id.purchase_policy or "no"
         return res
@@ -202,7 +200,7 @@ class RmaOrderLine(models.Model):
                 )
 
     def _remove_other_data_origin(self, exception):
-        res = super(RmaOrderLine, self)._remove_other_data_origin(exception)
+        res = super()._remove_other_data_origin(exception)
         if not exception == "purchase_order_line_id":
             self.purchase_order_line_id = False
         return res
@@ -233,7 +231,7 @@ class RmaOrderLine(models.Model):
 
     def _get_price_unit(self):
         self.ensure_one()
-        price_unit = super(RmaOrderLine, self)._get_price_unit()
+        price_unit = super()._get_price_unit()
         if self.purchase_order_line_id:
             moves = self.purchase_order_line_id.move_ids
             if moves:
