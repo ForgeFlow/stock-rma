@@ -43,7 +43,7 @@ class RmaLineMakeSaleOrder(models.TransientModel):
 
     @api.model
     def default_get(self, fields_list):
-        res = super(RmaLineMakeSaleOrder, self).default_get(fields_list)
+        res = super().default_get(fields_list)
         rma_line_obj = self.env["rma.order.line"]
         rma_line_ids = self.env.context["active_ids"] or []
         active_model = self.env.context["active_model"]

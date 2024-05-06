@@ -12,7 +12,7 @@
                     name="action_view_origin_sale_order"
                     class="oe_stat_button"
                     icon="fa-strikethrough"
-                    attrs="{'invisible': [('sale_id', '=', False)]}"
+                    invisible="sale_id == False"
                     string="Origin Sale Order"
                 >
                 </button>
@@ -21,7 +21,7 @@
                     name="action_view_sale_order"
                     class="oe_stat_button"
                     icon="fa-strikethrough"
-                    attrs="{'invisible': [('sales_count', '=', 0)]}"
+                    invisible="sales_count == 0"
                     groups="sales_team.group_sale_salesman_all_leads"
                 >
                             <field
@@ -37,11 +37,12 @@
                     name="sale_line_id"
                     context="{'rma': True}"
                     options="{'no_create': True}"
-                    attrs="{'invisible':[('type', '!=', 'customer')]}"
+                    invisible="type != 'customer'"
+                    readonly="state != 'draft'"
                 />
                 </group>
                 <group name="quantities" position="inside">
-                    <group attrs="{'invisible': [('sale_policy', '=', 'no')]}">
+                    <group invisible="sale_policy == 'no'">
                         <field name="qty_to_sell" />
                         <field name="qty_sold" />
                     </group>
@@ -53,9 +54,13 @@
                     <page
                     name="sale"
                     string="Sale Lines"
-                    attrs="{'invisible': [('sale_line_ids', '=', [])]}"
+                    invisible="sale_line_ids == []"
                 >
-                        <field name="sale_line_ids" nolabel="1" />
+                        <field
+                        name="sale_line_ids"
+                        nolabel="1"
+                        readonly="state != 'draft'"
+                    />
                     </page>
                 </notebook>
             </field>
@@ -71,13 +76,13 @@
                     name="%(action_rma_order_line_make_sale_order)d"
                     string="Create Sales Quotation"
                     class="oe_highlight"
-                    attrs="{'invisible':['|', '|', '|', ('qty_to_sell', '=', 0), ('qty_to_sell', '&lt;', 0), ('state', '!=', 'approved'), ('sale_policy', '=', 'no')]}"
+                    invisible="qty_to_sell == 0 or qty_to_sell &lt; 0 or state != 'approved' or sale_policy == 'no'"
                     type="action"
                 />
                 <button
                     name="%(action_rma_order_line_make_sale_order)d"
                     string="Create Sales Quotation"
-                    attrs="{'invisible':['|', '|', ('qty_to_sell', '>', 0), ('state', '!=', 'approved'), ('sale_policy', '=', 'no')]}"
+                    invisible="qty_to_sell &gt; 0 or state != 'approved' or sale_policy == 'no'"
                     type="action"
                 />
             </header>
