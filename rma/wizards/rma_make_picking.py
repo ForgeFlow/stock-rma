@@ -5,7 +5,8 @@ import time
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FORMAT, float_compare
+from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FORMAT
+from odoo.tools import float_compare
 
 
 class RmaMakePicking(models.TransientModel):
