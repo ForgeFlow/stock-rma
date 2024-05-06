@@ -7,7 +7,7 @@ from odoo.tests import common
 class TestRmaSale(common.SingleTransactionCase):
     @classmethod
     def setUpClass(cls):
-        super(TestRmaSale, cls).setUpClass()
+        super().setUpClass()
 
         cls.rma_obj = cls.env["rma.order"]
         cls.rma_line_obj = cls.env["rma.order.line"]
@@ -62,7 +62,6 @@ class TestRmaSale(common.SingleTransactionCase):
                         },
                     ),
                 ],
-                "pricelist_id": cls.env.ref("product.list0").id,
             }
         )
 

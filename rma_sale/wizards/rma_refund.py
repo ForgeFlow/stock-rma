@@ -8,12 +8,12 @@ class RmaRefund(models.TransientModel):
 
     @api.returns("rma.order.line")
     def _prepare_item(self, line):
-        res = super(RmaRefund, self)._prepare_item(line)
+        res = super()._prepare_item(line)
         res["sale_line_id"] = line.sale_line_id.id
         return res
 
     def _get_refund_price_unit(self, rma):
-        price_unit = super(RmaRefund, self)._get_refund_price_unit(rma)
+        price_unit = super()._get_refund_price_unit(rma)
         if rma.operation_id.refund_free_of_charge:
             return price_unit
         if rma.type == "customer":

@@ -42,8 +42,6 @@ class RmaOrderLine(models.Model):
         string="Originating Sales Order Line",
         ondelete="restrict",
         copy=False,
-        readonly=True,
-        states={"draft": [("readonly", False)]},
     )
     sale_id = fields.Many2one(
         string="Source Sales Order", related="sale_line_id.order_id"
@@ -52,8 +50,6 @@ class RmaOrderLine(models.Model):
         comodel_name="sale.order.line",
         inverse_name="rma_line_id",
         string="Sales Order Lines",
-        readonly=True,
-        states={"draft": [("readonly", False)]},
         copy=False,
     )
     qty_to_sell = fields.Float(
@@ -85,7 +81,7 @@ class RmaOrderLine(models.Model):
     @api.onchange("product_id", "partner_id")
     def _onchange_product_id(self):
         """Domain for sale_line_id is computed here to make it dynamic."""
-        res = super(RmaOrderLine, self)._onchange_product_id()
+        res = super()._onchange_product_id()
         if not res.get("domain"):
             res["domain"] = {}
         domain = [
@@ -100,7 +96,7 @@ class RmaOrderLine(models.Model):
 
     @api.onchange("operation_id")
     def _onchange_operation_id(self):
-        res = super(RmaOrderLine, self)._onchange_operation_id()
+        res = super()._onchange_operation_id()
         if self.operation_id:
             self.sale_policy = self.operation_id.sale_policy or "no"
         return res
@@ -173,7 +169,7 @@ class RmaOrderLine(models.Model):
         self._remove_other_data_origin("sale_line_id")
 
     def _remove_other_data_origin(self, exception):
-        res = super(RmaOrderLine, self)._remove_other_data_origin(exception)
+        res = super()._remove_other_data_origin(exception)
         if not exception == "sale_line_id":
             self.sale_line_id = False
         return res
@@ -224,7 +220,7 @@ class RmaOrderLine(models.Model):
 
     def _get_price_unit(self):
         self.ensure_one()
-        price_unit = super(RmaOrderLine, self)._get_price_unit()
+        price_unit = super()._get_price_unit()
         if self.sale_line_id:
             moves = self.sale_line_id.move_ids.filtered(
                 lambda x: x.state == "done"
