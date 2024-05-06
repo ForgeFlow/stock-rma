@@ -8,7 +8,7 @@
     "category": "RMA",
     "summary": "Links RMA with Sales Orders",
     "author": "ForgeFlow",
-    "website": "https://github.com/ForgeFlow/stock-rma",
+    "website": "https://github.com/ForgeFlow",
     "depends": ["rma_account", "sale_stock"],
     "data": [
         "security/ir.model.access.csv",
