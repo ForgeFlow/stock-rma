@@ -14,7 +14,7 @@ class RmaLineMakePurchaseOrder(models.TransientModel):
     partner_id = fields.Many2one(
         comodel_name="res.partner",
         required=False,
-        readonly=1,
+        readonly=True,
     )
     item_ids = fields.One2many(
         comodel_name="rma.order.line.make.purchase.order.item",
@@ -42,7 +42,7 @@ class RmaLineMakePurchaseOrder(models.TransientModel):
 
     @api.model
     def default_get(self, fields_list):
-        res = super(RmaLineMakePurchaseOrder, self).default_get(fields_list)
+        res = super().default_get(fields_list)
         rma_line_obj = self.env["rma.order.line"]
         rma_line_ids = self.env.context["active_ids"] or []
         active_model = self.env.context["active_model"]

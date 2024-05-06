@@ -8,7 +8,7 @@ class RmaMakePicking(models.TransientModel):
     _inherit = "rma_make_picking.wizard"
 
     def _prepare_item(self, line):
-        res = super(RmaMakePicking, self)._prepare_item(line)
+        res = super()._prepare_item(line)
         res["purchase_order_line_id"] = line.purchase_order_line_id.id
         return res
 
@@ -24,7 +24,7 @@ class RmaMakePicking(models.TransientModel):
             result["domain"] = [("id", "in", po_list)]
             return result
         else:
-            action = super(RmaMakePicking, self)._get_action(pickings, procurements)
+            action = super()._get_action(pickings, procurements)
             return action
 
 
