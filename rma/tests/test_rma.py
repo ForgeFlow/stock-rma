@@ -221,7 +221,6 @@ class TestRma(common.TransactionCase):
     def _create_rma_from_move(
         cls, products2move, r_type, partner, dropship, supplier_address_id=None
     ):
-
         moves = []
         if r_type == "customer":
             picking_type = cls._get_picking_type(

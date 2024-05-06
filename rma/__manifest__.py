@@ -8,7 +8,7 @@
     "category": "RMA",
     "summary": "Introduces the return merchandise authorization (RMA) process in odoo",
     "author": "ForgeFlow",
-    "website": "https://github.com/ForgeFlow/stock-rma",
+    "website": "https://github.com/ForgeFlow",
     "depends": ["stock", "mail", "web"],
     "demo": ["demo/stock_demo.xml"],
     "data": [
