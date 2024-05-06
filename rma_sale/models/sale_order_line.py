@@ -16,16 +16,14 @@ class SaleOrderLine(models.Model):
             (self._rec_name, operator, name),
             ("order_id.name", operator, name),
         ]
-        return super(SaleOrderLine, self).name_search(
-            name=name, args=args, operator=operator, limit=limit
-        )
+        return super().name_search(name=name, args=args, operator=operator, limit=limit)
 
     @api.model
     def _name_search(
         self, name="", args=None, operator="ilike", limit=100, name_get_uid=None
     ):
         """Typed text is cleared here for better extensibility."""
-        return super(SaleOrderLine, self)._name_search(
+        return super()._name_search(
             name="",
             args=args,
             operator=operator,
@@ -35,7 +33,7 @@ class SaleOrderLine(models.Model):
 
     def _get_sale_line_rma_name_get_label(self):
         self.ensure_one()
-        return "SO:%s | INV: %s, | PART:%s | QTY:%s" % (
+        return "SO:{} | INV: {}, | PART:{} | QTY:{}".format(
             self.order_id.name,
             " ".join(str(x) for x in [inv.name for inv in self.order_id.invoice_ids]),
             self.product_id.name,
@@ -61,8 +59,6 @@ class SaleOrderLine(models.Model):
     )
 
     def _prepare_order_line_procurement(self, group_id=False):
-        vals = super(SaleOrderLine, self)._prepare_order_line_procurement(
-            group_id=group_id
-        )
+        vals = super()._prepare_order_line_procurement(group_id=group_id)
         vals.update({"rma_line_id": self.rma_line_id.id})
         return vals

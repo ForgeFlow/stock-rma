@@ -27,7 +27,7 @@ class RmaOrder(models.Model):
                 ("sale_line_id", "=", line.sale_line_id.id),
             ]
         else:
-            domain = super(RmaOrder, self)._get_line_domain(rma_id, line)
+            domain = super()._get_line_domain(rma_id, line)
         return domain
 
     def action_view_sale_order(self):
