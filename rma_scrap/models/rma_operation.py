@@ -19,5 +19,6 @@ class RmaOperation(models.Model):
     scrap_location_id = fields.Many2one(
         comodel_name="stock.location",
         string="Scrap Destination Location",
-        domain="[('scrap_location', '=', True), ('company_id', 'in', [company_id, False])]",
+        domain="[('scrap_location', '=', True),"
+        "('company_id', 'in', [company_id, False])]",
     )
