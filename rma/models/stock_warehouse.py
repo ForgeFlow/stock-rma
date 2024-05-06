@@ -91,7 +91,7 @@ class StockWarehouse(models.Model):
                 self.mapped("rma_customer_out_pull_id").unlink()
                 self.mapped("rma_supplier_in_pull_id").unlink()
                 self.mapped("rma_supplier_out_pull_id").unlink()
-        return super(StockWarehouse, self).write(vals)
+        return super().write(vals)
 
     def _create_rma_picking_types(self):
         picking_type_obj = self.env["stock.picking.type"]
