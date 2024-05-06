@@ -8,7 +8,7 @@ class RmaMakePicking(models.TransientModel):
 
     @api.returns("rma.order.line")
     def _prepare_item(self, line):
-        res = super(RmaMakePicking, self)._prepare_item(line)
+        res = super()._prepare_item(line)
         res["sale_line_id"] = line.sale_line_id.id
         return res
 
