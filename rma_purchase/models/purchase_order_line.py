@@ -22,16 +22,14 @@ class PurchaseOrderLine(models.Model):
             (self._rec_name, operator, name),
             ("order_id.name", operator, name),
         ]
-        return super(PurchaseOrderLine, self).name_search(
-            name=name, args=args, operator=operator, limit=limit
-        )
+        return super().name_search(name=name, args=args, operator=operator, limit=limit)
 
     @api.model
     def _name_search(
         self, name="", args=None, operator="ilike", limit=100, name_get_uid=None
     ):
         """Typed text is cleared here for better extensibility."""
-        return super(PurchaseOrderLine, self)._name_search(
+        return super()._name_search(
             name="",
             args=args,
             operator=operator,
@@ -50,8 +48,7 @@ class PurchaseOrderLine(models.Model):
                     res.append(
                         (
                             purchase.id,
-                            "%s %s %s qty:%s"
-                            % (
+                            "{} {} {} qty:{}".format(
                                 purchase.order_id.name,
                                 " ".join(
                                     str(x)
@@ -68,11 +65,12 @@ class PurchaseOrderLine(models.Model):
                     res.append(super(PurchaseOrderLine, purchase).name_get()[0])
             return res
         else:
-            return super(PurchaseOrderLine, self).name_get()
+            return super().name_get()
 
-    @api.model
-    def create(self, vals):
-        rma_line_id = self.env.context.get("rma_line_id")
-        if rma_line_id:
-            vals["rma_line_id"] = rma_line_id
-        return super(PurchaseOrderLine, self).create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            rma_line_id = self.env.context.get("rma_line_id")
+            if rma_line_id:
+                vals["rma_line_id"] = rma_line_id
+        return super().create(vals_list)
