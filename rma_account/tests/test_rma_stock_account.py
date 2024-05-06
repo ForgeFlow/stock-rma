@@ -10,7 +10,7 @@ from odoo.addons.rma.tests.test_rma import TestRma
 class TestRmaStockAccount(TestRma):
     @classmethod
     def setUpClass(cls):
-        super(TestRmaStockAccount, cls).setUpClass()
+        super().setUpClass()
         cls.account_model = cls.env["account.account"]
         cls.g_account_user = cls.env.ref("account.group_account_user")
         cls.rma_refund_wiz = cls.env["rma.refund"]
@@ -80,8 +80,8 @@ class TestRmaStockAccount(TestRma):
     def check_accounts_used(
         self, account_move, debit_account=False, credit_account=False
     ):
-        debit_line = account_move.mapped("line_ids").filtered(lambda l: l.debit)
-        credit_line = account_move.mapped("line_ids").filtered(lambda l: l.credit)
+        debit_line = account_move.mapped("line_ids").filtered(lambda line: line.debit)
+        credit_line = account_move.mapped("line_ids").filtered(lambda line: line.credit)
         if debit_account:
             self.assertEqual(debit_line.account_id[0].code, debit_account)
         if credit_account:
@@ -141,7 +141,7 @@ class TestRmaStockAccount(TestRma):
         for rma_line in rma_customer_id.rma_line_ids:
             value_origin = rma_line.reference_move_id.stock_valuation_layer_ids.value
             move_product = picking.move_line_ids.filtered(
-                lambda l: l.product_id == rma_line.product_id
+                lambda line, rma_line=rma_line: line.product_id == rma_line.product_id
             )
             value_used = move_product.move_id.stock_valuation_layer_ids.value
             self.assertEqual(value_used, -value_origin)
@@ -159,11 +159,11 @@ class TestRmaStockAccount(TestRma):
         rma.refund_line_ids.move_id.action_post()
         rma._compute_refund_count()
         gdni_amls = rma.refund_line_ids.move_id.line_ids.filtered(
-            lambda l: l.account_id == self.account_gdni
+            lambda line: line.account_id == self.account_gdni
         )
         gdni_amls |= (
             rma.move_ids.stock_valuation_layer_ids.account_move_id.line_ids.filtered(
-                lambda l: l.account_id == self.account_gdni
+                lambda line: line.account_id == self.account_gdni
             )
         )
         gdni_balance = sum(gdni_amls.mapped("balance"))
@@ -184,11 +184,11 @@ class TestRmaStockAccount(TestRma):
         ).action_post()
         rma._compute_refund_count()
         gdni_amls = rma.refund_line_ids.move_id.line_ids.filtered(
-            lambda l: l.account_id == self.account_gdni
+            lambda line: line.account_id == self.account_gdni
         )
         gdni_amls |= (
             rma.move_ids.stock_valuation_layer_ids.account_move_id.line_ids.filtered(
-                lambda l: l.account_id == self.account_gdni
+                lambda line: line.account_id == self.account_gdni
             )
         )
         gdni_balance = sum(gdni_amls.mapped("balance"))
@@ -227,7 +227,7 @@ class TestRmaStockAccount(TestRma):
         self._receive_rma(rma_customer_id.rma_line_ids)
         gdni_amls = (
             rma.move_ids.stock_valuation_layer_ids.account_move_id.line_ids.filtered(
-                lambda l: l.account_id == self.account_gdni
+                lambda line: line.account_id == self.account_gdni
             )
         )
         gdni_balance = sum(gdni_amls.mapped("balance"))
@@ -237,7 +237,7 @@ class TestRmaStockAccount(TestRma):
         self._deliver_rma(rma_customer_id.rma_line_ids)
         gdni_amls = (
             rma.move_ids.stock_valuation_layer_ids.account_move_id.line_ids.filtered(
-                lambda l: l.account_id == self.account_gdni
+                lambda line: line.account_id == self.account_gdni
             )
         )
         gdni_balance = sum(gdni_amls.mapped("balance"))
@@ -313,7 +313,7 @@ class TestRmaStockAccount(TestRma):
         self._receive_rma(rma)
         layers = rma.move_ids.sudo().stock_valuation_layer_ids
         gdni_amls = layers.account_move_id.line_ids.filtered(
-            lambda l: l.account_id == self.account_gdni
+            lambda line: line.account_id == self.account_gdni
         )
         gdni_balance = sum(gdni_amls.mapped("balance"))
         self.assertEqual(len(gdni_amls), 1)
@@ -322,7 +322,7 @@ class TestRmaStockAccount(TestRma):
         self._deliver_rma(rma)
         layers = rma.move_ids.sudo().stock_valuation_layer_ids
         gdni_amls = layers.account_move_id.line_ids.filtered(
-            lambda l: l.account_id == self.account_gdni
+            lambda line: line.account_id == self.account_gdni
         )
         gdni_balance = sum(gdni_amls.mapped("balance"))
         self.assertEqual(len(gdni_amls), 2)
@@ -350,6 +350,6 @@ class TestRmaStockAccount(TestRma):
                 ("account_id", "=", self.account_gdni.id),
             ]
         ) + rma_line.refund_line_ids.filtered(
-            lambda l: l.account_id == self.account_gdni
+            lambda line: line.account_id == self.account_gdni
         )
         self.assertEqual(all(gdni_amls.mapped("reconciled")), True)

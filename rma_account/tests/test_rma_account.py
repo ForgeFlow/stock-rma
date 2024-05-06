@@ -10,7 +10,7 @@ from odoo.tests.common import Form
 class TestRmaAccount(common.SingleTransactionCase):
     @classmethod
     def setUpClass(cls):
-        super(TestRmaAccount, cls).setUpClass()
+        super().setUpClass()
 
         cls.rma_obj = cls.env["rma.order"]
         cls.rma_line_obj = cls.env["rma.order.line"]

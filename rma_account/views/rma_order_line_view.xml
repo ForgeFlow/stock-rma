@@ -13,7 +13,7 @@
                     context="{'rma': True}"
                     domain="[('move_id.move_type', 'not in', ['entry','out_invoice','out_refund']),
                                 ('partner_id', '=', commercial_partner_id)]"
-                    attrs="{'invisible':[('type', '!=', 'supplier')]}"
+                    invisible="type != 'supplier'"
                 />
             </group>
         </field>
@@ -30,7 +30,7 @@
                     name="action_view_invoice"
                     class="oe_stat_button"
                     icon="fa-pencil-square-o"
-                    attrs="{'invisible': [('account_move_line_id', '=', False)]}"
+                    invisible="account_move_line_id == False"
                     string="Origin Inv"
                 >
                 </button>
@@ -39,7 +39,7 @@
                     name="action_view_refunds"
                     class="oe_stat_button"
                     icon="fa-pencil-square-o"
-                    attrs="{'invisible': [('refund_count', '=', 0)]}"
+                    invisible="refund_count == 0"
                     groups="account.group_account_invoice"
                 >
                         <field name="refund_count" widget="statinfo" string="Refunds" />
@@ -53,32 +53,27 @@
                     context="{'rma': True}"
                     domain="[('move_id.move_type', '!=', 'entry'),
                                 ('partner_id', '=', commercial_partner_id)]"
-                    attrs="{'invisible':[('type', '!=', 'customer')]}"
+                    invisible="type != 'customer'"
+                    readonly="state != 'draft'"
                 />
             </group>
             <field name="operation_id" position="after">
                 <field name="refund_policy" />
             </field>
             <page name="stock" position="after">
-                <page
-                    name="refunds"
-                    string="Refunds"
-                    attrs="{'invisible': [('refund_line_ids', '=', [])]}"
-                >
+                <page name="refunds" string="Refunds" invisible="refund_line_ids == []">
                     <field name="refund_line_ids" nolabel="1" />
                 </page>
             </page>
             <field name="delivery_address_id" position="after">
                 <field
                     name="invoice_address_id"
+                    readonly="state != 'draft'"
                     groups='rma.group_rma_delivery_invoice_address'
                 />
             </field>
             <group name="supplier_rma" position="after">
-                <group
-                    name="refund"
-                    attrs="{'invisible': [('refund_policy', '=', 'no')]}"
-                >
+                <group name="refund" invisible="refund_policy == 'no'">
                     <field name="qty_to_refund" />
                     <field name="qty_refunded" />
                 </group>
