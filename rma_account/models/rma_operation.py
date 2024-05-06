@@ -53,5 +53,4 @@ class RmaOperation(models.Model):
     @api.onchange("automated_refund")
     def _onchange_automated_refund(self):
         for rec in self:
-            if rec.automated_refund:
-                rec.refund_free_of_charge = True
+            rec.refund_free_of_charge = rec.automated_refund

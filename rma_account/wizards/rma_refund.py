@@ -37,7 +37,7 @@ class RmaRefund(models.TransientModel):
         supplier.
         """
         context = self._context.copy()
-        res = super(RmaRefund, self).default_get(fields_list)
+        res = super().default_get(fields_list)
         rma_line_obj = self.env["rma.order.line"]
         rma_line_ids = self.env.context["active_ids"] or []
         active_model = self.env.context["active_model"]
