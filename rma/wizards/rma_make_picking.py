@@ -230,8 +230,7 @@ class RmaMakePicking(models.TransientModel):
                     )
                     move.move_line_ids.write(
                         {
-                            "reserved_uom_qty": 1,
-                            "qty_done": 0,
+                            "quantity": 0,
                         }
                     )
                 elif move.product_id.tracking == "lot":
@@ -250,8 +249,7 @@ class RmaMakePicking(models.TransientModel):
                         {
                             "lot_id": move.rma_line_id.lot_id.id,
                             "product_uom_id": move.product_id.uom_id.id,
-                            "qty_done": 0,
-                            "reserved_uom_qty": qty,
+                            "quantity": qty,
                         }
                     )
                     move_line_model.create(move_line_data)
