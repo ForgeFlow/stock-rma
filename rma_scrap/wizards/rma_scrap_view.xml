@@ -58,14 +58,14 @@
                     name="%(action_rma_scrap)d"
                     string="Scrap"
                     class="oe_highlight"
-                    attrs="{'invisible':['|', ('qty_to_scrap', '=', 0), ('state', '!=', 'approved')]}"
+                    invisible="qty_to_scrap == 0 or state != 'approved'"
                     type="action"
                     groups="stock.group_stock_user"
                 />
                 <button
                     name="%(action_rma_scrap)d"
                     string="Scrap"
-                    attrs="{'invisible':['|', ('qty_to_scrap', '!=', 0), ('state', '!=', 'approved')]}"
+                    invisible="qty_to_scrap != 0 or state != 'approved'"
                     type="action"
                     groups="stock.group_stock_user"
                 />
