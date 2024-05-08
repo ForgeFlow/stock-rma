@@ -80,10 +80,14 @@ class TestRmaStockAccountPurchase(TestRmaStockAccount):
             )
             .create({"description": "Test refund"})
         )
-        make_refund.invoice_refund()
-        rma_line.refund_line_ids.move_id.action_post()
-        account_move = rma_line.mapped("refund_line_ids.move_id")
-        self.check_accounts_used(account_move, credit_account="grni")
+        make_refund_res = make_refund.invoice_refund()
+        refund_move = (
+            self.env["account.move"]
+            .browse(make_refund_res["res_id"])
+            .line_ids.mapped("move_id")
+        )
+        refund_move.action_post()
+        self.check_accounts_used(refund_move, credit_account="grni")
 
     def test_02_return_and_refund_ref_po(self):
         """
