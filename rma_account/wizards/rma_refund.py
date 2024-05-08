@@ -140,11 +140,16 @@ class RmaRefund(models.TransientModel):
             journal = rma_line.operation_id.refund_journal_id
         elif rma_line.type == "customer":
             journal = self.env["account.journal"].search(
-                [("type", "=", "sale")], limit=1
+                [("type", "=", "sale"), ("company_id", "=", rma_line.company_id.id)],
+                limit=1,
             )
         else:
             journal = self.env["account.journal"].search(
-                [("type", "=", "purchase")], limit=1
+                [
+                    ("type", "=", "purchase"),
+                    ("company_id", "=", rma_line.company_id.id),
+                ],
+                limit=1,
             )
         values = {
             "payment_reference": rma_line.rma_id.name or rma_line.name,
