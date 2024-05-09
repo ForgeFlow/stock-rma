@@ -97,7 +97,6 @@ class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
     @classmethod
     def _create_product(cls):
         """Create a Product."""
-        #        group_ids = [group.id for group in groups]
         product_ctg = cls.product_ctg_model.create(
             {
                 "name": "test_product_ctg",
@@ -171,16 +170,8 @@ class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
                     "partner_id": move.partner_id.id,
                 }
             )
-            # data = wizard._prepare_rma_line_from_stock_move(move)
             wizard.add_lines()
 
-            # CHECK ME: this code duplicate rma lines, what is the porpourse?
-            # if move.product_id.rma_customer_operation_id:
-            #     move.product_id.rma_customer_operation_id.in_route_id = False
-            # move.product_id.categ_id.rma_customer_operation_id = False
-            # move.product_id.rma_customer_operation_id = False
-            # wizard._prepare_rma_line_from_stock_move(move)
-            # cls.line = cls.rma_line_model.create(data)
         return rma_id
 
     def _get_balance(self, domain):

@@ -10,9 +10,7 @@
     "category": "Generic",
     "depends": ["stock_account", "rma_account"],
     "license": "AGPL-3",
-    "data": [
-        "security/account_security.xml",
-    ],
+    "data": [],
     "installable": True,
     "maintainers": ["ChisOForgeFlow"],
     "development_status": "Beta",
