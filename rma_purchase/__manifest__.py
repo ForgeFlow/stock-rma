@@ -8,7 +8,7 @@
     "license": "LGPL-3",
     "author": "ForgeFlow, Odoo Community Association (OCA)",
     "website": "https://github.com/ForgeFlow",
-    "depends": ["rma_account", "purchase"],
+    "depends": ["rma_account", "purchase_stock"],
     "data": [
         "wizards/rma_order_line_make_purchase_order_view.xml",
         "security/ir.model.access.csv",
