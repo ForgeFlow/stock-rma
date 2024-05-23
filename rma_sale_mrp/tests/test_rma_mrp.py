@@ -252,3 +252,38 @@ class TestRmaMrp(TransactionCase):
         self.assertEqual(
             150.0, sum(component_2_sm.mapped("stock_valuation_layer_ids.value"))
         )
+
+    def test_02_add_kit_from_sale(self):
+        order_01 = self._make_sale_order(self.kit_product, 2, 30.0)
+        self._do_picking(order_01.picking_ids, 2.0)
+        rma = self.env["rma.order"].create({"partner_id": self.customer.id})
+        add_sale = (
+            self.env["rma_add_sale"]
+            .with_context(active_model="rma.order", active_ids=rma.ids)
+            .create(
+                {
+                    "sale_id": order_01.id,
+                    "sale_line_ids": [(6, 0, order_01.order_line.ids)],
+                }
+            )
+        )
+        add_sale.add_lines()
+        # component config is not set, we should create a rma line for the kit.
+        self.assertEqual(len(rma.rma_line_ids), 1)
+        self.assertEqual(rma.rma_line_ids.product_id, self.kit_product)
+        self.assertEqual(rma.rma_line_ids.product_qty, 2.0)
+
+        # test with component config now
+        rma.rma_line_ids.unlink()
+        order_01.company_id.write({"rma_add_component_from_sale": True})
+        add_sale.add_lines()
+        self.assertEqual(len(rma.rma_line_ids), 2)
+        line_component_1 = rma.rma_line_ids.filtered(
+            lambda line: line.product_id == self.component_product_1
+        )
+        line_component_2 = rma.rma_line_ids.filtered(
+            lambda line: line.product_id == self.component_product_2
+        )
+        self.assertTrue(line_component_1)
+        self.assertEqual(line_component_1.product_qty, 2.0)
+        self.assertTrue(line_component_2)
