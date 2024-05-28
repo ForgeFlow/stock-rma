@@ -11,6 +11,7 @@
     "depends": ["rma_repair", "repair_refurbish"],
     "data": [
         "wizards/rma_order_line_make_repair_view.xml",
+        "views/rma_operation_views.xml",
     ],
     "installable": True,
     "auto_install": True,
