@@ -89,6 +89,18 @@ class RmaOrderLine(models.Model):
         comodel_name="sale.order.line", compute="_compute_sale_line_domain"
     )
 
+    def _get_stock_move_reference(self):
+        self.ensure_one()
+        move = self.reference_move_id
+        if self.sale_line_id:
+            # CHECK ME: backorder cases can be more than one move
+            sale_moves = self.sale_line_id.move_ids.filtered(
+                lambda x: x.location_dest_id.usage == "customer" and x.state == "done"
+            )
+            if sale_moves:
+                return sale_moves
+        return move
+
     @api.depends("product_id", "partner_id")
     def _compute_sale_line_domain(self):
         line_model = self.env["sale.order.line"]
