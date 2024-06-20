@@ -9,7 +9,7 @@
     "summary": "Integrates RMA with Invoice Processing",
     "author": "ForgeFlow",
     "website": "https://github.com/ForgeFlow/stock-rma",
-    "depends": ["account_move_line_rma_order_line", "rma", "account_reconcile_oca"],
+    "depends": ["account_move_line_rma_order_line", "rma"],
     "data": [
         "views/rma_line_view.xml",
     ],
