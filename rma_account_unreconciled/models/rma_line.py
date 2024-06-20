@@ -2,6 +2,7 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html)
 
 from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 from odoo.osv import expression
 
 
@@ -77,17 +78,11 @@ class RmaOrderLine(models.Model):
         amls = (
             action.get("domain") and aml_model.search(action.get("domain")) or aml_model
         )
-        accounts = amls.mapped("account_id")
-        action_context = {
-            "show_mode_selector": False,
-            "account_ids": accounts.ids,
-            "active_model": "account.move.line",
-            "active_ids": amls.ids,
-        }
-        action_def = self.env["ir.actions.act_window"]._for_xml_id(
-            "account_reconcile_oca.account_account_reconcile_act_window"
-        )
-        action_def["context"] = action_context
-        action_def["domain"] = [("id", "in", amls.ids)]
-        action_def["context"]["default_account_move_lines"] = amls.ids
-        return action_def
+        if getattr(aml_model, "action_reconcile", False):
+            return amls.action_reconcile()
+        elif getattr(aml_model, "action_reconcile_manually", False):
+            return amls.action_reconcile_manually()
+        else:
+            raise UserError(
+                _("Could not find a method to open the reconciliation view.")
+            )
