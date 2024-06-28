@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+        <record id="view_rma_line_form" model="ir.ui.view">
+            <field name="model">rma.order.line</field>
+            <field name="inherit_id" ref="rma.view_rma_line_form" />
+            <field name="arch" type="xml">
+                <xpath
+                expr="//group[@name='product']/field[@name='product_id']"
+                position="after"
+            >
+                    <field name="product_exchange" invisible="True" />
+                    <field
+                    name="new_product_id"
+                    attrs="{'invisible':['|',('operation_id', '=', False),('product_exchange', '=', False)]}"
+                />
+                </xpath>
+            </field>
+        </record>
+
+</odoo>
