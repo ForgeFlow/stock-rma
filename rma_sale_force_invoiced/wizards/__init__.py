@@ -1,1 +1,1 @@
-from . import rma_order_line_make_sale_order
+from . import rma_make_sale_order
