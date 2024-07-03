@@ -9,7 +9,7 @@
                 <div name='button_box' position="inside">
                 <button
                     type="object"
-                    name="action_view_origin_sale_order"
+                    name="action_view_sale_order"
                     class="oe_stat_button"
                     icon="fa-strikethrough"
                     attrs="{'invisible': [('sale_id', '=', False)]}"
@@ -68,14 +68,14 @@
         <field name="arch" type="xml">
             <header position="inside">
                 <button
-                    name="%(action_rma_order_line_make_sale_order)d"
+                    name="%(action_rma_make_sale_order)d"
                     string="Create Sales Quotation"
                     class="oe_highlight"
                     attrs="{'invisible':['|', '|', '|', ('qty_to_sell', '=', 0), ('qty_to_sell', '&lt;', 0), ('state', '!=', 'approved'), ('sale_policy', '=', 'no')]}"
                     type="action"
                 />
                 <button
-                    name="%(action_rma_order_line_make_sale_order)d"
+                    name="%(action_rma_make_sale_order)d"
                     string="Create Sales Quotation"
                     attrs="{'invisible':['|', '|', ('qty_to_sell', '>', 0), ('state', '!=', 'approved'), ('sale_policy', '=', 'no')]}"
                     type="action"
