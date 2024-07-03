@@ -32,6 +32,9 @@
             <xpath expr="//field[@name='rma_line_ids']/tree" position="inside">
                 <field name="refund_policy" invisible="True" />
             </xpath>
+            <xpath expr="//field[@name='qty_to_deliver']" position="after">
+                <field name="qty_to_refund" invisible="1" />
+            </xpath>
         </field>
     </record>
 

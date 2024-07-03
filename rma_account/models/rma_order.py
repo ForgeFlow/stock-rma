@@ -17,6 +17,11 @@ class RmaOrder(models.Model):
             invoices = rec.mapped("rma_line_ids.move_id")
             rec.invoice_count = len(invoices)
 
+    @api.depends("rma_line_ids", "rma_line_ids.qty_to_refund")
+    def _compute_qty_to_refund(self):
+        for rec in self:
+            rec.qty_to_refund = sum(rec.rma_line_ids.mapped("qty_to_refund"))
+
     add_move_id = fields.Many2one(
         comodel_name="account.move",
         string="Add Invoice",
@@ -28,6 +33,10 @@ class RmaOrder(models.Model):
     )
     invoice_count = fields.Integer(
         compute="_compute_invoice_count", string="# of Invoices"
+    )
+    qty_to_refund = fields.Float(
+        digits="Product Unit of Measure",
+        compute="_compute_qty_to_refund",
     )
 
     def _prepare_rma_line_from_inv_line(self, line):
