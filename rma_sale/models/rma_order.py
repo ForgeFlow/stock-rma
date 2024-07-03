@@ -16,7 +16,16 @@ class RmaOrder(models.Model):
             sales = rma.mapped("rma_line_ids.sale_line_id.order_id")
             rma.sale_count = len(sales)
 
+    @api.depends("rma_line_ids", "rma_line_ids.qty_to_sell")
+    def _compute_qty_to_sell(self):
+        for rec in self:
+            rec.qty_to_sell = sum(rec.rma_line_ids.mapped("qty_to_sell"))
+
     sale_count = fields.Integer(compute="_compute_sales_count", string="# of Sales")
+    qty_to_sell = fields.Float(
+        digits="Product Unit of Measure",
+        compute="_compute_qty_to_sell",
+    )
 
     @api.model
     def _get_line_domain(self, rma_id, line):
