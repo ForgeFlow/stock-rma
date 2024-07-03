@@ -13,11 +13,11 @@
     "data": [
         "security/ir.model.access.csv",
         "data/rma_operation.xml",
+        "wizards/rma_make_sale_order_view.xml",
+        "wizards/rma_add_sale.xml",
         "views/rma_order_view.xml",
         "views/rma_operation_view.xml",
         "views/sale_order_view.xml",
-        "wizards/rma_order_line_make_sale_order_view.xml",
-        "wizards/rma_add_sale.xml",
         "views/rma_order_line_view.xml",
     ],
     "installable": True,
