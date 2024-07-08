@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    Copyright 2024 ForgeFlow S.L. (https://www.forgeflow.com)
+    License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+-->
+<odoo>
+    <!-- RMA Reason Code Type -->
+    <record id="view_rma_reason_code_form" model="ir.ui.view">
+        <field name="name">rma.reason.code.form</field>
+        <field name="model">rma.reason.code</field>
+        <field name="arch" type="xml">
+            <form string="Reason Code">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" nolabel="1" /></h1>
+                    </div>
+                    <group>
+                        <field
+                            name="description"
+                            placeholder="Add a description..."
+                            nolabel="1"
+                            colspan="2"
+                        />
+                        <field name="type" />
+                        <field name="color" widget="color_picker" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_rma_reason_code_list" model="ir.ui.view">
+        <field name="name">rma.reason.code.list</field>
+        <field name="model">rma.reason.code</field>
+        <field name="arch" type="xml">
+            <tree string="Reason Codes">
+                <field name="name" />
+                <field name="description" />
+                <field name="type" />
+                <field name="color" widget="color_picker" />
+            </tree>
+        </field>
+    </record>
+    <record id="open_view_rma_reason_code_form" model="ir.actions.act_window">
+        <field name="name">RMA Reason Codes</field>
+        <field name="res_model">rma.reason.code</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem
+        action="open_view_rma_reason_code_form"
+        id="menu_view_rma_reason_code_form"
+        parent="rma.menu_rma_config"
+        sequence="55"
+        groups="rma.group_rma_manager"
+    />
+</odoo>
