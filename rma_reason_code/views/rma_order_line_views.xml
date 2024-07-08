@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    Copyright 2024 ForgeFlow S.L. (https://www.forgeflow.com)
+    License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+-->
+<odoo>
+
+    <record id="view_rma_line_tree" model="ir.ui.view">
+        <field name="name">rma.order.line.tree - rma_reason_code</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_line_tree" />
+        <field name="arch" type="xml">
+            <field name="operation_id" position='after'>
+                <field
+                    name="reason_code_ids"
+                    widget="many2many_tags"
+                    options="{'color_field': 'color', 'no_create': True}"
+                />
+                <field name="allowed_reason_code_ids" invisible="1" />
+            </field>
+        </field>
+    </record>
+
+    <record id="view_rma_line_supplier_tree" model="ir.ui.view">
+        <field name="name">rma.order.line.supplier.tree - rma_reason_code</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_line_supplier_tree" />
+        <field name="arch" type="xml">
+            <field name="operation_id" position='after'>
+                <field
+                    name="reason_code_ids"
+                    widget="many2many_tags"
+                    options="{'color_field': 'color', 'no_create': True}"
+                />
+                <field name="allowed_reason_code_ids" invisible="1" />
+            </field>
+        </field>
+    </record>
+
+    <record id="view_rma_line_form" model="ir.ui.view">
+        <field name="name">rma.order.line.form - rma_reason_code</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_line_form" />
+        <field name="arch" type="xml">
+            <field name="assigned_to" position='after'>
+                <field
+                    name="reason_code_ids"
+                    widget="many2many_tags"
+                    options="{'color_field': 'color', 'no_create': True}"
+                />
+                <field name="allowed_reason_code_ids" invisible="1" />
+            </field>
+        </field>
+    </record>
+
+    <record id="view_rma_rma_line_filter" model="ir.ui.view">
+        <field name="name">rma.order.line.search - rma_reason_code</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_rma_line_filter" />
+        <field name="arch" type="xml">
+            <filter name="operation" position='after'>
+                <field name="reason_code_ids" />
+                <separator />
+                <filter
+                    name="group_reason_code_ids"
+                    string="Reason Code"
+                    context="{'group_by':'reason_code_ids'}"
+                />
+                <field name="allowed_reason_code_ids" invisible="1" />
+                <field name="allowed_reason_code_ids" invisible="1" />
+            </filter>
+        </field>
+    </record>
+</odoo>
