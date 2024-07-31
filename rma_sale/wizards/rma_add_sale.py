@@ -82,7 +82,9 @@ class RmaAddSale(models.TransientModel):
             "target": "new",
         }
 
-    def _prepare_rma_line(self, line, product, quantity, uom_id=False, lot=None):
+    def _prepare_rma_line_from_sale_order_line(
+        self, line, product, quantity, uom_id=False, lot=None
+    ):
         operation = self.rma_id.operation_default_id
         if not operation:
             operation = line.product_id.rma_customer_operation_id
@@ -216,7 +218,7 @@ class RmaAddSale(models.TransientModel):
                         line, existing_sale_line, lot=lot
                     ):
                         continue
-                    data = self._prepare_rma_line(
+                    data = self._prepare_rma_line_from_sale_order_line(
                         line, product, qty, uom_id=uom.id, lot=lot
                     )
                     rec = rma_line_obj.create(data)
@@ -229,7 +231,7 @@ class RmaAddSale(models.TransientModel):
                 if not self._should_create_rma_line(line, existing_sale_line):
                     continue
                 # we can't have lot management based on sale order line
-                data = self._prepare_rma_line(
+                data = self._prepare_rma_line_from_sale_order_line(
                     line,
                     line.product_id,
                     line.product_uom_qty,
