@@ -49,6 +49,9 @@ class RmaLineMakeRepair(models.TransientModel):
         res["item_ids"] = items
         return res
 
+    def create_repair_procurement_condition_applies(self, rma_line, repair):
+        return rma_line.location_id != repair.location_id
+
     def make_repair_order(self):
         self.ensure_one()
         res = []
@@ -58,10 +61,11 @@ class RmaLineMakeRepair(models.TransientModel):
             data = item._prepare_repair_order(rma_line)
             repair = repair_obj.create(data)
             res.append(repair.id)
-            if rma_line.location_id != repair.location_id:
+            if self.create_repair_procurement_condition_applies(rma_line, repair):
                 item._run_procurement(
                     rma_line.operation_id.repair_route_id, repair.location_id
                 )
+
         return {
             "domain": [("id", "in", res)],
             "name": _("Repairs"),
