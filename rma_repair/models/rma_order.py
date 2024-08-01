@@ -16,7 +16,7 @@ class RmaOrder(models.Model):
         for order in self:
             pickings = (
                 order.mapped("rma_line_ids.move_ids")
-                .filtered(lambda m: m.is_rma_put_away)
+                .filtered(lambda m: m.is_rma_repair_transfer)
                 .mapped("picking_id")
             )
             order.repair_transfer_count = len(pickings)
