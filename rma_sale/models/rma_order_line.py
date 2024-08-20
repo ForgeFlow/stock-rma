@@ -139,8 +139,8 @@ class RmaOrderLine(models.Model):
             "uom_id": line.product_uom.id,
             "operation_id": operation.id,
             "product_qty": line.product_uom_qty,
-            "delivery_address_id": line.order_id.partner_id.id,
-            "invoice_address_id": line.order_id.partner_id.id,
+            "delivery_address_id": line.order_id.partner_shipping_id.id,
+            "invoice_address_id": line.order_id.partner_invoice_id.id,
             "price_unit": line.currency_id._convert(
                 line.price_unit,
                 line.currency_id,
