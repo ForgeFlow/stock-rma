@@ -172,6 +172,8 @@ class RmaRefund(models.TransientModel):
             "date": wizard.date,
             "invoice_date": wizard.date_invoice,
             "partner_id": rma_line.invoice_address_id.id or rma_line.partner_id.id,
+            "partner_shipping_id": rma_line.delivery_address_id.id
+            or rma_line.partner_id.id,
             "invoice_line_ids": [
                 (0, None, self.prepare_refund_line(item)) for item in self.item_ids
             ],
