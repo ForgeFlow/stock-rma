@@ -145,4 +145,13 @@
         action="base.action_partner_supplier_form"
         sequence="60"
     />
+
+    <!-- Report menus-->
+
+    <menuitem
+        id="menu_rma_rma_report"
+        name="Report"
+        parent="menu_rma_root"
+        sequence="100"
+    />
 </odoo>

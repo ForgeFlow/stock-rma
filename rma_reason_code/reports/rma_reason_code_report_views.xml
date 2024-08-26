@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+     <record id="rma_reason_code_report_tree_view" model="ir.ui.view">
+            <field name="name">rma.reason.code.report.tree</field>
+            <field name="model">rma.reason.code.report</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="rma_order_line_id" />
+                    <field name="reason_code_id" />
+                    <field name="date_rma" optional="show" />
+                    <field name="type" optional="hide" />
+                    <field name="company_id" optional="hide" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="rma_reason_code_report_graph_view" model="ir.ui.view">
+            <field name="name">rma.reason.code.report.graph</field>
+            <field name="model">rma.reason.code.report</field>
+            <field name="arch" type="xml">
+                <graph type="bar" sample="1">
+                    <field name="date_rma" interval="week" />
+                </graph>
+            </field>
+        </record>
+
+        <record id="rma_reason_code_report_search_view" model="ir.ui.view">
+            <field name="name">rma.reason.code.report.search</field>
+            <field name="model">rma.reason.code.report</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="reason_code_id" />
+                    <group name="rma_type">
+                        <separator />
+                        <filter
+                        name="is_customer"
+                        string="Customer"
+                        domain="[('type', '=', 'customer')]"
+                    />
+                        <filter
+                        name="is_supplier"
+                        string="Supplier"
+                        domain="[('type', '=', 'supplier')]"
+                    />
+                    </group>
+                    <separator />
+                <separator />
+                <filter name="date_rma" string="Date" date="date_rma" />
+                    <filter
+                    name="group_rma_date"
+                    string="RMA Date"
+                    context="{'group_by':'date_rma:week'}"
+                />
+                    <filter
+                    name="group_reason_code_id"
+                    string="Reason Code"
+                    context="{'group_by':'reason_code_id'}"
+                />
+                </search>
+            </field>
+        </record>
+
+
+    <record id="action_rma_reason_code_report" model="ir.actions.act_window">
+      <field name="name">RMA Reason Code Analysis</field>
+      <field name="res_model">rma.reason.code.report</field>
+      <field name="view_mode">graph,pivot,tree</field>
+      <field
+            name="search_view_id"
+            ref="rma_reason_code.rma_reason_code_report_search_view"
+        />
+      <field name="context">{
+        'search_default_group_rma_date': 1,
+        'search_default_group_reason_code_id': 2,
+        'search_default_is_customer': 1,
+        }</field>
+      <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            No data yet!
+          </p><p>
+            Assign a Reason Code to a RMA
+          </p>
+      </field>
+    </record>
+
+    <record id="action_rtv_reason_code_report" model="ir.actions.act_window">
+          <field name="name">RTV Reason Code Analysis</field>
+          <field name="res_model">rma.reason.code.report</field>
+          <field name="view_mode">graph,pivot,tree</field>
+          <field
+            name="search_view_id"
+            ref="rma_reason_code.rma_reason_code_report_search_view"
+        />
+          <field name="context">{
+            'search_default_group_rma_date': 1,
+            'search_default_group_reason_code_id': 2,
+            'search_default_is_supplier': 1,
+            }</field>
+          <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                No data yet!
+              </p><p>
+                Assign a Reason Code to a RTV
+              </p>
+          </field>
+      </record>
+
+      <menuitem
+        action="action_rma_reason_code_report"
+        id="menu_rma_reason_code_report"
+        parent="rma.menu_rma_rma_report"
+        sequence="140"
+    />
+
+      <menuitem
+        action="action_rtv_reason_code_report"
+        id="menu_rtv_reason_code_report"
+        parent="rma.menu_rma_rma_report"
+        sequence="141"
+    />
+
+</odoo>
