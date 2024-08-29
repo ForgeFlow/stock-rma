@@ -692,12 +692,19 @@ class RmaOrderLine(models.Model):
     def action_rma_cancel(self):
         for order in self:
             order.check_cancel()
+            # cancel ongoing orig moves
+            # dest move cancelation can be managed with propagate_cancel option
+            # on stock rules.
+            moves = order.move_ids
+            to_cancel_orig_moves = self.env["stock.move"]
+            while moves:
+                moves = moves.move_orig_ids.filtered(
+                    lambda m: m.state not in ("done", "cancel") and m.picking_id
+                )
+                to_cancel_orig_moves |= moves
+            to_cancel_orig_moves._action_cancel()
             order.write({"state": "canceled"})
             order.move_ids._action_cancel()
-            shipments = order._get_in_pickings()
-            shipments |= order._get_out_pickings()
-            for ship in shipments:
-                ship.action_cancel()
         return True
 
     def _get_price_unit(self):
