@@ -59,7 +59,7 @@ class RmaRefund(models.TransientModel):
         items = []
         if active_model == "rma.order":
             rma = rma_obj.browse(active_ids)
-            lines = rma.rma_line_ids
+            lines = rma.rma_line_ids.filtered(lambda x: x.qty_to_refund > 0)
         else:
             lines = rma_line_obj.browse(active_ids)
         if len(lines.mapped("partner_id")) > 1:
@@ -105,16 +105,9 @@ class RmaRefund(models.TransientModel):
             return new_refund
 
     def invoice_refund(self):
-        rma_line_obj = self.env["rma.order.line"]
-        rma_obj = self.env["rma.order"]
-        active_ids = self.env.context.get("active_ids") or []
-        active_model = self.env.context.get("active_model")
-        if active_model == "rma.order":
-            rma = rma_obj.browse(active_ids)
-            lines = rma.rma_line_ids
-        else:
-            lines = rma_line_obj.browse(active_ids)
+        lines = self.item_ids.line_id
         for line in lines:
+
             if line.state != "approved":
                 raise ValidationError(_("RMA %s is not approved") % line.name)
         new_invoice = self.compute_refund()

@@ -1,7 +1,7 @@
 # Copyright 2017-22 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 
 
 class RmaOrder(models.Model):
@@ -104,25 +104,22 @@ class RmaOrder(models.Model):
         return res
 
     def action_view_invoice_refund(self):
-        move_ids = self.mapped("rma_line_ids.move_id").ids
+        move_ids = self.mapped("rma_line_ids.refund_line_ids.move_id").ids
         form_view_ref = self.env.ref("account.view_move_form", False)
         tree_view_ref = self.env.ref("account.view_move_tree", False)
-
-        return {
-            "domain": [("id", "in", move_ids)],
-            "name": "Refunds",
-            "res_model": "account.move",
-            "views": [(tree_view_ref.id, "tree"), (form_view_ref.id, "form")],
-        }
+        action = self.env.ref("account.action_move_in_refund_type")
+        result = action.sudo().read()[0]
+        result["domain"] = [("id", "in", move_ids)]
+        result["views"] = [(tree_view_ref.id, "tree"), (form_view_ref.id, "form")]
+        return result
 
     def action_view_invoice(self):
         move_ids = self.mapped("rma_line_ids.move_id").ids
         form_view_ref = self.env.ref("account.view_move_form", False)
         tree_view_ref = self.env.ref("account.view_move_tree", False)
-
-        return {
-            "domain": [("id", "in", move_ids)],
-            "name": "Originating Invoice",
-            "res_model": "account.move",
-            "views": [(tree_view_ref.id, "tree"), (form_view_ref.id, "form")],
-        }
+        action = self.env.ref("account.action_move_out_invoice_type")
+        result = action.sudo().read()[0]
+        result["domain"] = [("id", "in", move_ids)]
+        result["views"] = [(tree_view_ref.id, "tree"), (form_view_ref.id, "form")]
+        result["name"] = _("Originating Invoice")
+        return result

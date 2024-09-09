@@ -14,13 +14,13 @@
                     <field
                         name="sale_id"
                         domain="[
-                           ('partner_id','=',partner_id), (('state','not in',['draft','cancel']))]"
+                           ('partner_id','=',partner_id), ('state','not in',['draft','cancel']), ('picking_ids.state', '=', 'done')]"
                         context="{'partner_id': partner_id}"
                     />
                 </group>
                 <field
                     name="sale_line_ids"
-                    domain="[('order_id', '=', sale_id)]"
+                    domain="[('order_id', '=', sale_id), ('move_ids.state', '=', 'done')]"
                     string="Sale Order Lines"
                 >
                     <tree>
