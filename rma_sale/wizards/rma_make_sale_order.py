@@ -61,7 +61,7 @@ class RmaMakeSaleOrder(models.TransientModel):
         items = []
         if active_model == "rma.order":
             rma = rma_obj.browse(active_ids)
-            lines = rma.rma_line_ids
+            lines = rma.rma_line_ids.filtered(lambda x: x.qty_to_sell > 0)
         else:
             lines = rma_line_obj.browse(active_ids)
         for line in lines:
@@ -161,9 +161,7 @@ class RmaLineMakeSaleOrderItem(models.TransientModel):
     _description = "RMA Line Make Sale Order Item"
 
     wiz_id = fields.Many2one(comodel_name="rma.make.sale.order", string="Wizard")
-    line_id = fields.Many2one(
-        comodel_name="rma.order.line", string="RMA Line", compute="_compute_line_id"
-    )
+    line_id = fields.Many2one(comodel_name="rma.order.line", string="RMA Line")
     rma_id = fields.Many2one(
         comodel_name="rma.order", related="line_id.rma_id", readonly=False
     )
@@ -175,21 +173,6 @@ class RmaLineMakeSaleOrderItem(models.TransientModel):
         comodel_name="stock.warehouse", string="Outbound Warehouse"
     )
     free_of_charge = fields.Boolean(string="Free of Charge")
-
-    def _compute_line_id(self):
-        rma_line_obj = self.env["rma.order.line"]
-        rma_obj = self.env["rma.order"]
-        active_ids = self.env.context.get("active_ids") or []
-        active_model = self.env.context.get("active_model")
-        for rec in self:
-            if not active_ids:
-                return
-            if active_model == "rma.order":
-                rma = rma_obj.browse(active_ids)
-                lines = rma.rma_line_ids
-            else:
-                lines = rma_line_obj.browse(active_ids)
-            rec.line_id = lines[0]
 
     @api.onchange("product_id")
     def onchange_product_id(self):

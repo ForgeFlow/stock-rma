@@ -253,12 +253,12 @@ class RmaOrder(models.Model):
 
     def _view_shipments(self, result, shipments):
         # choose the view_mode accordingly
-        if len(shipments) > 1:
-            result["domain"] = [("id", "in", shipments.ids)]
-        elif len(shipments) == 1:
+        if len(shipments) == 1:
             res = self.env.ref("stock.view_picking_form", False)
             result["views"] = [(res and res.id or False, "form")]
             result["res_id"] = shipments.ids[0]
+        else:
+            result["domain"] = [("id", "in", shipments.ids)]
         return result
 
     def action_view_in_shipments(self):
