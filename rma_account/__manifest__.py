@@ -13,13 +13,13 @@
     "data": [
         "security/ir.model.access.csv",
         "data/rma_operation.xml",
+        "wizards/rma_add_account_move.xml",
+        "wizards/rma_refund.xml",
         "views/rma_order_view.xml",
         "views/rma_operation_view.xml",
         "views/rma_order_line_view.xml",
         "views/account_move_view.xml",
         "views/rma_account_menu.xml",
-        "wizards/rma_add_account_move.xml",
-        "wizards/rma_refund.xml",
     ],
     "installable": True,
 }
