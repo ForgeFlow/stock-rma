@@ -98,20 +98,4 @@
             eval="[(4, ref('rma.group_rma_customer_user')), (4, ref('rma.group_rma_customer_user'))]"
         />
     </record>
-
-    <record id="view_rma_add_sale_form" model="ir.ui.view">
-        <field name="name">rma.order.form - sale wizard</field>
-        <field name="model">rma.order</field>
-        <field name="inherit_id" ref="rma.view_rma_form" />
-        <field name="arch" type="xml">
-            <xpath expr="//header" position="inside">
-                <button
-                    name="%(action_rma_add_sale)d"
-                    string="Add From Sale Order"
-                    type="action"
-                    invisible="type != 'customer'"
-                />
-            </xpath>
-        </field>
-    </record>
 </odoo>
