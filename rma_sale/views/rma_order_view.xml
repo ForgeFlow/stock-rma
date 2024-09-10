@@ -1,12 +1,33 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-        <record id="view_rma_form" model="ir.ui.view">
-            <field name="name">rma.order.form</field>
-            <field name="model">rma.order</field>
-            <field name="inherit_id" ref="rma.view_rma_form" />
-            <field name="arch" type="xml">
-                <div name="button_box" position="inside">
-                    <button
+    <record id="view_rma_form" model="ir.ui.view">
+        <field name="name">rma.order.form</field>
+        <field name="model">rma.order</field>
+        <field name="inherit_id" ref="rma.view_rma_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button
+                    name="%(rma_sale.action_rma_add_sale)d"
+                    string="Add From Sale Order"
+                    type="action"
+                    attrs="{'invisible':[('type', '!=', 'customer')]}"
+                />
+                <button
+                    name="%(rma_sale.action_rma_make_sale_order)d"
+                    string="Create Sales Quotation"
+                    class="oe_highlight"
+                    attrs="{'invisible':['|', '|', ('qty_to_sell', '=', 0), ('qty_to_sell', '&lt;', 0), ('state', '!=', 'approved')]}"
+                    type="action"
+                />
+                <button
+                    name="%(rma_sale.action_rma_make_sale_order)d"
+                    string="Create Sales Quotation"
+                    attrs="{'invisible':['|', ('qty_to_sell', '>', 0), ('state', '!=', 'approved')]}"
+                    type="action"
+                />
+            </xpath>
+            <div name="button_box" position="inside">
+                <button
                     type="object"
                     name="action_view_sale_order"
                     class="oe_stat_button"
@@ -14,38 +35,16 @@
                     groups="sales_team.group_sale_salesman"
                     attrs="{'invisible':[('type', '!=', 'customer')]}"
                 >
-                        <field name="sale_count" widget="statinfo" string="Origin SO" />
-                    </button>
-                </div>
-                <xpath expr="//field[@name='rma_line_ids']/tree" position="inside">
-                    <field name="sale_policy" invisible="True" />
-                </xpath>
-                <xpath expr="//field[@name='qty_to_deliver']" position="after">
-                        <field name="qty_to_sell" invisible="1" />
-                </xpath>
-            </field>
-        </record>
-
-        <record id="view_rma_button_sale_form" model="ir.ui.view">
-        <field name="name">rma.order.form</field>
-        <field name="model">rma.order</field>
-        <field name="inherit_id" ref="rma.view_rma_button_form" />
-        <field name="arch" type="xml">
-            <header position="inside">
-                <button
-                    name="%(action_rma_make_sale_order)d"
-                    string="Create Sales Quotation"
-                    class="oe_highlight"
-                    attrs="{'invisible':['|', '|', ('qty_to_sell', '=', 0), ('qty_to_sell', '&lt;', 0), ('state', '!=', 'approved')]}"
-                    type="action"
-                />
-                <button
-                    name="%(action_rma_make_sale_order)d"
-                    string="Create Sales Quotation"
-                    attrs="{'invisible':['|', ('qty_to_sell', '>', 0), ('state', '!=', 'approved')]}"
-                    type="action"
-                />
-            </header>
+                    <field name="sale_count" widget="statinfo" string="Origin SO" />
+                </button>
+            </div>
+            <xpath expr="//field[@name='rma_line_ids']/tree" position="inside">
+                <field name="sale_policy" invisible="True" />
+            </xpath>
+            <xpath expr="//field[@name='qty_to_deliver']" position="after">
+                    <field name="qty_to_sell" invisible="1" />
+            </xpath>
         </field>
     </record>
+
 </odoo>

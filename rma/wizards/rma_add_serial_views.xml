@@ -44,23 +44,6 @@
         <field name="groups_id" eval="[(4, ref('rma.group_rma_customer_user'))]" />
     </record>
 
-
-    <record id="view_rma_add_serial_wiz_customer_form" model="ir.ui.view">
-        <field name="name">rma.order.form - rma.add.serial.wiz</field>
-        <field name="model">rma.order</field>
-        <field name="inherit_id" ref="rma.view_rma_form" />
-        <field name="arch" type="xml">
-            <xpath expr="//header" position="inside">
-                <button
-                    name="%(action_rma_add_serial_wiz_customer)d"
-                    string="Add Lot/Serial Numbers"
-                    type="action"
-                    attrs="{'invisible':[('type', '!=', 'customer')]}"
-                />
-            </xpath>
-        </field>
-    </record>
-
     <record id="view_rma_add_serial_wiz_supplier" model="ir.ui.view">
         <field name="name">rma.add.serial.wiz.supplier</field>
         <field name="model">rma.add.serial.wiz</field>
@@ -81,22 +64,6 @@
         <field name="target">new</field>
         <field name="view_id" ref="view_rma_add_serial_wiz_supplier" />
         <field name="groups_id" eval="[(4, ref('rma.group_rma_supplier_user'))]" />
-    </record>
-
-    <record id="view_rma_add_serial_wiz_button_supplier_form" model="ir.ui.view">
-        <field name="name">rma.order.supplier.form - rma.add.serial.wiz</field>
-        <field name="model">rma.order</field>
-        <field name="inherit_id" ref="rma.view_rma_supplier_form" />
-        <field name="arch" type="xml">
-            <xpath expr="//header" position="inside">
-                <button
-                    name="%(action_rma_add_serial_wiz_supplier)d"
-                    string="Add Lot/Serial numbers"
-                    type="action"
-                    attrs="{'invisible':[('type', '!=', 'supplier')]}"
-                />
-            </xpath>
-        </field>
     </record>
 
 </odoo>

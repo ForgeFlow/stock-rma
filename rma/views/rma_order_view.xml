@@ -78,6 +78,38 @@
                         attrs="{'invisible':[('state', 'in', ('done', 'cancel'))]}"
                         groups="rma.group_rma_customer_user"
                     />
+                <button
+                        name="%(rma.action_rma_picking_in)d"
+                        string="Create Incoming Shipment"
+                        class="oe_highlight"
+                        attrs="{'invisible':['|', ('qty_to_receive', '=', 0), ('qty_to_receive', '&lt;', 0)]}"
+                        type="action"
+                    />
+                <button
+                        name="%(rma.action_rma_picking_out)d"
+                        string="Create Delivery"
+                        class="oe_highlight"
+                        attrs="{'invisible':['|', ('qty_to_deliver', '=', 0), ('qty_to_deliver', '&lt;', 0)]}"
+                        type="action"
+                    />
+                <button
+                        name="%(rma.action_rma_add_serial_wiz_customer)d"
+                        string="Add Lot/Serial Numbers"
+                        type="action"
+                        attrs="{'invisible':[('type', '!=', 'customer')]}"
+                    />
+                <button
+                        name="%(rma.action_rma_add_stock_move_customer)d"
+                        string="Add From Stock Move"
+                        type="action"
+                        attrs="{'invisible':[('type', '!=', 'customer')]}"
+                    />
+                <button
+                        name="%(rma.action_make_supplier_rma)d"
+                        string="Create Supplier RMA"
+                        attrs="{'invisible':['|', ('type', '!=', 'customer'), ('state', '!=', 'approved')]}"
+                        type="action"
+                    />
                 <field
                         name="state"
                         widget="statusbar"
@@ -290,6 +322,20 @@
         <field name="inherit_id" ref="rma.view_rma_form" />
         <field name="mode">primary</field>
         <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button
+                    name="%(rma.action_rma_add_serial_wiz_supplier)d"
+                    string="Add Lot/Serial numbers"
+                    type="action"
+                    attrs="{'invisible':[('type', '!=', 'supplier')]}"
+                />
+                <button
+                    name="%(rma.action_rma_add_stock_move_supplier)d"
+                    string="Add From Stock Move"
+                    type="action"
+                    attrs="{'invisible':[('type', '!=', 'supplier')]}"
+                />
+            </xpath>
             <xpath expr="//button[@name='action_view_lines']" position="attributes">
                 <attribute name="groups">rma.group_rma_supplier_user</attribute>
             </xpath>

@@ -90,23 +90,6 @@
         <field name="groups_id" eval="[(4, ref('rma.group_rma_customer_user'))]" />
     </record>
 
-
-    <record id="view_rma_add_stock_move_customer_form" model="ir.ui.view">
-        <field name="name">rma.order.form - stock.move wizard</field>
-        <field name="model">rma.order</field>
-        <field name="inherit_id" ref="rma.view_rma_form" />
-        <field name="arch" type="xml">
-            <xpath expr="//header" position="inside">
-                <button
-                    name="%(action_rma_add_stock_move_customer)d"
-                    string="Add From Stock Move"
-                    type="action"
-                    attrs="{'invisible':[('type', '!=', 'customer')]}"
-                />
-            </xpath>
-        </field>
-    </record>
-
     <record id="view_rma_add_stock_move_supplier" model="ir.ui.view">
         <field name="name">rma.add.stock.move.supplier</field>
         <field name="model">rma_add_stock_move</field>
@@ -170,22 +153,6 @@
         <field name="target">new</field>
         <field name="view_id" ref="view_rma_add_stock_move_supplier" />
         <field name="groups_id" eval="[(4, ref('rma.group_rma_supplier_user'))]" />
-    </record>
-
-    <record id="view_rma_add_stock_move_button_supplier_form" model="ir.ui.view">
-        <field name="name">rma.order.supplier.form - stock.move wizard</field>
-        <field name="model">rma.order</field>
-        <field name="inherit_id" ref="rma.view_rma_supplier_form" />
-        <field name="arch" type="xml">
-            <xpath expr="//header" position="inside">
-                <button
-                    name="%(action_rma_add_stock_move_supplier)d"
-                    string="Add From Stock Move"
-                    type="action"
-                    attrs="{'invisible':[('type', '!=', 'supplier')]}"
-                />
-            </xpath>
-        </field>
     </record>
 
 </odoo>

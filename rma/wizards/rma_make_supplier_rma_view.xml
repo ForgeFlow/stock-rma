@@ -59,35 +59,4 @@
         <field name="binding_model_id" ref="rma.model_rma_order_line" />
     </record>
 
-    <record id="view_rma_line_supplier_rma_button_form" model="ir.ui.view">
-    <field name="name">rma.order.line.supplier.rma.form</field>
-    <field name="model">rma.order.line</field>
-    <field name="inherit_id" ref="rma.view_rma_line_form" />
-    <field name="arch" type="xml">
-        <header position="inside">
-            <button
-                    name="%(action_make_supplier_rma)d"
-                    string="Create Supplier RMA"
-                    attrs="{'invisible':['|', ('type', '!=', 'customer'), ('state', '!=', 'approved')]}"
-                    type="action"
-                />
-        </header>
-    </field>
-    </record>
-
-    <record id="view_rma_supplier_rma_button_form" model="ir.ui.view">
-    <field name="name">rma.supplier.rma.form</field>
-    <field name="model">rma.order</field>
-    <field name="inherit_id" ref="rma.view_rma_form" />
-    <field name="arch" type="xml">
-        <header position="inside">
-            <button
-                    name="%(action_make_supplier_rma)d"
-                    string="Create Supplier RMA"
-                    attrs="{'invisible':['|', ('type', '!=', 'customer'), ('state', '!=', 'approved')]}"
-                    type="action"
-                />
-        </header>
-    </field>
-    </record>
 </odoo>
