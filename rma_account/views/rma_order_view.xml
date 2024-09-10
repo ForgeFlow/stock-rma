@@ -5,6 +5,21 @@
         <field name="model">rma.order</field>
         <field name="inherit_id" ref="rma.view_rma_form" />
         <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button
+                    name="%(rma_account.action_rma_refund)d"
+                    string="Create Refund"
+                    class="oe_highlight"
+                    invisible="qty_to_refund == 0 or qty_to_refund &lt; 0 or state != 'approved'"
+                    type="action"
+                />
+                <button
+                    name="%(rma_account.action_rma_refund)d"
+                    string="Create Refund"
+                    invisible="qty_to_refund > 0 or state != 'approved'"
+                    type="action"
+                />
+            </xpath>
             <button name="action_view_out_shipments" position="after">
                 <button
                     type="object"
