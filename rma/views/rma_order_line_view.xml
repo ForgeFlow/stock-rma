@@ -217,7 +217,7 @@
                             <field
                             name="reference_move_id"
                             options="{'no_create': True}"
-                            domain="[('picking_id.partner_id', '=', partner_id),
+                            domain="[('picking_id.partner_id', 'child_of', partner_id),
                                             ('location_dest_id.usage', '=', 'customer'),
                                             ('state', '=', 'done')]"
                         />
@@ -367,7 +367,7 @@
                 <field name="reference_move_id" position="attributes">
                     <attribute
                     name="domain"
-                >[('picking_id.partner_id', '=', partner_id),
+                >[('picking_id.partner_id', 'child_of', partner_id),
                                     ('location_id.usage', '=', 'supplier'),
                                     ('state', '=', 'done')]</attribute>
                 </field>
