@@ -34,7 +34,7 @@ class RmaAddStockMove(models.TransientModel):
     move_ids = fields.Many2many(
         comodel_name="stock.move",
         string="Stock Moves",
-        domain="[('state', '=', 'done')]",
+        domain="[('state', '=', 'done'), ('partner_id', '=', partner_id)]",
     )
     show_lot_filter = fields.Boolean(
         string="Show lot filter?",
