@@ -7,8 +7,11 @@
            <field name="model">rma.operation</field>
            <field name="inherit_id" ref="rma.rma_operation_form" />
            <field name="arch" type="xml">
+               <xpath expr="//field[@name='receipt_policy']" position="after">
+                   <field name="default_carrier_in_id" options="{'no_create': True}" />
+               </xpath>
                <xpath expr="//field[@name='delivery_policy']" position="after">
-                   <field name="default_carrier_id" options="{'no_create': True}" />
+                   <field name="default_carrier_out_id" options="{'no_create': True}" />
                </xpath>
            </field>
        </record>
