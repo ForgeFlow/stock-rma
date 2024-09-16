@@ -22,15 +22,15 @@
                 />
             </header>
             <div name='button_box' position="inside">
-            <button
+                <button
                     type="object"
-                    name="action_view_sale_order"
+                    name="action_view_origin_sale_order"
                     class="oe_stat_button"
                     icon="fa-strikethrough"
-                    attrs="{'invisible': [('sale_id', '=', False)]}"
+                    attrs="{'invisible': [('sale_line_id', '=', False)]}"
                     string="Origin Sale Order"
                 >
-            </button>
+                </button>
                 <button
                     type="object"
                     name="action_view_sale_order"
