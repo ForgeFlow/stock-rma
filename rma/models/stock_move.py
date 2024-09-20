@@ -8,7 +8,7 @@ class StockMove(models.Model):
     _inherit = "stock.move"
 
     rma_line_id = fields.Many2one(
-        "rma.order.line", string="RMA line", ondelete="restrict"
+        "rma.order.line", string="RMA line", ondelete="restrict", index="btree_not_null"
     )
 
     @api.model_create_multi
