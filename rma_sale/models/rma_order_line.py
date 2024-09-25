@@ -82,6 +82,11 @@ class RmaOrderLine(models.Model):
     )
     sales_count = fields.Integer(compute="_compute_sales_count", string="# of Sales")
 
+    @api.model
+    def _origin_fields(self):
+        res = super()._origin_fields()
+        return res + ["sale_line_id"]
+
     @api.onchange("product_id", "partner_id")
     def _onchange_product_id(self):
         """Domain for sale_line_id is computed here to make it dynamic."""

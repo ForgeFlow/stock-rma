@@ -94,3 +94,7 @@ class RmaOperation(models.Model):
         required=True,
         default=lambda self: self.env.user.company_id,
     )
+    require_origin_field_filled = fields.Boolean(
+        default=False,
+        help="RMA document can't be continue in process if at least one origin field is filled",
+    )

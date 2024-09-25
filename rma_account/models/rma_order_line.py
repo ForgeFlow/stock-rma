@@ -130,6 +130,11 @@ class RmaOrderLine(models.Model):
         ondelete="restrict",
     )
 
+    @api.model
+    def _origin_fields(self):
+        res = super()._origin_fields()
+        return res + ["account_move_line_id"]
+
     @api.depends("partner_id")
     def _compute_commercial_partner_id(self):
         for rma_line in self:

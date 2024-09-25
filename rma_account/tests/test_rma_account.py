@@ -2,6 +2,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from odoo import fields
+from odoo.exceptions import UserError
 from odoo.fields import Date
 from odoo.tests import common
 from odoo.tests.common import Form
@@ -303,3 +304,37 @@ class TestRmaAccount(common.SingleTransactionCase):
         self.assertEqual(rma_1.product_id.id, bill_product.id)
         self.assertEqual(bill.rma_count, 1)
         self.assertEqual(bill.used_in_rma_count, 0)
+
+    def test_08_rma_require_origin_fields(self):
+        partner = self.inv_customer.partner_id
+        operation = self.env.ref("rma.rma_operation_customer_replace")
+        rma_line = Form(
+            self.rma_line_obj,
+            view=self.env.ref("rma_account.view_rma_line_form").id,
+        )
+        rma_line.partner_id = partner
+        rma_line.operation_id = operation
+        rma_line.product_id = self.product_1
+        rma_line = rma_line.save()
+        self.assertFalse(bool(rma_line.reference_move_id))
+        self.assertFalse(bool(rma_line.account_move_line_id))
+        rma_line.operation_id.write(
+            {
+                "require_origin_field_filled": True,
+            }
+        )
+        self.assertTrue(rma_line.operation_id.require_origin_field_filled)
+        with self.assertRaises(UserError):
+            rma_line.action_rma_to_approve()
+
+        rma_line = Form(
+            rma_line,
+            view=self.env.ref("rma.view_rma_line_form").id,
+        )
+
+        move_line = self.inv_customer.invoice_line_ids[0]
+
+        rma_line.account_move_line_id = move_line
+        rma_line = rma_line.save()
+        rma_line.action_rma_to_approve()
+        self.assertIn(rma_line.state, ("to_approve", "approved"))

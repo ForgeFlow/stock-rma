@@ -1,8 +1,9 @@
 # Copyright 2017-2022 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
+from odoo.exceptions import UserError
 from odoo.fields import Datetime
-from odoo.tests import common
+from odoo.tests import Form, common
 
 
 class TestRmaPurchase(common.TransactionCase):
@@ -108,3 +109,36 @@ class TestRmaPurchase(common.TransactionCase):
         rma._onchange_purchase_order_line_id()
         self.assertEqual(rma.product_id, self.product_1)
         self.assertEqual(rma.product_qty, 20.0)
+
+    def test_03_rma_require_origin_fields(self):
+        rma_line = Form(
+            self.rma_line_obj.with_context(supplier=True),
+            view=self.env.ref("rma.view_rma_line_supplier_form").id,
+        )
+        rma_line.partner_id = self.po.partner_id
+        rma_line.product_id = self.product_1
+        rma_line.operation_id = self.env.ref("rma.rma_operation_supplier_replace")
+        rma_line = rma_line.save()
+        self.assertFalse(bool(rma_line.reference_move_id))
+        self.assertFalse(bool(rma_line.account_move_line_id))
+        self.assertFalse(bool(rma_line.purchase_order_line_id))
+        rma_line.operation_id.write(
+            {
+                "require_origin_field_filled": True,
+            }
+        )
+        self.assertTrue(rma_line.operation_id.require_origin_field_filled)
+        with self.assertRaises(UserError):
+            rma_line.action_rma_to_approve()
+
+        rma_line = Form(
+            rma_line,
+            view=self.env.ref("rma.view_rma_line_supplier_form").id,
+        )
+
+        move_line = self.po.order_line[0]
+
+        rma_line.purchase_order_line_id = move_line
+        rma_line = rma_line.save()
+        rma_line.action_rma_to_approve()
+        self.assertIn(rma_line.state, ("to_approve", "approved"))

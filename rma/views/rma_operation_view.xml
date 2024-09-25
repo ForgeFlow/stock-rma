@@ -41,6 +41,7 @@
                         <group name="policies" string="Policies">
                             <field name="receipt_policy" />
                             <field name="delivery_policy" />
+                            <field name="require_origin_field_filled" />
                         </group>
                         <group name="inbound" string="Inbound">
                             <field name="in_route_id" />
