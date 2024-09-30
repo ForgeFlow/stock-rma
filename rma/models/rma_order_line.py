@@ -823,20 +823,20 @@ class RmaOrderLine(models.Model):
         if self.type == "customer":
             # from customer we link to supplier rma
             action = self.env.ref("rma.action_rma_supplier_lines")
-            rma_lines = self.supplier_rma_line_ids.ids
+            rma_lines = self.supplier_rma_line_ids
             res = self.env.ref("rma.view_rma_line_supplier_form", False)
         else:
             # from supplier we link to customer rma
             action = self.env.ref("rma.action_rma_customer_lines")
-            rma_lines = self.customer_rma_id.ids
+            rma_lines = self.customer_rma_id
             res = self.env.ref("rma.view_rma_line_form", False)
         result = action.sudo().read()[0]
         # choose the view_mode accordingly
         if rma_lines and len(rma_lines) != 1:
-            result["domain"] = rma_lines.ids
+            result["domain"] = [("id", "in", rma_lines.ids)]
         elif len(rma_lines) == 1:
             result["views"] = [(res and res.id or False, "form")]
-            result["res_id"] = rma_lines[0]
+            result["res_id"] = rma_lines.id
         return result
 
     @api.constrains("partner_id", "rma_id")
