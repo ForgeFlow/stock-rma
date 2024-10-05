@@ -17,6 +17,14 @@ class StockMove(models.Model):
             group = self.env["procurement.group"].browse(vals["group_id"])
             if group.rma_line_id:
                 vals["rma_line_id"] = group.rma_line_id.id
+        if vals.get("move_dest_ids"):
+            # in multi steps receipt we ensure the link to rma lines is added
+            move_dest_ids = self.env["stock.move"].browse(
+                [t[1] for t in vals["move_dest_ids"]]
+            )
+            if move_dest_ids:
+                if move_dest_ids.rma_line_id:
+                    vals["rma_line_id"] = move_dest_ids.rma_line_id.id
         return super(StockMove, self).create(vals)
 
     def _action_assign(self):
