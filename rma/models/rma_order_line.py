@@ -24,11 +24,14 @@ class RmaOrderLine(models.Model):
     @api.model
     def _default_warehouse_id(self):
         rma_id = self.env.context.get("default_rma_id", False)
-        warehouse = self.env["stock.warehouse"]
+        company_id = self.env.user.company_id.id
+        warehouse = self.env["stock.warehouse"].search(
+            [("company_id", "=", company_id)], order="sequence asc", limit=1
+        )
         if rma_id:
             rma = self.env["rma.order"].browse(rma_id)
             warehouse = self.env["stock.warehouse"].search(
-                [("company_id", "=", rma.company_id.id)], limit=1
+                [("company_id", "=", rma.company_id.id)], order="sequence asc", limit=1
             )
         return warehouse
 
@@ -590,7 +593,6 @@ class RmaOrderLine(models.Model):
                 operation.location_id.id
                 or operation.in_warehouse_id.lot_rma_id.id
                 or operation.out_warehouse_id.lot_rma_id.id
-                or warehouse.lot_rma_id.id
             ),
         }
         return data
