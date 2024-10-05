@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <!-- Inherit base kanban abstract view Kanban View -->
+    <record id="rma_order_line_kanban" model="ir.ui.view">
+        <field name="name">rma.order.line.kanban</field>
+        <field name="model">rma.order.line</field>
+        <field
+            name="inherit_id"
+            ref="base_kanban_stage.base_kanban_abstract_view_kanban"
+        />
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='card_body']">
+                <div name="main">
+                    <strong><field name="name" /></strong>
+                    <br />
+                    <strong>Partner</strong>:<field name="partner_id" />
+                    <br />
+                    <t t-if="origin">
+                        <br />
+                        <strong>Origin</strong>: <field name="origin" />
+                    </t>
+                    <t
+                        t-if="record.create_date.raw_value and record.create_date.raw_value &lt; (new Date())"
+                        t-set="red"
+                    >oe_kanban_text_red</t>
+                    <span t-attf-class="#{red || ''}">
+                        <strong>Date</strong>: <field name="create_date" />
+                    </span>
+                    <span name="product">
+                        <br />
+                        <strong>Product</strong>: <field name="product_id" />
+                        <br />
+                        <strong>QTY</strong>:<field name="product_qty" /> <field
+                            name="uom_id"
+                        />
+                    </span>
+                    <br />
+                    <span style='background-color:#EBEC6D' name="operation">
+                        Operation - <field name="operation_id" /><br />
+                    </span>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_rma_rma_line_filter" model="ir.ui.view">
+        <field name="name">rma.order.line.select</field>
+        <field name="model">rma.order.line</field>
+        <field name="inherit_id" ref="rma.view_rma_rma_line_filter" />
+        <field name="arch" type="xml">
+            <group name="stock_quantities" position="after">
+                <group name="rma_stages" groups="stock.group_stock_user">
+                    <filter
+                        string="Stage"
+                        name="stage"
+                        context="{'group_by':'stage_id'}"
+                    />
+                </group>
+            </group>
+        </field>
+    </record>
+
+    <record id="rma.action_rma_customer_lines" model="ir.actions.act_window">
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_id" ref="rma_kanban_stage.rma_order_line_kanban" />
+    </record>
+
+    <record id="rma.action_rma_supplier_lines" model="ir.actions.act_window">
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_id" ref="rma_kanban_stage.rma_order_line_kanban" />
+    </record>
+
+</odoo>
