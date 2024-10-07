@@ -5,9 +5,9 @@ from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 
-class RmaLineMakeSupplierRma(models.TransientModel):
-    _name = "rma.order.line.make.supplier.rma"
-    _description = "RMA Line Make Supplier RMA"
+class RmaMakeSupplierRma(models.TransientModel):
+    _name = "rma.make.supplier.rma"
+    _description = "Wizard to create Supplier RMA from rma"
 
     partner_id = fields.Many2one(
         comodel_name="res.partner",
@@ -50,17 +50,26 @@ class RmaLineMakeSupplierRma(models.TransientModel):
 
     @api.model
     def default_get(self, fields_list):
-        res = super(RmaLineMakeSupplierRma, self).default_get(fields_list)
+        context = self._context.copy()
+        res = super().default_get(fields_list)
         rma_line_obj = self.env["rma.order.line"]
-        rma_line_ids = self.env.context["active_ids"] or []
-        active_model = self.env.context["active_model"]
+        rma_obj = self.env["rma.order"]
+        active_ids = context.get("active_ids") or []
+        active_model = context.get("active_model")
 
-        if not rma_line_ids:
+        if not active_ids:
             return res
-        assert active_model == "rma.order.line", "Bad context propagation"
+        assert active_model in [
+            "rma.order.line",
+            "rma.order",
+        ], "Bad context propagation"
 
         items = []
-        lines = rma_line_obj.browse(rma_line_ids)
+        if active_model == "rma.order":
+            rma = rma_obj.browse(active_ids)
+            lines = rma.rma_line_ids
+        else:
+            lines = rma_line_obj.browse(active_ids)
         for line in lines:
             items.append([0, 0, self._prepare_item(line)])
         suppliers = lines.mapped(
@@ -177,7 +186,7 @@ class RmaLineMakeRmaOrderItem(models.TransientModel):
     _description = "RMA Line Make Supplier RMA Item"
 
     wiz_id = fields.Many2one(
-        "rma.order.line.make.supplier.rma",
+        "rma.make.supplier.rma",
         string="Wizard",
         required=True,
         ondelete="cascade",

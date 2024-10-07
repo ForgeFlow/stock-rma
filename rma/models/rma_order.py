@@ -60,6 +60,16 @@ class RmaOrder(models.Model):
                     state = "done"
             rec.state = state
 
+    @api.depends("rma_line_ids", "rma_line_ids.qty_to_receive")
+    def _compute_qty_to_receive(self):
+        for rec in self:
+            rec.qty_to_receive = sum(rec.rma_line_ids.mapped("qty_to_receive"))
+
+    @api.depends("rma_line_ids", "rma_line_ids.qty_to_deliver")
+    def _compute_qty_to_deliver(self):
+        for rec in self:
+            rec.qty_to_deliver = sum(rec.rma_line_ids.mapped("qty_to_deliver"))
+
     @api.model
     def _default_date_rma(self):
         return datetime.now()
@@ -175,6 +185,14 @@ class RmaOrder(models.Model):
         required=False,
         string="Default Operation Type",
     )
+    qty_to_receive = fields.Float(
+        digits="Product Unit of Measure",
+        compute="_compute_qty_to_receive",
+    )
+    qty_to_deliver = fields.Float(
+        digits="Product Unit of Measure",
+        compute="_compute_qty_to_deliver",
+    )
 
     @api.onchange(
         "operation_default_id",
@@ -235,12 +253,12 @@ class RmaOrder(models.Model):
 
     def _view_shipments(self, result, shipments):
         # choose the view_mode accordingly
-        if len(shipments) > 1:
-            result["domain"] = [("id", "in", shipments.ids)]
-        elif len(shipments) == 1:
+        if len(shipments) == 1:
             res = self.env.ref("stock.view_picking_form", False)
             result["views"] = [(res and res.id or False, "form")]
             result["res_id"] = shipments.ids[0]
+        else:
+            result["domain"] = [("id", "in", shipments.ids)]
         return result
 
     def action_view_in_shipments(self):

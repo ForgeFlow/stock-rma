@@ -13,7 +13,7 @@ class TestRmaSale(common.SingleTransactionCase):
         cls.rma_line_obj = cls.env["rma.order.line"]
         cls.rma_op_obj = cls.env["rma.operation"]
         cls.rma_add_sale_wiz = cls.env["rma_add_sale"]
-        cls.rma_make_sale_wiz = cls.env["rma.order.line.make.sale.order"]
+        cls.rma_make_sale_wiz = cls.env["rma.make.sale.order"]
         cls.so_obj = cls.env["sale.order"]
         cls.sol_obj = cls.env["sale.order.line"]
         cls.product_obj = cls.env["product.product"]

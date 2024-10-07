@@ -5,7 +5,7 @@
 
         <record id="view_rma_order_line_make_sale_order" model="ir.ui.view">
             <field name="name">RMA Line Make Sale Order</field>
-            <field name="model">rma.order.line.make.sale.order</field>
+            <field name="model">rma.make.sale.order</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
                  <form string="Create Quotation">
@@ -51,13 +51,10 @@
             </field>
         </record>
 
-        <record
-        id="action_rma_order_line_make_sale_order"
-        model="ir.actions.act_window"
-    >
+        <record id="action_rma_make_sale_order" model="ir.actions.act_window">
             <field name="name">Create Sales Quotation</field>
             <field name="type">ir.actions.act_window</field>
-            <field name="res_model">rma.order.line.make.sale.order</field>
+            <field name="res_model">rma.make.sale.order</field>
             <field name="view_mode">form</field>
             <field name="view_id" ref="view_rma_order_line_make_sale_order" />
             <field name="target">new</field>

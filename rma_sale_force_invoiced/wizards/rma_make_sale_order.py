@@ -4,11 +4,11 @@
 from odoo import api, models
 
 
-class RmaLineMakeSaleOrder(models.TransientModel):
-    _inherit = "rma.order.line.make.sale.order"
+class RmaMakeSaleOrder(models.TransientModel):
+    _inherit = "rma.make.sale.order"
 
     @api.model
     def _prepare_sale_order(self, line):
-        data = super(RmaLineMakeSaleOrder, self)._prepare_sale_order(line)
+        data = super()._prepare_sale_order(line)
         data["force_invoiced"] = line.operation_id.sale_force_invoiced
         return data

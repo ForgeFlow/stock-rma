@@ -4,7 +4,7 @@
 <odoo>
     <record id="view_rma_order_line_make_supplier_rma" model="ir.ui.view">
         <field name="name">RMA Line Make Supplier RMA</field>
-        <field name="model">rma.order.line.make.supplier.rma</field>
+        <field name="model">rma.make.supplier.rma</field>
         <field name="type">form</field>
         <field name="arch" type="xml">
              <form string="Create Supplier RMA">
@@ -49,29 +49,14 @@
         </field>
     </record>
 
-    <record id="action_rma_order_line_make_supplier_rma" model="ir.actions.act_window">
+    <record id="action_make_supplier_rma" model="ir.actions.act_window">
         <field name="name">Create Supplier RMA</field>
         <field name="type">ir.actions.act_window</field>
-        <field name="res_model">rma.order.line.make.supplier.rma</field>
+        <field name="res_model">rma.make.supplier.rma</field>
         <field name="view_mode">form</field>
         <field name="view_id" ref="view_rma_order_line_make_supplier_rma" />
         <field name="target">new</field>
         <field name="binding_model_id" ref="rma.model_rma_order_line" />
     </record>
 
-    <record id="view_rma_line_supplier_rma_button_form" model="ir.ui.view">
-    <field name="name">rma.order.line.supplier.rma.form</field>
-    <field name="model">rma.order.line</field>
-    <field name="inherit_id" ref="rma.view_rma_line_form" />
-    <field name="arch" type="xml">
-        <header position="inside">
-            <button
-                    name="%(action_rma_order_line_make_supplier_rma)d"
-                    string="Create Supplier RMA"
-                    attrs="{'invisible':['|', ('type', '!=', 'customer'), ('state', '!=', 'approved')]}"
-                    type="action"
-                />
-        </header>
-    </field>
-    </record>
 </odoo>

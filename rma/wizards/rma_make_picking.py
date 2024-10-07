@@ -10,7 +10,7 @@ from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FORMAT, float_compar
 
 class RmaMakePicking(models.TransientModel):
     _name = "rma_make_picking.wizard"
-    _description = "Wizard to create pickings from rma lines"
+    _description = "Wizard to create Pickings from rma"
 
     @api.returns("rma.order.line")
     def _prepare_item(self, line):
@@ -32,17 +32,27 @@ class RmaMakePicking(models.TransientModel):
         supplier.
         """
         context = self._context.copy()
-        res = super(RmaMakePicking, self).default_get(fields_list)
+        res = super().default_get(fields_list)
         rma_line_obj = self.env["rma.order.line"]
-        rma_line_ids = self.env.context["active_ids"] or []
-        active_model = self.env.context["active_model"]
-
-        if not rma_line_ids:
+        rma_obj = self.env["rma.order"]
+        active_ids = context.get("active_ids") or []
+        active_model = context.get("active_model")
+        if not active_ids:
             return res
-        assert active_model == "rma.order.line", "Bad context propagation"
+        assert active_model in [
+            "rma.order.line",
+            "rma.order",
+        ], "Bad context propagation"
 
         items = []
-        lines = rma_line_obj.browse(rma_line_ids)
+        if active_model == "rma.order":
+            rma = rma_obj.browse(active_ids)
+            if context.get("picking_type") == "incoming":
+                lines = rma.rma_line_ids.filtered(lambda x: x.qty_to_receive > 0)
+            if context.get("picking_type") == "outgoing":
+                lines = rma.rma_line_ids.filtered(lambda x: x.qty_to_deliver > 0)
+        else:
+            lines = rma_line_obj.browse(active_ids)
         if len(lines.mapped("partner_id")) > 1:
             raise ValidationError(
                 _(

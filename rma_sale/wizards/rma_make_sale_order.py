@@ -1,12 +1,13 @@
 # Copyright 2020 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo import _, api, exceptions, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 
-class RmaLineMakeSaleOrder(models.TransientModel):
-    _name = "rma.order.line.make.sale.order"
-    _description = "Make Sales Order from RMA Line"
+class RmaMakeSaleOrder(models.TransientModel):
+    _name = "rma.make.sale.order"
+    _description = "Make Sales Order from RMA"
 
     partner_id = fields.Many2one(
         comodel_name="res.partner",
@@ -43,24 +44,33 @@ class RmaLineMakeSaleOrder(models.TransientModel):
 
     @api.model
     def default_get(self, fields_list):
-        res = super(RmaLineMakeSaleOrder, self).default_get(fields_list)
+        context = self._context.copy()
+        res = super().default_get(fields_list)
         rma_line_obj = self.env["rma.order.line"]
-        rma_line_ids = self.env.context["active_ids"] or []
-        active_model = self.env.context["active_model"]
+        rma_obj = self.env["rma.order"]
+        active_ids = context.get("active_ids") or []
+        active_model = context.get("active_model")
 
-        if not rma_line_ids:
+        if not active_ids:
             return res
-        assert active_model == "rma.order.line", "Bad context propagation"
+        assert active_model in [
+            "rma.order.line",
+            "rma.order",
+        ], "Bad context propagation"
 
         items = []
-        lines = rma_line_obj.browse(rma_line_ids)
+        if active_model == "rma.order":
+            rma = rma_obj.browse(active_ids)
+            lines = rma.rma_line_ids.filtered(lambda x: x.qty_to_sell > 0)
+        else:
+            lines = rma_line_obj.browse(active_ids)
         for line in lines:
             items.append([0, 0, self._prepare_item(line)])
         customers = lines.mapped("partner_id")
         if len(customers) == 1:
             res["partner_id"] = customers.id
         else:
-            raise exceptions.Warning(
+            raise ValidationError(
                 _(
                     "Only RMA lines from the same partner can be processed at "
                     "the same time"
@@ -72,7 +82,7 @@ class RmaLineMakeSaleOrder(models.TransientModel):
     @api.model
     def _prepare_sale_order(self, line):
         if not self.partner_id:
-            raise exceptions.Warning(_("Enter a customer."))
+            raise ValidationError(_("Enter a customer."))
         customer = self.partner_id
         auto = self.env["account.fiscal.position"].search(
             [("auto_apply", "=", True), ("country_id", "=", customer.country_id.id)],
@@ -83,8 +93,11 @@ class RmaLineMakeSaleOrder(models.TransientModel):
             fiscal_position = customer.property_account_position_id
         elif auto:
             fiscal_position = auto
+        origin = line.name
+        if self.env.context.get("active_model") == "rma.order":
+            origin = line.rma_id.name
         data = {
-            "origin": line.name,
+            "origin": origin,
             "partner_id": customer.id,
             "warehouse_id": line.out_warehouse_id.id,
             "company_id": line.company_id.id,
@@ -118,19 +131,20 @@ class RmaLineMakeSaleOrder(models.TransientModel):
         sale_obj = self.env["sale.order"]
         so_line_obj = self.env["sale.order.line"]
         sale = False
-
         for item in self.item_ids:
-            line = item.line_id
             if item.product_qty <= 0.0:
-                raise exceptions.Warning(_("Enter a positive quantity."))
+                raise ValidationError(_("Enter a positive quantity."))
 
             if self.sale_order_id:
                 sale = self.sale_order_id
             if not sale:
+                line = item.line_id
                 po_data = self._prepare_sale_order(line)
                 sale = sale_obj.create(po_data)
-                sale.name = sale.name + " - " + line.name
-
+                rma = line
+                if self.env.context.get("active_model") == "rma.order":
+                    rma = line.rma_id
+                sale.name = sale.name + " - " + rma.name
             so_line_data = self._prepare_sale_order_line(sale, item)
             sale_line = so_line_obj.create(so_line_data)
             self._post_process_sale_order(item, sale_line)
@@ -146,12 +160,8 @@ class RmaLineMakeSaleOrderItem(models.TransientModel):
     _name = "rma.order.line.make.sale.order.item"
     _description = "RMA Line Make Sale Order Item"
 
-    wiz_id = fields.Many2one(
-        comodel_name="rma.order.line.make.sale.order", string="Wizard"
-    )
-    line_id = fields.Many2one(
-        comodel_name="rma.order.line", string="RMA Line", compute="_compute_line_id"
-    )
+    wiz_id = fields.Many2one(comodel_name="rma.make.sale.order", string="Wizard")
+    line_id = fields.Many2one(comodel_name="rma.order.line", string="RMA Line")
     rma_id = fields.Many2one(
         comodel_name="rma.order", related="line_id.rma_id", readonly=False
     )
@@ -163,15 +173,6 @@ class RmaLineMakeSaleOrderItem(models.TransientModel):
         comodel_name="stock.warehouse", string="Outbound Warehouse"
     )
     free_of_charge = fields.Boolean(string="Free of Charge")
-
-    def _compute_line_id(self):
-        rma_line_obj = self.env["rma.order.line"]
-        for rec in self:
-            if not self.env.context["active_ids"]:
-                return
-            rma_line_ids = self.env.context["active_ids"] or []
-            lines = rma_line_obj.browse(rma_line_ids)
-            rec.line_id = lines[0]
 
     @api.onchange("product_id")
     def onchange_product_id(self):

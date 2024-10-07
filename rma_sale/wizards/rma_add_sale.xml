@@ -14,13 +14,13 @@
                     <field
                         name="sale_id"
                         domain="[
-                           ('partner_id','=',partner_id), (('state','not in',['draft','cancel']))]"
+                           ('partner_id','=',partner_id), ('state','not in',['draft','cancel']), ('picking_ids.state', '=', 'done')]"
                         context="{'partner_id': partner_id}"
                     />
                 </group>
                 <field
                     name="sale_line_ids"
-                    domain="[('order_id', '=', sale_id)]"
+                    domain="[('order_id', '=', sale_id), ('move_ids.state', '=', 'done')]"
                     string="Sale Order Lines"
                 >
                     <tree>
@@ -101,23 +101,6 @@
             name="groups_id"
             eval="[(4, ref('rma.group_rma_customer_user')), (4, ref('rma.group_rma_customer_user'))]"
         />
-    </record>
-
-
-    <record id="view_rma_add_sale_form" model="ir.ui.view">
-        <field name="name">rma.order.form - sale wizard</field>
-        <field name="model">rma.order</field>
-        <field name="inherit_id" ref="rma.view_rma_form" />
-        <field name="arch" type="xml">
-            <xpath expr="//header" position="inside">
-                <button
-                    name="%(action_rma_add_sale)d"
-                    string="Add From Sale Order"
-                    type="action"
-                    attrs="{'invisible':[('type', '!=', 'customer')]}"
-                />
-            </xpath>
-        </field>
     </record>
 
 </odoo>

@@ -12,7 +12,14 @@ class RmaRefund(models.TransientModel):
     @api.model
     def _get_reason(self):
         active_ids = self.env.context.get("active_ids", False)
-        return self.env["rma.order.line"].browse(active_ids[0]).rma_id.name or ""
+        active_model = self.env.context.get("active_model", False)
+        reason = ""
+        if active_model and active_ids:
+            if active_model == "rma.order":
+                reason = self.env[active_model].browse(active_ids[0]).name or ""
+            else:
+                reason = self.env[active_model].browse(active_ids[0]).rma_id.name or ""
+        return reason
 
     @api.returns("rma.order.line")
     def _prepare_item(self, line):
@@ -37,16 +44,24 @@ class RmaRefund(models.TransientModel):
         supplier.
         """
         context = self._context.copy()
-        res = super(RmaRefund, self).default_get(fields_list)
+        res = super().default_get(fields_list)
         rma_line_obj = self.env["rma.order.line"]
-        rma_line_ids = self.env.context["active_ids"] or []
-        active_model = self.env.context["active_model"]
-        if not rma_line_ids:
+        rma_obj = self.env["rma.order"]
+        active_ids = context.get("active_ids") or []
+        active_model = context.get("active_model")
+        if not active_ids:
             return res
-        assert active_model == "rma.order.line", "Bad context propagation"
+        assert active_model in [
+            "rma.order.line",
+            "rma.order",
+        ], "Bad context propagation"
 
         items = []
-        lines = rma_line_obj.browse(rma_line_ids)
+        if active_model == "rma.order":
+            rma = rma_obj.browse(active_ids)
+            lines = rma.rma_line_ids.filtered(lambda x: x.qty_to_refund > 0)
+        else:
+            lines = rma_line_obj.browse(active_ids)
         if len(lines.mapped("partner_id")) > 1:
             raise ValidationError(
                 _(
@@ -90,8 +105,9 @@ class RmaRefund(models.TransientModel):
             return new_refund
 
     def invoice_refund(self):
-        rma_line_ids = self.env["rma.order.line"].browse(self.env.context["active_ids"])
-        for line in rma_line_ids:
+        lines = self.item_ids.line_id
+        for line in lines:
+
             if line.state != "approved":
                 raise ValidationError(_("RMA %s is not approved") % line.name)
         new_invoice = self.compute_refund()
