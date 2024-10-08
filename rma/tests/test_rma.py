@@ -1093,3 +1093,44 @@ class TestRma(common.TransactionCase):
         self.assertEqual(
             rma.rma_line_ids.mapped("state"), ["approved", "approved", "approved"]
         )
+
+    def test_10_rma_require_origin_fields(self):
+        self.rma_cust_replace_op_id.write(
+            {
+                "require_origin_field_filled": True,
+            }
+        )
+        rma_line = Form(
+            self.rma_line,
+            view=self.env.ref("rma.view_rma_line_form").id,
+        )
+        rma_line.partner_id = self.partner_id
+        rma_line.operation_id = self.rma_cust_replace_op_id
+        rma_line.product_id = self.product_1
+        rma_line = rma_line.save()
+        with self.assertRaises(UserError):
+            rma_line.action_rma_to_approve()
+
+        self._create_inventory(self.product_1, 5, self.stock_location)
+        picking_type = self._get_picking_type(
+            self.wh, self.stock_location, self.customer_location
+        )
+        picking = self._create_picking(self.partner_id, picking_type)
+        move_values = self._prepare_move(
+            self.product_1,
+            5,
+            self.stock_location,
+            self.customer_location,
+            picking,
+        )
+        move_created = self.env["stock.move"].create(move_values)
+        self._do_picking(picking)
+
+        rma_line = Form(
+            rma_line,
+            view=self.env.ref("rma.view_rma_line_form").id,
+        )
+        rma_line.reference_move_id = move_created
+        rma_line = rma_line.save()
+        rma_line.action_rma_to_approve()
+        self.assertIn(rma_line.state, ("to_approve", "approved"))

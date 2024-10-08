@@ -88,6 +88,11 @@ class RmaOrderLine(models.Model):
         compute="_compute_qty_purchase",
     )
 
+    @api.model
+    def _origin_fields(self):
+        res = super()._origin_fields()
+        return res + ["purchase_order_line_id"]
+
     @api.onchange("product_id", "partner_id")
     def _onchange_product_id(self):
         """Domain for purchase_order_line_id is computed here to make

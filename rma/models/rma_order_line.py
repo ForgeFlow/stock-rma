@@ -647,8 +647,20 @@ class RmaOrderLine(models.Model):
                     % (rec.product_id.display_name)
                 )
 
+    @api.model
+    def _origin_fields(self):
+        return ["reference_move_id"]
+
+    def _check_origin_fields_filled(self):
+        for rec in self.filtered(lambda x: x.operation_id.require_origin_field_filled):
+            if not any(rec[origin_field] for origin_field in self._origin_fields()):
+                raise UserError(
+                    _("You should fill at least one origin field to continue")
+                )
+
     def action_rma_to_approve(self):
         self._check_lot_assigned()
+        self._check_origin_fields_filled()
         self.write({"state": "to_approve"})
         for rec in self:
             if rec.product_id.rma_approval_policy == "one_step":
