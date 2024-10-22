@@ -232,7 +232,13 @@ class RmaOrderLine(models.Model):
                 and x.location_dest_id.usage == "customer"
             )
             if moves:
-                layers = moves.sudo().mapped("stock_valuation_layer_ids")
+                # We take negative valuation layers, as are to customers,
+                # and we handle dropship cases where will have negative and positive layers
+                layers = (
+                    moves.sudo()
+                    .mapped("stock_valuation_layer_ids")
+                    .filtered(lambda layer: layer.quantity < 0 and layer.value < 0)
+                )
                 if layers:
                     price_unit = sum(layers.mapped("value")) / sum(
                         layers.mapped("quantity")
