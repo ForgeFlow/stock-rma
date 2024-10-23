@@ -3,6 +3,7 @@
 
 from odoo.exceptions import UserError, ValidationError
 from odoo.tests import Form, common
+from odoo.tools.safe_eval import safe_eval
 
 
 class TestRma(common.TransactionCase):
@@ -129,11 +130,20 @@ class TestRma(common.TransactionCase):
         ).create({})
         wizard._create_picking()
         res = rma_line_ids.action_view_out_shipments()
-        picking = cls.env["stock.picking"].browse(res["res_id"])
-        picking.action_assign()
-        for mv in picking.move_ids:
-            mv.quantity_done = mv.product_uom_qty
-        picking._action_done()
+        picking = cls.env["stock.picking"].browse()
+        if res["res_id"]:
+            picking = cls.env["stock.picking"].browse(res["res_id"])
+        elif res.get("domain", False):
+            domain = res["domain"]
+            if isinstance(domain, str):
+                domain = safe_eval(domain)
+            picking = cls.env["stock.picking"].browse(domain[0][2])
+        if picking:
+            for pick in picking:
+                pick.action_assign()
+                for mv in pick.move_ids:
+                    mv.quantity_done = mv.product_uom_qty
+                pick._action_done()
         return picking
 
     @classmethod

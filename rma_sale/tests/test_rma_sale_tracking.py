@@ -81,7 +81,7 @@ class TestRmaSaleTracking(TestRma):
 
         picking.action_assign()
 
-        for move in picking.move_lines:
+        for move in picking.move_ids:
             if move.product_id.id == cls.product_serial_2.id:
                 move.move_line_ids.write({"result_package_id": cls.package_2.id})
             if move.product_id.id == cls.product_lot_2.id:
@@ -145,7 +145,7 @@ class TestRmaSaleTracking(TestRma):
                 "Destination package should not be assigned",
             )
             picking.action_assign()
-            for mv in picking.move_lines:
+            for mv in picking.move_ids:
                 mv.quantity_done = mv.product_uom_qty
             picking._action_done()
             self.assertEqual(
