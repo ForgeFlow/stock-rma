@@ -36,4 +36,5 @@
     ],
     "installable": True,
     "application": True,
+    "post_load": "post_load_hook",
 }
