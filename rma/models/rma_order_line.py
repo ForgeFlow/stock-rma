@@ -578,7 +578,8 @@ class RmaOrderLine(models.Model):
         for rec in self:
             if (
                 rec.reference_move_id
-                and rec.reference_move_id.picking_id.partner_id != rec.partner_id
+                and rec.reference_move_id.picking_id.partner_id.commercial_partner_id
+                != rec.partner_id.commercial_partner_id
             ):
                 raise ValidationError(
                     _(
