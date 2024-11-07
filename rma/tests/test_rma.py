@@ -85,6 +85,51 @@ class TestRma(common.TransactionCase):
         cls.rma_supplier_id = cls._create_rma_from_move(
             products2move, "supplier", cls.env.ref("base.res_partner_2"), dropship=False
         )
+        # create rules to have multi step reception/shipment, unactive by default
+        cls.test_rma_loc = cls.stock_rma_location.copy({"name": "rma loc shipping"})
+        rma_route = cls.env.ref("rma.route_rma_customer")
+        cls.second_step_incoming_rule = cls.env["stock.rule"].create(
+            {
+                "name": "reception => rma loc shipping",
+                "action": "pull",
+                "picking_type_id": cls.wh.int_type_id.id,
+                "location_src_id": cls.wh.wh_input_stock_loc_id.id,
+                "location_dest_id": cls.test_rma_loc.id,
+                "procure_method": "make_to_stock",
+                "route_id": rma_route.id,
+                "warehouse_id": cls.wh.id,
+                "company_id": cls.wh.company_id.id,
+                "active": False,
+                "sequence": 0,
+            }
+        )
+        cls.second_step_outgoing_rule = cls.env["stock.rule"].create(
+            {
+                "name": "rma => reception",
+                "action": "push",
+                "picking_type_id": cls.wh.int_type_id.id,
+                "location_src_id": cls.stock_rma_location.id,
+                "location_dest_id": cls.wh.wh_input_stock_loc_id.id,
+                "procure_method": "make_to_stock",
+                "route_id": rma_route.id,
+                "warehouse_id": cls.wh.id,
+                "company_id": cls.wh.company_id.id,
+                "active": False,
+            }
+        )
+
+    @classmethod
+    def _configure_2_steps_incoming_outgoing(cls):
+        cls.second_step_incoming_rule.write({"active": True})
+        cls.second_step_outgoing_rule.write({"active": True})
+        rma_customer_rule = cls.env.ref("rma.rule_rma_customer_out_pull")
+        rma_customer_rule.write(
+            {
+                "procure_method": "make_to_order",
+                "sequence": 0,
+                "location_src_id": cls.test_rma_loc.id,
+            }
+        )
 
     @classmethod
     def _create_user(cls, login, groups, company):
@@ -1167,37 +1212,7 @@ class TestRma(common.TransactionCase):
 
     def test_10_rma_cancel_line(self):
         # configure a new rule to make reception and  expedition in 2 steps
-        rma_route = self.env.ref("rma.route_rma_customer")
-        rma_loc = self.env.ref("rma.location_rma")
-        rma_loc2 = rma_loc.copy({"name": "rma loc shipping"})
-        rma_customer_rule = self.env.ref("rma.rule_rma_customer_out_pull")
-        rma_customer_rule.write({"procure_method": "make_to_order", "sequence": 0})
-        self.env["stock.rule"].create(
-            {
-                "name": "reception => rma loc shipping",
-                "action": "pull",
-                "picking_type_id": self.wh.int_type_id.id,
-                "location_src_id": self.wh.wh_input_stock_loc_id.id,
-                "location_dest_id": rma_loc2.id,
-                "procure_method": "make_to_stock",
-                "route_id": rma_route.id,
-                "warehouse_id": self.wh.id,
-                "company_id": self.wh.company_id.id,
-            }
-        )
-        self.env["stock.rule"].create(
-            {
-                "name": "rma => reception",
-                "action": "push",
-                "picking_type_id": self.wh.int_type_id.id,
-                "location_src_id": rma_loc.id,
-                "location_dest_id": self.wh.wh_input_stock_loc_id.id,
-                "procure_method": "make_to_stock",
-                "route_id": rma_route.id,
-                "warehouse_id": self.wh.id,
-                "company_id": self.wh.company_id.id,
-            }
-        )
+        self._configure_2_steps_incoming_outgoing()
         # Generate expedition for the rma group
         self.rma_customer_id.rma_line_ids.action_rma_to_approve()
         wizard = self.rma_make_picking.with_context(
@@ -1209,13 +1224,12 @@ class TestRma(common.TransactionCase):
             }
         ).create({})
         wizard._create_picking()
-        self.rma_customer_id.rma_line_ids.action_view_in_shipments()
         # cancel first line and check it cancel the dest moves, but leave the picking
         # ongoing for the 2 other lines
         first_rma_line = self.rma_customer_id.rma_line_ids[0]
         second_rma_line = self.rma_customer_id.rma_line_ids[1]
         first_line_in_move = first_rma_line.move_ids.filtered(
-            lambda m: m.location_dest_id == rma_loc
+            lambda m: m.location_dest_id == self.stock_rma_location
         )
         first_line_in_dest_move = first_line_in_move.move_dest_ids
         reception_picking = first_line_in_move.picking_id
@@ -1225,7 +1239,7 @@ class TestRma(common.TransactionCase):
         self.assertEqual(first_line_in_move.state, "cancel")
         self.assertEqual(reception_picking.state, "assigned")
         second_line_in_move = second_rma_line.move_ids.filtered(
-            lambda m: m.location_dest_id == rma_loc
+            lambda m: m.location_dest_id == self.stock_rma_location
         )
         self.assertEqual(second_line_in_move.state, "assigned")
 
@@ -1555,3 +1569,64 @@ class TestRma(common.TransactionCase):
             mv.picked = True
         picking._action_done()
         self.assertEqual(picking.state, "done", "Final picking should has done state")
+
+    def test_16_rma_received_shipped_quantities_multiple_step(self):
+        # configure a new rule to make reception and  expedition in 2 steps
+        self._configure_2_steps_incoming_outgoing()
+        rma_customer = self._create_rma_from_move(
+            [(self.product_1, 3)],
+            "customer",
+            self.env.ref("base.res_partner_2"),
+            dropship=False,
+        )
+        rma_customer.rma_line_ids.action_rma_to_approve()
+        # Generate reception for the rma group and check incoming quantities
+        rma_line = rma_customer.rma_line_ids
+        wizard = self.rma_make_picking.with_context(
+            **{
+                "active_ids": rma_customer.rma_line_ids.ids,
+                "active_model": "rma.order.line",
+                "picking_type": "incoming",
+                "active_id": 1,
+            }
+        ).create({})
+        wizard._create_picking()
+        in_pickings = rma_line._get_in_pickings()
+        first_in_picking = in_pickings.filtered(lambda p: p.state == "assigned")
+        self.assertEqual(rma_line.qty_incoming, 3.0)
+        self.assertEqual(rma_line.qty_received, 0.0)
+        for mv in first_in_picking.move_ids:
+            mv.quantity = mv.product_qty
+            mv.picked = True
+        first_in_picking._action_done()
+        # Until all the incoming moves are completed,
+        # we do not assume the reception is done.
+        self.assertEqual(rma_line.qty_incoming, 3.0)
+        self.assertEqual(rma_line.qty_received, 0.0)
+        second_picking = in_pickings - first_in_picking
+        for mv in second_picking.move_ids:
+            mv.quantity = mv.product_qty
+            mv.picked = True
+        second_picking._action_done()
+        self.assertEqual(rma_line.qty_incoming, 0.0)
+        self.assertEqual(rma_line.qty_received, 3.0)
+
+        # generate 2 step expedition and check quantities
+        wizard = self.rma_make_picking.with_context(
+            **{
+                "active_ids": rma_line.ids,
+                "active_model": "rma.order.line",
+                "picking_type": "outgoing",
+                "active_id": 1,
+            }
+        ).create({})
+        wizard.with_context(test=True)._create_picking()
+        out_picking = rma_line._get_out_pickings()
+        self.assertEqual(rma_line.qty_outgoing, 3.0)
+        self.assertEqual(rma_line.qty_delivered, 0.0)
+        for mv in out_picking.move_ids:
+            mv.quantity = mv.product_qty
+            mv.picked = True
+        out_picking._action_done()
+        self.assertEqual(rma_line.qty_outgoing, 0.0)
+        self.assertEqual(rma_line.qty_delivered, 3.0)

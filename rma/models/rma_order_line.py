@@ -162,7 +162,7 @@ class RmaOrderLine(models.Model):
     def _compute_qty_incoming(self):
         for rec in self:
             qty = rec._get_rma_move_qty(
-                ("draft", "confirmed", "assigned"), direction="in"
+                ("draft", "confirmed", "assigned", "waiting"), direction="in"
             )
             rec.qty_incoming = qty
 
@@ -176,7 +176,7 @@ class RmaOrderLine(models.Model):
     def _compute_qty_outgoing(self):
         for rec in self:
             qty = rec._get_rma_move_qty(
-                ("draft", "confirmed", "assigned"), direction="out"
+                ("draft", "confirmed", "assigned", "waiting"), direction="out"
             )
             rec.qty_outgoing = qty
 
