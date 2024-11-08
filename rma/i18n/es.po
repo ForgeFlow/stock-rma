@@ -1459,7 +1459,7 @@ msgstr "Ajustes"
 #: model_terms:ir.ui.view,arch_db:rma.view_rma_form
 #: model_terms:ir.ui.view,arch_db:rma.view_rma_line_form
 #: model_terms:ir.ui.view,arch_db:rma.view_rma_supplier_form
-msgid "Shipments"
+msgid "Incoming Shipments"
 msgstr "Envíos"
 
 #. module: rma
