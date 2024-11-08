@@ -101,6 +101,12 @@ msgid "Action Needed"
 msgstr ""
 
 #. module: rma
+#: model_terms:ir.ui.view,arch_db:rma.view_rma_form
+#: model_terms:ir.ui.view,arch_db:rma.view_rma_line_form
+msgid "Incoming Shipments"
+msgstr ""
+
+#. module: rma
 #: model:ir.model.fields,field_description:rma.field_rma_operation__active
 msgid "Active"
 msgstr ""
