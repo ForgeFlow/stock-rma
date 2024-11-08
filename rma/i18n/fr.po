@@ -1518,8 +1518,8 @@ msgstr "Paramètres"
 #. module: rma
 #: model_terms:ir.ui.view,arch_db:rma.view_rma_form
 #: model_terms:ir.ui.view,arch_db:rma.view_rma_line_form
-msgid "Shipments"
-msgstr "Expéditions"
+msgid "Incoming Shipments"
+msgstr "Réceptions"
 
 #. module: rma
 #: model_terms:ir.ui.view,arch_db:rma.view_rma_add_serial_wiz_customer
