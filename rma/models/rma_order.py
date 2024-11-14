@@ -89,6 +89,7 @@ class RmaOrder(models.Model):
         string="Order Date",
         index=True,
         default=lambda self: self._default_date_rma(),
+        store=True,
     )
     partner_id = fields.Many2one(
         comodel_name="res.partner", string="Partner", required=True
