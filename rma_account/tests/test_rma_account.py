@@ -3,8 +3,7 @@
 
 from odoo import fields
 from odoo.fields import Date
-from odoo.tests import common
-from odoo.tests.common import Form
+from odoo.tests import Form, common
 
 
 class TestRmaAccount(common.SingleTransactionCase):
@@ -68,7 +67,7 @@ class TestRmaAccount(common.SingleTransactionCase):
         cls.product_1 = cls.product_obj.create(
             {
                 "name": "Test Product 1",
-                "type": "product",
+                "is_storable": True,
                 "list_price": 100.0,
                 "rma_customer_operation_id": cls.cust_refund_op.id,
                 "rma_supplier_operation_id": cls.sup_refund_op.id,
@@ -77,7 +76,7 @@ class TestRmaAccount(common.SingleTransactionCase):
         cls.product_2 = cls.product_obj.create(
             {
                 "name": "Test Product 2",
-                "type": "product",
+                "is_storable": True,
                 "list_price": 150.0,
                 "rma_customer_operation_id": cls.operation_1.id,
                 "rma_supplier_operation_id": cls.sup_refund_op.id,

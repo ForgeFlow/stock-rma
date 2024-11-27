@@ -1,6 +1,5 @@
 <?xml version="1.0" ?>
 <odoo>
-
     <record id="view_rma_add_account_move" model="ir.ui.view">
         <field name="name">rma.add.invoice</field>
         <field name="model">rma_add_account_move</field>
@@ -14,7 +13,7 @@
                     name="line_ids"
                     domain="[('move_id.partner_id', '=', partner_id)]"
                 >
-                    <tree name="Invoice Lines">
+                    <list name="Invoice Lines">
                         <field name="move_id" />
                         <field name="name" />
                         <field
@@ -28,22 +27,20 @@
                         <field name="discount" groups="base.group_no_one" />
                         <field name="price_subtotal" />
                         <field name="currency_id" invisible="1" />
-                    </tree>
+                    </list>
                 </field>
                 <footer>
                     <button
-                        string="Confirm"
-                        name="add_lines"
-                        type="object"
-                        class="oe_highlight"
-                    />
-                    or
-                    <button
-                        name="action_cancel"
-                        string="Cancel"
-                        class="oe_link"
-                        special="cancel"
-                    />
+                    string="Confirm"
+                    name="add_lines"
+                    type="object"
+                    class="oe_highlight"
+                /> or <button
+                    name="action_cancel"
+                    string="Cancel"
+                    class="oe_link"
+                    special="cancel"
+                />
                 </footer>
             </form>
         </field>
@@ -62,7 +59,7 @@
                     name="line_ids"
                     domain="[('move_id.partner_id', '=', partner_id)]"
                 >
-                    <tree name="Invoice Lines">
+                    <list name="Invoice Lines">
                         <field name="move_id" />
                         <field name="name" />
                         <field
@@ -76,25 +73,22 @@
                         <field name="discount" groups="base.group_no_one" />
                         <field name="price_subtotal" />
                         <field name="currency_id" invisible="1" />
-                    </tree>
+                    </list>
                 </field>
                 <footer>
                     <button
-                        string="Confirm"
-                        name="add_lines"
-                        type="object"
-                        class="oe_highlight"
-                    />
-                    or
-                    <button
-                        name="action_cancel"
-                        string="Cancel"
-                        class="oe_link"
-                        special="cancel"
-                    />
+                    string="Confirm"
+                    name="add_lines"
+                    type="object"
+                    class="oe_highlight"
+                /> or <button
+                    name="action_cancel"
+                    string="Cancel"
+                    class="oe_link"
+                    special="cancel"
+                />
                 </footer>
             </form>
         </field>
     </record>
-
 </odoo>

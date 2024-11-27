@@ -1,7 +1,7 @@
 # Copyright 2017-22 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo.tests.common import Form
+from odoo.tests import Form
 
 # pylint: disable=odoo-addons-relative-import
 from odoo.addons.rma.tests.test_rma import TestRma
@@ -71,7 +71,7 @@ class TestRmaStockAccount(TestRma):
                 "name": name,
                 "code": code,
                 "account_type": acc_type,
-                "company_id": company.id,
+                "company_ids": [(4, company.id)],
                 "reconcile": reconcile,
             }
         )

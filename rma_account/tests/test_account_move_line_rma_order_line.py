@@ -87,7 +87,7 @@ class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
                 "name": name,
                 "code": code,
                 "account_type": acc_type,
-                "company_id": company.id,
+                "company_ids": [(4, company.id)],
                 "reconcile": reconcile,
             }
         )
@@ -110,7 +110,7 @@ class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
             {
                 "name": "test_product",
                 "categ_id": product_ctg.id,
-                "type": "product",
+                "is_storable": True,
                 "standard_price": 1.0,
                 "list_price": 1.0,
             }
