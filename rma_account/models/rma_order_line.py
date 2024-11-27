@@ -281,27 +281,27 @@ class RmaOrderLine(models.Model):
 
     def action_view_invoice(self):
         form_view_ref = self.env.ref("account.view_move_form", False)
-        tree_view_ref = self.env.ref("account.view_move_tree", False)
+        list_view_ref = self.env.ref("account.view_move_tree", False)
 
         return {
             "domain": [("id", "in", [self.account_move_line_id.move_id.id])],
             "name": "Originating Invoice",
             "res_model": "account.move",
             "type": "ir.actions.act_window",
-            "views": [(tree_view_ref.id, "tree"), (form_view_ref.id, "form")],
+            "views": [(list_view_ref.id, "list"), (form_view_ref.id, "form")],
         }
 
     def action_view_refunds(self):
         moves = self.mapped("refund_line_ids.move_id")
         form_view_ref = self.env.ref("account.view_move_form", False)
-        tree_view_ref = self.env.ref("account.view_move_tree", False)
+        list_view_ref = self.env.ref("account.view_move_tree", False)
 
         return {
             "domain": [("id", "in", moves.ids)],
             "name": "Refunds",
             "res_model": "account.move",
             "type": "ir.actions.act_window",
-            "views": [(tree_view_ref.id, "tree"), (form_view_ref.id, "form")],
+            "views": [(list_view_ref.id, "list"), (form_view_ref.id, "form")],
         }
 
     def _compute_display_name(self):

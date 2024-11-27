@@ -32,9 +32,8 @@
                     icon="fa-pencil-square-o"
                     invisible="account_move_line_id == False"
                     string="Origin Inv"
-                >
-                </button>
-                 <button
+                />
+                <button
                     type="object"
                     name="action_view_refunds"
                     class="oe_stat_button"
@@ -42,8 +41,8 @@
                     invisible="refund_count == 0"
                     groups="account.group_account_invoice"
                 >
-                        <field name="refund_count" widget="statinfo" string="Refunds" />
-                    </button>
+                    <field name="refund_count" widget="statinfo" string="Refunds" />
+                </button>
             </button>
             <group name="main_info" position="inside">
                 <field name="commercial_partner_id" invisible="1" />

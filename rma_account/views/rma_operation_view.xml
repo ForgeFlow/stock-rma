@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <odoo>
     <record id="rma_operation_tree" model="ir.ui.view">
-        <field name="name">rma.operation.tree</field>
+        <field name="name">rma.operation.list</field>
         <field name="model">rma.operation</field>
         <field name="inherit_id" ref="rma.rma_operation_tree" />
         <field name="arch" type="xml">
