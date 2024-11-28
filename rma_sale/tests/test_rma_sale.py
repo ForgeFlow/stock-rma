@@ -26,10 +26,10 @@ class TestRmaSale(common.SingleTransactionCase):
 
         # Create products
         cls.product_1 = cls.product_obj.create(
-            {"name": "Test Product 1", "type": "product", "list_price": 100.0}
+            {"name": "Test Product 1", "is_storable": True, "list_price": 100.0}
         )
         cls.product_2 = cls.product_obj.create(
-            {"name": "Test Product 2", "type": "product", "list_price": 150.0}
+            {"name": "Test Product 2", "is_storable": True, "list_price": 150.0}
         )
 
         # Create SO:

@@ -23,7 +23,7 @@
                     domain="[('order_id', '=', sale_id)]"
                     string="Sale Order Lines"
                 >
-                    <tree>
+                    <list>
                         <field name="product_id" invisible="1" />
                         <field name="order_id" />
                         <field name="order_partner_id" />
@@ -39,13 +39,13 @@
                             groups="uom.group_uom"
                         />
                         <field name="price_subtotal" sum="Total" widget="monetary" />
-                    </tree>
-
+                    </list>
                 </field>
                 <field name="show_lot_filter" invisible="1" />
                 <field name="lot_domain_ids" widget="many2many_tags" invisible="1" />
                 <div class="oe_grey" invisible="show_lot_filter == False">
-                    The creation of the RMA Lines will be separated according to the lots or serials selected
+                    The creation of the RMA Lines will be separated according to the lots or serials
+                    selected
                 </div>
                 <div class="o_row">
                     <label
@@ -70,18 +70,16 @@
                 </div>
                 <footer>
                     <button
-                        string="Confirm"
-                        name="add_lines"
-                        type="object"
-                        class="oe_highlight"
-                    />
-                    or
-                    <button
-                        name="action_cancel"
-                        string="Cancel"
-                        class="oe_link"
-                        special="cancel"
-                    />
+                    string="Confirm"
+                    name="add_lines"
+                    type="object"
+                    class="oe_highlight"
+                /> or <button
+                    name="action_cancel"
+                    string="Cancel"
+                    class="oe_link"
+                    special="cancel"
+                />
                 </footer>
             </form>
         </field>
@@ -100,7 +98,6 @@
         />
     </record>
 
-
     <record id="view_rma_add_sale_form" model="ir.ui.view">
         <field name="name">rma.order.form - sale wizard</field>
         <field name="model">rma.order</field>
@@ -116,5 +113,4 @@
             </xpath>
         </field>
     </record>
-
 </odoo>
