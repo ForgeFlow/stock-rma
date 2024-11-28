@@ -23,7 +23,7 @@
                     domain="[('order_id', '=', purchase_id)]"
                     string="Purchase Order Lines"
                 >
-                    <tree name="Purchase Order Lines">
+                    <list name="Purchase Order Lines">
                         <field name="order_id" />
                         <field name="name" />
                         <field name="partner_id" string="Vendor" />
@@ -33,22 +33,22 @@
                         <field name="product_uom" groups="uom.group_uom" />
                         <field name="price_subtotal" widget="monetary" />
                         <field name="date_planned" widget="date" />
-                    </tree>
+                    </list>
                 </field>
                 <footer>
                     <button
-                        string="Confirm"
-                        name="add_lines"
-                        type="object"
-                        class="oe_highlight"
-                    />
+                    string="Confirm"
+                    name="add_lines"
+                    type="object"
+                    class="oe_highlight"
+                />
                     or
                     <button
-                        name="action_cancel"
-                        string="Cancel"
-                        class="oe_link"
-                        special="cancel"
-                    />
+                    name="action_cancel"
+                    string="Cancel"
+                    class="oe_link"
+                    special="cancel"
+                />
                 </footer>
             </form>
         </field>

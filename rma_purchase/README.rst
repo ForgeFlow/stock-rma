@@ -21,6 +21,11 @@ To add lines to a RMA from PO act as follows:
    RMA.
 #. Hit *Confirm*.
 
+Known issues / Roadmap
+======================
+
+- This module does not fully reconcile the rma in case the refund price is different from the PO price
+
 Bug Tracker
 ===========
 
