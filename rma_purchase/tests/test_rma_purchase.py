@@ -25,16 +25,10 @@ class TestRmaPurchase(common.TransactionCase):
 
         # Create products
         self.product_1 = self.product_obj.create(
-            {
-                "name": "Test Product 1",
-                "type": "product",
-            }
+            {"name": "Test Product 1", "is_storable": True}
         )
         self.product_2 = self.product_obj.create(
-            {
-                "name": "Test Product 2",
-                "type": "product",
-            }
+            {"name": "Test Product 2", "is_storable": True}
         )
 
         # Create PO:

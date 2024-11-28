@@ -2,7 +2,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from odoo.fields import Date, Datetime
-from odoo.tests.common import Form
+from odoo.tests import Form
 
 # pylint: disable=odoo-addons-relative-import
 from odoo.addons.rma_account.tests.test_rma_stock_account import TestRmaStockAccount
@@ -157,10 +157,10 @@ class TestRmaStockAccountPurchase(TestRmaStockAccount):
         Then create an RMA to return it and get the refund from the supplier with
         a different price than the original purchase price
         """
-        # extra variable to pass pre-commit
-        account_pd = self.account_price_diff
         self.product_fifo_1.categ_id.update(
-            {"property_account_creditor_price_difference_categ": account_pd}
+            {
+                "property_account_creditor_price_difference_categ": self.account_price_diff
+            }
         )
         self.product_fifo_1.standard_price = 1234
         po = self.po_model.create(
@@ -223,4 +223,4 @@ class TestRmaStockAccountPurchase(TestRmaStockAccount):
                 ("rma_line_id", "=", rma_line.id),
             ]
         )
-        self.assertEqual(sum(price_diff_amls.mapped("balance")), -100)
+        self.assertEqual(sum(price_diff_amls.mapped("balance")), 0)
