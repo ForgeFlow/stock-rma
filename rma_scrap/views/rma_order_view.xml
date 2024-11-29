@@ -17,7 +17,7 @@
                     <field name="scrap_count" widget="statinfo" string="Scraps" />
                 </button>
             </button>
-            <xpath expr="//field[@name='rma_line_ids']/tree" position="inside">
+            <xpath expr="//field[@name='rma_line_ids']/list" position="inside">
                 <field name="scrap_policy" invisible="True" />
             </xpath>
         </field>

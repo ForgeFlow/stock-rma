@@ -14,8 +14,7 @@
                     string="RMA Line"
                     groups="stock.group_stock_user"
                     invisible="rma_line_id == False"
-                >
-                </button>
+                />
                 <field name="rma_line_id" invisible="1" />
             </button>
         </field>

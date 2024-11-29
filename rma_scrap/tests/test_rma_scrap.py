@@ -23,12 +23,12 @@ class TestRmaScrap(common.SingleTransactionCase):
 
         # Create products
         cls.product_1 = cls.product_obj.create(
-            {"name": "Test Product 1", "type": "product", "list_price": 100.0}
+            {"name": "Test Product 1", "is_storable": True, "list_price": 100.0}
         )
         cls.product_2 = cls.product_obj.create(
             {
                 "name": "Test Product 2",
-                "type": "product",
+                "is_storable": True,
                 "list_price": 150.0,
                 "tracking": "lot",
             }
@@ -36,7 +36,7 @@ class TestRmaScrap(common.SingleTransactionCase):
         cls.product_3 = cls.product_obj.create(
             {
                 "name": "Test Product 3",
-                "type": "product",
+                "is_storable": True,
                 "list_price": 150.0,
                 "tracking": "serial",
             }
@@ -131,12 +131,12 @@ class TestRmaScrap(common.SingleTransactionCase):
 
         action_picking = wizard.action_create_picking()
         picking = self.env["stock.picking"].browse([action_picking["res_id"]])
-        picking.move_line_ids[0].quantity = rma.qty_to_receive
+        picking.move_line_ids[0].quantity = rma.qty_incoming
 
         picking.button_validate()
         rma._compute_qty_to_scrap()
 
-        self.assertFalse(rma.qty_to_receive)
+        self.assertFalse(rma.qty_incoming)
         self.assertEqual(rma.qty_received, 1.00)
         self.assertEqual(rma.qty_to_scrap, 1.00)
         wizard = self.rma_make_scrap_wiz.with_context(
@@ -247,13 +247,13 @@ class TestRmaScrap(common.SingleTransactionCase):
 
         action_picking = wizard.action_create_picking()
         picking = self.env["stock.picking"].browse([action_picking["res_id"]])
-        picking.move_line_ids[0].quantity = rma.qty_to_receive
+        picking.move_line_ids[0].quantity = rma.qty_incoming
         picking.move_line_ids[0].lot_id = self.serial_p3
 
         picking.button_validate()
         rma._compute_qty_to_scrap()
 
-        self.assertFalse(rma.qty_to_receive)
+        self.assertFalse(rma.qty_incoming)
         self.assertEqual(rma.qty_received, 1.00)
         self.assertEqual(rma.qty_to_scrap, 1.00)
         wizard = self.rma_make_scrap_wiz.with_context(
