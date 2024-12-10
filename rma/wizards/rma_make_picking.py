@@ -136,6 +136,7 @@ class RmaMakePicking(models.TransientModel):
             "location_id": location,
             "rma_line_id": line.id,
             "route_ids": route,
+            "lot_id": line.lot_id.id,
         }
         return procurement_data
 
@@ -222,19 +223,10 @@ class RmaMakePicking(models.TransientModel):
         move_line_model = self.env["stock.move.line"]
         picking_type = self.env.context.get("picking_type")
         if picking_type == "outgoing":
-            pickings = self.mapped("item_ids.line_id")._get_out_pickings()
             action = self.item_ids.line_id.action_view_out_shipments()
         else:
             pickings = self.mapped("item_ids.line_id")._get_in_pickings()
             action = self.item_ids.line_id.action_view_in_shipments()
-        # Force the reservation of the RMA specific lot for incoming shipments.
-        # FIXME: still needs fixing, not reserving appropriate serials.
-        for move in pickings.move_ids.filtered(
-            lambda x: x.state not in ("draft", "cancel", "done", "waiting")
-            and x.rma_line_id
-            and x.product_id.tracking in ("lot", "serial")
-            and x.rma_line_id.lot_id
-        ):
             # Force the reservation of the RMA specific lot for incoming shipments.
             for move in pickings.move_ids.filtered(
                 lambda x: x.state not in ("draft", "cancel", "done", "waiting")
