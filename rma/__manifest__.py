@@ -9,7 +9,7 @@
     "summary": "Introduces the return merchandise authorization (RMA) process in odoo",
     "author": "ForgeFlow",
     "website": "https://github.com/ForgeFlow",
-    "depends": ["stock", "mail", "web"],
+    "depends": ["stock", "mail", "web", "stock_move_forced_lot"],
     "demo": ["demo/stock_demo.xml"],
     "data": [
         "security/rma.xml",
