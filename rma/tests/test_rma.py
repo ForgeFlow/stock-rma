@@ -317,7 +317,9 @@ class TestRma(common.TransactionCase):
                 ).default_get([str(move.id), str(cls.partner_id.id)])
                 data = wizard.with_user(
                     cls.rma_basic_user
-                )._prepare_rma_line_from_stock_move(move)
+                )._prepare_rma_line_from_stock_move(
+                    move, lot=len(move.lot_ids) == 1 and move.lot_ids[0] or False
+                )
                 data["type"] = "supplier"
             if dropship:
                 data.update(
@@ -1263,3 +1265,236 @@ class TestRma(common.TransactionCase):
         self.assertEqual(rma.qty_to_deliver, 0)
         self.assertEqual(rma.qty_delivered, 3)
         self.assertEqual(len(rma.move_ids), 4)
+
+    def test_12_supplier_rma_single_line(self):
+        rma_line_id = self.rma_supplier_id.rma_line_ids[0].id
+        wizard = self.rma_make_picking.with_context(
+            {
+                "active_ids": [rma_line_id],
+                "active_model": "rma.order.line",
+                "picking_type": "outgoing",
+                "active_id": 2,
+            }
+        ).create({})
+        wizard._create_picking()
+        picking = self.rma_supplier_id.rma_line_ids[0]._get_out_pickings()
+        partner = picking.partner_id
+        self.assertTrue(partner, "Partner is not defined or False")
+        moves = picking.move_lines
+        self.assertEqual(len(moves), 1, "Incorrect number of moves created")
+
+    def test_13_customer_rma_tracking_lot(self):
+        lot = self.lot_obj.create(
+            {
+                "product_id": self.product_1_lot.id,
+            }
+        )
+        origin_package = self.package_obj.create({})
+        destination_package = self.package_obj.create({})
+        products2move = [
+            (self.product_1_lot, 5, lot.id, origin_package.id, destination_package.id)
+        ]
+        rma_customer_id = self._create_rma_from_move(
+            products2move,
+            "customer",
+            self.env.ref("base.res_partner_2"),
+            dropship=False,
+        )
+        rma = rma_customer_id.rma_line_ids
+        rma.action_rma_to_approve()
+        wizard = self.rma_make_picking.with_context(
+            {
+                "active_ids": rma.ids,
+                "active_model": "rma.order.line",
+                "picking_type": "incoming",
+                "active_id": rma.ids[0],
+            }
+        ).create({})
+        wizard.action_create_picking()
+        res = rma.action_view_in_shipments()
+        self.assertTrue("res_id" in res, "Incorrect number of pickings" "created")
+        picking = self.env["stock.picking"].browse(res["res_id"])
+        self.assertEqual(len(picking), 1, "Incorrect number of pickings created")
+        moves = picking.move_lines
+        self.assertEqual(
+            destination_package,
+            moves.mapped("move_line_ids.package_id"),
+            "Should have same package assigned",
+        )
+        self.assertFalse(
+            bool(moves.mapped("move_line_ids.result_package_id")),
+            "Destination package should not be assigned",
+        )
+        picking.action_assign()
+        for mv in picking.move_lines:
+            mv.quantity_done = mv.product_uom_qty
+        picking._action_done()
+        wizard = self.rma_make_picking.with_context(
+            {
+                "active_id": rma.ids[0],
+                "active_ids": rma.ids,
+                "active_model": "rma.order.line",
+                "picking_type": "outgoing",
+            }
+        ).create({})
+        wizard.action_create_picking()
+        res = rma.action_view_out_shipments()
+        picking = self.env["stock.picking"].browse(res["res_id"])
+        picking.action_assign()
+        for mv in picking.move_lines:
+            mv.quantity_done = mv.product_uom_qty
+        picking._action_done()
+        self.assertEqual(picking.state, "done", "Final picking should has done state")
+
+    def test_14_customer_rma_tracking_serial(self):
+        lot = self.lot_obj.create(
+            {
+                "product_id": self.product_1_serial.id,
+            }
+        )
+        origin_package = self.package_obj.create({})
+        destination_package = self.package_obj.create({})
+        products2move = [
+            (
+                self.product_1_serial,
+                1,
+                lot.id,
+                origin_package.id,
+                destination_package.id,
+            )
+        ]
+        rma_customer_id = self._create_rma_from_move(
+            products2move,
+            "customer",
+            self.env.ref("base.res_partner_2"),
+            dropship=False,
+        )
+        rma = rma_customer_id.rma_line_ids
+        rma.action_rma_to_approve()
+        wizard = self.rma_make_picking.with_context(
+            {
+                "active_ids": rma.ids,
+                "active_model": "rma.order.line",
+                "picking_type": "incoming",
+                "active_id": rma.ids[0],
+            }
+        ).create({})
+        wizard.action_create_picking()
+        res = rma.action_view_in_shipments()
+        self.assertTrue("res_id" in res, "Incorrect number of pickings" "created")
+        picking = self.env["stock.picking"].browse(res["res_id"])
+        self.assertEqual(len(picking), 1, "Incorrect number of pickings created")
+        moves = picking.move_lines
+        self.assertEqual(
+            destination_package,
+            moves.mapped("move_line_ids.package_id"),
+            "Should have same package assigned",
+        )
+        self.assertFalse(
+            bool(moves.mapped("move_line_ids.result_package_id")),
+            "Destination package should not be assigned",
+        )
+        picking.action_assign()
+        for mv in picking.move_lines:
+            mv.quantity_done = mv.product_uom_qty
+        picking._action_done()
+        wizard = self.rma_make_picking.with_context(
+            {
+                "active_id": rma.ids[0],
+                "active_ids": rma.ids,
+                "active_model": "rma.order.line",
+                "picking_type": "outgoing",
+            }
+        ).create({})
+        wizard.action_create_picking()
+        res = rma.action_view_out_shipments()
+        picking = self.env["stock.picking"].browse(res["res_id"])
+        picking.action_assign()
+        for mv in picking.move_lines:
+            mv.quantity_done = mv.product_uom_qty
+        picking._action_done()
+        self.assertEqual(picking.state, "done", "Final picking should has done state")
+
+    def test_15_move_reserving_correct_lot(self):
+        lot1 = self.lot_obj.create(
+            {
+                "product_id": self.product_1_serial.id,
+                "name": "LOT1",
+            }
+        )
+        lot2 = self.lot_obj.create(
+            {
+                "product_id": self.product_1_serial.id,
+                "name": "LOT2",
+            }
+        )
+        products2move = [
+            (
+                self.product_1_serial,
+                1,
+                lot1.id,
+            )
+        ]
+        rma_supplier_id = self._create_rma_from_move(
+            products2move,
+            "supplier",
+            self.env.ref("base.res_partner_2"),
+            dropship=False,
+        )
+        rma = rma_supplier_id.rma_line_ids
+        rma.action_rma_to_approve()
+        wizard = self.rma_make_picking.with_context(
+            {
+                "active_ids": rma.ids,
+                "active_model": "rma.order.line",
+                "picking_type": "outgoing",
+                "active_id": rma.ids[0],
+            }
+        ).create({})
+        wizard.action_create_picking()
+        res = rma.action_view_out_shipments()
+        self.assertTrue("res_id" in res, "Incorrect number of pickings" "created")
+        picking = self.env["stock.picking"].browse(res["res_id"])
+        self.assertEqual(len(picking), 1, "Incorrect number of pickings created")
+
+        quant_lot1 = self.env["stock.quant"].search(
+            [
+                ("product_id", "=", self.product_1_serial.id),
+                ("lot_id", "=", lot1.id),
+                ("location_id", "=", self.stock_rma_location.id),
+            ]
+        )
+        quant_lot1.quantity = 0
+        quant_lot2 = self.env["stock.quant"].search(
+            [
+                ("product_id", "=", self.product_1_serial.id),
+                ("lot_id", "=", lot2.id),
+                ("location_id", "=", self.stock_rma_location.id),
+            ]
+        )
+        quant_lot2.quantity = 0
+        moves = picking.move_lines
+        self.assertFalse(
+            moves.move_line_ids,
+            "There should not be any move_line created (no quantity to reserve).",
+        )
+        picking.action_assign()
+        self.assertFalse(
+            moves.move_line_ids,
+            "There should not be any move_line created (no quantity to reserve).",
+        )
+        quant_lot2.quantity = 1
+        picking.action_assign()
+        self.assertFalse(
+            moves.move_line_ids,
+            "There should not be any move_line created "
+            "(no quantity to reserve for the lot of the rma).",
+        )
+        quant_lot1.quantity = 1
+        picking.action_assign()
+        self.assertTrue(moves.move_line_ids)
+        self.assertEqual(moves.move_line_ids.lot_id, lot1)
+        for mv in picking.move_lines.move_line_ids:
+            mv.qty_done = mv.product_uom_qty
+        picking._action_done()
+        self.assertEqual(picking.state, "done", "Final picking should has done state")
