@@ -6,7 +6,7 @@
     "license": "AGPL-3",
     "summary": "Reason code for RMA",
     "author": "ForgeFlow",
-    "website": "https://github.com/ForgeFlow/stock-rma",
+    "website": "https://github.com/ForgeFlow",
     "category": "Warehouse Management",
     "depends": ["rma"],
     "data": [

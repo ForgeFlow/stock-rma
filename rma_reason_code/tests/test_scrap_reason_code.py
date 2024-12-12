@@ -9,7 +9,7 @@ from odoo.tests import common
 class RMAOrderLine(common.SavepointCase):
     @classmethod
     def setUpClass(cls):
-        super(RMAOrderLine, cls).setUpClass()
+        super().setUpClass()
         cls.user_admin = cls.env.ref("base.user_admin")
         cls.env = api.Environment(cls.cr, cls.user_admin.id, {})
         cls.user_admin.tz = False  # Make sure there's no timezone in user

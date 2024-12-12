@@ -32,7 +32,8 @@ class RmaReasonCodeReport(models.Model):
             FROM
                 rma_order_line rma
                 INNER JOIN
-                    rma_order_line_reason_code_rel rolr ON rma.id = rolr.rma_order_line_id
+                    rma_order_line_reason_code_rel rolr
+                    ON rma.id = rolr.rma_order_line_id
                 INNER JOIN
                     rma_reason_code rrc ON rolr.rma_reason_code_id = rrc.id
 
@@ -46,10 +47,8 @@ class RmaReasonCodeReport(models.Model):
 
     @property
     def _table_query(self):
-        return """
-            {_select}
-            {_from}
-            {_order_by}
-        """.format(
-            _select=self._select(), _from=self._from(), _order_by=self._order_by()
-        )
+        return f"""
+            {self._select()}
+            {self._from()}
+            {self._order_by()}
+        """
