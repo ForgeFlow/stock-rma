@@ -13,14 +13,15 @@ class RMAReasonCode(models.Model):
         return randint(1, 11)
 
     name = fields.Char("Code", required=True)
-    description = fields.Text("Description")
-    type = fields.Selection(
+    description = fields.Text()
+    rma_type = fields.Selection(
         [
             ("customer", "Customer RMA"),
             ("supplier", "Supplier RTV"),
             ("both", "Both Customer and Supplier"),
         ],
         default="both",
+        string="RMA Type",
         required=True,
     )
-    color = fields.Integer("Color", default=_get_default_color)
+    color = fields.Integer(default=_get_default_color)

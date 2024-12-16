@@ -8,7 +8,7 @@
                     <field name="rma_order_line_id" />
                     <field name="reason_code_id" />
                     <field name="date_rma" optional="show" />
-                    <field name="type" optional="hide" />
+                    <field name="rma_type" optional="hide" />
                     <field name="company_id" optional="hide" />
                 </tree>
             </field>
@@ -35,12 +35,12 @@
                         <filter
                         name="is_customer"
                         string="Customer"
-                        domain="[('type', '=', 'customer')]"
+                        domain="[('rma_type', '=', 'customer')]"
                     />
                         <filter
                         name="is_supplier"
                         string="Supplier"
-                        domain="[('type', '=', 'supplier')]"
+                        domain="[('rma_type', '=', 'supplier')]"
                     />
                     </group>
                     <separator />

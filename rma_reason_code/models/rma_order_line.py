@@ -24,9 +24,9 @@ class RMAOrderLine(models.Model):
         for rec in self:
             codes = self.env["rma.reason.code"]
             if rec.type == "customer":
-                codes = codes.search([("type", "in", ["customer", "both"])])
+                codes = codes.search([("rma_type", "in", ["customer", "both"])])
             else:
-                codes = codes.search([("type", "in", ["supplier", "both"])])
+                codes = codes.search([("rma_type", "in", ["supplier", "both"])])
             rec.allowed_reason_code_ids = codes
 
     @api.constrains("reason_code_ids", "product_id")

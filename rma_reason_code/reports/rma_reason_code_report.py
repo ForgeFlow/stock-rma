@@ -12,7 +12,7 @@ class RmaReasonCodeReport(models.Model):
     rma_order_line_id = fields.Many2one(comodel_name="rma.order.line")
     reason_code_id = fields.Many2one(comodel_name="rma.reason.code")
     date_rma = fields.Datetime(string="Order Date")
-    type = fields.Selection([("customer", "Customer"), ("supplier", "Supplier")])
+    rma_type = fields.Selection([("customer", "Customer"), ("supplier", "Supplier")])
     company_id = fields.Many2one(comodel_name="res.company")
 
     def _select(self):
@@ -20,7 +20,7 @@ class RmaReasonCodeReport(models.Model):
             SELECT
                 row_number() OVER () AS id,
                 rma.id as rma_order_line_id,
-                rma.type,
+                rma.type AS rma_type,
                 rrc.id as reason_code_id,
                 rma.date_rma,
                 rma.company_id

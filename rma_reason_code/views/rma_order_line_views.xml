@@ -16,7 +16,7 @@
                     widget="many2many_tags"
                     options="{'color_field': 'color', 'no_create': True}"
                 />
-                <field name="allowed_reason_code_ids" invisible="1" />
+                <field name="allowed_reason_code_ids" column_invisible="1" />
             </field>
         </field>
     </record>
@@ -32,7 +32,7 @@
                     widget="many2many_tags"
                     options="{'color_field': 'color', 'no_create': True}"
                 />
-                <field name="allowed_reason_code_ids" invisible="1" />
+                <field name="allowed_reason_code_ids" column_invisible="1" />
             </field>
         </field>
     </record>
@@ -66,8 +66,8 @@
                     string="Reason Code"
                     context="{'group_by':'reason_code_ids'}"
                 />
-                <field name="allowed_reason_code_ids" invisible="1" />
-                <field name="allowed_reason_code_ids" invisible="1" />
+                <field name="allowed_reason_code_ids" column_invisible="1" />
+                <field name="allowed_reason_code_ids" column_invisible="1" />
             </filter>
         </field>
     </record>

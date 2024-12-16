@@ -6,7 +6,7 @@ from odoo.exceptions import ValidationError
 from odoo.tests import common
 
 
-class RMAOrderLine(common.SavepointCase):
+class RMAOrderLine(common.TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -105,21 +105,21 @@ class RMAOrderLine(common.SavepointCase):
             {
                 "name": "Test Code 1",
                 "description": "Test description",
-                "type": "both",
+                "rma_type": "both",
             }
         )
         cls.reason_code_customer = cls.env["rma.reason.code"].create(
             {
                 "name": "Test Code 2",
                 "description": "Test description",
-                "type": "customer",
+                "rma_type": "customer",
             }
         )
         cls.reason_code_supplier = cls.env["rma.reason.code"].create(
             {
                 "name": "Test Code 3",
                 "description": "Test description",
-                "type": "supplier",
+                "rma_type": "supplier",
             }
         )
 

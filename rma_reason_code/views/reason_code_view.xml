@@ -21,7 +21,7 @@
                             nolabel="1"
                             colspan="2"
                         />
-                        <field name="type" />
+                        <field name="rma_type" />
                         <field name="color" widget="color_picker" />
                     </group>
                 </sheet>
@@ -32,10 +32,10 @@
         <field name="name">rma.reason.code.list</field>
         <field name="model">rma.reason.code</field>
         <field name="arch" type="xml">
-            <tree string="Reason Codes">
+            <tree>
                 <field name="name" />
                 <field name="description" />
-                <field name="type" />
+                <field name="rma_type" />
                 <field name="color" widget="color_picker" />
             </tree>
         </field>
