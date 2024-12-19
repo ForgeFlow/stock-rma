@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    Copyright 2024 ForgeFlow S.L. (https://www.forgeflow.com)
+    License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+-->
+<odoo>
+    <record id="rma_reason_code_report_comp_rule" model="ir.rule">
+        <field name="name">RMA Reason Code Report</field>
+        <field name="model_id" ref="model_rma_reason_code_report" />
+        <field
+            name="domain_force"
+        >['|',('company_id','=',False),('company_id', 'in', company_ids)]</field>
+    </record>
+</odoo>
