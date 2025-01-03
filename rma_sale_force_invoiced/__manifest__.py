@@ -8,7 +8,7 @@
     "category": "RMA",
     "summary": "Forces sales orders created from RMA to be forced as invoiced",
     "author": "ForgeFlow",
-    "website": "https://github.com/ForgeFlow/stock-rma",
+    "website": "https://github.com/ForgeFlow",
     "depends": ["rma_sale", "sale_force_invoiced"],
     "data": [
         "views/rma_operation_views.xml",
