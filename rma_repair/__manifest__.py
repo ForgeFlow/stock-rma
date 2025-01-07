@@ -7,7 +7,7 @@
     "category": "RMA",
     "summary": "Links RMA with Repairs.",
     "author": "ForgeFlow",
-    "website": "https://github.com/ForgeFlow/stock-rma",
+    "website": "https://github.com/ForgeFlow",
     "depends": ["rma_account", "repair"],
     "data": [
         "security/ir.model.access.csv",
