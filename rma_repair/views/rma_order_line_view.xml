@@ -13,7 +13,7 @@
                     class="oe_stat_button"
                     icon="fa-wrench"
                     groups="stock.group_stock_user"
-                    attrs="{'invisible': [('repair_count', '=', 0)]}"
+                    invisible="repair_count == 0"
                 >
                         <field
                         name="repair_count"
@@ -27,7 +27,7 @@
                     class="oe_stat_button"
                     icon="fa-truck"
                     groups="stock.group_stock_user"
-                    attrs="{'invisible': [('repair_transfer_count', '=', 0)]}"
+                    invisible="repair_transfer_count == 0"
                 >
                         <field
                         name="repair_transfer_count"
@@ -37,10 +37,9 @@
                     </button>
             </div>
             <group name="quantities" position="inside">
-                <group attrs="{'invisible': [('repair_type', '=', 'no')]}">
+                <group invisible="repair_type == 'no'">
                     <field name="qty_to_repair" />
                     <field name="qty_under_repair" />
-                    <field name="qty_to_pay" />
                     <field name="qty_repaired" />
                 </group>
             </group>
@@ -49,7 +48,7 @@
             </field>
             <notebook position="inside">
                 <page name="repair" string="Repair Orders">
-                    <field name="repair_ids" nolabel="1" />
+                    <field name="repair_ids" nolabel="1" readonly="state != 'draft'" />
                 </page>
             </notebook>
         </field>
@@ -65,13 +64,13 @@
                     name="%(action_rma_order_line_make_repair)d"
                     string="Create Repair Order"
                     class="oe_highlight"
-                    attrs="{'invisible':['|', '|', ('type', '!=', 'customer'), '|', ('qty_to_repair', '=', 0), ('qty_to_repair', '&lt;', 0), ('state', '!=', 'approved')]}"
+                    invisible="type != 'customer' or qty_to_repair == 0 or qty_to_repair &lt; 0 or state != 'approved'"
                     type="action"
                 />
                 <button
                     name="%(action_rma_order_line_make_repair)d"
                     string="Create Repair Order"
-                    attrs="{'invisible':['|', '|', ('type', '!=', 'customer'), ('qty_to_repair', '>', 0), ('state', '!=', 'approved')]}"
+                    invisible="type != 'customer' or qty_to_repair &gt; 0 or state != 'approved'"
                     type="action"
                 />
             </header>

@@ -29,12 +29,11 @@ class RmaLineMakeRepair(models.TransientModel):
             "partner_id": line.partner_id.id,
             "location_id": line.operation_id.repair_location_id.id
             or line.location_id.id,
-            "invoice_method": line.operation_id.repair_invoice_method or "after_repair",
         }
 
     @api.model
     def default_get(self, fields_list):
-        res = super(RmaLineMakeRepair, self).default_get(fields_list)
+        res = super().default_get(fields_list)
         rma_line_obj = self.env["rma.order.line"]
         rma_line_ids = self.env.context["active_ids"] or []
         active_model = self.env.context["active_model"]
@@ -118,34 +117,17 @@ class RmaLineMakeRepairItem(models.TransientModel):
     location_id = fields.Many2one(
         comodel_name="stock.location", string="Location", required=True
     )
-    invoice_method = fields.Selection(
-        selection=[
-            ("none", "No Invoice"),
-            ("b4repair", "Before Repair"),
-            ("after_repair", "After Repair"),
-        ],
-        required=True,
-        help="Selecting 'Before Repair' or 'After Repair' will allow you "
-        "to generate invoice before or after the repair is done "
-        "respectively. 'No invoice' means you don't want to generate "
-        "invoice for this repair order.",
-    )
 
     def _prepare_repair_order(self, rma_line):
         self.ensure_one()
-        addr = rma_line.partner_id.address_get(["delivery", "invoice"])
         return {
             "product_id": rma_line.product_id.id,
             "partner_id": rma_line.partner_id.id,
-            "pricelist_id": rma_line.partner_id.property_product_pricelist.id or False,
             "product_qty": self.product_qty,
             "rma_line_id": rma_line.id,
             "product_uom": rma_line.product_id.uom_po_id.id,
             "company_id": rma_line.company_id.id,
             "location_id": self.location_id.id,
-            "invoice_method": self.invoice_method,
-            "address_id": addr["delivery"],
-            "partner_invoice_id": addr["invoice"],
             "lot_id": rma_line.lot_id.id,
         }
 

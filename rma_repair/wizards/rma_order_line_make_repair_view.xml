@@ -6,44 +6,43 @@
         <field name="model">rma.order.line.make.repair</field>
         <field name="type">form</field>
         <field name="arch" type="xml">
-             <form string="Create Repair">
-                 <separator string="New Repair Orders details:" />
-                 <newline />
-                 <group>
-                     <field name="item_ids" nolabel="1" colspan="2">
-                          <tree name="Details" editable="bottom" create="false">
-                              <field
+            <form string="Create Repair">
+                <separator string="New Repair Orders details:" />
+                <newline />
+                <group>
+                    <field name="item_ids" nolabel="1" colspan="2">
+                        <tree name="Details" editable="bottom" create="false">
+                            <field
                                 name="line_id"
                                 force_save="1"
                                 options="{'no_open': true}"
                             />
-                              <field name="product_id" force_save="1" />
-                              <field name="product_qty" />
-                              <field
+                            <field name="product_id" force_save="1" />
+                            <field name="product_qty" />
+                            <field
                                 name="product_uom_id"
                                 force_save="1"
                                 groups="uom.group_uom"
                             />
-                              <field name="partner_id" force_save="1" />
-                              <field
+                            <field name="partner_id" force_save="1" />
+                            <field
                                 name="location_id"
                                 groups="stock.group_stock_multi_locations"
                                 force_save="1"
                             />
-                              <field name="invoice_method" />
-                          </tree>
-                     </field>
-                 </group>
-                 <newline />
-                 <footer>
-                     <button
+                        </tree>
+                    </field>
+                </group>
+                <newline />
+                <footer>
+                    <button
                         name="make_repair_order"
                         string="Create Repair Orders"
                         type="object"
                         class="oe_highlight"
                     />
-                     <button special="cancel" string="Cancel" class="oe_link" />
-                 </footer>
+                    <button special="cancel" string="Cancel" class="oe_link" />
+                </footer>
             </form>
         </field>
     </record>
