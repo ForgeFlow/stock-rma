@@ -13,7 +13,7 @@ class StockMove(models.Model):
     )
 
     def _is_in_out_rma_move(self, op, states, location_type):
-        res = super(StockMove, self)._is_in_out_rma_move(op, states, location_type)
+        res = super()._is_in_out_rma_move(op, states, location_type)
         if self.is_rma_repair_transfer:
             return False
         return res

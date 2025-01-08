@@ -13,6 +13,3 @@ class RepairOrder(models.Model):
     under_warranty = fields.Boolean(
         related="rma_line_id.under_warranty",
     )
-    payment_state = fields.Selection(
-        related="invoice_id.payment_state", string="Payment Status"
-    )
