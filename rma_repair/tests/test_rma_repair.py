@@ -8,7 +8,7 @@ from odoo.tests import common
 class TestRmaRepair(common.SingleTransactionCase):
     @classmethod
     def setUpClass(cls):
-        super(TestRmaRepair, cls).setUpClass()
+        super().setUpClass()
 
         cls.rma_obj = cls.env["rma.order"]
         cls.rma_line_obj = cls.env["rma.order.line"]
@@ -16,7 +16,6 @@ class TestRmaRepair(common.SingleTransactionCase):
         cls.rma_add_invoice_wiz = cls.env["rma_add_account_move"]
         cls.rma_make_repair_wiz = cls.env["rma.order.line.make.repair"]
         cls.rma_make_picking = cls.env["rma_make_picking.wizard"]
-        cls.repair_line_obj = cls.env["repair.line"]
         cls.acc_obj = cls.env["account.account"]
         cls.inv_obj = cls.env["account.move"]
         cls.invl_obj = cls.env["account.move.line"]
@@ -262,7 +261,7 @@ class TestRmaRepair(common.SingleTransactionCase):
         self.assertEqual(repair_transfer_move.location_id, self.stock_rma_location)
         self.assertEqual(repair_transfer_move.product_qty, 15.0)
         self.assertEqual(repair_transfer_move.product_id, rma.product_id)
-        rma.repair_ids.action_repair_confirm()
+        rma.repair_ids.action_repair_start()
         self.assertEqual(rma.repair_count, 1)
         self.assertEqual(rma.qty_to_repair, 0.0)
         self.assertEqual(rma.qty_repaired, 0.0)
@@ -298,7 +297,7 @@ class TestRmaRepair(common.SingleTransactionCase):
         picking = self.env["stock.picking"].browse(res["res_id"])
         picking.action_assign()
         for mv in picking.move_ids:
-            mv.quantity_done = mv.product_uom_qty
+            mv.quantity = mv.product_uom_qty
         picking._action_done()
         self.assertEqual(rma.repair_transfer_count, 0)
         self.assertEqual(rma.qty_to_deliver, 0.0)
@@ -318,31 +317,11 @@ class TestRmaRepair(common.SingleTransactionCase):
         self.assertEqual(repair_transfer_move.location_id, self.stock_rma_location)
         self.assertEqual(repair_transfer_move.product_id, rma.product_id)
         repair = rma.repair_ids
-        line = self.repair_line_obj.create(
-            {
-                "name": "consume stuff to repair",
-                "repair_id": repair.id,
-                "type": "add",
-                "product_id": self.material.id,
-                "product_uom": self.material.uom_id.id,
-                "product_uom_qty": 1.0,
-                "location_id": self.stock_location.id,
-                "location_dest_id": self.stock_location.id,
-                "price_unit": 10.0,
-            }
-        )
-        line.onchange_product_id()
-        repair.invoice_method = "after_repair"
-        repair.action_repair_confirm()
+        repair.action_validate()
         repair.action_repair_start()
         repair.action_repair_end()
-        self.assertEqual(rma.qty_to_pay, 0.0)
-        repair.action_repair_invoice_create()
         self.assertEqual(rma.qty_repaired, 1.0)
         self.assertEqual(rma.qty_to_deliver, 1.0)
-        repair.invoice_id.action_post()
-        self.assertEqual(repair.payment_state, "not_paid")
-        self.assertEqual(rma.qty_to_pay, 1.0)
         self.assertEqual(rma.qty_repaired, 1.0)
         self.assertEqual(rma.delivery_policy, "repair")
         self.assertEqual(rma.qty_delivered, 0.0)
