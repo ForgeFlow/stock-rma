@@ -8,6 +8,11 @@
             <field name="partner_id" position="after">
                 <field name="valid_lot_ids" invisible="1" />
             </field>
+            <field name="lot_id" position="attributes">
+                <attribute
+                    name="domain"
+                >[('product_id', '=', product_id),('id','in',valid_lot_ids)]</attribute>
+            </field>
         </field>
     </record>
 </odoo>
