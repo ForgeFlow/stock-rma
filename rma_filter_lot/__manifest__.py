@@ -8,7 +8,7 @@
     "category": "RMA",
     "summary": "Filter RMA lots",
     "author": "ForgeFlow",
-    "website": "https://github.com/ForgeFlow/stock-rma",
+    "website": "https://github.com/ForgeFlow",
     "depends": ["rma"],
     "data": [
         "views/rma_order_view.xml",
