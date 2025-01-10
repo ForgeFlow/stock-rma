@@ -8,56 +8,33 @@
         <field name="inherit_id" ref="base.res_config_settings_view_form" />
         <field name="arch" type="xml">
             <xpath expr="//form" position="inside">
-                <div
-                    class="app_settings_block"
-                    data-string="RMA"
+                <app
                     string="RMA"
-                    data-key="rma"
+                    data-string="RMA"
+                    name="rma"
                     groups="rma.group_rma_manager"
                 >
-                    <h2>Return Merchandise Authorization</h2>
-                    <div class="row mt16 o_settings_container">
-                        <div
-                            name="rma_delivery_address"
-                            class="col-12 col-lg-6 o_setting_box"
+                    <block
+                        title="Return Merchandise Authorization"
+                        name="return_merchandise_authorization"
+                    >
+                        <setting
+                            id="rma_delivery_address"
+                            help="Display 3 fields on rma: partner, invoice address, delivery address"
                         >
-                            <div class="o_setting_left_pane">
-                                <field name="group_rma_delivery_address" />
-                            </div>
-                            <div class="o_setting_right_pane">
-                                <label for="group_rma_delivery_address" />
-                                <div class="text-muted">
-                                    Display 3 fields on rma: partner, invoice address, delivery address
-                                </div>
-                            </div>
-                        </div>
-                        <div
-                            name="group_rma_lines"
-                            class="col-12 col-lg-6 o_setting_box"
+                            <field name="group_rma_delivery_address" />
+                        </setting>
+                        <setting
+                            id="group_rma_lines"
+                            help="Group RMA lines in one RMA group"
                         >
-                            <div class="o_setting_left_pane">
-                                <field name="group_rma_lines" />
-                            </div>
-                            <div class="o_setting_right_pane">
-                                <label for="group_rma_lines" />
-                                <div class="text-muted">
-                                    Group RMA lines in one RMA group
-                                </div>
-                            </div>
-                        </div>
-                        <div name="rma_account" class="col-12 col-lg-6 o_setting_box">
-                            <div class="o_setting_left_pane">
-                                <field name="module_rma_account" />
-                            </div>
-                            <div class="o_setting_right_pane">
-                                <label for="module_rma_account" />
-                                <div class="text-muted">
-                                    Enable RMA invoicing
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                            <field name="group_rma_lines" />
+                        </setting>
+                        <setting id="module_rma_account" help="Enable RMA invoicing">
+                            <field name="module_rma_account" />
+                        </setting>
+                    </block>
+                </app>
             </xpath>
         </field>
     </record>
