@@ -116,7 +116,7 @@ class TestRma(common.TransactionCase):
         pickings.action_assign()
         for picking in pickings:
             for mv in picking.move_ids:
-                mv.quantity = mv.product_uom_qty
+                mv.quantity = mv.product_qty
                 mv.picked = True
         # In case of two step pickings, ship in two steps:
         while pickings.filtered(lambda p: p.state == "assigned"):
@@ -138,7 +138,7 @@ class TestRma(common.TransactionCase):
         pickings.action_assign()
         for picking in pickings:
             for mv in picking.move_ids:
-                mv.quantity = mv.product_uom_qty
+                mv.quantity = mv.product_qty
                 mv.picked = True
         pickings._action_done()
         return pickings

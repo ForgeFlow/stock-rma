@@ -282,7 +282,7 @@ class TestRmaStockAccount(TestRma):
                 "name": "Customers->RMA",
                 "action": "pull",
                 "warehouse_id": self.wh.id,
-                "location_src_id": self.customer_location.id,
+                "location_src_id": self.input_location.id,
                 "location_dest_id": self.env.ref("rma.location_rma").id,
                 "procure_method": "make_to_order",
                 "route_id": self.customer_route.id,
