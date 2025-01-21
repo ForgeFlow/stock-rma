@@ -3,14 +3,14 @@
 
 {
     "name": "RMA (Return Merchandise Authorization)",
-    "version": "14.0.1.1.1",
+    "version": "14.0.1.1.2",
     "license": "LGPL-3",
     "category": "RMA",
     "summary": "Introduces the return merchandise authorization (RMA) process "
     "in odoo",
     "author": "ForgeFlow",
     "website": "https://github.com/ForgeFlow/stock-rma",
-    "depends": ["stock", "mail", "web", "stock_move_forced_lot"],
+    "depends": ["stock", "mail", "web", "stock_restrict_lot"],
     "demo": ["demo/stock_demo.xml"],
     "data": [
         "security/rma.xml",
