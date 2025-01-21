@@ -136,7 +136,7 @@ class RmaMakePicking(models.TransientModel):
             "location_id": location,
             "rma_line_id": line.id,
             "route_ids": route,
-            "lot_id": line.lot_id.id,
+            "restrict_lot_id": line.lot_id.id,
         }
         return procurement_data
 
