@@ -108,7 +108,6 @@
                         name="%(rma.action_make_supplier_rma)d"
                         string="Create Supplier RMA"
                         invisible="type != 'customer or state != approved''"
-                        class="oe_highlight"
                         type="action"
                     />
                 <field
