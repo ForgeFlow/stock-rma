@@ -107,7 +107,6 @@
                 <button
                         name="%(rma.action_make_supplier_rma)d"
                         string="Create Supplier RMA"
-                        class="oe_highlight"
                         attrs="{'invisible':['|', ('type', '!=', 'customer'), ('state', '!=', 'approved')]}"
                         type="action"
                     />
