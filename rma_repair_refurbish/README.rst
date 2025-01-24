@@ -1,11 +1,11 @@
 .. image:: https://img.shields.io/badge/licence-AGPL--3-blue.svg
     :alt: License AGPL-3
 
-==========
-RMA Repair
-==========
+====================
+RMA Repair Refurbish
+====================
 
-This module allows you to create repairs from one or more RMA lines.
+Links RMA with Repairs and Refurbish.
 
 Installation
 ============
@@ -15,13 +15,6 @@ This module depends on ``repair_refurbish`` which is available at
 
 Usage
 =====
-
-To create repairs from RMA lines:
-
-#. Go to an approved RMA.
-#. Click on *Create Repair Order*.
-#. Fill the required information in the lines.
-#. Hit *Create Repair Orders*.
 
 Bug Tracker
 ===========
@@ -37,11 +30,7 @@ Credits
 Contributors
 ------------
 
-* Jordi Ballester Alomar <jordi.ballester@forgeflow.com>
-* Aaron Henriquez <ahenriquez@forgeflow.com>
 * Lois Rilo <lois.rilo@forgeflow.com>
-* Akim Juillerat <akim.juillerat@camptocamp.com>
-* Bhavesh Odedra <bodedra@opensourceintegrators.com>
 
 Maintainer
 ----------

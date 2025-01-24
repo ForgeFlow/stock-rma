@@ -9,7 +9,7 @@ class RmaLineMakeRepair(models.TransientModel):
 
     @api.model
     def _prepare_item(self, line):
-        res = super(RmaLineMakeRepair, self)._prepare_item(line)
+        res = super()._prepare_item(line)
         if line.product_id.refurbish_product_id:
             to_refurbish = True
             refurbish_product_id = line.product_id.refurbish_product_id.id
@@ -43,7 +43,7 @@ class RmaLineMakeRepairItem(models.TransientModel):
     )
 
     def _prepare_repair_order(self, rma_line):
-        res = super(RmaLineMakeRepairItem, self)._prepare_repair_order(rma_line)
+        res = super()._prepare_repair_order(rma_line)
         location_dest = (
             self.location_dest_id
             if not self.to_refurbish
