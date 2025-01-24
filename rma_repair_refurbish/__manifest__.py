@@ -7,7 +7,7 @@
     "category": "RMA",
     "summary": "Links RMA with Repairs and Refurbish.",
     "author": "ForgeFlow, Odoo Community Association (OCA)",
-    "website": "https://github.com/ForgeFlow/stock-rma",
+    "website": "https://github.com/ForgeFlow",
     "depends": ["rma_repair", "repair_refurbish"],
     "data": [
         "wizards/rma_order_line_make_repair_view.xml",
