@@ -48,7 +48,7 @@
                     name="action_view_sale_order"
                     class="oe_stat_button"
                     icon="fa-strikethrough"
-                    attrs="{'invisible': [('sale_count', '=', 0)]}"
+                    invisible="sale_count == 0"
                     groups="sales_team.group_sale_salesman_all_leads"
                 >
                     <field name="sale_count" widget="statinfo" string="Sales Orders" />
