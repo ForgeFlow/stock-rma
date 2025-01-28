@@ -23,7 +23,7 @@
                     name="action_view_invoice_refund"
                     class="oe_stat_button"
                     icon="fa-pencil-square-o"
-                    attrs="{'invisible': [('invoice_refund_count', '=', 0)]}"
+                    invisible="invoice_refund_count == 0"
                     groups="account.group_account_invoice"
                 >
                     <field
@@ -37,7 +37,7 @@
                     name="action_view_invoice"
                     class="oe_stat_button"
                     icon="fa-pencil-square-o"
-                    attrs="{'invisible': [('invoice_count', '=', 0)]}"
+                    invisible="invoice_count == 0"
                     groups="account.group_account_invoice"
                 >
                     <field name="invoice_count" widget="statinfo" string="Origin Inv" />
