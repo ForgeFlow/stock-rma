@@ -107,7 +107,7 @@
                 <button
                         name="%(rma.action_make_supplier_rma)d"
                         string="Create Supplier RMA"
-                        invisible="type != 'customer or state != approved''"
+                        invisible="type != 'customer' or state != 'approved'"
                         type="action"
                     />
                 <field
@@ -124,9 +124,8 @@
                             name="action_view_in_shipments"
                             class="oe_stat_button"
                             icon="fa-truck"
-                            attrs="{'invisible': [('in_shipment_count', '=', 0)]}"
-                            groups="stock.group_stock_user"
                             invisible="in_shipment_count == 0"
+                            groups="stock.group_stock_user"
                         >
                         <field
                                 name="in_shipment_count"
@@ -139,9 +138,8 @@
                             name="action_view_out_shipments"
                             class="oe_stat_button"
                             icon="fa-truck"
-                            attrs="{'invisible': [('out_shipment_count', '=', 0)]}"
-                            groups="stock.group_stock_user"
                             invisible="out_shipment_count == 0"
+                            groups="stock.group_stock_user"
                         >
                         <field
                                 name="out_shipment_count"
@@ -154,9 +152,8 @@
                             name="action_view_lines"
                             class="oe_stat_button"
                             icon="fa-list"
-                            attrs="{'invisible': [('line_count', '=', 0)]}"
-                            groups="rma.group_rma_customer_user"
                             invisible="line_count == 0"
+                            groups="rma.group_rma_customer_user"
                         >
                         <field name="line_count" widget="statinfo" string="RMA Lines" />
                     </button>
