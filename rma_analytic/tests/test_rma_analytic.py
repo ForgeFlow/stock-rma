@@ -26,6 +26,7 @@ class TestRmaAnalytic(test_rma.TestRma):
                 "name": "Refund and receive",
                 "type": "customer",
                 "receipt_policy": "ordered",
+                "delivery_policy": "received",
                 "refund_policy": "ordered",
                 "in_route_id": cls.rma_route_cust.id,
                 "out_route_id": cls.rma_route_cust.id,
