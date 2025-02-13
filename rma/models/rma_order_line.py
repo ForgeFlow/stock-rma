@@ -72,6 +72,18 @@ class RmaOrderLine(models.Model):
         return moves
 
     @api.model
+    def _get_out_moves(self):
+        moves = self.env["stock.move"]
+        for move in self.move_ids:
+            first_usage = move._get_first_usage()
+            last_usage = move._get_last_usage()
+            if first_usage == "internal" and last_usage != "internal":
+                moves |= move
+            elif first_usage == "supplier" and last_usage == "customer":
+                moves |= moves
+        return moves
+
+    @api.model
     def _get_out_pickings(self):
         pickings = self.env["stock.picking"]
         for move in self.move_ids:
@@ -101,30 +113,10 @@ class RmaOrderLine(models.Model):
             product_obj = self.env["uom.uom"]
             qty = 0.0
             if direction == "in":
-                moves = rec.move_ids.filtered(
-                    lambda m: m.state in states
-                    and (
-                        m.location_id.usage == "supplier"
-                        or m.location_id.usage == "customer"
-                    )
-                    and (
-                        m.location_dest_id.usage == "internal"
-                        or m.location_dest_id.usage == "supplier"
-                    )
-                )
-            elif direction == "out":
-                moves = rec.move_ids.filtered(
-                    lambda m: m.state in states
-                    and (
-                        m.location_dest_id.usage == "supplier"
-                        or m.location_dest_id.usage == "customer"
-                    )
-                    and (
-                        m.location_id.usage == "internal"
-                        or m.location_id.usage == "supplier"
-                    )
-                )
-            for move in moves:
+                moves = rec._get_in_moves()
+            else:
+                moves = rec._get_out_moves()
+            for move in moves.filtered(lambda m: m.state in states):
                 # If the move is part of a chain don't count it
                 if direction == "out" and move.move_orig_ids:
                     continue
@@ -170,7 +162,7 @@ class RmaOrderLine(models.Model):
     def _compute_qty_incoming(self):
         for rec in self:
             qty = rec._get_rma_move_qty(
-                ("draft", "confirmed", "assigned"), direction="in"
+                ("draft", "confirmed", "assigned", "waiting"), direction="in"
             )
             rec.qty_incoming = qty
 
@@ -184,7 +176,7 @@ class RmaOrderLine(models.Model):
     def _compute_qty_outgoing(self):
         for rec in self:
             qty = rec._get_rma_move_qty(
-                ("draft", "confirmed", "assigned"), direction="out"
+                ("draft", "confirmed", "assigned", "waiting"), direction="out"
             )
             rec.qty_outgoing = qty
 
@@ -490,6 +482,10 @@ class RmaOrderLine(models.Model):
     )
     under_warranty = fields.Boolean(string="Under Warranty?")
 
+    def _get_stock_move_reference(self):
+        self.ensure_one()
+        return self.reference_move_id
+
     def _prepare_rma_line_from_stock_move(self, sm, lot=False):
         if not self.type:
             self.type = self._get_default_type()
@@ -582,7 +578,8 @@ class RmaOrderLine(models.Model):
         for rec in self:
             if (
                 rec.reference_move_id
-                and rec.reference_move_id.picking_id.partner_id != rec.partner_id
+                and rec.reference_move_id.picking_id.partner_id.commercial_partner_id
+                != rec.partner_id.commercial_partner_id
             ):
                 raise ValidationError(
                     _(
