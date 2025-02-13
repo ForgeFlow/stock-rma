@@ -13,7 +13,20 @@ class RmaOrderLine(models.Model):
         compute="_compute_domain_lot_ids",
     )
 
-    @api.depends("product_id")
+    def _get_filter_lot_customer_domain(self):
+        self.ensure_one()
+        return [
+            ("location_dest_id.usage", "=", "customer"),
+            ("product_id", "=", self.product_id.id),
+            ("state", "=", "done"),
+            (
+                "move_id.partner_id",
+                "child_of",
+                self.partner_id.commercial_partner_id.ids,
+            ),
+        ]
+
+    @api.depends("product_id", "operation_id")
     def _compute_domain_lot_ids(self):
         for rec in self:
             lots = rec.env["stock.lot"].search([("product_id", "=", rec.product_id.id)])
@@ -34,6 +47,14 @@ class RmaOrderLine(models.Model):
                         valid_ids |= quant.lot_id
                 if valid_ids:
                     lots = valid_ids
+                # Check if the lot has ever been shipped to that customer.
+                # In that case restrict to those.
+                mls = rec.env["stock.move.line"].search(
+                    rec._get_filter_lot_customer_domain()
+                )
+                moved_lots = mls.mapped("lot_id")
+                if moved_lots:
+                    lots = lots.filtered(lambda lot: lot in moved_lots)  # noqa: B023
             rec.valid_lot_ids = lots
 
     def _onchange_product_id(self):
