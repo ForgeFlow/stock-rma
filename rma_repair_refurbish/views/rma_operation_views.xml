@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="rma_operation_form" model="ir.ui.view">
+        <field name="name">rma.operation.form - rma_repair_refurbish</field>
+        <field name="model">rma.operation</field>
+        <field name="inherit_id" ref="rma.rma_operation_form" />
+        <field name="arch" type="xml">
+            <group name="repair" position="inside">
+                <field name="repair_location_dest_id" />
+            </group>
+        </field>
+    </record>
+
+</odoo>
