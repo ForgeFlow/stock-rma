@@ -88,15 +88,27 @@ class TestRma(common.TransactionCase):
         # create rules to have multi step reception/shipment, unactive by default
         cls.test_rma_loc = cls.stock_rma_location.copy({"name": "rma loc shipping"})
         rma_route = cls.env.ref("rma.route_rma_customer")
+        rma_route_2steps_classic = rma_route.copy(
+            {"name": "RMA Customer 2 Steps (classic test)", "rule_ids": False}
+        )
+        cls.rma_cust_replace_op_2sc_id = cls.rma_cust_replace_op_id.copy(
+            {
+                "name": "Replace After Receive 2steps (classic test)",
+                "code": "RPL-C-2C",
+                "in_route_id": rma_route_2steps_classic.id,
+            }
+        )
+        cls.rma_location = cls.env.ref("rma.location_rma")
+        cls.op_type_cust_to_rma = cls.env.ref("rma.picking_type_rma_cust_in")
         cls.second_step_incoming_rule = cls.env["stock.rule"].create(
             {
                 "name": "reception => rma loc shipping",
                 "action": "pull",
-                "picking_type_id": cls.wh.int_type_id.id,
+                "picking_type_id": cls.op_type_cust_to_rma.id,
                 "location_src_id": cls.wh.wh_input_stock_loc_id.id,
-                "location_dest_id": cls.test_rma_loc.id,
-                "procure_method": "make_to_stock",
-                "route_id": rma_route.id,
+                "location_dest_id": cls.rma_location.id,
+                "procure_method": "make_to_order",
+                "route_id": rma_route_2steps_classic.id,
                 "warehouse_id": cls.wh.id,
                 "company_id": cls.wh.company_id.id,
                 "active": False,
@@ -106,14 +118,15 @@ class TestRma(common.TransactionCase):
         cls.second_step_outgoing_rule = cls.env["stock.rule"].create(
             {
                 "name": "rma => reception",
-                "action": "push",
-                "picking_type_id": cls.wh.int_type_id.id,
-                "location_src_id": cls.stock_rma_location.id,
+                "action": "pull",
+                "picking_type_id": cls.op_type_cust_to_rma.id,
+                "location_src_id": cls.customer_location.id,
                 "location_dest_id": cls.wh.wh_input_stock_loc_id.id,
                 "procure_method": "make_to_stock",
-                "route_id": rma_route.id,
+                "route_id": rma_route_2steps_classic.id,
                 "warehouse_id": cls.wh.id,
                 "company_id": cls.wh.company_id.id,
+                "location_dest_from_rule": True,
                 "active": False,
             }
         )
@@ -122,14 +135,6 @@ class TestRma(common.TransactionCase):
     def _configure_2_steps_incoming_outgoing(cls):
         cls.second_step_incoming_rule.write({"active": True})
         cls.second_step_outgoing_rule.write({"active": True})
-        rma_customer_rule = cls.env.ref("rma.rule_rma_customer_out_pull")
-        rma_customer_rule.write(
-            {
-                "procure_method": "make_to_order",
-                "sequence": 0,
-                "location_src_id": cls.test_rma_loc.id,
-            }
-        )
 
     @classmethod
     def _create_user(cls, login, groups, company):
@@ -207,7 +212,7 @@ class TestRma(common.TransactionCase):
             {
                 "name": name,
                 "categ_id": cls.category.id,
-                "type": "product",
+                "is_storable": True,
                 "tracking": tracking,
             }
         )
@@ -1211,10 +1216,11 @@ class TestRma(common.TransactionCase):
         )
 
     def test_10_rma_cancel_line(self):
-        # configure a new rule to make reception and  expedition in 2 steps
+        # configure a new rule to make reception and expedition in 2 steps
         self._configure_2_steps_incoming_outgoing()
         # Generate expedition for the rma group
         self.rma_customer_id.rma_line_ids.action_rma_to_approve()
+        self.rma_customer_id.rma_line_ids.operation_id = self.rma_cust_replace_op_2sc_id
         wizard = self.rma_make_picking.with_context(
             **{
                 "active_ids": self.rma_customer_id.rma_line_ids.ids,
@@ -1229,7 +1235,7 @@ class TestRma(common.TransactionCase):
         first_rma_line = self.rma_customer_id.rma_line_ids[0]
         second_rma_line = self.rma_customer_id.rma_line_ids[1]
         first_line_in_move = first_rma_line.move_ids.filtered(
-            lambda m: m.location_dest_id == self.stock_rma_location
+            lambda m: m.location_dest_id == self.wh.wh_input_stock_loc_id
         )
         first_line_in_dest_move = first_line_in_move.move_dest_ids
         reception_picking = first_line_in_move.picking_id
@@ -1239,7 +1245,7 @@ class TestRma(common.TransactionCase):
         self.assertEqual(first_line_in_move.state, "cancel")
         self.assertEqual(reception_picking.state, "assigned")
         second_line_in_move = second_rma_line.move_ids.filtered(
-            lambda m: m.location_dest_id == self.stock_rma_location
+            lambda m: m.location_dest_id == self.wh.wh_input_stock_loc_id
         )
         self.assertEqual(second_line_in_move.state, "assigned")
 
@@ -1259,7 +1265,7 @@ class TestRma(common.TransactionCase):
         wizard._create_picking()
         # cancel first line, check both chained move are canceled
         second_rma_out_move = second_rma_line.move_ids.filtered(
-            lambda m: m.picking_id.picking_type_code == "outgoing"
+            lambda m: m.procure_method == "make_to_order"
         )
         second_rma_out_move_orig = second_rma_out_move.move_orig_ids
         self.assertTrue(second_rma_out_move_orig)
@@ -1276,8 +1282,6 @@ class TestRma(common.TransactionCase):
         """
         # Alter the customer RMA route to make it multi-step
         # Get rid of the duplicated rule
-        self.env.ref("rma.rule_rma_customer_out_pull").active = False
-        self.env.ref("rma.rule_rma_customer_in_pull").active = False
         cust_in_pull_rule = self.customer_route.rule_ids.filtered(
             lambda r: r.location_dest_id == self.stock_rma_location
         )
@@ -1571,7 +1575,7 @@ class TestRma(common.TransactionCase):
         self.assertEqual(picking.state, "done", "Final picking should has done state")
 
     def test_16_rma_received_shipped_quantities_multiple_step(self):
-        # configure a new rule to make reception and  expedition in 2 steps
+        # configure a new rule to make reception and expedition in 2 steps
         self._configure_2_steps_incoming_outgoing()
         rma_customer = self._create_rma_from_move(
             [(self.product_1, 3)],
@@ -1579,6 +1583,7 @@ class TestRma(common.TransactionCase):
             self.env.ref("base.res_partner_2"),
             dropship=False,
         )
+        rma_customer.rma_line_ids.operation_id = self.rma_cust_replace_op_2sc_id
         rma_customer.rma_line_ids.action_rma_to_approve()
         # Generate reception for the rma group and check incoming quantities
         rma_line = rma_customer.rma_line_ids
@@ -1604,6 +1609,111 @@ class TestRma(common.TransactionCase):
         self.assertEqual(rma_line.qty_incoming, 3.0)
         self.assertEqual(rma_line.qty_received, 0.0)
         second_picking = in_pickings - first_in_picking
+        for mv in second_picking.move_ids:
+            mv.quantity = mv.product_qty
+            mv.picked = True
+        second_picking._action_done()
+        self.assertEqual(rma_line.qty_incoming, 0.0)
+        self.assertEqual(rma_line.qty_received, 3.0)
+
+        # generate 2 step expedition and check quantities
+        wizard = self.rma_make_picking.with_context(
+            **{
+                "active_ids": rma_line.ids,
+                "active_model": "rma.order.line",
+                "picking_type": "outgoing",
+                "active_id": 1,
+            }
+        ).create({})
+        wizard.with_context(test=True)._create_picking()
+        out_picking = rma_line._get_out_pickings()
+        self.assertEqual(rma_line.qty_outgoing, 3.0)
+        self.assertEqual(rma_line.qty_delivered, 0.0)
+        for mv in out_picking.move_ids:
+            mv.quantity = mv.product_qty
+            mv.picked = True
+        out_picking._action_done()
+        self.assertEqual(rma_line.qty_outgoing, 0.0)
+        self.assertEqual(rma_line.qty_delivered, 3.0)
+
+    def test_17_rma_received_shipped_quantities_multiple_step_new_flow(self):
+        # configure a new rule to make reception and expedition in
+        # 2 steps with new flow of Odoo 18
+        # This flow create 2nd picking only after 1st picking is done
+        rma_route = self.env.ref("rma.route_rma_customer")
+        rma_route_2steps_new = rma_route.copy(
+            {"name": "RMA Customer 2 Steps (new flow test)", "rule_ids": False}
+        )
+        rma_cust_replace_op_2sc_new_id = self.rma_cust_replace_op_id.copy(
+            {
+                "name": "Replace After Receive 2 Steps (new flow test)",
+                "code": "RPL-C-2C",
+                "in_route_id": rma_route_2steps_new.id,
+            }
+        )
+        op_type_cust_to_input = self.op_type_cust_to_rma.copy(
+            {"default_location_dest_id": self.wh.wh_input_stock_loc_id.id}
+        )
+        self.second_step_incoming_rule = self.env["stock.rule"].create(
+            {
+                "name": "Customer => input",
+                "action": "pull",
+                "picking_type_id": op_type_cust_to_input.id,
+                "location_src_id": self.customer_location.id,
+                "location_dest_id": self.rma_location.id,
+                "procure_method": "make_to_stock",
+                "route_id": rma_route_2steps_new.id,
+                "warehouse_id": self.wh.id,
+                "company_id": self.wh.company_id.id,
+                "sequence": 0,
+            }
+        )
+        self.second_step_outgoing_rule = self.env["stock.rule"].create(
+            {
+                "name": "input => rma",
+                "action": "push",
+                "picking_type_id": self.op_type_cust_to_rma.id,
+                "location_src_id": self.wh.wh_input_stock_loc_id.id,
+                "location_dest_id": self.rma_location.id,
+                "procure_method": "make_to_stock",
+                "route_id": rma_route_2steps_new.id,
+                "warehouse_id": self.wh.id,
+                "company_id": self.wh.company_id.id,
+                "sequence": 1,
+            }
+        )
+
+        rma_customer = self._create_rma_from_move(
+            [(self.product_1, 3)],
+            "customer",
+            self.env.ref("base.res_partner_2"),
+            dropship=False,
+        )
+        rma_customer.rma_line_ids.operation_id = rma_cust_replace_op_2sc_new_id
+        rma_customer.rma_line_ids.action_rma_to_approve()
+        # Generate reception for the rma group and check incoming quantities
+        rma_line = rma_customer.rma_line_ids
+        wizard = self.rma_make_picking.with_context(
+            **{
+                "active_ids": rma_customer.rma_line_ids.ids,
+                "active_model": "rma.order.line",
+                "picking_type": "incoming",
+                "active_id": 1,
+            }
+        ).create({})
+        wizard._create_picking()
+        first_in_picking = rma_line._get_in_pickings()
+        self.assertEqual(rma_line.qty_incoming, 3.0)
+        self.assertEqual(rma_line.qty_received, 0.0)
+        for mv in first_in_picking.move_ids:
+            mv.quantity = mv.product_qty
+            mv.picked = True
+        first_in_picking._action_done()
+        # Until all the incoming moves are completed,
+        # we do not assume the reception is done.
+        self.assertEqual(rma_line.qty_incoming, 3.0)
+        self.assertEqual(rma_line.qty_received, 0.0)
+        second_picking = first_in_picking._get_next_transfers()
         for mv in second_picking.move_ids:
             mv.quantity = mv.product_qty
             mv.picked = True

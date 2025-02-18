@@ -41,5 +41,4 @@
         <field name="out_route_id" ref="rma.route_rma_dropship" />
         <field name="in_route_id" ref="rma.route_rma_dropship" />
     </record>
-
 </odoo>

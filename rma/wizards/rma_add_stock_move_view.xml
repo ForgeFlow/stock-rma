@@ -10,7 +10,7 @@
                 </group>
                 <separator string="Select Stock Moves to add" />
                 <field name="move_ids">
-                    <tree>
+                    <list>
                         <field name="product_id" />
                         <field name="product_uom_qty" />
                         <field
@@ -30,7 +30,7 @@
                         <field name="create_date" groups="base.group_no_one" />
                         <field name="date" string="Date" groups="base.group_no_one" />
                         <field name="state" />
-                    </tree>
+                    </list>
                 </field>
                 <field name="show_lot_filter" invisible="1" />
                 <field name="lot_domain_ids" widget="many2many_tags" invisible="1" />
@@ -60,18 +60,18 @@
                 </div>
                 <footer>
                     <button
-                        string="Confirm"
-                        name="add_lines"
-                        type="object"
-                        class="oe_highlight"
-                    />
+                    string="Confirm"
+                    name="add_lines"
+                    type="object"
+                    class="oe_highlight"
+                />
                     or
                     <button
-                        name="action_cancel"
-                        string="Cancel"
-                        class="oe_link"
-                        special="cancel"
-                    />
+                    name="action_cancel"
+                    string="Cancel"
+                    class="oe_link"
+                    special="cancel"
+                />
                 </footer>
             </form>
         </field>
@@ -86,7 +86,6 @@
         <field name="view_id" ref="view_rma_add_stock_move_customer" />
         <field name="groups_id" eval="[(4, ref('rma.group_rma_customer_user'))]" />
     </record>
-
 
     <record id="view_rma_add_stock_move_customer_form" model="ir.ui.view">
         <field name="name">rma.order.form - stock.move wizard</field>
@@ -142,18 +141,18 @@
                 </div>
                 <footer>
                     <button
-                        string="Confirm"
-                        name="add_lines"
-                        type="object"
-                        class="oe_highlight"
-                    />
+                    string="Confirm"
+                    name="add_lines"
+                    type="object"
+                    class="oe_highlight"
+                />
                     or
                     <button
-                        name="action_cancel"
-                        string="Cancel"
-                        class="oe_link"
-                        special="cancel"
-                    />
+                    name="action_cancel"
+                    string="Cancel"
+                    class="oe_link"
+                    special="cancel"
+                />
                 </footer>
             </form>
         </field>
@@ -184,5 +183,4 @@
             </xpath>
         </field>
     </record>
-
 </odoo>

@@ -1,7 +1,7 @@
 # Copyright (C) 2017-20 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -65,7 +65,7 @@ class RmaAddStockMove(models.TransientModel):
         )
         return {
             "type": "ir.actions.act_window",
-            "name": _("Add from Stock Move"),
+            "name": self.env._("Add from Stock Move"),
             "view_mode": "form",
             "res_model": self._name,
             "res_id": self.id,
@@ -90,14 +90,14 @@ class RmaAddStockMove(models.TransientModel):
                 [("type", "=", self.rma_id.type)], limit=1
             )
             if not operation:
-                raise ValidationError(_("Please define an operation first"))
+                raise ValidationError(self.env._("Please define an operation first"))
 
         if not operation.in_route_id or not operation.out_route_id:
             route = self.env["stock.route"].search(
                 [("rma_selectable", "=", True)], limit=1
             )
             if not route:
-                raise ValidationError(_("Please define an RMA route"))
+                raise ValidationError(self.env._("Please define an RMA route"))
         in_warehouse = self.rma_id.in_warehouse_id or operation.in_warehouse_id
         in_route = self.rma_id.in_route_id or operation.in_route_id
         out_warehouse = self.rma_id.out_warehouse_id or operation.out_warehouse_id
@@ -112,7 +112,7 @@ class RmaAddStockMove(models.TransientModel):
             )
             if not warehouse:
                 raise ValidationError(
-                    _("Please define a warehouse with a default RMA location")
+                    self.env._("Please define a warehouse with a default RMA location")
                 )
             in_warehouse = in_warehouse or warehouse
             out_warehouse = out_warehouse or warehouse

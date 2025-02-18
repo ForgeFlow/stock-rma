@@ -3,7 +3,7 @@
 
 from datetime import datetime
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 
@@ -217,9 +217,11 @@ class RmaOrder(models.Model):
         if self.rma_line_ids and self.partner_id != self.mapped(
             "rma_line_ids.partner_id"
         ):
-            raise UserError(_("Group partner and RMA's partner must be the same."))
+            raise UserError(
+                self.env._("Group partner and RMA's partner must be the same.")
+            )
         if len(self.mapped("rma_line_ids.partner_id")) > 1:
-            raise UserError(_("All grouped RMA's should have same partner."))
+            raise UserError(self.env._("All grouped RMA's should have same partner."))
 
     @api.model_create_multi
     def create(self, vals_list):
