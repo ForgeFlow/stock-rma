@@ -3,7 +3,7 @@
 
 from datetime import timedelta
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import float_compare
 
@@ -45,7 +45,7 @@ class RmaMakePicking(models.TransientModel):
         lines = rma_line_obj.browse(rma_line_ids)
         if len(lines.mapped("partner_id")) > 1:
             raise ValidationError(
-                _(
+                self.env._(
                     "Only RMA lines from the same partner can be processed at "
                     "the same time"
                 )
@@ -89,7 +89,7 @@ class RmaMakePicking(models.TransientModel):
         elif item.line_id.partner_id:
             delivery_address = item.line_id.partner_id
         else:
-            raise ValidationError(_("Unknown delivery address"))
+            raise ValidationError(self.env._("Unknown delivery address"))
         return delivery_address
 
     @api.model
@@ -122,9 +122,9 @@ class RmaMakePicking(models.TransientModel):
             if line.product_id.sale_delay:
                 date_planned = date_planned + timedelta(days=line.product_id.sale_delay)
         if not route:
-            raise ValidationError(_("No route specified"))
+            raise ValidationError(self.env._("No route specified"))
         if not warehouse:
-            raise ValidationError(_("No warehouse specified"))
+            raise ValidationError(self.env._("No warehouse specified"))
         procurement_data = {
             "name": line.rma_id and line.rma_id.name or line.name,
             "group_id": group,
@@ -155,11 +155,11 @@ class RmaMakePicking(models.TransientModel):
             qty = item.qty_to_deliver
         values = self._get_procurement_data(item, group, qty, picking_type)
         product = item.line_id.product_id
-        if float_compare(qty, 0, product.uom_id.rounding) != 1:
+        if float_compare(qty, 0, precision_rounding=product.uom_id.rounding) != 1:
             raise ValidationError(
-                _(
+                self.env._(
                     "No quantity to transfer on %(arg1)s shipment of product %(arg2)s.",
-                    arg1=_(picking_type),
+                    arg1=self.env._(picking_type),
                     arg2=product.default_code or product.name,
                 )
             )
@@ -196,11 +196,15 @@ class RmaMakePicking(models.TransientModel):
         for item in self.item_ids:
             line = item.line_id
             if line.state != "approved":
-                raise ValidationError(_("RMA %s is not approved") % line.name)
+                raise ValidationError(self.env._("RMA %s is not approved") % line.name)
             if line.receipt_policy == "no" and picking_type == "incoming":
-                raise ValidationError(_("No shipments needed for this operation"))
+                raise ValidationError(
+                    self.env._("No shipments needed for this operation")
+                )
             if line.delivery_policy == "no" and picking_type == "outgoing":
-                raise ValidationError(_("No deliveries needed for this operation"))
+                raise ValidationError(
+                    self.env._("No deliveries needed for this operation")
+                )
             procurement = self._create_procurement(item, picking_type)
             procurements.extend(procurement)
         return procurements

@@ -1,7 +1,7 @@
 # Copyright (C) 2017-20 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo import _, fields, models
+from odoo import fields, models
 
 
 class StockWarehouse(models.Model):
@@ -69,7 +69,6 @@ class StockWarehouse(models.Model):
                                 "usage": "internal",
                                 "location_id": wh.view_location_id.id,
                                 "company_id": wh.company_id.id,
-                                "return_location": True,
                             }
                         )
                     # RMA types
@@ -105,7 +104,7 @@ class StockWarehouse(models.Model):
             # create rma_cust_out_type_id:
             rma_cust_out_type_id = picking_type_obj.create(
                 {
-                    "name": _("Customer RMA Deliveries"),
+                    "name": self.env._("Customer RMA Deliveries"),
                     "warehouse_id": wh.id,
                     "code": "outgoing",
                     "use_create_lots": True,
@@ -121,7 +120,7 @@ class StockWarehouse(models.Model):
             # create rma_sup_out_type_id:
             rma_sup_out_type_id = picking_type_obj.create(
                 {
-                    "name": _("Supplier RMA Deliveries"),
+                    "name": self.env._("Supplier RMA Deliveries"),
                     "warehouse_id": wh.id,
                     "code": "outgoing",
                     "use_create_lots": True,
@@ -137,7 +136,7 @@ class StockWarehouse(models.Model):
             # create rma_cust_in_type_id:
             rma_cust_in_type_id = picking_type_obj.create(
                 {
-                    "name": _("Customer RMA Receipts"),
+                    "name": self.env._("Customer RMA Receipts"),
                     "warehouse_id": wh.id,
                     "code": "incoming",
                     "use_create_lots": True,
@@ -153,7 +152,7 @@ class StockWarehouse(models.Model):
             # create rma_sup_in_type_id:
             rma_sup_in_type_id = picking_type_obj.create(
                 {
-                    "name": _("Supplier RMA Receipts"),
+                    "name": self.env._("Supplier RMA Receipts"),
                     "warehouse_id": wh.id,
                     "code": "incoming",
                     "use_create_lots": True,

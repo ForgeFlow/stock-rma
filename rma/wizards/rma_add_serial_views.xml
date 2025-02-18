@@ -17,18 +17,18 @@
                 <field name="lot_ids" />
                 <footer>
                     <button
-                        string="Confirm"
-                        name="action_confirm"
-                        type="object"
-                        class="oe_highlight"
-                    />
+                    string="Confirm"
+                    name="action_confirm"
+                    type="object"
+                    class="oe_highlight"
+                />
                     or
                     <button
-                        name="action_cancel"
-                        string="Cancel"
-                        class="oe_link"
-                        special="cancel"
-                    />
+                    name="action_cancel"
+                    string="Cancel"
+                    class="oe_link"
+                    special="cancel"
+                />
                 </footer>
             </form>
         </field>
@@ -43,7 +43,6 @@
         <field name="view_id" ref="view_rma_add_serial_wiz_customer" />
         <field name="groups_id" eval="[(4, ref('rma.group_rma_customer_user'))]" />
     </record>
-
 
     <record id="view_rma_add_serial_wiz_customer_form" model="ir.ui.view">
         <field name="name">rma.order.form - rma.add.serial.wiz</field>
@@ -98,5 +97,4 @@
             </xpath>
         </field>
     </record>
-
 </odoo>

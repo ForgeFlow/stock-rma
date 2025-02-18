@@ -1,7 +1,7 @@
 # Copyright 2017 ForgeFlow
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -68,7 +68,7 @@ class RmaLineMakeSupplierRma(models.TransientModel):
         )
         if len(suppliers) > 1:
             raise ValidationError(
-                _(
+                self.env._(
                     "Only RMA lines from the same supplier can be "
                     "processed at the same time"
                 )
@@ -80,7 +80,7 @@ class RmaLineMakeSupplierRma(models.TransientModel):
     @api.model
     def _prepare_supplier_rma(self, company):
         if not self.partner_id:
-            raise ValidationError(_("Enter a supplier."))
+            raise ValidationError(self.env._("Enter a supplier."))
         return {
             "partner_id": self.partner_id.id,
             "type": "supplier",
@@ -98,7 +98,7 @@ class RmaLineMakeSupplierRma(models.TransientModel):
                 [("rma_selectable", "=", True)], limit=1
             )
             if not route:
-                raise ValidationError(_("Please define an RMA route"))
+                raise ValidationError(self.env._("Please define an RMA route"))
         if not operation.in_warehouse_id or not operation.out_warehouse_id:
             warehouse = self.env["stock.warehouse"].search(
                 [
@@ -109,7 +109,7 @@ class RmaLineMakeSupplierRma(models.TransientModel):
             )
             if not warehouse:
                 raise ValidationError(
-                    _("Please define a warehouse with a default RMA location")
+                    self.env._("Please define a warehouse with a default RMA location")
                 )
         data = {
             "partner_id": self.partner_id.id,
@@ -149,7 +149,7 @@ class RmaLineMakeSupplierRma(models.TransientModel):
         for item in self.item_ids:
             line = item.line_id
             if item.product_qty <= 0.0:
-                raise ValidationError(_("Enter a positive quantity."))
+                raise ValidationError(self.env._("Enter a positive quantity."))
 
             if self.supplier_rma_id:
                 rma = self.supplier_rma_id

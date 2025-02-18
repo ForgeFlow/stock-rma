@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
     <template id="report_delivery_document" inherit_id="stock.report_delivery_document">
-
         <xpath
             expr="//table[@name='stock_move_table']//th[@name='th_sm_quantity']"
             position="before"
@@ -10,7 +9,9 @@
                 t-set="has_rma"
                 t-value="bool(o.move_ids.filtered(lambda m: m.rma_line_id))"
             />
-            <th t-if="has_rma" name="th_sm_rma_line"><strong>RMA</strong></th>
+            <th t-if="has_rma" name="th_sm_rma_line">
+                <strong>RMA</strong>
+            </th>
         </xpath>
         <xpath expr="//table[@name='stock_move_table']/tbody//td[2]" position="before">
             <td t-if="has_rma">
@@ -26,7 +27,9 @@
                 t-set="sml_has_rma"
                 t-value="bool(o.move_line_ids.filtered(lambda m: m.move_id.rma_line_id))"
             />
-            <th t-if="sml_has_rma" name="th_sml_rma_line"><strong>RMA</strong></th>
+            <th t-if="sml_has_rma" name="th_sml_rma_line">
+                <strong>RMA</strong>
+            </th>
         </xpath>
     </template>
 
@@ -53,5 +56,4 @@
             </td>
         </xpath>
     </template>
-
 </odoo>
