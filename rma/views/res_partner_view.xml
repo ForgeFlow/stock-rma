@@ -1,6 +1,5 @@
 <?xml version="1.0" ?>
 <odoo>
-
     <record id="view_partner_form" model="ir.ui.view">
         <field name="name">res.partner.form - rma</field>
         <field name="model">res.partner</field>
@@ -15,14 +14,9 @@
                     context="{'res_partner_search_mode': 'customer'}"
                     groups="rma.group_rma_customer_user,rma.group_rma_supplier_user"
                 >
-                            <field
-                        name="rma_line_count"
-                        widget="statinfo"
-                        string="RMAs"
-                    />
+                    <field name="rma_line_count" widget="statinfo" string="RMAs" />
                 </button>
             </div>
         </field>
     </record>
-
 </odoo>

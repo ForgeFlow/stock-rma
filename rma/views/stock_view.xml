@@ -3,7 +3,7 @@
     <record id="view_move_form" model="ir.ui.view">
         <field name="name">rma.move.form</field>
         <field name="model">stock.move</field>
-         <field name="inherit_id" ref="stock.view_move_form" />
+        <field name="inherit_id" ref="stock.view_move_form" />
         <field name="arch" type="xml">
             <group name="origin_grp" position="after">
                 <group name="rma">
@@ -30,7 +30,7 @@
         <field name="inherit_id" ref="stock.view_picking_form" />
         <field name="arch" type="xml">
             <xpath
-                expr="//page[@name='operations']/field[@name='move_ids_without_package']/tree"
+                expr="//page[@name='operations']/field[@name='move_ids_without_package']/list"
                 position="inside"
             >
                 <field name="rma_line_id" optional="hide" invisible="not rma_line_id" />

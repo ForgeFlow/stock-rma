@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
     <record id="rma_operation_tree" model="ir.ui.view">
-        <field name="name">rma.operation.tree</field>
+        <field name="name">rma.operation.list</field>
         <field name="model">rma.operation</field>
         <field name="arch" type="xml">
-            <tree name="RMA Operations">
+            <list name="RMA Operations">
                 <field name="active" invisible="1" />
                 <field name="code" />
                 <field name="name" />
                 <field name="receipt_policy" />
                 <field name="delivery_policy" />
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -24,12 +24,11 @@
                         name="web_ribbon"
                         title="Archived"
                         bg_color="bg-danger"
-                        invisible="active == True"
+                        invisible="active"
                     />
                     <div class="oe_button_box" name="button_box" />
                     <group colspan="4" col="2">
                         <group name="description" string="Description">
-                            <field name="active" invisible="1" />
                             <field name="code" />
                             <field name="name" />
                             <field name="type" />
@@ -71,7 +70,7 @@
     <record id="action_rma_operation_customer" model="ir.actions.act_window">
         <field name="name">Customer Operations</field>
         <field name="res_model">rma.operation</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="context">{'default_type': "customer"}</field>
         <field name="domain">[('type','=', 'customer')]</field>
         <field name="view_id" ref="rma_operation_tree" />
@@ -80,10 +79,9 @@
     <record id="action_rma_operation_supplier" model="ir.actions.act_window">
         <field name="name">Supplier Operations</field>
         <field name="res_model">rma.operation</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="context">{'default_type': "supplier"}</field>
         <field name="domain">[('type','=', 'supplier')]</field>
         <field name="view_id" ref="rma_operation_tree" />
     </record>
-
 </odoo>

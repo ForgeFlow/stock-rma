@@ -1,7 +1,7 @@
 # Copyright (C) 2017-22 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -23,7 +23,7 @@ class ProcurementGroup(models.Model):
         if rma_route_check:
             if res and not res.route_id.rma_selectable:
                 raise ValidationError(
-                    _(
+                    self.env._(
                         "No rule found for this product %(product)s and "
                         "location %(location)s that is valid for RMA operations."
                     )

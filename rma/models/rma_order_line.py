@@ -3,7 +3,7 @@
 
 import operator
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
 ops = {"=": operator.eq, "!=": operator.ne}
@@ -505,14 +505,14 @@ class RmaOrderLine(models.Model):
                 [("type", "=", self.type)], limit=1
             )
             if not operation:
-                raise ValidationError(_("Please define an operation first."))
+                raise ValidationError(self.env._("Please define an operation first."))
 
         if not operation.in_route_id or not operation.out_route_id:
             route = self.env["stock.route"].search(
                 [("rma_selectable", "=", True)], limit=1
             )
             if not route:
-                raise ValidationError(_("Please define an RMA route."))
+                raise ValidationError(self.env._("Please define an RMA route."))
 
         if (
             not operation.in_warehouse_id
@@ -528,7 +528,7 @@ class RmaOrderLine(models.Model):
             )
             if not warehouse:
                 raise ValidationError(
-                    _("Please define a warehouse with a default RMA location.")
+                    self.env._("Please define a warehouse with a default RMA location.")
                 )
 
         data = {
@@ -562,7 +562,7 @@ class RmaOrderLine(models.Model):
             return
         if sm.move_line_ids.lot_id:
             if len(sm.move_line_ids.lot_id) > 1:
-                raise UserError(_("To manage lots use RMA groups."))
+                raise UserError(self.env._("To manage lots use RMA groups."))
             else:
                 data = self._prepare_rma_line_from_stock_move(
                     sm, lot=sm.move_line_ids.lot_id[0]
@@ -582,7 +582,7 @@ class RmaOrderLine(models.Model):
                 != rec.partner_id.commercial_partner_id
             ):
                 raise ValidationError(
-                    _(
+                    self.env._(
                         "RMA customer and originating stock move customer "
                         "doesn't match."
                     )
@@ -597,7 +597,7 @@ class RmaOrderLine(models.Model):
         for rec in self:
             if rec.product_id.tracking == "serial" and rec.product_qty != 1:
                 raise ValidationError(
-                    _(
+                    self.env._(
                         "Product %s has serial tracking configuration, "
                         "quantity to receive should be 1"
                     )
@@ -642,7 +642,9 @@ class RmaOrderLine(models.Model):
         for move in self.move_ids:
             if move.state == "done":
                 raise UserError(
-                    _("Unable to cancel %s as some receptions have already been done.")
+                    self.env._(
+                        "Unable to cancel %s as some receptions have already been done."
+                    )
                     % (self.name)
                 )
 
@@ -807,5 +809,5 @@ class RmaOrderLine(models.Model):
     def _check_partner_id(self):
         if self.rma_id and self.partner_id != self.rma_id.partner_id:
             raise ValidationError(
-                _("Group partner and RMA's partner must be the same.")
+                self.env._("Group partner and RMA's partner must be the same.")
             )

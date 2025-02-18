@@ -1,7 +1,7 @@
 # Copyright 2022 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -75,14 +75,14 @@ class RmaAddSerialWiz(models.TransientModel):
                 [("type", "=", self.rma_id.type)], limit=1
             )
             if not operation:
-                raise ValidationError(_("Please define an operation first"))
+                raise ValidationError(self.env._("Please define an operation first"))
 
         if not operation.in_route_id or not operation.out_route_id:
             route = self.env["stock.route"].search(
                 [("rma_selectable", "=", True)], limit=1
             )
             if not route:
-                raise ValidationError(_("Please define an RMA route"))
+                raise ValidationError(self.env._("Please define an RMA route"))
 
         in_warehouse = self.rma_id.in_warehouse_id or operation.in_warehouse_id
         in_route = self.rma_id.in_route_id or operation.in_route_id
@@ -98,7 +98,7 @@ class RmaAddSerialWiz(models.TransientModel):
             )
             if not warehouse:
                 raise ValidationError(
-                    _("Please define a warehouse with a default RMA location")
+                    self.env._("Please define a warehouse with a default RMA location")
                 )
             in_warehouse = in_warehouse or warehouse
             out_warehouse = out_warehouse or warehouse
@@ -142,7 +142,7 @@ class RmaAddSerialWiz(models.TransientModel):
         for lot in self.lot_ids:
             if lot in existing_lots:
                 raise ValidationError(
-                    _("Lot/Serial Number %s already added.") % lot.name
+                    self.env._("Lot/Serial Number %s already added.") % lot.name
                 )
 
             vals = self._prepare_rma_line_from_lot_vals(lot)
