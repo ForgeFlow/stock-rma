@@ -1,11 +1,11 @@
 # Copyright (C) 2017-20 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-import time
+from datetime import timedelta
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FORMAT, float_compare
+from odoo.tools import float_compare
 
 
 class RmaMakePicking(models.TransientModel):
@@ -102,6 +102,7 @@ class RmaMakePicking(models.TransientModel):
     def _get_procurement_data(self, item, group, qty, picking_type):
         line = item.line_id
         delivery_address_id = self._get_address(item)
+        date_planned = fields.Datetime.now()
         location, warehouse, route = False, False, False
         if picking_type == "incoming":
             if line.customer_to_supplier:
@@ -117,6 +118,8 @@ class RmaMakePicking(models.TransientModel):
                 location = self._get_address_location(delivery_address_id, line.type)
             warehouse = line.out_warehouse_id
             route = line.out_route_id
+            if line.product_id.sale_delay:
+                date_planned = date_planned + timedelta(days=line.product_id.sale_delay)
         if not route:
             raise ValidationError(_("No route specified"))
         if not warehouse:
@@ -126,7 +129,7 @@ class RmaMakePicking(models.TransientModel):
             "group_id": group,
             "origin": group and group.name or line.name,
             "warehouse_id": warehouse,
-            "date_planned": time.strftime(DT_FORMAT),
+            "date_planned": date_planned,
             "product_id": item.product_id,
             "product_qty": qty,
             "partner_id": delivery_address_id.id,
