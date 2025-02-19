@@ -15,4 +15,8 @@ def migrate(env, version):
         if openupgrade.table_exists(cr, field[1]) and openupgrade.column_exists(
             cr, field[1], field[2]
         ):
-            openupgrade.rename_fields(env, [field])
+            env.cr.execute(
+                "UPDATE stock_move "
+                "SET restrict_lot_id = forced_lot_id "
+                "WHERE restrict_lot_id is NULL AND forced_lot_id is NOT NULL"
+            )
