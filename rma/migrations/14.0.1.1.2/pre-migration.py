@@ -18,5 +18,5 @@ def migrate(env, version):
             env.cr.execute(
                 "UPDATE stock_move "
                 "SET restrict_lot_id = forced_lot_id "
-                "WHERE restrict_lot_id is NULL AND forced_lot is NOT NULL"
+                "WHERE restrict_lot_id is NULL AND forced_lot_id is NOT NULL"
             )
