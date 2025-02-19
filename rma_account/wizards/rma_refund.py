@@ -121,6 +121,13 @@ class RmaRefund(models.TransientModel):
             currency = rma.account_move_line_id.currency_id
         return currency
 
+    def _get_refund_discount(self, rma):
+        discount = 0.0
+        # If this references a previous invoice/bill, use the same unit price
+        if rma.account_move_line_id:
+            discount = rma.account_move_line_id.discount
+        return discount
+
     @api.model
     def prepare_refund_line(self, item):
         values = {
@@ -130,6 +137,7 @@ class RmaRefund(models.TransientModel):
             "product_id": item.product.id,
             "rma_line_id": item.line_id.id,
             "quantity": item.qty_to_refund,
+            "discount": self._get_refund_discount(item.line_id),
         }
         return values
 
