@@ -26,6 +26,12 @@ class RmaRefund(models.TransientModel):
                 price_unit = rma.product_id.with_company(rma.company_id).lst_price
         return price_unit
 
+    def _get_refund_discount(self, rma):
+        discount = super()._get_refund_discount(rma)
+        if not rma.account_move_line_id and rma.type == "customer" and rma.sale_line_id:
+            discount = rma.sale_line_id.discount
+        return discount
+
     def _get_refund_currency(self, rma):
         currency = rma.currency_id
         if rma.type == "customer":
