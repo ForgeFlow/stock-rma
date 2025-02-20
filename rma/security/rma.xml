@@ -41,10 +41,6 @@
             <field name="category_id" ref="module_category_rma" />
         </record>
 
-        <record id="stock.group_stock_manager" model="res.groups">
-            <field name="implied_ids" eval="[(4, ref('group_rma_manager'))]" />
-        </record>
-
         <record model="ir.rule" id="rma_order_rule">
           <field name="name">rma order multi-company</field>
           <field
