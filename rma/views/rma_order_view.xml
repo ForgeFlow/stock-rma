@@ -242,7 +242,10 @@
                                     create="0"
                                 >
                                 <field name="sequence" widget="handle" />
-                                <field name="partner_id" invisible="True" />
+                                <field
+                                        name="partner_id"
+                                        attrs="{'column_invisible': True}"
+                                    />
                                 <field name="product_id" />
                                 <field
                                         name="lot_id"
@@ -253,18 +256,54 @@
                                 <field name="name" />
                                 <field name="uom_id" groups="uom.group_uom" />
                                 <field name="operation_id" />
-                                <field name="location_id" invisible="True" />
-                                <field name="in_route_id" invisible="True" />
-                                <field name="out_route_id" invisible="True" />
-                                <field name="in_warehouse_id" invisible="True" />
-                                <field name="out_warehouse_id" invisible="True" />
-                                <field name="customer_to_supplier" invisible="True" />
-                                <field name="supplier_address_id" invisible="True" />
-                                <field name="supplier_to_customer" invisible="True" />
-                                <field name="customer_address_id" invisible="True" />
-                                <field name="receipt_policy" invisible="True" />
-                                <field name="delivery_policy" invisible="True" />
-                                <field name="delivery_address_id" invisible="True" />
+                                <field
+                                        name="location_id"
+                                        attrs="{'column_invisible': True}"
+                                    />
+                                <field
+                                        name="in_route_id"
+                                        attrs="{'column_invisible': True}"
+                                    />
+                                <field
+                                        name="out_route_id"
+                                        attrs="{'column_invisible': True}"
+                                    />
+                                <field
+                                        name="in_warehouse_id"
+                                        attrs="{'column_invisible': True}"
+                                    />
+                                <field
+                                        name="out_warehouse_id"
+                                        attrs="{'column_invisible': True}"
+                                    />
+                                <field
+                                        name="customer_to_supplier"
+                                        attrs="{'column_invisible': True}"
+                                    />
+                                <field
+                                        name="supplier_address_id"
+                                        attrs="{'column_invisible': True}"
+                                    />
+                                <field
+                                        name="supplier_to_customer"
+                                        attrs="{'column_invisible': True}"
+                                    />
+                                <field
+                                        name="customer_address_id"
+                                        attrs="{'column_invisible': True}"
+                                    />
+                                <field
+                                        name="receipt_policy"
+                                        attrs="{'column_invisible': True}"
+                                    />
+                                <field
+                                        name="delivery_policy"
+                                        attrs="{'column_invisible': True}"
+                                    />
+                                <field
+                                        name="delivery_address_id"
+                                        attrs="{'column_invisible': True}"
+                                    />
                                 <field name="product_qty" />
                                 <field name="price_unit" />
                                 <field name="state" />
