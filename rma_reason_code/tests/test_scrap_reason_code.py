@@ -11,6 +11,8 @@ class RMAOrderLine(common.TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.user_admin = cls.env.ref("base.user_admin")
+        rma_manager_group = cls.env.ref("rma.group_rma_manager")
+        cls.user_admin.write({"groups_id": [(4, rma_manager_group.id)]})
         cls.env = api.Environment(cls.cr, cls.user_admin.id, {})
         cls.user_admin.tz = False  # Make sure there's no timezone in user
         cls.warehouse = cls.env.ref("stock.warehouse0")
