@@ -32,13 +32,13 @@
                 expr="//field[@name='invoice_line_ids']/tree/field[@name='company_id']"
                 position="after"
             >
-                <field name="rma_line_id" invisible="1" />
+                <field name="rma_line_id" column_invisible="1" />
             </xpath>
             <xpath
                 expr="//field[@name='line_ids']/tree/field[@name='company_id']"
                 position="after"
             >
-                <field name="rma_line_id" invisible="1" />
+                <field name="rma_line_id" column_invisible="1" />
             </xpath>
         </field>
     </record>

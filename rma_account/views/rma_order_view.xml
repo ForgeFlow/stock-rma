@@ -30,7 +30,7 @@
                 </button>
             </button>
             <xpath expr="//field[@name='rma_line_ids']/tree" position="inside">
-                <field name="refund_policy" invisible="True" />
+                <field name="refund_policy" column_invisible="True" />
             </xpath>
         </field>
     </record>
