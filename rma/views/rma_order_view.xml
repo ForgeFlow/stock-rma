@@ -126,7 +126,6 @@
                             icon="fa-truck"
                             attrs="{'invisible': [('in_shipment_count', '=', 0)]}"
                             groups="stock.group_stock_user"
-                            attrs="{'invisible': [('in_shipment_count', '=', 0)]}"
                         >
                         <field
                                 name="in_shipment_count"
@@ -141,7 +140,6 @@
                             icon="fa-truck"
                             attrs="{'invisible': [('out_shipment_count', '=', 0)]}"
                             groups="stock.group_stock_user"
-                            attrs="{'invisible': [('out_shipment_count', '=', 0)]}"
                         >
                         <field
                                 name="out_shipment_count"
