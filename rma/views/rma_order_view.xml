@@ -119,6 +119,7 @@
                             class="oe_stat_button"
                             icon="fa-list"
                             groups="rma.group_rma_customer_user"
+                            attrs="{'invisible': [('line_count', '=', 0)]}"
                         >
                         <field name="line_count" widget="statinfo" string="RMA Lines" />
                     </button>
