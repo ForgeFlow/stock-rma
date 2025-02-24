@@ -13,6 +13,7 @@
                     class="oe_stat_button"
                     icon="fa-shopping-cart"
                     groups="purchase.group_purchase_user"
+                    attrs="{'invisible': [('po_count', '=', 0)]}"
                 >
                     <field name="po_count" widget="statinfo" string="Purchase Orders" />
                 </button>
@@ -22,6 +23,7 @@
                     class="oe_stat_button"
                     icon="fa-shopping-cart"
                     groups="purchase.group_purchase_user"
+                    attrs="{'invisible': [('origin_po_count', '=', 0)]}"
                 >
                     <field
                         name="origin_po_count"
