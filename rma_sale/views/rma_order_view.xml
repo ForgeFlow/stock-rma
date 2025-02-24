@@ -13,7 +13,7 @@
                     name="%(rma_sale.action_rma_add_sale)d"
                     string="Add From Sale Order"
                     type="action"
-                    invisible="type != 'customer'"
+                    invisible="type != 'customer' or sale_count == 0"
                 />
             </xpath>
             <xpath
