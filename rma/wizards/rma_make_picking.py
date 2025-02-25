@@ -125,7 +125,7 @@ class RmaMakePicking(models.TransientModel):
         if not warehouse:
             raise ValidationError(_("No warehouse specified"))
         procurement_data = {
-            "name": line.rma_id and line.rma_id.name or line.name,
+            "name": line.product_id.display_name,
             "group_id": group,
             "origin": group and group.name or line.name,
             "warehouse_id": warehouse,
@@ -169,7 +169,7 @@ class RmaMakePicking(models.TransientModel):
                 qty,
                 item.line_id.product_id.product_tmpl_id.uom_id,
                 values.get("location_id"),
-                values.get("origin"),
+                values.get("name"),
                 values.get("origin"),
                 self.env.company,
                 values,
