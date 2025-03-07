@@ -1,7 +1,9 @@
 # Do NOT update manually; changes here will be overwritten by Copier
-_commit: v1.17.1
+_commit: v1.29
 _src_path: https://github.com/OCA/oca-addons-repo-template.git
 ci: GitHub
+convert_readme_fragments_to_markdown: false
+enable_checklog_odoo: false
 generate_requirements_txt: false
 github_check_license: true
 github_ci_extra_env: {}
@@ -19,4 +21,6 @@ repo_description: Return Merchandise Authorization for Odoo
 repo_name: stock-rma
 repo_slug: https://github.com/ForgeFlow/stock-rma
 repo_website: https://github.com/ForgeFlow/stock-rma
+use_pyproject_toml: false
+use_ruff: false
 
