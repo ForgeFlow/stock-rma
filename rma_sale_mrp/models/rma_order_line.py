@@ -39,3 +39,32 @@ class RmaOrderLine(models.Model):
         else:
             price_unit = super(RmaOrderLine, self)._get_price_unit()
         return price_unit
+
+    def _get_rma_quantity_from_moves(self, moves):
+        self.ensure_one()
+        boms = moves.bom_line_id.bom_id
+        relevant_bom = boms.filtered(
+            lambda b: b.type == "phantom"
+            and (
+                b.product_id == self.product_id
+                or (
+                    b.product_tmpl_id == self.product_id.product_tmpl_id
+                    and not b.product_id
+                )
+            )
+        )
+        if relevant_bom:
+            # moves are already filtered and we never have return here
+            filters = {
+                "incoming_moves": lambda m: True,
+                "outgoing_moves": lambda m: False,
+            }
+            order_qty = self.uom_id._compute_quantity(
+                self.product_qty, relevant_bom.product_uom_id
+            )
+            qty = moves._compute_kit_quantities(
+                self.product_id, order_qty, relevant_bom, filters
+            )
+        else:
+            qty = super()._get_rma_quantity_from_moves(moves)
+        return qty

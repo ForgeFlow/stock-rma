@@ -108,28 +108,37 @@ class RmaOrderLine(models.Model):
             pickings = line._get_out_pickings()
             line.out_shipment_count = len(pickings)
 
+    def _get_rma_quantity_from_moves(self, moves):
+        self.ensure_one()
+        uom_obj = self.env["uom.uom"]
+        qty = 0.0
+        for move in moves:
+            if move.state == "done":
+                qty += uom_obj._compute_quantity(
+                    move.product_uom_qty, self.uom_id
+                )
+            else:
+                qty += uom_obj._compute_quantity(
+                    move.product_uom_qty, self.uom_id
+                )
+        return qty
+
     def _get_rma_move_qty(self, states, direction="in"):
         for rec in self:
-            product_obj = self.env["uom.uom"]
             qty = 0.0
             if direction == "in":
                 moves = rec._get_in_moves()
             else:
                 moves = rec._get_out_moves()
-            for move in moves.filtered(lambda m: m.state in states):
-                # If the move is part of a chain don't count it
-                if direction == "out" and move.move_orig_ids:
-                    continue
-                elif direction == "in" and move.move_dest_ids:
-                    continue
-                if move.state == "done":
-                    qty += product_obj._compute_quantity(
-                        move.product_uom_qty, rec.uom_id
-                    )
-                else:
-                    qty += product_obj._compute_quantity(
-                        move.product_uom_qty, rec.uom_id
-                    )
+            if direction == "out":
+                moves = moves.filtered(
+                    lambda move: not move.move_orig_ids and move.state in states
+                )
+            elif direction == "in":
+                moves = moves.filtered(
+                    lambda move: not move.move_dest_ids and move.state in states
+                )
+            qty = rec._get_rma_quantity_from_moves(moves)
             return qty
 
     @api.depends(
