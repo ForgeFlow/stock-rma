@@ -108,7 +108,7 @@ class TestRmaScrap(common.SingleTransactionCase):
 
         action_picking = wizard.action_create_picking()
         picking = self.env["stock.picking"].browse([action_picking["res_id"]])
-        picking.move_line_ids[0].qty_done = rma.qty_to_receive
+        picking.move_line_ids[0].qty_done = rma.qty_incoming
 
         picking.button_validate()
         rma._compute_qty_to_scrap()
