@@ -9,7 +9,7 @@
 
 # RMA
 
-RMA
+Return Merchandise Authorization
 
 <!-- /!\ do not modify below this line -->
 

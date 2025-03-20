@@ -1,5 +1,5 @@
 # Do NOT update manually; changes here will be overwritten by Copier
-_commit: v1.26
+_commit: v1.29
 _src_path: https://github.com/OCA/oca-addons-repo-template.git
 additional_ruff_rules: []
 ci: GitHub
@@ -18,7 +18,7 @@ odoo_version: 18.0
 org_name: ForgeFlow
 org_slug: ForgeFlow
 rebel_module_groups: []
-repo_description: RMA
+repo_description: Return Merchandise Authorization
 repo_name: RMA
 repo_slug: stock-rma
 repo_website: https://github.com/ForgeFlow
