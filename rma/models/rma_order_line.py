@@ -132,6 +132,7 @@ class RmaOrderLine(models.Model):
         "move_ids",
         "move_ids.state",
         "qty_received",
+        "qty_incoming",
         "receipt_policy",
         "product_qty",
         "type",
@@ -140,9 +141,13 @@ class RmaOrderLine(models.Model):
         for rec in self:
             rec.qty_to_receive = 0.0
             if rec.receipt_policy == "ordered":
-                rec.qty_to_receive = rec.product_qty - rec.qty_received
+                rec.qty_to_receive = (
+                    rec.product_qty - rec.qty_incoming - rec.qty_received
+                )
             elif rec.receipt_policy == "delivered":
-                rec.qty_to_receive = rec.qty_delivered - rec.qty_received
+                rec.qty_to_receive = (
+                    rec.qty_delivered - rec.qty_incoming - rec.qty_received
+                )
 
     @api.depends(
         "move_ids",
