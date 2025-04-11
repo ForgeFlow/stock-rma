@@ -78,6 +78,38 @@
                         invisible="state in ('done', 'cancel')"
                         groups="rma.group_rma_customer_user"
                     />
+                    <button
+                        name="%(rma.action_rma_add_serial_wiz_customer)d"
+                        string="Add Lot/Serial Numbers"
+                        type="action"
+                        invisible="type != 'customer'"
+                    />
+                    <button
+                        name="%(rma.action_rma_add_stock_move_customer)d"
+                        string="Add From Stock Move"
+                        type="action"
+                        invisible="type != 'customer'"
+                    />
+                    <button
+                        name="%(rma.action_rma_picking_in)d"
+                        string="Create Incoming Shipment"
+                        class="oe_highlight"
+                        invisible="qty_to_receive == 0 or qty_to_receive &lt; 0 or state != 'approved'"
+                        type="action"
+                    />
+                    <button
+                        name="%(rma.action_rma_picking_out)d"
+                        string="Create Delivery"
+                        class="oe_highlight"
+                        invisible="qty_to_deliver == 0 or qty_to_deliver &lt; 0 or state != 'approved'"
+                        type="action"
+                    />
+                    <button
+                        name="%(rma.action_make_supplier_rma)d"
+                        string="Create Supplier RMA"
+                        invisible="type != 'customer' or state != 'approved'"
+                        type="action"
+                    />
                     <field
                         name="state"
                         widget="statusbar"
@@ -92,13 +124,13 @@
                             name="action_view_in_shipments"
                             class="oe_stat_button"
                             icon="fa-truck"
-                            groups="stock.group_stock_user"
                             invisible="in_shipment_count == 0"
+                            groups="stock.group_stock_user"
                         >
                             <field
                                 name="in_shipment_count"
                                 widget="statinfo"
-                                string="Shipments"
+                                string="Incoming Shipments"
                             />
                         </button>
                         <button
@@ -106,8 +138,8 @@
                             name="action_view_out_shipments"
                             class="oe_stat_button"
                             icon="fa-truck"
-                            groups="stock.group_stock_user"
                             invisible="out_shipment_count == 0"
+                            groups="stock.group_stock_user"
                         >
                             <field
                                 name="out_shipment_count"
@@ -120,8 +152,8 @@
                             name="action_view_lines"
                             class="oe_stat_button"
                             icon="fa-list"
-                            groups="rma.group_rma_customer_user"
                             invisible="line_count == 0"
+                            groups="rma.group_rma_customer_user"
                         >
                             <field
                                 name="line_count"
@@ -202,6 +234,8 @@
                                 invisible="customer_to_supplier == False"
                                 readonly="state != 'draft'"
                             />
+                            <field name="qty_to_receive" invisible="1" />
+                            <field name="qty_to_deliver" invisible="1" />
                         </group>
                     </group>
                     <group>
@@ -288,6 +322,20 @@
         <field name="inherit_id" ref="rma.view_rma_form" />
         <field name="mode">primary</field>
         <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button
+                    name="%(rma.action_rma_add_serial_wiz_supplier)d"
+                    string="Add Lot/Serial numbers"
+                    type="action"
+                    invisible="type != 'supplier'"
+                />
+                <button
+                    name="%(rma.action_rma_add_stock_move_supplier)d"
+                    string="Add From Stock Move"
+                    type="action"
+                    invisible="type != 'supplier'"
+                />
+            </xpath>
             <xpath expr="//button[@name='action_view_lines']" position="attributes">
                 <attribute name="groups">rma.group_rma_supplier_user</attribute>
             </xpath>
