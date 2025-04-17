@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.rma</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="10" />
+        <field name="inherit_id" ref="base.res_config_settings_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app
+                    string="RMA"
+                    data-string="RMA"
+                    name="rma"
+                    groups="rma.group_rma_manager"
+                >
+                    <block
+                        title="Return Merchandise Authorization"
+                        name="return_merchandise_authorization"
+                    >
+                        <setting
+                            id="rma_delivery_address"
+                            help="Display 3 fields on rma: partner, invoice address, delivery address"
+                        >
+                            <field name="group_rma_delivery_address" />
+                        </setting>
+                        <setting
+                            id="group_rma_lines"
+                            help="Group RMA lines in one RMA group"
+                        >
+                            <field name="group_rma_lines" />
+                        </setting>
+                        <setting id="module_rma_account" help="Enable RMA invoicing">
+                            <field name="module_rma_account" />
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_rma_config_settings" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module' : 'rma'}</field>
+    </record>
+</odoo>
