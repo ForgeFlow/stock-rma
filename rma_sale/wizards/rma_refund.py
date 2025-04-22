@@ -43,6 +43,21 @@ class RmaRefund(models.TransientModel):
                 currency = rma.company_id.currency_id
         return currency
 
+    @api.model
+    def _prepare_refund(self, wizard, rma_line):
+        vals = super()._prepare_refund(wizard, rma_line)
+        fiscal_position = rma_line.sale_line_id.order_id.fiscal_position_id
+        if rma_line.type == "customer" and fiscal_position:
+            vals["fiscal_position_id"] = fiscal_position.id
+        return vals
+
+    def prepare_refund_line(self, item):
+        vals = super().prepare_refund_line(item)
+        taxes = item.line_id.sale_line_id.tax_id
+        if item.line_id.type == "customer" and taxes:
+            vals["tax_ids"] = [(6, 0, taxes.ids)]
+        return vals
+
 
 class RmaRefundItem(models.TransientModel):
     _inherit = "rma.refund.item"
