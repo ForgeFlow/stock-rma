@@ -25,7 +25,6 @@
                     icon="fa-pencil-square-o"
                     attrs="{'invisible': [('invoice_refund_count', '=', 0)]}"
                     groups="account.group_account_invoice"
-                    attrs="{'invisible': [('invoice_refund_count', '=', 0)]}"
                 >
                     <field
                         name="invoice_refund_count"
@@ -40,7 +39,6 @@
                     icon="fa-pencil-square-o"
                     attrs="{'invisible': [('invoice_count', '=', 0)]}"
                     groups="account.group_account_invoice"
-                    attrs="{'invisible': [('invoice_count', '=', 0)]}"
                 >
                     <field name="invoice_count" widget="statinfo" string="Origin Inv" />
                 </button>

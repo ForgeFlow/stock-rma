@@ -154,7 +154,6 @@
                             icon="fa-list"
                             attrs="{'invisible': [('line_count', '=', 0)]}"
                             groups="rma.group_rma_customer_user"
-                            attrs="{'invisible': [('line_count', '=', 0)]}"
                         >
                         <field name="line_count" widget="statinfo" string="RMA Lines" />
                     </button>
