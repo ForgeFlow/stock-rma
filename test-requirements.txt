@@ -1,0 +1,1 @@
+odoo-addon-procurement-mto-analytic@git+https://github.com/qrtl/account-analytic.git@16.0-mig-procurment_mto_analytic#subdirectory=setup/procurement_mto_analytic
