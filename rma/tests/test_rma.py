@@ -1281,7 +1281,6 @@ class TestRma(common.TransactionCase):
         Receive a product and then return it using a multi-step route.
         """
         # Alter the customer RMA route to make it multi-step
-        # Get rid of the duplicated rule
         cust_in_pull_rule = self.customer_route.rule_ids.filtered(
             lambda r: r.location_dest_id == self.stock_rma_location
         )
