@@ -123,6 +123,15 @@ class TestRma(common.TransactionCase):
         cls.second_step_incoming_rule.write({"active": True})
         cls.second_step_outgoing_rule.write({"active": True})
 
+        rma_customer_rule = cls.wh.rma_customer_out_pull_id
+        rma_customer_rule.write(
+            {
+                "procure_method": "make_to_order",
+                "sequence": 0,
+                "location_src_id": cls.test_rma_loc.id,
+            }
+        )
+
     @classmethod
     def _create_user(cls, login, groups, company):
         group_ids = [group.id for group in groups]
@@ -1251,7 +1260,7 @@ class TestRma(common.TransactionCase):
         wizard._create_picking()
         # cancel first line, check both chained move are canceled
         second_rma_out_move = second_rma_line.move_ids.filtered(
-            lambda m: m.procure_method == "make_to_order"
+            lambda m: m.picking_id.picking_type_code == "outgoing"
         )
         second_rma_out_move_orig = second_rma_out_move.move_orig_ids
         self.assertTrue(second_rma_out_move_orig)
