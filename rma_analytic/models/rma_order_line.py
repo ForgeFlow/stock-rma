@@ -1,20 +1,17 @@
 # Copyright 2023 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
 
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class RmaOrderLine(models.Model):
+    _name = "rma.order.line"
+    _inherit = ["rma.order.line", "analytic.mixin"]
 
-    _inherit = "rma.order.line"
+    analytic_distribution = fields.Json()
 
-    analytic_account_id = fields.Many2one(
-        comodel_name="account.analytic.account",
-        string="Analytic Account",
-    )
-
-    def _prepare_rma_line_from_inv_line(self, line):
-        res = super(RmaOrderLine, self)._prepare_rma_line_from_inv_line(line)
-        if line.analytic_account_id:
-            res.update(analytic_account_id=line.analytic_account_id.id)
-        return res
+    @api.onchange("account_move_line_id")
+    def _onchange_account_move_line_id(self):
+        if self.analytic_distribution:
+            self.analytic_distribution = self.analytic_distribution
+        return super()._onchange_account_move_line_id()

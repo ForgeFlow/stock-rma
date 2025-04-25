@@ -9,6 +9,6 @@ class RmaAddAccountMove(models.TransientModel):
 
     def _prepare_rma_line_from_inv_line(self, line):
         res = super(RmaAddAccountMove, self)._prepare_rma_line_from_inv_line(line)
-        if line.analytic_account_id:
-            res.update(analytic_account_id=line.analytic_account_id.id)
+        if line.analytic_distribution:
+            res.update(analytic_distribution=line.analytic_distribution)
         return res

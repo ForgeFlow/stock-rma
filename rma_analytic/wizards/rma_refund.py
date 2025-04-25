@@ -10,6 +10,6 @@ class RmaRefund(models.TransientModel):
     @api.model
     def prepare_refund_line(self, item):
         res = super(RmaRefund, self).prepare_refund_line(item)
-        if item.line_id.analytic_account_id:
-            res.update(analytic_account_id=item.line_id.analytic_account_id.id)
+        if item.line_id.analytic_distribution:
+            res.update(analytic_distribution=item.line_id.analytic_distribution)
         return res

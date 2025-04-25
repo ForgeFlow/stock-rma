@@ -28,6 +28,6 @@ class StockRule(models.Model):
             company_id,
             values,
         )
-        if "analytic_account_id" in values:
-            res["analytic_account_id"] = values.get("analytic_account_id")
+        if "analytic_distribution" in values:
+            res["analytic_distribution"] = values.get("analytic_distribution")
         return res

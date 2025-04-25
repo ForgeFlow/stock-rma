@@ -9,7 +9,8 @@
         <field name="arch" type="xml">
             <field name="state" position="after">
                 <field
-                    name="analytic_account_id"
+                    name="analytic_distribution"
+                    widget="analytic_distribution"
                     groups="analytic.group_analytic_accounting"
                 />
             </field>
@@ -23,7 +24,8 @@
         <field name="arch" type="xml">
             <field name="state" position="after">
                 <field
-                    name="analytic_account_id"
+                    name="analytic_distribution"
+                    widget="analytic_distribution"
                     groups="analytic.group_analytic_accounting"
                 />
             </field>
@@ -37,7 +39,8 @@
         <field name="arch" type="xml">
             <group name="main_info" position="inside">
                 <field
-                    name="analytic_account_id"
+                    name="analytic_distribution"
+                    widget="analytic_distribution"
                     groups="analytic.group_analytic_accounting"
                 />
             </group>
@@ -51,7 +54,8 @@
         <field name="arch" type="xml">
             <group name="main_info" position="inside">
                 <field
-                    name="analytic_account_id"
+                    name="analytic_distribution"
+                    widget="analytic_distribution"
                     groups="analytic.group_analytic_accounting"
                 />
             </group>

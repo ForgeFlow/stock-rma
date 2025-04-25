@@ -2,11 +2,12 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from odoo import fields
-from odoo.tests import Form
+from odoo.tests import Form, tagged
 
 from odoo.addons.rma.tests import test_rma
 
 
+@tagged("post_install", "-at_install")
 class TestRmaAnalytic(test_rma.TestRma):
     @classmethod
     def setUpClass(cls):
@@ -49,13 +50,23 @@ class TestRmaAnalytic(test_rma.TestRma):
             dropship=False,
         )
         cls.company_id = cls.env.user.company_id
-        cls.anal = cls.env["account.analytic.account"].create({"name": "Name"})
+        cls.analytic_plan_1 = cls.env["account.analytic.plan"].create(
+            {
+                "name": "Plan 1",
+                "default_applicability": "unavailable",
+                "company_id": False,
+            }
+        )
+        cls.anal = cls.env["account.analytic.account"].create(
+            {"name": "Name", "plan_id": cls.analytic_plan_1.id}
+        )
+        analytic_distribution = {cls.anal.id: 100}
         cls.inv_customer = cls.env["account.move"].create(
             {
                 "partner_id": cls.partner_id.id,
                 "move_type": "out_invoice",
                 "invoice_date": fields.Date.from_string("2023-01-01"),
-                "currency_id": cls.company_id.currency_id,
+                "currency_id": cls.company_id.currency_id.id,
                 "invoice_line_ids": [
                     (
                         0,
@@ -66,7 +77,7 @@ class TestRmaAnalytic(test_rma.TestRma):
                             "product_uom_id": cls.product_1.uom_id.id,
                             "quantity": 12.0,
                             "price_unit": 100.0,
-                            "analytic_account_id": cls.anal.id,
+                            "analytic_distribution": analytic_distribution,
                         },
                     ),
                 ],
@@ -78,18 +89,19 @@ class TestRmaAnalytic(test_rma.TestRma):
         res = super(TestRmaAnalytic, cls)._prepare_move(
             product, qty, src, dest, picking_in
         )
+        plan = cls.env["account.analytic.plan"].search([], limit=1)
         analytic_1 = cls.env["account.analytic.account"].create(
-            {"name": "Test account #1"}
+            {"name": "Test account #1", "plan_id": plan.id}
         )
-        res.update({"analytic_account_id": analytic_1.id})
+        res.update({"analytic_distribution": {analytic_1.id: 100}})
         return res
 
     def test_analytic(self):
         for line in self.rma_ana_id.rma_line_ids:
             for move in line.move_ids:
                 self.assertEqual(
-                    line.analytic_account_id,
-                    move.analytic_account_id,
+                    line.analytic_distribution,
+                    move.analytic_distribution,
                     "the analytic account is not propagated",
                 )
 
@@ -99,17 +111,14 @@ class TestRmaAnalytic(test_rma.TestRma):
         rma_line_form.partner_id = self.partner_id
         rma_line_form.product_id = self.product_1
         rma_line_form.operation_id = self.env.ref("rma.rma_operation_customer_replace")
-        rma_line_form.in_route_id = self.env.ref("rma.route_rma_customer")
-        rma_line_form.out_route_id = self.env.ref("rma.route_rma_customer")
         rma_line_form.in_warehouse_id = self.env.ref("stock.warehouse0")
         rma_line_form.out_warehouse_id = self.env.ref("stock.warehouse0")
         rma_line_form.location_id = self.env.ref("stock.stock_location_stock")
         rma_line_form.account_move_line_id = self.inv_customer.invoice_line_ids[0]
-        rma_line_form.uom_id = self.product_1.uom_id
         rma_line = rma_line_form.save()
         self.assertEqual(
-            rma_line.analytic_account_id,
-            self.inv_customer.invoice_line_ids[0].analytic_account_id,
+            rma_line.analytic_distribution,
+            self.inv_customer.invoice_line_ids[0].analytic_distribution,
         )
 
     def test_invoice_analytic02(self):
@@ -136,8 +145,8 @@ class TestRmaAnalytic(test_rma.TestRma):
         add_inv.add_lines()
 
         self.assertEqual(
-            rma_order.mapped("rma_line_ids.analytic_account_id"),
-            self.inv_customer.invoice_line_ids[0].analytic_account_id,
+            rma_order.mapped("rma_line_ids.analytic_distribution"),
+            [self.inv_customer.invoice_line_ids[0].analytic_distribution],
         )
 
     def test_refund_analytic(self):
@@ -160,6 +169,6 @@ class TestRmaAnalytic(test_rma.TestRma):
         ).create({"description": "Test refund"})
         make_refund.invoice_refund()
         self.assertEqual(
-            rma_line.mapped("analytic_account_id"),
-            rma_line.mapped("refund_line_ids.analytic_account_id"),
+            rma_line.mapped("analytic_distribution"),
+            rma_line.mapped("refund_line_ids.analytic_distribution"),
         )
