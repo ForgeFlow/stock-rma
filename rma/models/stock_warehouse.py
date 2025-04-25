@@ -1,7 +1,7 @@
 # Copyright (C) 2017-20 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo import _, fields, models
+from odoo import _, api, fields, models
 
 
 class StockWarehouse(models.Model):
@@ -60,27 +60,7 @@ class StockWarehouse(models.Model):
     def write(self, vals):
         if "rma_in_this_wh" in vals:
             if vals.get("rma_in_this_wh"):
-                for wh in self:
-                    # RMA location:
-                    if not wh.lot_rma_id:
-                        wh.lot_rma_id = self.env["stock.location"].create(
-                            {
-                                "name": "RMA",
-                                "usage": "internal",
-                                "location_id": wh.view_location_id.id,
-                                "company_id": wh.company_id.id,
-                                "return_location": True,
-                            }
-                        )
-                    # RMA types
-                    if not wh._rma_types_available():
-                        wh._create_rma_picking_types()
-                    else:
-                        for r_type in wh._get_rma_types():
-                            if r_type:
-                                r_type.active = True
-                    # RMA rules:
-                    wh._create_or_update_rma_pull()
+                self._setup_rma()
             else:
                 for wh in self:
                     for r_type in wh._get_rma_types():
@@ -92,6 +72,35 @@ class StockWarehouse(models.Model):
                 self.mapped("rma_supplier_in_pull_id").unlink()
                 self.mapped("rma_supplier_out_pull_id").unlink()
         return super(StockWarehouse, self).write(vals)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        warehouses = super().create(vals_list)
+        warehouses.filtered(lambda w: w.rma_in_this_wh)._setup_rma()
+        return warehouses
+
+    def _setup_rma(self):
+        for wh in self:
+            # RMA location:
+            if not wh.lot_rma_id:
+                wh.lot_rma_id = self.env["stock.location"].create(
+                    {
+                        "name": "RMA",
+                        "usage": "internal",
+                        "location_id": wh.view_location_id.id,
+                        "company_id": wh.company_id.id,
+                        "return_location": True,
+                    }
+                )
+            # RMA types
+            if not wh._rma_types_available():
+                wh._create_rma_picking_types()
+            else:
+                for r_type in wh._get_rma_types():
+                    if r_type:
+                        r_type.active = True
+            # RMA rules:
+            wh._create_or_update_rma_pull()
 
     def _create_rma_picking_types(self):
         picking_type_obj = self.env["stock.picking.type"]
