@@ -8,9 +8,11 @@
             <xpath expr="//field[@name='wh_output_stock_loc_id']" position="after">
                 <field name="lot_rma_id" />
             </xpath>
-            <field name="resupply_wh_ids" position="after">
-                <field name="rma_in_this_wh" />
-            </field>
+            <xpath expr="//page[@name='warehouse_config']" position="inside">
+                <group string="RMA" class="oe_inline">
+                    <field name="rma_in_this_wh" />
+                </group>
+            </xpath>
             <xpath expr="//field[@name='out_type_id']" position="after">
                 <field name="rma_cust_in_type_id" />
                 <field name="rma_cust_out_type_id" />
