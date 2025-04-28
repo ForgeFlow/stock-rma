@@ -138,8 +138,11 @@ class RmaMakePicking(models.TransientModel):
             "location_id": location,
             "rma_line_id": line.id,
             "route_ids": route,
-            "restrict_lot_id": line.lot_id.id,
         }
+        if (picking_type == "incoming" and line.operation_id.in_force_same_lot) or (
+            picking_type == "outgoing" and line.operation_id.out_force_same_lot
+        ):
+            procurement_data["restrict_lot_id"] = line.lot_id.id
         return procurement_data
 
     @api.model
