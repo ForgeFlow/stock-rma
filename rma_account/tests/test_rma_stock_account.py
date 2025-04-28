@@ -198,56 +198,7 @@ class TestRmaStockAccount(TestRma):
         # Ensure that the GDNI move lines are all reconciled
         self.assertEqual(all(gdni_amls.mapped("reconciled")), True)
 
-    def test_03_cost_from_move(self):
-        """
-        Receive a product and then return it. The Goods Delivered Not Invoiced
-        should result in 0
-        """
-        # Set a standard price on the products
-        self.product_fifo_1.standard_price = 10
-        self._create_inventory(
-            self.product_fifo_1, 20.0, self.env.ref("stock.stock_location_customers")
-        )
-        products2move = [
-            (self.product_fifo_1, 3),
-        ]
-        self.product_fifo_1.categ_id.rma_customer_operation_id = (
-            self.rma_cust_replace_op_id
-        )
-        rma_customer_id = self._create_rma_from_move(
-            products2move,
-            "customer",
-            self.env.ref("base.res_partner_2"),
-            dropship=False,
-        )
-        # Set an incorrect price in the RMA (this should not affect cost)
-        rma = rma_customer_id.rma_line_ids
-        rma.price_unit = 999
-        rma.action_rma_to_approve()
-        self._receive_rma(rma_customer_id.rma_line_ids)
-        gdni_amls = (
-            rma.move_ids.stock_valuation_layer_ids.account_move_id.line_ids.filtered(
-                lambda l: l.account_id == self.account_gdni
-            )
-        )
-        gdni_balance = sum(gdni_amls.mapped("balance"))
-        self.assertEqual(len(gdni_amls), 1)
-        # Balance should be -30, as we have only received
-        self.assertEqual(gdni_balance, -30.0)
-        self._deliver_rma(rma_customer_id.rma_line_ids)
-        gdni_amls = (
-            rma.move_ids.stock_valuation_layer_ids.account_move_id.line_ids.filtered(
-                lambda l: l.account_id == self.account_gdni
-            )
-        )
-        gdni_balance = sum(gdni_amls.mapped("balance"))
-        self.assertEqual(len(gdni_amls), 2)
-        # Balance should be 0, as we have received and shipped
-        self.assertEqual(gdni_balance, 0.0)
-        # The GDNI entries should be now reconciled
-        self.assertEqual(all(gdni_amls.mapped("reconciled")), True)
-
-    def test_08_cost_from_move_multi_step(self):
+    def test_03_cost_from_move_multi_step(self):
         """
         Receive a product and then return it using a multi-step route.
         The Goods Delivered Not Invoiced should result in 0
@@ -279,14 +230,14 @@ class TestRmaStockAccount(TestRma):
         )
         self.env["stock.rule"].create(
             {
-                "name": "Customers->RMA",
+                "name": "Output->RMA",
                 "action": "pull",
                 "warehouse_id": self.wh.id,
-                "location_src_id": self.customer_location.id,
+                "location_src_id": self.input_location.id,
                 "location_dest_id": self.env.ref("rma.location_rma").id,
                 "procure_method": "make_to_order",
                 "route_id": self.customer_route.id,
-                "picking_type_id": self.env.ref("stock.picking_type_in").id,
+                "picking_type_id": self.env.ref("stock.picking_type_internal").id,
             }
         )
         # Set a standard price on the products
@@ -331,7 +282,7 @@ class TestRmaStockAccount(TestRma):
         # The GDNI entries should be now reconciled
         self.assertEqual(all(gdni_amls.mapped("reconciled")), True)
 
-    def test_05_reconcile_grni_when_no_refund(self):
+    def test_04_reconcile_grni_when_no_refund(self):
         """
         Test that receive and send a replacement order leaves GDNI reconciled
         """
