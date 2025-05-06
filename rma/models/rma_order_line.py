@@ -132,7 +132,7 @@ class RmaOrderLine(models.Model):
                 moves = rec._get_out_moves()
             if direction == "out":
                 moves = moves.filtered(
-                    lambda move: not move.move_orig_ids and move.state in states
+                    lambda move: not move.move_dest_ids and move.state in states
                 )
             elif direction == "in":
                 moves = moves.filtered(
