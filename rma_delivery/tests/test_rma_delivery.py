@@ -43,7 +43,8 @@ class TestRmaDelivery(TestRma):
         picking = self.env["stock.picking"].browse(res["res_id"])
         picking.action_assign()
         for mv in picking.move_ids:
-            mv.quantity_done = mv.product_uom_qty
+            mv.quantity = mv.product_uom_qty
+            mv.picked = True
         picking._action_done()
         wizard = self.rma_make_picking.with_context(
             active_id=self.rma_customer_id.rma_line_ids.ids[0],

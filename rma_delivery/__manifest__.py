@@ -3,13 +3,13 @@
 
 {
     "name": "RMA delivery integration",
-    "version": "16.0.1.0.0",
+    "version": "18.0.1.0.0",
     "license": "LGPL-3",
     "category": "RMA",
     "summary": "RMA default carrier on operation" "in odoo",
     "author": "ForgeFlow",
     "website": "https://github.com/ForgeFlow",
-    "depends": ["rma", "delivery"],
+    "depends": ["rma", "stock_delivery"],
     "demo": [],
     "data": [
         "views/rma_operation_view.xml",
