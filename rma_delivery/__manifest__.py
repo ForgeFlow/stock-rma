@@ -8,7 +8,7 @@
     "category": "RMA",
     "summary": "RMA default carrier on operation" "in odoo",
     "author": "ForgeFlow",
-    "website": "https://github.com/ForgeFlow/stock-rma",
+    "website": "https://github.com/ForgeFlow",
     "depends": ["rma", "delivery"],
     "demo": [],
     "data": [

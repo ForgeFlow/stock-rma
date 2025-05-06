@@ -5,7 +5,6 @@ from odoo import models
 
 
 class RmaMakePicking(models.TransientModel):
-
     _inherit = "rma_make_picking.wizard"
 
     def _create_picking(self):

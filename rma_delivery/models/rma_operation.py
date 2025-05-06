@@ -5,7 +5,6 @@ from odoo import fields, models
 
 
 class RmaOperation(models.Model):
-
     _inherit = "rma.operation"
 
     default_carrier_id = fields.Many2one(
