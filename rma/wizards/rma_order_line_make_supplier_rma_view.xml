@@ -8,12 +8,16 @@
         <field name="type">form</field>
         <field name="arch" type="xml">
              <form string="Create Supplier RMA">
-                 <separator string="Existing Supplier RMA to update:" />
+                 <separator
+                    string="Existing Supplier RMA to update:"
+                    groups="rma.group_rma_groups"
+                />
                  <newline />
                  <group>
                     <field
                         name="supplier_rma_id"
                         domain="[('partner_id', '=', partner_id)]"
+                        groups="rma.group_rma_groups"
                     />
                  </group>
                  <newline />

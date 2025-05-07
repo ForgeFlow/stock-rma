@@ -99,24 +99,35 @@ class RmaMakePicking(models.TransientModel):
         elif a_type == "customer":
             return delivery_address_id.property_stock_customer
 
+    def _get_procurement_location(self, line, picking_type, delivery_address_id):
+        location = False
+        if picking_type == "incoming":
+            if line.customer_to_supplier:
+                location = self._get_address_location(delivery_address_id, "supplier")
+            else:
+                location = line.location_id
+        elif picking_type == "outgoing":
+            if line.supplier_to_customer:
+                location = self._get_address_location(delivery_address_id, "customer")
+            else:
+                location = line.location_supplier_id or self._get_address_location(
+                    delivery_address_id, line.type
+                )
+        return location
+
     @api.model
     def _get_procurement_data(self, item, group, qty, picking_type):
         line = item.line_id
         delivery_address_id = self._get_address(item)
         date_planned = fields.Datetime.now()
         location, warehouse, route = False, False, False
+        location = self._get_procurement_location(
+            line, picking_type, delivery_address_id
+        )
         if picking_type == "incoming":
-            if line.customer_to_supplier:
-                location = self._get_address_location(delivery_address_id, "supplier")
-            else:
-                location = line.location_id
             warehouse = line.in_warehouse_id
             route = line.in_route_id
         elif picking_type == "outgoing":
-            if line.supplier_to_customer:
-                location = self._get_address_location(delivery_address_id, "customer")
-            else:
-                location = self._get_address_location(delivery_address_id, line.type)
             warehouse = line.out_warehouse_id
             route = line.out_route_id
             if line.product_id.sale_delay:
