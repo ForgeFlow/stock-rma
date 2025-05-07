@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-
     <record id="view_rma_order_line_make_repair" model="ir.ui.view">
         <field name="name">RMA Line Make Repair</field>
         <field name="model">rma.order.line.make.repair</field>
@@ -55,5 +54,4 @@
         <field name="target">new</field>
         <field name="binding_model_id" ref="rma_repair.model_rma_order_line" />
     </record>
-
 </odoo>
