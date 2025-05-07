@@ -8,7 +8,7 @@
     "category": "RMA",
     "summary": "Integrates RMA with Kit Manufacturing/Sale Process",
     "author": "ForgeFlow",
-    "website": "https://github.com/ForgeFlow/stock-rma",
+    "website": "https://github.com/ForgeFlow",
     "depends": ["rma_sale", "sale_mrp"],
     "data": ["views/res_config_settings_views.xml"],
     "installable": True,

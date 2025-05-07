@@ -6,7 +6,6 @@ from odoo.tools import float_is_zero
 
 
 class RmaOrderLine(models.Model):
-
     _inherit = "rma.order.line"
 
     def _get_price_unit(self):
@@ -35,7 +34,7 @@ class RmaOrderLine(models.Model):
             if not float_is_zero(layers_quantity, precision_digits=pd):
                 price_unit = layers_value / layers_quantity
             else:
-                price_unit = super(RmaOrderLine, self)._get_price_unit()
+                price_unit = super()._get_price_unit()
         else:
-            price_unit = super(RmaOrderLine, self)._get_price_unit()
+            price_unit = super()._get_price_unit()
         return price_unit
