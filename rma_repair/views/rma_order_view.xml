@@ -35,7 +35,7 @@
                     />
                 </button>
             </div>
-            <xpath expr="//field[@name='rma_line_ids']/tree" position="inside">
+            <xpath expr="//field[@name='rma_line_ids']/list" position="inside">
                 <field name="repair_type" column_invisible="True" />
             </xpath>
         </field>

@@ -105,7 +105,7 @@ class TestRmaRepair(common.SingleTransactionCase):
         cls.product_1 = cls.product_obj.create(
             {
                 "name": "Test Product 1",
-                "type": "product",
+                "is_storable": True,
                 "list_price": 100.0,
                 "rma_customer_operation_id": cls.operation_1.id,
             }
@@ -113,7 +113,7 @@ class TestRmaRepair(common.SingleTransactionCase):
         cls.product_2 = cls.product_obj.create(
             {
                 "name": "Test Product 2",
-                "type": "product",
+                "is_storable": True,
                 "list_price": 150.0,
                 "rma_customer_operation_id": cls.operation_2.id,
             }
@@ -121,7 +121,7 @@ class TestRmaRepair(common.SingleTransactionCase):
         cls.product_3 = cls.product_obj.create(
             {
                 "name": "Test Product 3",
-                "type": "product",
+                "is_storable": True,
                 "list_price": 1.0,
                 "rma_customer_operation_id": cls.operation_3.id,
             }
@@ -184,7 +184,9 @@ class TestRmaRepair(common.SingleTransactionCase):
         cls.bank_journal = cls.env["account.journal"].search(
             [("type", "=", "bank")], limit=1
         )
-        cls.material = cls.product_obj.create({"name": "Materials", "type": "product"})
+        cls.material = cls.product_obj.create(
+            {"name": "Materials", "is_storable": True}
+        )
 
         cls.material.product_tmpl_id.standard_price = 10
         cls.stock_location = cls.env.ref("stock.stock_location_stock")
@@ -256,7 +258,7 @@ class TestRmaRepair(common.SingleTransactionCase):
         rma._compute_repair_transfer_count()
         self.assertEqual(rma.repair_transfer_count, 1)
         repair_transfer_move = rma.move_ids.filtered(
-            lambda x: x.location_dest_id == self.repair_loc
+            lambda x: x.location_final_id == self.repair_loc
         )
         self.assertEqual(repair_transfer_move.location_id, self.stock_rma_location)
         self.assertEqual(repair_transfer_move.product_qty, 15.0)
@@ -312,7 +314,7 @@ class TestRmaRepair(common.SingleTransactionCase):
         rma._compute_repair_transfer_count()
         self.assertEqual(rma.repair_transfer_count, 1)
         repair_transfer_move = rma.move_ids.filtered(
-            lambda x: x.location_dest_id == self.repair_loc
+            lambda x: x.location_final_id == self.repair_loc
         )
         self.assertEqual(repair_transfer_move.location_id, self.stock_rma_location)
         self.assertEqual(repair_transfer_move.product_id, rma.product_id)
