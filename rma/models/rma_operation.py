@@ -80,6 +80,12 @@ class RmaOperation(models.Model):
         default=lambda self: self._default_warehouse_id(),
     )
     location_id = fields.Many2one("stock.location", "Send To This Company Location")
+    location_supplier_id = fields.Many2one(
+        comodel_name="stock.location",
+        string="Send To This Supplier Location",
+        help="You can specify any supplier location, the absence of any filter is "
+        "on purpose as you could define 'internal' supplier locations",
+    )
     type = fields.Selection(
         [("customer", "Customer"), ("supplier", "Supplier")],
         string="Used in RMA of this type",
