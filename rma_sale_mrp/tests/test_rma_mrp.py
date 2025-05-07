@@ -5,72 +5,73 @@ from odoo.tests import Form, TransactionCase
 
 
 class TestRmaMrp(TransactionCase):
-    def setUp(self):
-        super().setUp()
-        self.product_model = self.env["product.product"]
-        self.template_model = self.env["product.template"]
-        self.product_ctg_model = self.env["product.category"]
-        self.journal_model = self.env["account.journal"]
-        self.rma_line = self.env["rma.order.line"]
-        self.rma_make_picking = self.env["rma_make_picking.wizard"]
-        self.rma_op_obj = self.env["rma.operation"]
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.product_model = cls.env["product.product"]
+        cls.template_model = cls.env["product.template"]
+        cls.product_ctg_model = cls.env["product.category"]
+        cls.journal_model = cls.env["account.journal"]
+        cls.rma_line = cls.env["rma.order.line"]
+        cls.rma_make_picking = cls.env["rma_make_picking.wizard"]
+        cls.rma_op_obj = cls.env["rma.operation"]
         # Get required Model data
-        self.product_uom = self.env.ref("uom.product_uom_unit")
-        self.company = self.env.ref("base.main_company")
-        self.stock_picking_type_out = self.env.ref("stock.picking_type_out")
-        self.stock_picking_type_in = self.env.ref("stock.picking_type_in")
-        self.stock_location_id = self.env.ref("stock.stock_location_stock")
-        self.stock_location_customer_id = self.env.ref("stock.stock_location_customers")
-        self.stock_location_supplier_id = self.env.ref("stock.stock_location_suppliers")
-        self.rma_route_cust = self.env.ref("rma.route_rma_customer")
-        self.customer_view = self.env.ref("rma_sale.view_rma_line_form")
+        cls.product_uom = cls.env.ref("uom.product_uom_unit")
+        cls.company = cls.env.ref("base.main_company")
+        cls.stock_picking_type_out = cls.env.ref("stock.picking_type_out")
+        cls.stock_picking_type_in = cls.env.ref("stock.picking_type_in")
+        cls.stock_location_id = cls.env.ref("stock.stock_location_stock")
+        cls.stock_location_customer_id = cls.env.ref("stock.stock_location_customers")
+        cls.stock_location_supplier_id = cls.env.ref("stock.stock_location_suppliers")
+        cls.rma_route_cust = cls.env.ref("rma.route_rma_customer")
+        cls.customer_view = cls.env.ref("rma_sale.view_rma_line_form")
 
-        self.stock_journal = self.env["account.journal"].create(
+        cls.stock_journal = cls.env["account.journal"].create(
             {"name": "Stock journal", "type": "general", "code": "STK00"}
         )
         # Create product category
-        self.product_ctg = self._create_product_category()
+        cls.product_ctg = cls._create_product_category(cls)
 
         # Create partners
-        self.supplier = self.env["res.partner"].create({"name": "Test supplier"})
-        self.customer = self.env["res.partner"].create({"name": "Test customer"})
+        cls.supplier = cls.env["res.partner"].create({"name": "Test supplier"})
+        cls.customer = cls.env["res.partner"].create({"name": "Test customer"})
 
         # Create a Product with real cost
         standard_price = 10.0
         list_price = 20.0
-        self.kit_product = self._create_product(standard_price, False, list_price)
-        self.component_product_1 = self._create_product(
-            standard_price, False, list_price
+        cls.kit_product = cls._create_product(cls, standard_price, False, list_price)
+        cls.component_product_1 = cls._create_product(
+            cls, standard_price, False, list_price
         )
-        self.component_product_2 = self._create_product(
-            standard_price, False, list_price
+        cls.component_product_2 = cls._create_product(
+            cls, standard_price, False, list_price
         )
 
         # Create BoM for Kit A
-        bom_product_form = Form(self.env["mrp.bom"])
-        bom_product_form.product_id = self.kit_product
-        bom_product_form.product_tmpl_id = self.kit_product.product_tmpl_id
+        bom_product_form = Form(cls.env["mrp.bom"])
+        bom_product_form.product_id = cls.kit_product
+        bom_product_form.product_tmpl_id = cls.kit_product.product_tmpl_id
         bom_product_form.product_qty = 1.0
         bom_product_form.type = "phantom"
         with bom_product_form.bom_line_ids.new() as bom_line:
-            bom_line.product_id = self.component_product_1
+            bom_line.product_id = cls.component_product_1
             bom_line.product_qty = 1.0
         with bom_product_form.bom_line_ids.new() as bom_line:
-            bom_line.product_id = self.component_product_2
+            bom_line.product_id = cls.component_product_2
             bom_line.product_qty = 1.0
-        self.bom_kit = bom_product_form.save()
+        cls.bom_kit = bom_product_form.save()
 
         # RMA configuration
 
-        self.operation_1 = self.rma_op_obj.create(
+        cls.operation_1 = cls.rma_op_obj.create(
             {
                 "code": "TEST",
                 "name": "Refund and receive",
                 "type": "customer",
                 "receipt_policy": "ordered",
                 "refund_policy": "ordered",
-                "in_route_id": self.rma_route_cust.id,
-                "out_route_id": self.rma_route_cust.id,
+                "in_route_id": cls.rma_route_cust.id,
+                "out_route_id": cls.rma_route_cust.id,
             }
         )
 
@@ -92,7 +93,7 @@ class TestRmaMrp(TransactionCase):
                 {
                     "name": "test_product",
                     "categ_id": self.product_ctg.id,
-                    "type": "product",
+                    "is_storable": True,
                     "standard_price": standard_price,
                     "valuation": "real_time",
                     "invoice_policy": "delivery",
@@ -135,7 +136,8 @@ class TestRmaMrp(TransactionCase):
         """Do picking with only one move on the given date."""
         picking.action_confirm()
         picking.action_assign()
-        picking.move_ids.quantity_done = qty
+        picking.move_ids.quantity = qty
+        picking.move_ids.picked = True
         res = picking.button_validate()
         if isinstance(res, dict) and res:
             backorder_wiz_id = res["res_id"]
@@ -168,7 +170,8 @@ class TestRmaMrp(TransactionCase):
         pickings.action_assign()
         for picking in pickings:
             for mv in picking.move_ids:
-                mv.quantity_done = mv.product_uom_qty
+                mv.quantity = mv.product_uom_qty
+                mv.picked = True
         # In case of two step pickings, ship in two steps:
         while pickings.filtered(lambda p: p.state == "assigned"):
             pickings._action_done()
