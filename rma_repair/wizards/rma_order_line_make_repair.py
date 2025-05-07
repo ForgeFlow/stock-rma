@@ -2,7 +2,7 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 import time
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FORMAT
 
@@ -67,7 +67,7 @@ class RmaLineMakeRepair(models.TransientModel):
 
         return {
             "domain": [("id", "in", res)],
-            "name": _("Repairs"),
+            "name": self.env._("Repairs"),
             "view_mode": "tree,form",
             "res_model": "repair.order",
             "view_id": False,
@@ -84,7 +84,7 @@ class RmaLineMakeRepairItem(models.TransientModel):
     def _check_product_qty(self):
         for rec in self:
             if rec.product_qty <= 0.0:
-                raise ValidationError(_("Quantity must be positive."))
+                raise ValidationError(self.env._("Quantity must be positive."))
 
     wiz_id = fields.Many2one(
         comodel_name="rma.order.line.make.repair", string="Wizard", ondelete="cascade"
@@ -111,7 +111,7 @@ class RmaLineMakeRepairItem(models.TransientModel):
         comodel_name="res.partner",
         string="Customer",
         required=False,
-        domain=[("customer", "=", True)],
+        domain=[("customer_rank", ">=", 1)],
         readonly=True,
     )
     location_id = fields.Many2one(
@@ -168,7 +168,7 @@ class RmaLineMakeRepairItem(models.TransientModel):
     @api.model
     def _get_procurement_data(self, route, dest_location):
         if not route:
-            raise ValidationError(_("No route specified"))
+            raise ValidationError(self.env._("No route specified"))
         group = self.find_procurement_group()
         if not group:
             group = self._get_procurement_group()
