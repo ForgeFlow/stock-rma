@@ -442,6 +442,14 @@ class RmaOrderLine(models.Model):
         states={"draft": [("readonly", False)]},
         default=lambda self: self._default_location_id(),
     )
+    location_supplier_id = fields.Many2one(
+        comodel_name="stock.location",
+        string="Send To This Supplier Location",
+        readonly=True,
+        states={"draft": [("readonly", False)]},
+        help="If no location is selected, the one define in the delivery "
+        "address will be used, which by default is 'Vendors' location.",
+    )
     customer_rma_id = fields.Many2one(
         "rma.order.line", string="Customer RMA line", ondelete="cascade"
     )
@@ -759,6 +767,9 @@ class RmaOrderLine(models.Model):
             self.rma_id.location_id
             or self.operation_id.location_id
             or self.in_warehouse_id.lot_rma_id
+        )
+        self.location_supplier_id = (
+            self.rma_id.location_supplier_id or self.operation_id.location_supplier_id
         )
         self.in_route_id = self.rma_id.in_route_id or self.operation_id.in_route_id
         self.out_route_id = self.rma_id.out_route_id or self.operation_id.out_route_id

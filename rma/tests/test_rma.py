@@ -1633,3 +1633,79 @@ class TestRma(common.TransactionCase):
             mv.qty_done = mv.reserved_uom_qty
         picking._action_done()
         self.assertEqual(picking.state, "done", "Final picking should has done state")
+
+    def test_13_custom_supplier_location(self):
+        # Test we can use custom supplier locations
+        supplier_loc = self.env["stock.location"].create(
+            {
+                "name": "Supplier Location",
+                "usage": "supplier",
+            }
+        )
+        custom_rma_supplier_route = self.env["stock.route"].create(
+            {
+                "name": "RMA Supplier Custom",
+                "product_selectable": True,
+                "company_id": False,
+                "rma_selectable": True,
+            }
+        )
+        picking_type_to_sub = self.env["stock.picking.type"].create(
+            {
+                "name": "RMA to custom",
+                "code": "internal",
+                "warehouse_id": self.wh.id,
+                "sequence_code": "RMA-CUST",
+                "default_location_src_id": self.stock_rma_location.id,
+                "default_location_dest_id": supplier_loc.id,
+            }
+        )
+        picking_type_from_sub = self.env["stock.picking.type"].create(
+            {
+                "name": "custom to RMA",
+                "code": "internal",
+                "warehouse_id": self.wh.id,
+                "sequence_code": "CUST-RMA",
+                "default_location_src_id": supplier_loc.id,
+                "default_location_dest_id": self.stock_rma_location.id,
+            }
+        )
+        self.env["stock.rule"].create(
+            {
+                "name": "RMA to custom",
+                "route_id": custom_rma_supplier_route.id,
+                "action": "pull",
+                "picking_type_id": picking_type_to_sub.id,
+                "location_src_id": self.stock_rma_location.id,
+                "location_dest_id": supplier_loc.id,
+                "procure_method": "make_to_stock",
+            }
+        )
+        self.env["stock.rule"].create(
+            {
+                "name": "custom to RMA",
+                "route_id": custom_rma_supplier_route.id,
+                "action": "pull",
+                "picking_type_id": picking_type_from_sub.id,
+                "location_src_id": supplier_loc.id,
+                "location_dest_id": self.stock_rma_location.id,
+                "procure_method": "make_to_stock",
+            }
+        )
+        products2move = [
+            (self.product_1, 1),
+        ]
+        rma_supplier_id = self._create_rma_from_move(
+            products2move,
+            "supplier",
+            self.env.ref("base.res_partner_2"),
+            dropship=False,
+        )
+        rma = rma_supplier_id.rma_line_ids
+        rma.out_route_id = custom_rma_supplier_route
+        rma.location_supplier_id = supplier_loc
+        rma.action_rma_to_approve()
+        self._deliver_rma(rma)
+        res = rma.action_view_out_shipments()
+        picking = self.env["stock.picking"].browse(res["res_id"])
+        self.assertEqual(picking.location_dest_id, supplier_loc)

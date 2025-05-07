@@ -61,6 +61,7 @@
                         <group name="outbound" string="Outbound">
                             <field name="out_route_id" />
                             <field name="out_warehouse_id" />
+                            <field name="location_supplier_id" />
                             <field
                                 name="supplier_to_customer"
                                 attrs="{'invisible':[('type', '=', 'customer')]}"

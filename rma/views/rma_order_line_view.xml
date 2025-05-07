@@ -288,6 +288,7 @@
                                 </group>
                                 <group name="outbound" string="Outbound">
                                     <field name="out_warehouse_id" />
+                                    <field name="location_supplier_id" />
                                     <field
                                     name="out_route_id"
                                     groups="stock.group_adv_location"
