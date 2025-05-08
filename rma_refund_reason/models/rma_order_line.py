@@ -5,7 +5,6 @@ from odoo import api, fields, models
 
 
 class RmaOrderLine(models.Model):
-
     _inherit = "rma.order.line"
 
     refund_reason_id = fields.Many2one(
@@ -15,7 +14,7 @@ class RmaOrderLine(models.Model):
 
     @api.onchange("operation_id")
     def _onchange_operation_id(self):
-        result = super(RmaOrderLine, self)._onchange_operation_id()
+        result = super()._onchange_operation_id()
         if self.operation_id:
             self.refund_reason_id = self.operation_id.refund_reason_id.id
         return result

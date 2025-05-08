@@ -7,7 +7,7 @@
     "summary": "RMA Refund Reason Integration",
     "category": "RMA",
     "author": "ForgeFlow",
-    "website": "https://github.com/ForgeFlow/stock-rma",
+    "website": "https://github.com/ForgeFlow",
     "license": "AGPL-3",
     "depends": ["rma_account", "account_invoice_refund_reason"],
     "data": [

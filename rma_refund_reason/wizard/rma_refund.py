@@ -5,7 +5,6 @@ from odoo import api, fields, models
 
 
 class RmaRefund(models.TransientModel):
-
     _inherit = "rma.refund"
 
     @api.model
@@ -29,7 +28,7 @@ class RmaRefund(models.TransientModel):
 
     @api.model
     def _prepare_refund(self, wizard, rma_line):
-        values = super(RmaRefund, self)._prepare_refund(wizard, rma_line)
+        values = super()._prepare_refund(wizard, rma_line)
         if rma_line.refund_reason_id:
             values.update(
                 {
