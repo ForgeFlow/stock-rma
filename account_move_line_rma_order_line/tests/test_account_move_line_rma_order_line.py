@@ -88,7 +88,7 @@ class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
                 "name": name,
                 "code": code,
                 "account_type": acc_type,
-                "company_id": company.id,
+                "company_ids": [(6, 0, company.ids)],
                 "reconcile": reconcile,
             }
         )
@@ -110,7 +110,7 @@ class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
             {
                 "name": "test_product",
                 "categ_id": product_ctg.id,
-                "type": "product",
+                "is_storable": True,
                 "standard_price": 1.0,
                 "list_price": 1.0,
             }
@@ -199,8 +199,7 @@ class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
             self.assertEqual(
                 balance,
                 expected_balance,
-                "Balance is not %s for rma Line %s."
-                % (str(expected_balance), rma_line.name),
+                f"Balance is not {str(expected_balance)} for rma Line {rma_line.name}.",
             )
 
     def test_rma_invoice(self):
@@ -237,7 +236,7 @@ class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
         else:
             picking_ids = self.env["stock.picking"].search(res["domain"])
             picking = self.env["stock.picking"].browse(picking_ids)
-        picking.move_ids.write({"quantity_done": 1.0})
+        picking.move_ids.write({"quantity": 1.0, "picked": True})
         picking.button_validate()
         # decreasing cogs
         expected_balance = -1.0

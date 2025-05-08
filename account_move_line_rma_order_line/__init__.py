@@ -6,8 +6,7 @@ from odoo import api, SUPERUSER_ID
 _logger = logging.getLogger(__name__)
 
 
-def post_init_hook(cr, registry):
-    env = api.Environment(cr, SUPERUSER_ID, {})
+def post_init_hook(env):
     aml_model = env["account.move.line"]
     sm_model = env["stock.move"]
     svl_model = env["stock.valuation.layer"]
@@ -21,7 +20,8 @@ def post_init_hook(cr, registry):
             and x.rma_line_id
         ):
             move_lines_without_rma = account_move.line_ids.filtered(
-                lambda x: x.product_id.id == aml_w_rma.product_id.id
+                lambda x, aml_w_rma=aml_w_rma: x.product_id.id
+                == aml_w_rma.product_id.id
                 and not x.rma_line_id
                 and aml_w_rma.name in x.name
             )
@@ -35,7 +35,7 @@ def post_init_hook(cr, registry):
         current_layers = svl_model.search([("stock_move_id", "=", move.id)])
         if current_layers:
             for aml in current_layers.mapped("account_move_id.line_ids").filtered(
-                lambda x: x.account_id.id
+                lambda x, move=move: x.account_id.id
                 != move.product_id.categ_id.property_stock_valuation_account_id.id
                 and not x.rma_line_id
             ):

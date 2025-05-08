@@ -19,13 +19,14 @@ class AccountMove(models.Model):
                 ):
                     current_move = self.browse(line.get("move_id", False))
                     current_rma = current_move.invoice_line_ids.filtered(
-                        lambda x: x.rma_line_id and x.product_id.id == product.id
+                        lambda x, product=product: x.rma_line_id
+                        and x.product_id.id == product.id
                     ).mapped("rma_line_id")
                     if len(current_rma) == 1:
                         line.update({"rma_line_id": current_rma.id})
                     elif len(current_rma) > 1:
                         find_with_label_rma = current_rma.filtered(
-                            lambda x: x.name == line.get("name")
+                            lambda x, line=line: x.name == line.get("name")
                         )
                         if len(find_with_label_rma) == 1:
                             line.update({"rma_line_id": find_with_label_rma.id})
