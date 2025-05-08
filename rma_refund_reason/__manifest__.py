@@ -3,7 +3,7 @@
 
 {
     "name": "RMA Refund Reason Integration",
-    "version": "16.0.1.0.0",
+    "version": "18.0.1.0.0",
     "summary": "RMA Refund Reason Integration",
     "category": "RMA",
     "author": "ForgeFlow",
