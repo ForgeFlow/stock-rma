@@ -6,7 +6,7 @@
     "summary": "Introduces the rma order line to the journal items",
     "version": "16.0.1.1.0",
     "author": "ForgeFlow, " "Odoo Community Association (OCA)",
-    "website": "https://github.com/ForgeFlow/stock-rma",
+    "website": "https://github.com/ForgeFlow",
     "category": "Generic",
     "depends": ["stock_account", "rma_account"],
     "license": "AGPL-3",

@@ -7,7 +7,7 @@ from odoo.tests import common
 class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
     @classmethod
     def setUpClass(cls):
-        super(TestAccountMoveLineRmaOrderLine, cls).setUpClass()
+        super().setUpClass()
         cls.rma_model = cls.env["rma.order"]
         cls.rma_line_model = cls.env["rma.order.line"]
         cls.rma_refund_wiz = cls.env["rma.refund"]
