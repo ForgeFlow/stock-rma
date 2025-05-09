@@ -280,13 +280,6 @@ class RmaMakePicking(models.TransientModel):
                     "quantity": 1.0,
                 }
             )
-            if move.rma_line_id.lot_id and not quants:
-                # CHECK ME: force al least has lot assigned if quant is not found
-                move_line_data.update(
-                    {
-                        "lot_id": move.rma_line_id.lot_id.id,
-                    }
-                )
             if move.product_id.tracking == "serial":
                 move.write(
                     {
