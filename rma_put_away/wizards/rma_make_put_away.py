@@ -3,7 +3,7 @@
 
 import time
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FORMAT
 
@@ -62,7 +62,7 @@ class RmaMakePutAway(models.TransientModel):
         for item in self.item_ids:
             line = item.line_id
             if line.state != "approved":
-                raise ValidationError(_("RMA %s is not approved") % line.name)
+                raise ValidationError(self.env._("RMA %s is not approved") % line.name)
             procurement = self._prepare_procurement(item)
             procurements.append(procurement)
         try:
@@ -83,7 +83,7 @@ class RmaMakePutAway(models.TransientModel):
         line = item.line_id
         route = line.operation_id.put_away_route_id
         if not route:
-            raise ValidationError(_("No route specified"))
+            raise ValidationError(self.env._("No route specified"))
         procurement_data = {
             "name": line.rma_id and line.rma_id.name or line.name,
             "origin": line.name,
@@ -92,7 +92,7 @@ class RmaMakePutAway(models.TransientModel):
             "product_qty": item.product_qty,
             "qty_to_put_away": item.product_qty,
             "product_uom": line.product_id.product_tmpl_id.uom_id.id,
-            "location_id": item.location_id.id,
+            "location_dest_id": item.location_id.id,
             "rma_line_id": line.id,
             "route_ids": route,
             "company_id": line.company_id,

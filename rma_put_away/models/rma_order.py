@@ -21,8 +21,9 @@ class RmaOrder(models.Model):
 
     def action_view_put_away_transfers(self):
         self.ensure_one()
-        action = self.env.ref("stock.action_picking_tree_all")
-        result = action.sudo().read()[0]
+        result = self.env["ir.actions.actions"]._for_xml_id(
+            "stock.action_picking_tree_all"
+        )
         pickings = self.env["stock.picking"]
         for line in self.rma_line_ids:
             pickings |= line.move_ids.filtered(lambda m: m.is_rma_put_away).mapped(

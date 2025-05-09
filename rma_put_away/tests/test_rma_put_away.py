@@ -22,12 +22,18 @@ class TestRmaPutAway(common.SingleTransactionCase):
 
         # Create products
         cls.product_1 = cls.product_obj.create(
-            {"name": "Test Product 1", "type": "product", "list_price": 100.0}
+            {
+                "name": "Test Product 1",
+                "type": "consu",
+                "is_storable": True,
+                "list_price": 100.0,
+            }
         )
         cls.product_2 = cls.product_obj.create(
             {
                 "name": "Test Product 2",
-                "type": "product",
+                "type": "consu",
+                "is_storable": True,
                 "list_price": 150.0,
                 "tracking": "lot",
             }
@@ -56,6 +62,15 @@ class TestRmaPutAway(common.SingleTransactionCase):
                 "sequence": 10,
             }
         )
+        cls.operation_type = cls.env["stock.picking.type"].create(
+            {
+                "name": "Put Away",
+                "sequence_code": "PA",
+                "code": "internal",
+                "default_location_src_id": cls.stock_rma_location.id,
+                "default_location_dest_id": cls.put_away_loc.id,
+            }
+        )
 
         cls.env["stock.rule"].create(
             {
@@ -64,7 +79,7 @@ class TestRmaPutAway(common.SingleTransactionCase):
                 "location_src_id": cls.stock_rma_location.id,
                 "location_dest_id": cls.put_away_loc.id,
                 "action": "pull",
-                "picking_type_id": cls.wh.int_type_id.id,
+                "picking_type_id": cls.operation_type.id,
                 "procure_method": "make_to_stock",
                 "warehouse_id": cls.wh.id,
             }
@@ -151,7 +166,8 @@ class TestRmaPutAway(common.SingleTransactionCase):
         move = picking.move_ids_without_package
         self.assertEqual(move.product_id.id, self.product_1.id)
         self.assertEqual(move.product_uom_qty, 1)
-        move.quantity_done = 1
+        move.quantity = 1
+        move.picked = True
         self.assertTrue(picking.action_assign())
         self.assertTrue(picking.button_validate())
 
@@ -186,7 +202,8 @@ class TestRmaPutAway(common.SingleTransactionCase):
         picking = self.env["stock.picking"].browse(res["res_id"])
         picking.action_assign()
         for mv in picking.move_ids:
-            mv.quantity_done = mv.product_uom_qty
+            mv.quantity = mv.product_uom_qty
+            mv.picked = True
         picking._action_done()
         wizard = self.rma_make_put_away_wiz.with_context(
             **{
@@ -216,6 +233,7 @@ class TestRmaPutAway(common.SingleTransactionCase):
         self.assertEqual(move.product_id.id, self.product_2.id)
         self.assertEqual(move.product_uom_qty, 1)
         self.assertEqual(move.move_line_ids.lot_id.id, self.lot.id)
-        move.quantity_done = 1
+        move.quantity = 1
+        move.picked = True
         move.move_line_ids.lot_id = self.lot
         self.assertTrue(picking.button_validate())

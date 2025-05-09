@@ -12,12 +12,12 @@
                     class="oe_stat_button"
                     icon="fa-truck"
                     groups="stock.group_stock_user"
-                    attrs="{'invisible': [('put_away_count', '=', 0)]}"
+                    invisible="put_away_count == 0"
                 >
                     <field name="put_away_count" widget="statinfo" string="Put Aways" />
                 </button>
             </button>
-            <xpath expr="//field[@name='rma_line_ids']/tree" position="inside">
+            <xpath expr="//field[@name='rma_line_ids']/list" position="inside">
                 <field name="put_away_policy" invisible="True" />
             </xpath>
         </field>

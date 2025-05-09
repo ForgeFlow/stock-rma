@@ -1,6 +1,6 @@
 {
     "name": "RMA Put Away",
-    "version": "16.0.1.0.0",
+    "version": "18.0.1.0.0",
     "license": "LGPL-3",
     "category": "RMA",
     "summary": "Allows to put away the received products in odoo",
