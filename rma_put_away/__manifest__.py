@@ -5,7 +5,7 @@
     "category": "RMA",
     "summary": "Allows to put away the received products in odoo",
     "author": "ForgeFlow",
-    "website": "https://github.com/ForgeFlow/stock-rma",
+    "website": "https://github.com/ForgeFlow",
     "depends": ["rma"],
     "data": [
         "security/ir.model.access.csv",

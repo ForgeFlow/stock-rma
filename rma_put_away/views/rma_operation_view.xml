@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-
     <record id="rma_operation_tree" model="ir.ui.view">
         <field name="name">rma.operation.tree</field>
         <field name="model">rma.operation</field>
@@ -28,5 +27,4 @@
             </group>
         </field>
     </record>
-
 </odoo>

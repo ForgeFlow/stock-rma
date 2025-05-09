@@ -19,18 +19,18 @@
                 </field>
                 <footer>
                     <button
-                        string="Confirm"
-                        name="action_create_put_away"
-                        type="object"
-                        class="oe_highlight"
-                    />
+                    string="Confirm"
+                    name="action_create_put_away"
+                    type="object"
+                    class="oe_highlight"
+                />
                     or
                     <button
-                        name="action_cancel"
-                        string="Cancel"
-                        class="oe_link"
-                        special="cancel"
-                    />
+                    name="action_cancel"
+                    string="Cancel"
+                    class="oe_link"
+                    special="cancel"
+                />
                 </footer>
             </form>
         </field>
