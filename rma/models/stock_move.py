@@ -49,60 +49,6 @@ class StockMove(models.Model):
             return False
         return res
 
-    def _get_available_quantity(
-        self,
-        location_id,
-        lot_id=None,
-        package_id=None,
-        owner_id=None,
-        strict=False,
-        allow_negative=False,
-    ):
-        if (
-            not lot_id
-            and self.rma_line_id.lot_id
-            and self.location_id.usage == "internal"
-            and self.rma_line_id.operation_id.out_force_same_lot
-        ):
-            # In supplier RMA deliveries we can only send the RMA lot/serial.
-            lot_id = self.rma_line_id.lot_id
-        return super()._get_available_quantity(
-            location_id,
-            lot_id=lot_id,
-            package_id=package_id,
-            owner_id=owner_id,
-            strict=strict,
-            allow_negative=allow_negative,
-        )
-
-    def _update_reserved_quantity(
-        self,
-        need,
-        available_quantity,
-        location_id,
-        lot_id=None,
-        package_id=None,
-        owner_id=None,
-        strict=True,
-    ):
-        if (
-            not lot_id
-            and self.rma_line_id.lot_id
-            and self.location_id.usage == "internal"
-            and self.rma_line_id.operation_id.out_force_same_lot
-        ):
-            # In supplier RMA deliveries we can only send the RMA lot/serial.
-            lot_id = self.rma_line_id.lot_id
-        return super()._update_reserved_quantity(
-            need,
-            available_quantity,
-            location_id,
-            lot_id=lot_id,
-            package_id=package_id,
-            owner_id=owner_id,
-            strict=strict,
-        )
-
     @api.model
     def _prepare_merge_moves_distinct_fields(self):
         res = super()._prepare_merge_moves_distinct_fields()
