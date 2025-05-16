@@ -147,6 +147,10 @@ class RmaOrder(models.Model):
         comodel_name="stock.location",
         string="Send To This Company Location",
     )
+    location_supplier_id = fields.Many2one(
+        comodel_name="stock.location",
+        string="Send To This Supplier Location",
+    )
     customer_to_supplier = fields.Boolean("The customer will send to the supplier")
     supplier_to_customer = fields.Boolean("The supplier will send to the customer")
     supplier_address_id = fields.Many2one(
@@ -187,6 +191,7 @@ class RmaOrder(models.Model):
             self.location_id = (
                 self.operation_default_id.location_id or self.in_warehouse_id.lot_rma_id
             )
+            self.location_supplier_id = self.operation_default_id.location_supplier_id
             self.customer_to_supplier = self.operation_default_id.customer_to_supplier
             self.supplier_to_customer = self.operation_default_id.supplier_to_customer
             self.in_route_id = self.operation_default_id.in_route_id
