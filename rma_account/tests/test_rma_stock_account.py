@@ -204,9 +204,6 @@ class TestRmaStockAccount(TestRma):
         The Goods Delivered Not Invoiced should result in 0
         """
         # Alter the customer RMA route to make it multi-step
-        # Get rid of the duplicated rule
-        self.env.ref("rma.rule_rma_customer_out_pull").active = False
-        self.env.ref("rma.rule_rma_customer_in_pull").active = False
         cust_in_pull_rule = self.customer_route.rule_ids.filtered(
             lambda r: r.location_dest_id == self.stock_rma_location
         )
