@@ -678,8 +678,8 @@ class TestRma(common.TransactionCase):
         )
         # product specific
         self._check_equal_quantity(
-            lines.filtered(lambda l: l.product_id == self.product_1).qty_to_deliver,
-            3,
+            lines.filtered(lambda x: x.product_id == self.product_1).qty_to_deliver,
+            0,
             "Wrong qty to_deliver",
         )
         self._check_equal_quantity(
@@ -688,8 +688,8 @@ class TestRma(common.TransactionCase):
             "Wrong qty outgoing",
         )
         self._check_equal_quantity(
-            lines.filtered(lambda l: l.product_id == self.product_2).qty_to_deliver,
-            5,
+            lines.filtered(lambda x: x.product_id == self.product_2).qty_to_deliver,
+            0,
             "Wrong qty to_deliver",
         )
         self._check_equal_quantity(
@@ -698,8 +698,8 @@ class TestRma(common.TransactionCase):
             "Wrong qty outgoing",
         )
         self._check_equal_quantity(
-            lines.filtered(lambda l: l.product_id == self.product_3).qty_to_deliver,
-            2,
+            lines.filtered(lambda x: x.product_id == self.product_3).qty_to_deliver,
+            0,
             "Wrong qty to_deliver",
         )
         self._check_equal_quantity(
@@ -912,8 +912,8 @@ class TestRma(common.TransactionCase):
             "Wrong qty_to_receive",
         )
         self._check_equal_quantity(
-            lines.filtered(lambda l: l.product_id == self.product_1).qty_to_deliver,
-            3,
+            lines.filtered(lambda x: x.product_id == self.product_1).qty_to_deliver,
+            0,
             "Wrong qty_to_deliver",
         )
         self._check_equal_quantity(
@@ -922,8 +922,8 @@ class TestRma(common.TransactionCase):
             "Wrong qty_to_receive",
         )
         self._check_equal_quantity(
-            lines.filtered(lambda l: l.product_id == self.product_2).qty_to_deliver,
-            5,
+            lines.filtered(lambda x: x.product_id == self.product_2).qty_to_deliver,
+            0,
             "Wrong qty_to_deliver",
         )
         self._check_equal_quantity(
@@ -932,8 +932,8 @@ class TestRma(common.TransactionCase):
             "Wrong qty_to_receive",
         )
         self._check_equal_quantity(
-            lines.filtered(lambda l: l.product_id == self.product_3).qty_to_deliver,
-            2,
+            lines.filtered(lambda x: x.product_id == self.product_3).qty_to_deliver,
+            0,
             "Wrong qty_to_deliver",
         )
         self.assertEqual(

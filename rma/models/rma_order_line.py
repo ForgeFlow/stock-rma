@@ -122,7 +122,14 @@ class RmaOrderLine(models.Model):
                     continue
                 elif direction == "in" and move.move_dest_ids:
                     continue
-                qty += product_obj._compute_quantity(move.product_uom_qty, rec.uom_id)
+                if move.state == "done":
+                    qty += product_obj._compute_quantity(
+                        move.product_uom_qty, rec.uom_id
+                    )
+                else:
+                    qty += product_obj._compute_quantity(
+                        move.product_uom_qty, rec.uom_id
+                    )
             return qty
 
     @api.depends(
@@ -154,9 +161,13 @@ class RmaOrderLine(models.Model):
         for rec in self:
             rec.qty_to_deliver = 0.0
             if rec.delivery_policy == "ordered":
-                rec.qty_to_deliver = rec.product_qty - rec.qty_delivered
+                rec.qty_to_deliver = max(
+                    rec.product_qty - rec.qty_outgoing - rec.qty_delivered, 0
+                )
             elif rec.delivery_policy == "received":
-                rec.qty_to_deliver = rec.qty_received - rec.qty_delivered
+                rec.qty_to_deliver = max(
+                    rec.qty_received - rec.qty_outgoing - rec.qty_delivered, 0
+                )
 
     @api.depends("move_ids", "move_ids.state", "type")
     def _compute_qty_incoming(self):
@@ -176,7 +187,8 @@ class RmaOrderLine(models.Model):
     def _compute_qty_outgoing(self):
         for rec in self:
             qty = rec._get_rma_move_qty(
-                ("draft", "confirmed", "assigned", "waiting"), direction="out"
+                ("draft", "confirmed", "assigned", "waiting", "partially_available"),
+                direction="out",
             )
             rec.qty_outgoing = qty
 
