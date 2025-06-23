@@ -122,7 +122,8 @@ class TestRma(common.TransactionCase):
     def _configure_2_steps_incoming_outgoing(cls):
         cls.second_step_incoming_rule.write({"active": True})
         cls.second_step_outgoing_rule.write({"active": True})
-        rma_customer_rule = cls.env.ref("rma.rule_rma_customer_out_pull")
+
+        rma_customer_rule = cls.wh.rma_customer_out_pull_id
         rma_customer_rule.write(
             {
                 "procure_method": "make_to_order",
@@ -1275,9 +1276,6 @@ class TestRma(common.TransactionCase):
         Receive a product and then return it using a multi-step route.
         """
         # Alter the customer RMA route to make it multi-step
-        # Get rid of the duplicated rule
-        self.env.ref("rma.rule_rma_customer_out_pull").active = False
-        self.env.ref("rma.rule_rma_customer_in_pull").active = False
         cust_in_pull_rule = self.customer_route.rule_ids.filtered(
             lambda r: r.location_dest_id == self.stock_rma_location
         )
