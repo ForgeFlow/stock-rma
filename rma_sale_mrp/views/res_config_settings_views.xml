@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="10" />
+        <field name="inherit_id" ref="rma.res_config_settings_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//setting[@id='module_rma_account']" position="after">
+                <setting
+                    name="kit_component"
+                    help="When adding rma lines from sale : add the components in case of a kit."
+                >
+                    <field name="rma_add_component_from_sale" />
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,292 @@
+# Copyright 2023 ForgeFlow S.L.
+# License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
+
+from odoo.tests import Form, TransactionCase
+
+
+class TestRmaMrp(TransactionCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.product_model = cls.env["product.product"]
+        cls.template_model = cls.env["product.template"]
+        cls.product_ctg_model = cls.env["product.category"]
+        cls.journal_model = cls.env["account.journal"]
+        cls.rma_line = cls.env["rma.order.line"]
+        cls.rma_make_picking = cls.env["rma_make_picking.wizard"]
+        cls.rma_op_obj = cls.env["rma.operation"]
+        # Get required Model data
+        cls.product_uom = cls.env.ref("uom.product_uom_unit")
+        cls.company = cls.env.ref("base.main_company")
+        cls.stock_picking_type_out = cls.env.ref("stock.picking_type_out")
+        cls.stock_picking_type_in = cls.env.ref("stock.picking_type_in")
+        cls.stock_location_id = cls.env.ref("stock.stock_location_stock")
+        cls.stock_location_customer_id = cls.env.ref("stock.stock_location_customers")
+        cls.stock_location_supplier_id = cls.env.ref("stock.stock_location_suppliers")
+        cls.rma_route_cust = cls.env.ref("rma.route_rma_customer")
+        cls.customer_view = cls.env.ref("rma_sale.view_rma_line_form")
+
+        cls.stock_journal = cls.env["account.journal"].create(
+            {"name": "Stock journal", "type": "general", "code": "STK00"}
+        )
+        # Create product category
+        cls.product_ctg = cls._create_product_category(cls)
+
+        # Create partners
+        cls.supplier = cls.env["res.partner"].create({"name": "Test supplier"})
+        cls.customer = cls.env["res.partner"].create({"name": "Test customer"})
+
+        # Create a Product with real cost
+        standard_price = 10.0
+        list_price = 20.0
+        cls.kit_product = cls._create_product(cls, standard_price, False, list_price)
+        cls.component_product_1 = cls._create_product(
+            cls, standard_price, False, list_price
+        )
+        cls.component_product_2 = cls._create_product(
+            cls, standard_price, False, list_price
+        )
+
+        # Create BoM for Kit A
+        bom_product_form = Form(cls.env["mrp.bom"])
+        bom_product_form.product_id = cls.kit_product
+        bom_product_form.product_tmpl_id = cls.kit_product.product_tmpl_id
+        bom_product_form.product_qty = 1.0
+        bom_product_form.type = "phantom"
+        with bom_product_form.bom_line_ids.new() as bom_line:
+            bom_line.product_id = cls.component_product_1
+            bom_line.product_qty = 1.0
+        with bom_product_form.bom_line_ids.new() as bom_line:
+            bom_line.product_id = cls.component_product_2
+            bom_line.product_qty = 1.0
+        cls.bom_kit = bom_product_form.save()
+
+        # RMA configuration
+
+        cls.operation_1 = cls.rma_op_obj.create(
+            {
+                "code": "TEST",
+                "name": "Refund and receive",
+                "type": "customer",
+                "receipt_policy": "ordered",
+                "refund_policy": "ordered",
+                "in_route_id": cls.rma_route_cust.id,
+                "out_route_id": cls.rma_route_cust.id,
+            }
+        )
+
+    def _create_product_category(self):
+        product_ctg = self.product_ctg_model.create(
+            {
+                "name": "test_product_ctg",
+                "property_valuation": "real_time",
+                "property_cost_method": "fifo",
+                "property_stock_journal": self.stock_journal.id,
+            }
+        )
+        return product_ctg
+
+    def _create_product(self, standard_price, template, list_price):
+        """Create a Product variant."""
+        if not template:
+            template = self.template_model.create(
+                {
+                    "name": "test_product",
+                    "categ_id": self.product_ctg.id,
+                    "is_storable": True,
+                    "standard_price": standard_price,
+                    "valuation": "real_time",
+                    "invoice_policy": "delivery",
+                }
+            )
+            return template.product_variant_ids[0]
+        product = self.product_model.create(
+            {"product_tmpl_id": template.id, "list_price": list_price}
+        )
+        return product
+
+    def _create_receipt(self, product, qty, price_unit=10.0):
+        return self.env["stock.picking"].create(
+            {
+                "name": self.stock_picking_type_in.sequence_id._next(),
+                "partner_id": self.supplier.id,
+                "picking_type_id": self.stock_picking_type_in.id,
+                "location_id": self.stock_location_supplier_id.id,
+                "location_dest_id": self.stock_location_id.id,
+                "move_ids": [
+                    (
+                        0,
+                        0,
+                        {
+                            "name": product.name,
+                            "product_id": product.id,
+                            "product_uom": product.uom_id.id,
+                            "product_uom_qty": qty,
+                            "price_unit": price_unit,
+                            "location_id": self.stock_location_supplier_id.id,
+                            "location_dest_id": self.stock_location_id.id,
+                            "procure_method": "make_to_stock",
+                        },
+                    )
+                ],
+            }
+        )
+
+    def _do_picking(self, picking, qty):
+        """Do picking with only one move on the given date."""
+        picking.action_confirm()
+        picking.action_assign()
+        picking.move_ids.quantity = qty
+        picking.move_ids.picked = True
+        res = picking.button_validate()
+        if isinstance(res, dict) and res:
+            backorder_wiz_id = res["res_id"]
+            backorder_wiz = self.env["stock.backorder.confirmation"].browse(
+                [backorder_wiz_id]
+            )
+            backorder_wiz.process()
+        return True
+
+    def _make_sale_order(self, product, quantity, price_unit=10.0):
+        so = Form(self.env["sale.order"])
+        so.partner_id = self.customer
+        with so.order_line.new() as sale_line:
+            sale_line.product_id = product
+            sale_line.product_uom_qty = quantity
+            sale_line.price_unit = price_unit or product.list_price
+        so = so.save()
+        so.action_confirm()
+        return so
+
+    def _receive_rma(self, rma_line_ids):
+        wizard = self.rma_make_picking.with_context(
+            active_ids=rma_line_ids.ids,
+            active_model="rma.order.line",
+            picking_type="incoming",
+            active_id=1,
+        ).create({})
+        wizard._create_picking()
+        pickings = rma_line_ids._get_in_pickings()
+        pickings.action_assign()
+        for picking in pickings:
+            for mv in picking.move_ids:
+                mv.quantity = mv.product_uom_qty
+                mv.picked = True
+        # In case of two step pickings, ship in two steps:
+        while pickings.filtered(lambda p: p.state == "assigned"):
+            pickings._action_done()
+        return pickings
+
+    def _create_rma_receipt(self, so_line, price_unit=10.0):
+        rma_line = Form(
+            self.rma_line.with_context(customer=1),
+            view=self.customer_view.id,
+        )
+        rma_line.partner_id = so_line.order_id.partner_id
+        rma_line.sale_line_id = so_line
+        rma_line.price_unit = price_unit
+        rma_line.operation_id = self.operation_1
+        rma_line = rma_line.save()
+        rma_line.action_rma_to_approve()
+        picking = self._receive_rma(rma_line)
+        return picking
+
+    def test_01_kit_return_with_diff_prices(self):
+        receipt_01 = self._create_receipt(self.component_product_1, 10, 10.0)
+        self._do_picking(receipt_01, 10.0)
+        receipt_02 = self._create_receipt(self.component_product_2, 10, 10.0)
+        self._do_picking(receipt_02, 10.0)
+
+        order_01 = self._make_sale_order(self.kit_product, 10, 30.0)
+        self._do_picking(order_01.picking_ids, 10.0)
+
+        receipt_03 = self._create_receipt(self.component_product_1, 10, 15.0)
+        self._do_picking(receipt_03, 10.0)
+        receipt_04 = self._create_receipt(self.component_product_2, 10, 15.0)
+        self._do_picking(receipt_04, 10.0)
+
+        order_02 = self._make_sale_order(self.kit_product, 10, 30.0)
+        self._do_picking(order_02.picking_ids, 10.0)
+
+        rma_picking_01 = self._create_rma_receipt(
+            order_01.order_line, order_01.order_line.price_unit
+        )
+
+        component_1_sm = rma_picking_01.move_ids.filtered(
+            lambda x: x.product_id == self.component_product_1
+        )
+        component_2_sm = rma_picking_01.move_ids.filtered(
+            lambda x: x.product_id == self.component_product_2
+        )
+
+        self.assertTrue(bool(component_1_sm))
+        self.assertTrue(bool(component_2_sm))
+
+        self.component_product_1.standard_price = 20.0
+        self.component_product_2.standard_price = 20.0
+
+        self.assertEqual(
+            100.0, sum(component_1_sm.mapped("stock_valuation_layer_ids.value"))
+        )
+        self.assertEqual(
+            100.0, sum(component_2_sm.mapped("stock_valuation_layer_ids.value"))
+        )
+
+        rma_picking_02 = self._create_rma_receipt(
+            order_02.order_line, order_02.order_line.price_unit
+        )
+
+        component_1_sm = rma_picking_02.move_ids.filtered(
+            lambda x: x.product_id == self.component_product_1
+        )
+        component_2_sm = rma_picking_02.move_ids.filtered(
+            lambda x: x.product_id == self.component_product_2
+        )
+
+        self.assertTrue(bool(component_1_sm))
+        self.assertTrue(bool(component_2_sm))
+
+        self.component_product_1.standard_price = 25.0
+        self.component_product_2.standard_price = 25.0
+
+        self.assertEqual(
+            150.0, sum(component_1_sm.mapped("stock_valuation_layer_ids.value"))
+        )
+        self.assertEqual(
+            150.0, sum(component_2_sm.mapped("stock_valuation_layer_ids.value"))
+        )
+
+    def test_02_add_kit_from_sale(self):
+        order_01 = self._make_sale_order(self.kit_product, 2, 30.0)
+        self._do_picking(order_01.picking_ids, 2.0)
+        rma = self.env["rma.order"].create({"partner_id": self.customer.id})
+        add_sale = (
+            self.env["rma_add_sale"]
+            .with_context(active_model="rma.order", active_ids=rma.ids)
+            .create(
+                {
+                    "sale_id": order_01.id,
+                    "sale_line_ids": [(6, 0, order_01.order_line.ids)],
+                }
+            )
+        )
+        add_sale.add_lines()
+        # component config is not set, we should create a rma line for the kit.
+        self.assertEqual(len(rma.rma_line_ids), 1)
+        self.assertEqual(rma.rma_line_ids.product_id, self.kit_product)
+        self.assertEqual(rma.rma_line_ids.product_qty, 2.0)
+
+        # test with component config now
+        rma.rma_line_ids.unlink()
+        order_01.company_id.write({"rma_add_component_from_sale": True})
+        add_sale.add_lines()
+        self.assertEqual(len(rma.rma_line_ids), 2)
+        line_component_1 = rma.rma_line_ids.filtered(
+            lambda line: line.product_id == self.component_product_1
+        )
+        line_component_2 = rma.rma_line_ids.filtered(
+            lambda line: line.product_id == self.component_product_2
+        )
+        self.assertTrue(line_component_1)
+        self.assertEqual(line_component_1.product_qty, 2.0)
+        self.assertTrue(line_component_2)
