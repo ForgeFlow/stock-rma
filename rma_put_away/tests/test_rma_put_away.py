@@ -187,6 +187,7 @@ class TestRmaPutAway(common.SingleTransactionCase):
         picking.action_assign()
         for mv in picking.move_ids:
             mv.quantity_done = mv.product_uom_qty
+            mv.move_line_ids.lot_id = self.lot
         picking._action_done()
         wizard = self.rma_make_put_away_wiz.with_context(
             **{
