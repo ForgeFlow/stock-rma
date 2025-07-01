@@ -104,7 +104,7 @@ class RmaLineMakePurchaseOrder(models.TransientModel):
 
         for item in self.item_ids:
             if item.product_qty <= 0.0:
-                raise exceptions.Warning(_("Enter a positive quantity."))
+                raise exceptions.UserError(_("Enter a positive quantity."))
 
             purchase = self.purchase_order_id
             if not purchase:
