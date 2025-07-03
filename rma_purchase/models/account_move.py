@@ -110,11 +110,6 @@ class AccountMove(models.Model):
                     price_unit = line.product_id.uom_id._compute_price(
                         line.product_id.standard_price, line.product_uom_id
                     )
-                    price_unit = (
-                        -price_unit
-                        if line.move_id.move_type == "in_refund"
-                        else price_unit
-                    )
                     valuation_date = (
                         valuation_stock_moves
                         and max(valuation_stock_moves.mapped("date"))
