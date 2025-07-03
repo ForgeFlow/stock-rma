@@ -122,7 +122,7 @@ class RmaLineMakeSaleOrder(models.TransientModel):
         for item in self.item_ids:
             line = item.line_id
             if item.product_qty <= 0.0:
-                raise exceptions.Warning(_("Enter a positive quantity."))
+                raise exceptions.UserError(_("Enter a positive quantity."))
 
             if self.sale_order_id:
                 sale = self.sale_order_id
