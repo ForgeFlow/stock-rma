@@ -63,7 +63,23 @@ class AccountMove(models.Model):
                     continue
 
                 # Retrieve accounts needed to generate the price difference.
-                debit_expense_account = line._get_price_diff_account()
+                debit_expense_account = False
+                if line.product_id.cost_method == "standard":
+                    product = line.product_id
+                    pcateg = product.categ_id
+                    debit_expense_account = (
+                        product.property_account_creditor_price_difference
+                        or pcateg.property_account_creditor_price_difference_categ
+                    )
+                    debit_expense_account = line.move_id.fiscal_position_id.map_account(
+                        debit_expense_account
+                    )
+                else:
+                    debit_expense_account = (
+                        line.product_id.product_tmpl_id.get_product_accounts(
+                            fiscal_pos=move.fiscal_position_id
+                        )["expense"]
+                    )
                 if not debit_expense_account:
                     continue
                 # Retrieve stock valuation moves.
@@ -109,11 +125,6 @@ class AccountMove(models.Model):
                     # so that it can always be computed with the good rate
                     price_unit = line.product_id.uom_id._compute_price(
                         line.product_id.standard_price, line.product_uom_id
-                    )
-                    price_unit = (
-                        -price_unit
-                        if line.move_id.move_type == "in_refund"
-                        else price_unit
                     )
                     valuation_date = (
                         valuation_stock_moves
