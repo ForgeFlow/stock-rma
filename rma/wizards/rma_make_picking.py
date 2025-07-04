@@ -248,102 +248,98 @@ class RmaMakePicking(models.TransientModel):
             return True
         return False
 
-    def action_create_picking(self):
-        self._create_picking()
+    def _force_reservation_specific_lot(self, pickings, picking_type):
         move_line_model = self.env["stock.move.line"]
-        picking_type = self.env.context.get("picking_type")
-        if picking_type == "outgoing":
-            action = self.item_ids.line_id.action_view_out_shipments()
-        else:
-            pickings = self.mapped("item_ids.line_id")._get_in_pickings()
-            action = self.item_ids.line_id.action_view_in_shipments()
+        # Force the reservation of the RMA specific lot for incoming shipments.
+        for move in pickings.move_ids.filtered(
+            lambda x: x.state not in ("draft", "cancel", "done", "waiting")
+            and x.rma_line_id
+            and x.product_id.tracking in ("lot", "serial")
+            and x.rma_line_id.lot_id
+        ):
             # Force the reservation of the RMA specific lot for incoming shipments.
-            for move in pickings.move_ids.filtered(
-                lambda x: x.state not in ("draft", "cancel", "done", "waiting")
-                and x.rma_line_id
-                and x.product_id.tracking in ("lot", "serial")
-                and x.rma_line_id.lot_id
-            ):
-                # Force the reservation of the RMA specific lot for incoming shipments.
-                is_final_step = self._is_final_step(move)
-                move.move_line_ids.unlink()
-                reference_moves = (
-                    not is_final_step
-                    and move.rma_line_id._get_stock_move_reference()
-                    or self.env["stock.move"]
-                )
-                package = reference_moves.mapped("move_line_ids.result_package_id")
-                quants = self.env["stock.quant"]._gather(
-                    move.product_id,
-                    move.location_id,
-                    lot_id=move.rma_line_id.lot_id,
-                    package_id=len(package) == 1 and package or False,
-                )
-                move_line_data = move._prepare_move_line_vals(
-                    reserved_quant=(len(quants) == 1) and quants or False
+            is_final_step = self._is_final_step(move)
+            move.move_line_ids.unlink()
+            reference_moves = (
+                not is_final_step
+                and move.rma_line_id._get_stock_move_reference()
+                or self.env["stock.move"]
+            )
+            package = reference_moves.mapped("move_line_ids.result_package_id")
+            quants = self.env["stock.quant"]._gather(
+                move.product_id,
+                move.location_id,
+                lot_id=move.rma_line_id.lot_id,
+                package_id=len(package) == 1 and package or False,
+            )
+            move_line_data = move._prepare_move_line_vals(
+                reserved_quant=(len(quants) == 1) and quants or False
+            )
+            move_line_data.update(
+                {
+                    "quantity": 1.0,
+                }
+            )
+            if move.product_id.tracking == "serial":
+                move.write(
+                    {
+                        "lot_ids": move.rma_line_id.lot_id.ids,
+                    }
                 )
                 move_line_data.update(
                     {
                         "quantity": 0,
                     }
                 )
-                if move.rma_line_id.lot_id and not quants:
-                    # CHECK ME: force al least has lot assigned if quant is not found
-                    move_line_data.update(
+                if move.move_line_ids:
+                    move.move_line_ids.with_context(
+                        bypass_reservation_update=True
+                    ).write(
                         {
-                            "lot_id": move.rma_line_id.lot_id.id,
-                        }
-                    )
-                if move.product_id.tracking == "serial":
-                    move.write(
-                        {
-                            "lot_ids": move.rma_line_id.lot_id.ids,
-                        }
-                    )
-                    move_line_data.update(
-                        {
+                            "lot_id": move_line_data.get("lot_id"),
+                            "package_id": move_line_data.get("package_id"),
+                            "result_package_id": move_line_data.get(
+                                "result_package_id", False
+                            ),
                             "quantity": 1.0,
                         }
                     )
-                    if move.move_line_ids:
-                        move.move_line_ids.with_context(
-                            bypass_reservation_update=True
-                        ).write(
-                            {
-                                "lot_id": move_line_data.get("lot_id"),
-                                "package_id": move_line_data.get("package_id"),
-                                "result_package_id": move_line_data.get(
-                                    "result_package_id", False
-                                ),
-                                "quantity": 1.0,
-                            }
-                        )
-                    if (
-                        len(quants) == 1
-                        and quants.reserved_quantity == 0
-                        and quants.quantity == 1
-                        and quants.location_id.usage not in ("customer", "supplier")
-                    ):
-                        quants.sudo().write(
-                            {"reserved_quantity": quants.reserved_quantity + 1}
-                        )
-                elif move.product_id.tracking == "lot":
-                    if picking_type == "incoming":
-                        qty = self.item_ids.filtered(
-                            lambda x: x.line_id.id == move.rma_line_id.id  # noqa: B023
-                        ).qty_to_receive
-                    else:
-                        qty = self.item_ids.filtered(
-                            lambda x: x.line_id.id == move.rma_line_id.id  # noqa: B023
-                        ).qty_to_deliver
-                    move_line_data.update(
-                        {
-                            "quantity": qty if picking_type == "incoming" else 0,
-                        }
+                if (
+                    len(quants) == 1
+                    and quants.reserved_quantity == 0
+                    and quants.quantity == 1
+                    and quants.location_id.usage not in ("customer", "supplier")
+                ):
+                    quants.sudo().write(
+                        {"reserved_quantity": quants.reserved_quantity + 1}
                     )
-                if not move.move_line_ids:
-                    move_line_model.create(move_line_data)
-                pickings.with_context(force_no_bypass_reservation=True).action_assign()
+            elif move.product_id.tracking == "lot":
+                if picking_type == "incoming":
+                    qty = self.item_ids.filtered(
+                        lambda x: x.line_id.id == move.rma_line_id.id  # noqa: B023
+                    ).qty_to_receive
+                else:
+                    qty = self.item_ids.filtered(
+                        lambda x: x.line_id.id == move.rma_line_id.id  # noqa: B023
+                    ).qty_to_deliver
+                move_line_data.update(
+                    {
+                        "quantity": qty if picking_type == "incoming" else 0,
+                    }
+                )
+            if not move.move_line_ids:
+                move_line_model.create(move_line_data)
+            pickings.with_context(force_no_bypass_reservation=True).action_assign()
+
+    def action_create_picking(self):
+        self._create_picking()
+        picking_type = self.env.context.get("picking_type")
+        if picking_type == "outgoing":
+            action = self.item_ids.line_id.action_view_out_shipments()
+        else:
+            pickings = self.mapped("item_ids.line_id")._get_in_pickings()
+            action = self.item_ids.line_id.action_view_in_shipments()
+            self._force_reservation_specific_lot(pickings, picking_type)
         return action
 
     def action_cancel(self):
