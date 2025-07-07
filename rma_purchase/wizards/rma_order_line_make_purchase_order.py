@@ -16,6 +16,11 @@ class RmaLineMakePurchaseOrder(models.TransientModel):
         required=False,
         readonly=1,
     )
+    picking_type_id = fields.Many2one(
+        comodel_name="stock.picking.type",
+        string="Picking Type",
+        default=lambda self: self._default_picking_type(),
+    )
     item_ids = fields.One2many(
         comodel_name="rma.order.line.make.purchase.order.item",
         inverse_name="wiz_id",
@@ -27,6 +32,12 @@ class RmaLineMakePurchaseOrder(models.TransientModel):
         required=False,
         domain=[("state", "=", "draft")],
     )
+
+    @api.model
+    def _default_picking_type(self):
+        return self.env["purchase.order"]._get_picking_type(
+            company_id=self.env.company.id
+        )
 
     @api.model
     def _prepare_item(self, line):
@@ -77,6 +88,9 @@ class RmaLineMakePurchaseOrder(models.TransientModel):
             "origin": "",
             "partner_id": supplier.id,
             "company_id": item.line_id.company_id.id,
+            "picking_type_id": self.picking_type_id.id
+            if self.picking_type_id
+            else False,
         }
         return data
 
