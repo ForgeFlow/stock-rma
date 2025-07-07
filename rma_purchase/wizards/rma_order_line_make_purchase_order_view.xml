@@ -20,6 +20,7 @@
                  <newline />
                  <group>
                      <field name="partner_id" />
+                     <field name="picking_type_id" />
                  </group>
                  <newline />
                  <group>
