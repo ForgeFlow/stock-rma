@@ -4,35 +4,35 @@
     <!--Sequences-->
     <record id="seq_picking_type_rma_cust_out" model="ir.sequence">
         <field name="name">RMA Customer Sequence out</field>
-        <field name="prefix">RMA/CUST/OUT</field>
+        <field name="prefix">RMA/CUST/OUT/</field>
         <field name="padding">5</field>
         <field name="company_id" eval="False" />
     </record>
 
     <record id="seq_picking_type_rma_cust_in" model="ir.sequence">
         <field name="name">RMA Customer Sequence in</field>
-        <field name="prefix">RMA/CUST/IN</field>
+        <field name="prefix">RMA/CUST/IN/</field>
         <field name="padding">5</field>
         <field name="company_id" eval="False" />
     </record>
 
     <record id="seq_picking_type_rma_sup_out" model="ir.sequence">
         <field name="name">RMA Supplier Sequence out</field>
-        <field name="prefix">RMA/SUPP/OUT</field>
+        <field name="prefix">RMA/SUPP/OUT/</field>
         <field name="padding">5</field>
         <field name="company_id" eval="False" />
     </record>
 
     <record id="seq_picking_type_rma_sup_in" model="ir.sequence">
         <field name="name">RMA Supplier Sequence in</field>
-        <field name="prefix">RMA/SUPP/IN</field>
+        <field name="prefix">RMA/SUPP/IN/</field>
         <field name="padding">5</field>
         <field name="company_id" eval="False" />
     </record>
 
     <record id="seq_picking_type_rma_dropship" model="ir.sequence">
         <field name="name">RMA Dropship</field>
-        <field name="prefix">RMA/DS</field>
+        <field name="prefix">RMA/DS/</field>
         <field name="padding">5</field>
         <field name="company_id" eval="False" />
     </record>
