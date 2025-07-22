@@ -172,11 +172,15 @@
                     </group>
                 </group>
                 <group>
-                    <group name="inbound_route" string="Inbound">
+                    <group name="operation" string="Default Operation">">
                         <field
                                 name="operation_default_id"
                                 domain="[('type','=','customer')]"
                             />
+                    </group>
+                </group>
+                <group>
+                    <group name="inbound_route" string="Inbound">
                         <field
                                 name="in_warehouse_id"
                                 attrs="{'readonly':[('state', '!=', 'draft')]}"
@@ -192,11 +196,6 @@
                             />
                         <field
                                 name="location_id"
-                                attrs="{'readonly':[('state', '!=', 'draft')]}"
-                            />
-                        <field
-                                name="out_route_id"
-                                invisible="1"
                                 attrs="{'readonly':[('state', '!=', 'draft')]}"
                             />
                         <field
@@ -302,6 +301,15 @@
             </field>
             <group name="inbound_route" position="after">
                 <group name="outbound_route" string="Outbound">
+                    <field
+                        name="out_route_id"
+                        invisible="1"
+                        attrs="{'readonly':[('state', '!=', 'draft')]}"
+                    />
+                    <field
+                        name="location_supplier_id"
+                        attrs="{'readonly':[('state', '!=', 'draft')]}"
+                    />
                     <field
                         name="supplier_to_customer"
                         attrs="{'readonly':[('state', '!=', 'draft')]}"
