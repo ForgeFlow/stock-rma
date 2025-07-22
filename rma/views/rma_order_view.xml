@@ -202,11 +202,15 @@
                         </group>
                     </group>
                     <group>
-                        <group name="inbound_route" string="Inbound">
+                        <group name="operation" string="Default Operation">">
                             <field
-                                name="operation_default_id"
-                                domain="[('type','=','customer')]"
-                            />
+                            name="operation_default_id"
+                            domain="[('type','=','customer')]"
+                        />
+                        </group>
+                    </group>
+                    <group name="route">
+                        <group name="inbound_route" string="Inbound">
                             <field name="in_warehouse_id" readonly="state != 'draft'" />
                             <field name="in_route_id" readonly="state != 'draft'" />
                             <field
@@ -362,6 +366,13 @@
             </field>
             <group name="inbound_route" position="after">
                 <group name="outbound_route" string="Outbound">
+                    <field
+                        name="out_warehouse_id"
+                        invisible="1"
+                        readonly="state != 'draft'"
+                    />
+                    <field name="out_route_id" readonly="state != 'draft'" />
+                    <field name="location_supplier_id" readonly="state != 'draft'" />
                     <field name="supplier_to_customer" readonly="state != 'draft'" />
                     <field
                         name="customer_address_id"
