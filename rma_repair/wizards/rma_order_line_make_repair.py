@@ -68,7 +68,7 @@ class RmaLineMakeRepair(models.TransientModel):
         return {
             "domain": [("id", "in", res)],
             "name": self.env._("Repairs"),
-            "view_mode": "tree,form",
+            "view_mode": "list,form",
             "res_model": "repair.order",
             "view_id": False,
             "context": False,
