@@ -91,7 +91,15 @@
                         name="action_rma_done"
                         type="object"
                         string="Done"
-                        invisible="state in ('done', 'draft', 'canceled')"
+                        invisible="state in ('done', 'draft', 'canceled', 'approved')"
+                        groups="rma.group_rma_customer_user"
+                    />
+                    <button
+                        name="action_rma_done"
+                        type="object"
+                        string="Done"
+                        invisible="state != 'approved'"
+                        class="oe_highlight"
                         groups="rma.group_rma_customer_user"
                     />
                     <button
