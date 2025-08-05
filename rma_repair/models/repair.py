@@ -10,7 +10,6 @@ class RepairOrder(models.Model):
     rma_line_id = fields.Many2one(
         comodel_name="rma.order.line", string="RMA", ondelete="restrict"
     )
-    rma_under_warranty = fields.Boolean(
-        string="Under Warranty",
+    under_warranty = fields.Boolean(
         related="rma_line_id.under_warranty",
     )

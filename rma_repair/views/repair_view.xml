@@ -7,11 +7,7 @@
         <field name="arch" type="xml">
             <field name="tag_ids" position="after">
                 <field name="rma_line_id" />
-                <field name="rma_under_warranty" invisible="not rma_line_id" />
             </field>
-            <xpath expr="//field[@name='under_warranty']" position="attributes">
-                <attribute name="invisible">rma_line_id</attribute>
-            </xpath>
         </field>
     </record>
 </odoo>
