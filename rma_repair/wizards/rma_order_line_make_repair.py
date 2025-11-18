@@ -120,12 +120,16 @@ class RmaLineMakeRepairItem(models.TransientModel):
 
     def _prepare_repair_order(self, rma_line):
         self.ensure_one()
+        sellers = rma_line.product_id.seller_ids.filtered(lambda sel: sel.partner_id == rma_line.partner_id)
+        seller_uom = sellers and sellers[0].product_uom_id or False
+        if not seller_uom:
+            seller_uom = rma_line.product_id.uom_id
         return {
             "product_id": rma_line.product_id.id,
             "partner_id": rma_line.partner_id.id,
             "product_qty": self.product_qty,
             "rma_line_id": rma_line.id,
-            "product_uom": rma_line.product_id.uom_po_id.id,
+            "product_uom": seller_uom.id,
             "company_id": rma_line.company_id.id,
             "location_id": self.location_id.id,
             "lot_id": rma_line.lot_id.id,
@@ -137,8 +141,9 @@ class RmaLineMakeRepairItem(models.TransientModel):
         procurement = self._prepare_procurement(route, dest_location)
         procurements.append(procurement)
         try:
-            self.env["procurement.group"].with_context(picking_type="internal").run(
-                procurements
+            self.env["stock.rule"].with_context(picking_type="internal").run(
+                procurements,
+                raise_user_error=True,
             )
         except UserError as error:
             errors.append(error.args[0])
@@ -146,59 +151,57 @@ class RmaLineMakeRepairItem(models.TransientModel):
             raise UserError("\n".join(errors))
         return procurements
 
-    def find_procurement_group(self):
+
+    def find_stock_reference(self):
         if self.line_id.rma_id:
-            return self.env["procurement.group"].search(
+            return self.env["stock.reference"].search(
                 [("rma_id", "=", self.line_id.rma_id.id)], limit=1
             )
         else:
-            return self.env["procurement.group"].search(
+            return self.env["stock.reference"].search(
                 [("rma_line_id", "=", self.line_id.id)], limit=1
             )
 
-    def _get_procurement_group(self):
-        group_data = {
-            "partner_id": self.line_id.partner_id.id,
+    def _create_stock_reference(self):
+        ref_data = {
             "name": self.line_id.rma_id.name or self.line_id.name,
-            "rma_id": self.line_id.rma_id and self.line_id.rma_id.id or False,
+            "rma_id": self.line_id.rma_id.id if self.line_id.rma_id else False,
             "rma_line_id": self.line_id.id if not self.line_id.rma_id else False,
         }
-        return self.env["procurement.group"].create(group_data)
+        return self.env["stock.reference"].create(ref_data)
 
     @api.model
     def _get_procurement_data(self, route, dest_location):
         if not route:
             raise ValidationError(self.env._("No route specified"))
-        group = self.find_procurement_group()
-        if not group:
-            group = self._get_procurement_group()
-        procurement_data = {
-            "name": self.line_id and self.line_id.name,
-            "group_id": group,
-            "warehouse": dest_location.warehouse_id,
+        ref = self.find_stock_reference()
+        if not ref:
+            ref = self._create_stock_reference()
+        values = {
+            "name": self.line_id.name,
             "origin": self.line_id.name,
-            "date_planned": time.strftime(DT_FORMAT),
-            "product_id": self.product_id,
-            "product_qty": self.product_qty,
-            "product_uom": self.product_id.product_tmpl_id.uom_id.id,
-            "location_id": dest_location,
-            "partner_id": self.partner_id.id,
+            "date_planned": fields.Datetime.now(),
+            "location_id": dest_location.id,
             "route_ids": route,
+            "stock_reference_id": ref.id,
             "rma_line_id": self.line_id.id,
             "is_rma_repair_transfer": True,
+            "partner_id": self.line_id.partner_id,
         }
-        return procurement_data
+        return values
+
 
     @api.model
     def _prepare_procurement(self, route, dest_location):
         values = self._get_procurement_data(route, dest_location)
-        procurement = self.env["procurement.group"].Procurement(
+
+        procurement = self.env["stock.rule"].Procurement(
             self.product_id,
             self.product_qty,
-            self.product_id.product_tmpl_id.uom_id,
+            self.product_id.uom_id,
             dest_location,
-            values.get("origin"),
-            values.get("origin"),
+            values["origin"],
+            values["origin"],
             self.env.company,
             values,
         )

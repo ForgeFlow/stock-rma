@@ -9,7 +9,7 @@ class StockMove(models.Model):
 
     is_rma_repair_transfer = fields.Boolean(
         string="Is RMA Repair",
-        help="This Stock Move has been created from a Repair operation in " "the RMA.",
+        help="This Stock Move has been created from a Repair operation in the RMA.",
     )
 
     def _is_in_out_rma_move(self, op, states, location_type):
