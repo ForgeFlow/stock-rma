@@ -1,0 +1,589 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* rma_account
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-09-16 14:25+0000\n"
+"PO-Revision-Date: 2024-09-16 14:25+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_order__invoice_count
+msgid "# of Invoices"
+msgstr "# de Factures"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_account_bank_statement_line__rma_count
+#: model:ir.model.fields,field_description:rma_account.field_account_move__rma_count
+#: model:ir.model.fields,field_description:rma_account.field_account_move_line__rma_line_count
+#: model:ir.model.fields,field_description:rma_account.field_account_payment__rma_count
+msgid "# of RMA"
+msgstr "# de RMA"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_order__invoice_refund_count
+#: model:ir.model.fields,field_description:rma_account.field_rma_order_line__refund_count
+msgid "# of Refunds"
+msgstr "# d'Avoirs"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_account_bank_statement_line__used_in_rma_count
+#: model:ir.model.fields,field_description:rma_account.field_account_move__used_in_rma_count
+#: model:ir.model.fields,field_description:rma_account.field_account_payment__used_in_rma_count
+msgid "# of Used in RMA"
+msgstr "# d'utilisés dans RMA"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_account_move_line__used_in_rma_line_count
+msgid "# of used RMA"
+msgstr "# de RMA utilisés"
+
+#. module: rma_account
+#: model:ir.ui.menu,name:rma_account.menu_rma_account
+msgid "Accounting"
+msgstr "Comptabilité"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund__date
+msgid "Accounting Date"
+msgstr "Date comptable"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_order__add_move_id
+msgid "Add Invoice"
+msgstr "Ajouter une facture"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_account_bank_statement_line__add_rma_line_id
+#: model:ir.model.fields,field_description:rma_account.field_account_move__add_rma_line_id
+#: model:ir.model.fields,field_description:rma_account.field_account_payment__add_rma_line_id
+msgid "Add from RMA line"
+msgstr "Ajouter depuis la ligne RMA"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_operation__automated_refund
+msgid "Automated Refund"
+msgstr "Remboursement automatisé"
+
+#. module: rma_account
+#: model:ir.model.fields.selection,name:rma_account.selection__rma_operation__refund_policy__delivered
+#: model:ir.model.fields.selection,name:rma_account.selection__rma_order_line__refund_policy__delivered
+msgid "Based on Delivered Quantities"
+msgstr "Basé sur les quantités livrées"
+
+#. module: rma_account
+#: model:ir.model.fields.selection,name:rma_account.selection__rma_operation__refund_policy__ordered
+#: model:ir.model.fields.selection,name:rma_account.selection__rma_order_line__refund_policy__ordered
+#: model:ir.model.fields.selection,name:rma_account.selection__rma_refund_item__refund_policy__ordered
+msgid "Based on Ordered Quantities"
+msgstr "Basé sur les quantités commandées"
+
+#. module: rma_account
+#: model:ir.model.fields.selection,name:rma_account.selection__rma_operation__refund_policy__received
+#: model:ir.model.fields.selection,name:rma_account.selection__rma_order_line__refund_policy__received
+#: model:ir.model.fields.selection,name:rma_account.selection__rma_refund_item__refund_policy__received
+msgid "Based on Received Quantities"
+msgstr "Basé sur les quantités reçues"
+
+#. module: rma_account
+#: model_terms:ir.ui.view,arch_db:rma_account.view_rma_add_account_move
+#: model_terms:ir.ui.view,arch_db:rma_account.view_rma_add_account_move_supplier
+#: model_terms:ir.ui.view,arch_db:rma_account.view_rma_refund
+msgid "Cancel"
+msgstr "Annuler"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_order_line__commercial_partner_id
+msgid "Commercial Entity"
+msgstr "Entité commerciale"
+
+#. module: rma_account
+#: model_terms:ir.ui.view,arch_db:rma_account.view_rma_add_account_move
+#: model_terms:ir.ui.view,arch_db:rma_account.view_rma_add_account_move_supplier
+msgid "Confirm"
+msgstr "Confirmer"
+
+#. module: rma_account
+#: model:ir.actions.act_window,name:rma_account.action_rma_refund
+#: model_terms:ir.ui.view,arch_db:rma_account.view_rma_form
+#: model_terms:ir.ui.view,arch_db:rma_account.view_rma_line_form
+#: model_terms:ir.ui.view,arch_db:rma_account.view_rma_refund
+msgid "Create Refund"
+msgstr "Créer un remboursement"
+
+#. module: rma_account
+#: model:ir.model.fields,help:rma_account.field_account_bank_statement_line__add_rma_line_id
+#: model:ir.model.fields,help:rma_account.field_account_move__add_rma_line_id
+#: model:ir.model.fields,help:rma_account.field_account_payment__add_rma_line_id
+msgid "Create a refund in based on an existing rma_line"
+msgstr "Créer un remboursement basé sur une ligne RMA existante"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_add_account_move__create_uid
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund__create_uid
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund_item__create_uid
+msgid "Created by"
+msgstr "Créé par"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_add_account_move__create_date
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund__create_date
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund_item__create_date
+msgid "Created on"
+msgstr "Créé le"
+
+#. module: rma_account
+#: model_terms:ir.ui.view,arch_db:rma_account.view_rma_refund
+msgid "Credit Note"
+msgstr "Note de crédit"
+
+#. module: rma_account
+#: model:ir.actions.act_window,name:rma_account.action_rma_account_customer_lines
+msgid "Customer RMA"
+msgstr "RMA Client"
+
+#. module: rma_account
+#: model:ir.ui.menu,name:rma_account.menu_rma_customer_refunds
+#: model:ir.ui.menu,name:rma_account.menu_rma_line_account_customer
+msgid "Customer RMA to Refund"
+msgstr "RMA client à rembourser"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund_item__name
+msgid "Description"
+msgstr ""
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_add_account_move__display_name
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund__display_name
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund_item__display_name
+msgid "Display Name"
+msgstr "Afficher un nom"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_add_account_move__id
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund__id
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund_item__id
+msgid "ID"
+msgstr ""
+
+#. module: rma_account
+#: model:ir.model.fields,help:rma_account.field_rma_operation__refund_free_of_charge
+msgid ""
+"In case of automated refund you should mark this option as long "
+"automatedrefunds mean to compensate Stock Interim accounts only without "
+"hittingAccounts receivable"
+msgstr ""
+"En cas de remboursement automatique, vous devez cocher cette option car les "
+"remboursements automatisés longs visent à compenser uniquement les comptes "
+"Stock Provisoire sans affecter les comptes clients"
+
+#. module: rma_account
+#: model:ir.model.fields,help:rma_account.field_rma_operation__automated_refund
+msgid ""
+"In the scenario where a company uses anglo-saxon accounting, if you receive "
+"products from a customer and don't expect to refund the customer but send a "
+"replacement unit, mark this flag to be accounting consistent"
+msgstr ""
+"Dans le cas où une entreprise utilise la comptabilité anglo-saxonne, si vous"
+" recevez des produits d'un client et que vous n'espérez pas rembourser le "
+"client mais envoyer une unité de remplacement, cochez cette option pour être"
+" comptablement cohérent"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund_item__invoice_address_id
+msgid "Invoice Address"
+msgstr "Addresse de facturation"
+
+#. module: rma_account
+#: model:ir.actions.act_window,name:rma_account.action_invoice_line
+msgid "Invoice Line"
+msgstr "Ligne de facture"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_add_account_move__line_ids
+msgid "Invoice Lines"
+msgstr "Lignes de facture"
+
+#. module: rma_account
+#: model:ir.model.fields,help:rma_account.field_rma_order_line__invoice_address_id
+msgid "Invoice address for current rma order."
+msgstr "Adresse de facturation pour la commande RMA en cours."
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund__item_ids
+msgid "Items"
+msgstr "Articles"
+
+#. module: rma_account
+#: model:ir.model,name:rma_account.model_account_move
+msgid "Journal Entry"
+msgstr "Pièce comptable"
+
+#. module: rma_account
+#: model:ir.model,name:rma_account.model_account_move_line
+msgid "Journal Item"
+msgstr "Écriture comptable"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_order_line__move_line_ids
+msgid "Journal Items"
+msgstr "Éléments du journal"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_add_account_move____last_update
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund____last_update
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund_item____last_update
+msgid "Last Modified on"
+msgstr ""
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_add_account_move__write_uid
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund__write_uid
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund_item__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_add_account_move__write_date
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund__write_date
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund_item__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: rma_account
+#: model:ir.model.fields.selection,name:rma_account.selection__rma_operation__refund_policy__no
+#: model:ir.model.fields.selection,name:rma_account.selection__rma_order_line__refund_policy__no
+msgid "No refund"
+msgstr "Aucun remboursement"
+
+#. module: rma_account
+#: model:ir.model.fields.selection,name:rma_account.selection__rma_refund_item__refund_policy__no
+msgid "Not required"
+msgstr "Non requis"
+
+#. module: rma_account
+#. odoo-python
+#: code:addons/rma_account/wizards/rma_refund.py:0
+#, python-format
+msgid "Only RMAs from the same partner can be processed at the same time."
+msgstr "Seuls les RMA provenant du même partenaire peuvent être traités en même temps."
+
+#. module: rma_account
+#: model_terms:ir.ui.view,arch_db:rma_account.view_rma_form
+#: model_terms:ir.ui.view,arch_db:rma_account.view_rma_line_form
+msgid "Origin Inv"
+msgstr "Facture Source"
+
+#. module: rma_account
+#. odoo-python
+#: code:addons/rma_account/models/rma_order.py:0
+#, python-format
+msgid "Originating Invoice"
+msgstr "Facture Source"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_order_line__account_move_line_id
+msgid "Originating Invoice Line"
+msgstr "Ligne de facture source"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_add_account_move__partner_id
+msgid "Partner"
+msgstr "Partenaire"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_order_line__invoice_address_id
+msgid "Partner invoice address"
+msgstr "Adresse de facturation du partenaire"
+
+#. module: rma_account
+#. odoo-python
+#: code:addons/rma_account/models/rma_order_line.py:0
+#: code:addons/rma_account/wizards/rma_add_account_move.py:0
+#, python-format
+msgid "Please define a warehouse with a default rma location"
+msgstr "Veuillez définir un entrepôt avec un emplacement rma par défaut"
+
+#. module: rma_account
+#. odoo-python
+#: code:addons/rma_account/models/rma_order_line.py:0
+#: code:addons/rma_account/wizards/rma_add_account_move.py:0
+#, python-format
+msgid "Please define an operation first"
+msgstr "Veuillez d'abord définir une opération"
+
+#. module: rma_account
+#. odoo-python
+#: code:addons/rma_account/models/rma_order_line.py:0
+#: code:addons/rma_account/wizards/rma_add_account_move.py:0
+#, python-format
+msgid "Please define an rma route"
+msgstr "Veuillez définir une route rma"
+
+#. module: rma_account
+#: model:ir.model,name:rma_account.model_procurement_group
+msgid "Procurement Group"
+msgstr "Groupe d'approvisionnement"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund_item__product
+msgid "Product"
+msgstr "Produit"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund_item__product_id
+msgid "Product (Technical)"
+msgstr "Produit (Technique)"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_order_line__qty_refunded
+msgid "Qty Refunded"
+msgstr "Qté remboursée"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_order__qty_to_refund
+#: model:ir.model.fields,field_description:rma_account.field_rma_order_line__qty_to_refund
+msgid "Qty To Refund"
+msgstr "Qté à rembourser"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund_item__product_qty
+msgid "Quantity Ordered"
+msgstr "Quantité commandée"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund_item__qty_to_refund
+msgid "Quantity To Refund"
+msgstr "Quantité à rembourser"
+
+#. module: rma_account
+#: model:ir.model,name:rma_account.model_rma_order_line
+#: model:ir.model.fields,field_description:rma_account.field_account_move_line__rma_line_ids
+#: model:ir.model.fields,field_description:rma_account.field_procurement_group__rma_id
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund_item__rma_id
+#: model_terms:ir.ui.view,arch_db:rma_account.invoice_form
+msgid "RMA"
+msgstr ""
+
+#. module: rma_account
+#. odoo-python
+#: code:addons/rma_account/wizards/rma_refund.py:0
+#, python-format
+msgid "RMA %s is not approved"
+msgstr "RMA %s n'est pas approuvé"
+
+#. module: rma_account
+#: model:ir.model,name:rma_account.model_rma_order
+msgid "RMA Group"
+msgstr "Groupe RMA"
+
+#. module: rma_account
+#: model_terms:ir.ui.view,arch_db:rma_account.view_invoice_line_form
+msgid "RMA Lines"
+msgstr "Lignes RMA"
+
+#. module: rma_account
+#: model:ir.model,name:rma_account.model_rma_refund_item
+msgid "RMA Lines to refund"
+msgstr "Lignes RMA à rembourser"
+
+#. module: rma_account
+#: model:ir.model,name:rma_account.model_rma_operation
+msgid "RMA Operation"
+msgstr "Opération RMA"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_add_account_move__rma_id
+msgid "RMA Order"
+msgstr "Commande RMA"
+
+#. module: rma_account
+#. odoo-python
+#: code:addons/rma_account/models/rma_order_line.py:0
+#, python-format
+msgid "RMA customer and originating invoice line customer doesn't match."
+msgstr "Le client RMA et le client sur la ligne de facture source ne correspondent pas."
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_account_move_line__rma_line_id
+#: model:ir.model.fields,field_description:rma_account.field_procurement_group__rma_line_id
+msgid "RMA line"
+msgstr "Ligne RMA"
+
+#. module: rma_account
+#: model_terms:ir.ui.view,arch_db:rma_account.view_invoice_line_form
+msgid "RMA line originated"
+msgstr "Origine de la ligne RMA"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund_item__line_id
+msgid "RMA order Line"
+msgstr "Ligne de commande RMA"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund__description
+msgid "Reason"
+msgstr "Raison"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_operation__refund_journal_id
+msgid "Refund Account Journal"
+msgstr "Journal du compte d'avoir"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund__date_invoice
+msgid "Refund Date"
+msgstr "Date de remboursement"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_operation__refund_free_of_charge
+msgid "Refund Free Of Charge"
+msgstr "Remboursement sans frais"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_order_line__refund_line_ids
+msgid "Refund Lines"
+msgstr "Lignes d'avoir"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_operation__refund_policy
+#: model:ir.model.fields,field_description:rma_account.field_rma_order_line__refund_policy
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund_item__refund_policy
+msgid "Refund Policy"
+msgstr "Politique de remboursement"
+
+#. module: rma_account
+#. odoo-python
+#: code:addons/rma_account/wizards/rma_refund.py:0
+#, python-format
+msgid "Refund created by %(rnr)s, %(r)s"
+msgstr "Avoir créé par %(rnr)s, %(r)s"
+
+#. module: rma_account
+#. odoo-python
+#: code:addons/rma_account/wizards/rma_refund.py:0
+#, python-format
+msgid "Refund created by %s"
+msgstr "Avoir créé par %s"
+
+#. module: rma_account
+#: model_terms:ir.ui.view,arch_db:rma_account.view_rma_form
+#: model_terms:ir.ui.view,arch_db:rma_account.view_rma_line_form
+msgid "Refunds"
+msgstr "Avoirs"
+
+#. module: rma_account
+#: model_terms:ir.ui.view,arch_db:rma_account.view_rma_add_account_move
+msgid "Select Invoice from customer"
+msgstr "Sélectionnez la Facture client"
+
+#. module: rma_account
+#: model_terms:ir.ui.view,arch_db:rma_account.view_rma_add_account_move_supplier
+msgid "Select Invoice from supplier"
+msgstr "Sélectionnez la Facture fournisseur"
+
+#. module: rma_account
+#: model_terms:ir.ui.view,arch_db:rma_account.view_rma_add_account_move
+#: model_terms:ir.ui.view,arch_db:rma_account.view_rma_add_account_move_supplier
+msgid "Select Invoices lines to add"
+msgstr "Sélectionnez les lignes de facture à ajouter"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_order_line__move_id
+msgid "Source"
+msgstr ""
+
+#. module: rma_account
+#: model:ir.model,name:rma_account.model_stock_move
+msgid "Stock Move"
+msgstr "Mouvement de stock"
+
+#. module: rma_account
+#: model:ir.model,name:rma_account.model_stock_valuation_layer
+msgid "Stock Valuation Layer"
+msgstr "Couche de valorisation d'inventaire"
+
+#. module: rma_account
+#: model:ir.actions.act_window,name:rma_account.action_rma_supplier_lines
+msgid "Supplier RMA"
+msgstr "RMA Fournisseur"
+
+#. module: rma_account
+#: model:ir.ui.menu,name:rma_account.menu_rma_line_account_supplier
+#: model:ir.ui.menu,name:rma_account.menu_rma_line_supplier_refunds
+msgid "Supplier RMA to Refund"
+msgstr "RMA Fournisseur à rembourser"
+
+#. module: rma_account
+#. odoo-python
+#: code:addons/rma_account/wizards/rma_refund.py:0
+#, python-format
+msgid "The invoice address must be the same for all the lines."
+msgstr "L'adresse de facturation doit être la même pour toutes les lignes."
+
+#. module: rma_account
+#. odoo-python
+#: code:addons/rma_account/models/rma_order_line.py:0
+#, python-format
+msgid "There's an rma for the invoice line %(arg1)s and invoice %(arg2)s"
+msgstr "Il existe un rma pour la ligne de facture %(arg1)s et la facture %(arg2)s"
+
+#. module: rma_account
+#: model:ir.model.fields,help:rma_account.field_account_move_line__rma_line_ids
+msgid "This will contain the RMA lines for the invoice line"
+msgstr "Celui-ci contiendra les lignes RMA pour la ligne de facture"
+
+#. module: rma_account
+#: model:ir.model.fields,help:rma_account.field_account_move_line__rma_line_id
+msgid "This will contain the rma line that originated this line"
+msgstr "Celui-ci contiendra la ligne rma à l'origine de cette ligne"
+
+#. module: rma_account
+#: model_terms:ir.ui.view,arch_db:rma_account.view_rma_rma_line_filter
+msgid "To Refund"
+msgstr "A rembourser"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund_item__uom_id
+msgid "Unit of Measure"
+msgstr "Unité de mesure"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_operation__valid_refund_journal_ids
+msgid "Valid Refund Journal"
+msgstr "Journal de remboursement valide"
+
+#. module: rma_account
+#: model:ir.model.fields,field_description:rma_account.field_rma_refund_item__wiz_id
+msgid "Wizard"
+msgstr "Assistant"
+
+#. module: rma_account
+#: model:ir.model,name:rma_account.model_rma_refund
+msgid "Wizard for RMA Refund"
+msgstr "Assistant de remboursement RMA"
+
+#. module: rma_account
+#: model:ir.model,name:rma_account.model_rma_add_account_move
+msgid "Wizard to add rma lines"
+msgstr "Assistant pour ajouter des lignes RMA"
+
+#. module: rma_account
+#: model:ir.model,name:rma_account.model_rma_make_supplier_rma
+msgid "Wizard to create Supplier RMA from rma"
+msgstr "Assistant pour créer un RMA fournisseur à partir d'un RMA"
+
+#. module: rma_account
+#: model_terms:ir.ui.view,arch_db:rma_account.view_rma_add_account_move
+#: model_terms:ir.ui.view,arch_db:rma_account.view_rma_add_account_move_supplier
+msgid "or"
+msgstr "ou"
