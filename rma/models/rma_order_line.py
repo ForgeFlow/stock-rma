@@ -243,8 +243,7 @@ class RmaOrderLine(models.Model):
     delivery_address_id = fields.Many2one(
         comodel_name="res.partner",
         string="Partner delivery address",
-        help="This address will be used to deliver repaired or replacement "
-        "products.",
+        help="This address will be used to deliver repaired or replacement products.",
     )
     rma_id = fields.Many2one(
         comodel_name="rma.order",
@@ -256,7 +255,7 @@ class RmaOrderLine(models.Model):
         string="Reference",
         required=True,
         default="/",
-        help="Add here the supplier RMA #. Otherwise an internal code is" " assigned.",
+        help="Add here the supplier RMA #. Otherwise an internal code is assigned.",
         copy=False,
     )
     description = fields.Text()
@@ -440,12 +439,12 @@ class RmaOrderLine(models.Model):
     supplier_address_id = fields.Many2one(
         comodel_name="res.partner",
         string="Supplier Address",
-        help="Address of the supplier in case of Customer RMA operation " "dropship.",
+        help="Address of the supplier in case of Customer RMA operation dropship.",
     )
     customer_address_id = fields.Many2one(
         comodel_name="res.partner",
         string="Customer Address",
-        help="Address of the customer in case of Supplier RMA operation " "dropship.",
+        help="Address of the customer in case of Supplier RMA operation dropship.",
     )
     qty_to_receive = fields.Float(
         digits="Product Unit of Measure",
