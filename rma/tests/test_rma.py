@@ -17,7 +17,7 @@ class TestRma(common.TransactionCase):
         cls.rma_add_stock_move = cls.env["rma_add_stock_move"]
         cls.product_ctg_model = cls.env["product.category"]
         cls.lot_obj = cls.env["stock.lot"]
-        cls.package_obj = cls.env["stock.quant.package"]
+        cls.package_obj = cls.env["stock.package"]
         cls.stockpicking = cls.env["stock.picking"]
         cls.rma = cls.env["rma.order"]
         cls.rma_line = cls.env["rma.order.line"]
@@ -29,6 +29,8 @@ class TestRma(common.TransactionCase):
         cls.rma_sup_replace_op_id = cls.env.ref("rma.rma_operation_supplier_replace")
         cls.rma_ds_replace_op_id = cls.env.ref("rma.rma_operation_ds_replace")
         cls.customer_route = cls.env.ref("rma.route_rma_customer")
+        cls.supplier_route = cls.env.ref("rma.route_rma_supplier")
+        cls.dropship_route = cls.env.ref("rma.route_rma_dropship")
         cls.input_location = cls.env.ref("stock.stock_location_company")
         cls.output_location = cls.env.ref("stock.stock_location_output")
         cls.category = cls._create_product_category(
@@ -45,7 +47,20 @@ class TestRma(common.TransactionCase):
         cls.company.group_rma_delivery_address = True
         cls.company.group_rma_lines = True
 
-        cls.partner_id = cls.env.ref("base.res_partner_2")
+        cls.partner_id = cls.env["res.partner"].create(
+            {
+                "name": "Partner for RMA",
+                "email": "partner_for_rma@example.com",
+                "phone": "1234567890",
+            }
+        )
+        cls.partner_id2 = cls.env["res.partner"].create(
+            {
+                "name": "Partner for RMA 2",
+                "email": "partner_for_rma_2@example.com",
+                "phone": "1234567890",
+            }
+        )
         cls.stock_location = cls.env.ref("stock.stock_location_stock")
         cls.wh = cls.env.ref("stock.warehouse0")
         cls.stock_rma_location = cls.wh.lot_rma_id
@@ -71,31 +86,154 @@ class TestRma(common.TransactionCase):
         # Customer RMA:
         products2move = [(cls.product_1, 3), (cls.product_2, 5), (cls.product_3, 2)]
         cls.rma_customer_id = cls._create_rma_from_move(
-            products2move, "customer", cls.env.ref("base.res_partner_2"), dropship=False
+            products2move, "customer", cls.partner_id, dropship=False
         )
         # Dropship:
         cls.rma_droship_id = cls._create_rma_from_move(
             products2move,
             "customer",
-            cls.env.ref("base.res_partner_2"),
+            cls.partner_id,
             dropship=True,
-            supplier_address_id=cls.env.ref("base.res_partner_3"),
+            supplier_address_id=cls.partner_id,
         )
         # Supplier RMA:
         cls.rma_supplier_id = cls._create_rma_from_move(
-            products2move, "supplier", cls.env.ref("base.res_partner_2"), dropship=False
+            products2move, "supplier", cls.partner_id, dropship=False
+        )
+        # create the basic stock rules, as Odoo does not load demo data in tests
+        cls.customer_in_picking_type = cls.env["stock.picking.type"].create(
+            {
+                "name": "Customer In",
+                "code": "incoming",
+                "sequence_code": "RMA CUS IN",
+                "warehouse_id": cls.wh.id,
+                "company_id": cls.company.id,
+                "default_location_src_id": cls.customer_location.id,
+                "default_location_dest_id": cls.stock_rma_location.id,
+            }
+        )
+        cls.customer_out_picking_type = cls.env["stock.picking.type"].create(
+            {
+                "name": "Customer Out",
+                "code": "outgoing",
+                "sequence_code": "RMA CUS OUT",
+                "warehouse_id": cls.wh.id,
+                "company_id": cls.company.id,
+                "default_location_src_id": cls.stock_rma_location.id,
+                "default_location_dest_id": cls.customer_location.id,
+            }
+        )
+        cls.supplier_in_picking_type = cls.env["stock.picking.type"].create(
+            {
+                "name": "Supplier In",
+                "code": "incoming",
+                "sequence_code": "RMA SUP IN",
+                "warehouse_id": cls.wh.id,
+                "company_id": cls.company.id,
+                "default_location_src_id": cls.supplier_location.id,
+                "default_location_dest_id": cls.stock_rma_location.id,
+            }
+        )
+        cls.supplier_out_picking_type = cls.env["stock.picking.type"].create(
+            {
+                "name": "Supplier Out",
+                "code": "outgoing",
+                "sequence_code": "RMA SUP OUT",
+                "warehouse_id": cls.wh.id,
+                "company_id": cls.company.id,
+                "default_location_src_id": cls.stock_rma_location.id,
+                "default_location_dest_id": cls.supplier_location.id,
+            }
+        )
+        cls.customer_in_rule = cls.env["stock.rule"].create(
+            {
+                "name": "customer => rma loc",
+                "action": "pull",
+                "picking_type_id": cls.customer_in_picking_type.id,
+                "location_src_id": cls.customer_location.id,
+                "location_dest_id": cls.stock_rma_location.id,
+                "procure_method": "make_to_stock",
+                "route_id": cls.customer_route.id,
+                "warehouse_id": cls.wh.id,
+                "company_id": cls.wh.company_id.id,
+            }
+        )
+        cls.customer_out_rule = cls.env["stock.rule"].create(
+            {
+                "name": "rma loc => customer",
+                "action": "pull",
+                "picking_type_id": cls.customer_out_picking_type.id,
+                "location_src_id": cls.stock_rma_location.id,
+                "location_dest_id": cls.customer_location.id,
+                "procure_method": "make_to_stock",
+                "route_id": cls.customer_route.id,
+                "warehouse_id": cls.wh.id,
+                "company_id": cls.wh.company_id.id,
+            }
+        )
+        cls.customer_dropship_rule = cls.env["stock.rule"].create(
+            {
+                "name": "customer => supplier",
+                "action": "pull",
+                "picking_type_id": cls.customer_in_picking_type.id,
+                "location_src_id": cls.customer_location.id,
+                "location_dest_id": cls.supplier_location.id,
+                "procure_method": "make_to_stock",
+                "route_id": cls.dropship_route.id,
+                "warehouse_id": cls.wh.id,
+                "company_id": cls.wh.company_id.id,
+            }
+        )
+        cls.supplier_dropship_rule = cls.env["stock.rule"].create(
+            {
+                "name": "supplier => customer",
+                "action": "pull",
+                "picking_type_id": cls.supplier_out_picking_type.id,
+                "location_src_id": cls.supplier_location.id,
+                "location_dest_id": cls.customer_location.id,
+                "procure_method": "make_to_stock",
+                "route_id": cls.dropship_route.id,
+                "warehouse_id": cls.wh.id,
+                "company_id": cls.wh.company_id.id,
+            }
+        )
+        cls.supplier_in_rule = cls.env["stock.rule"].create(
+            {
+                "name": "supplier => rma loc",
+                "action": "pull",
+                "picking_type_id": cls.supplier_in_picking_type.id,
+                "location_src_id": cls.supplier_location.id,
+                "location_dest_id": cls.stock_rma_location.id,
+                "procure_method": "make_to_stock",
+                "route_id": cls.supplier_route.id,
+                "warehouse_id": cls.wh.id,
+                "company_id": cls.wh.company_id.id,
+            }
+        )
+        cls.supplier_out_rule = cls.env["stock.rule"].create(
+            {
+                "name": "rma loc => supplier",
+                "action": "pull",
+                "picking_type_id": cls.supplier_out_picking_type.id,
+                "location_src_id": cls.stock_rma_location.id,
+                "location_dest_id": cls.supplier_location.id,
+                "procure_method": "make_to_stock",
+                "route_id": cls.supplier_route.id,
+                "warehouse_id": cls.wh.id,
+                "company_id": cls.wh.company_id.id,
+            }
         )
         # create rules to have multi step reception/shipment, unactive by default
         cls.test_rma_loc = cls.stock_rma_location.copy({"name": "rma loc shipping"})
         rma_route = cls.env.ref("rma.route_rma_customer")
-        rma_route_2steps_classic = rma_route.copy(
+        cls.rma_route_2steps_classic = rma_route.copy(
             {"name": "RMA Customer 2 Steps (classic test)", "rule_ids": False}
         )
         cls.rma_cust_replace_op_2sc_id = cls.rma_cust_replace_op_id.copy(
             {
                 "name": "Replace After Receive 2steps (classic test)",
                 "code": "RPL-C-2C",
-                "in_route_id": rma_route_2steps_classic.id,
+                "in_route_id": cls.rma_route_2steps_classic.id,
             }
         )
         cls.rma_location = cls.env.ref("rma.location_rma")
@@ -108,7 +246,7 @@ class TestRma(common.TransactionCase):
                 "location_src_id": cls.wh.wh_input_stock_loc_id.id,
                 "location_dest_id": cls.rma_location.id,
                 "procure_method": "make_to_order",
-                "route_id": rma_route_2steps_classic.id,
+                "route_id": cls.rma_route_2steps_classic.id,
                 "warehouse_id": cls.wh.id,
                 "company_id": cls.wh.company_id.id,
                 "active": False,
@@ -123,7 +261,7 @@ class TestRma(common.TransactionCase):
                 "location_src_id": cls.customer_location.id,
                 "location_dest_id": cls.wh.wh_input_stock_loc_id.id,
                 "procure_method": "make_to_stock",
-                "route_id": rma_route_2steps_classic.id,
+                "route_id": cls.rma_route_2steps_classic.id,
                 "warehouse_id": cls.wh.id,
                 "company_id": cls.wh.company_id.id,
                 "location_dest_from_rule": True,
@@ -146,7 +284,7 @@ class TestRma(common.TransactionCase):
                 "email": "example@yourcompany.com",
                 "company_id": company.id,
                 "company_ids": [(4, company.id)],
-                "groups_id": [(6, 0, group_ids)],
+                "group_ids": [(6, 0, group_ids)],
             }
         )
         return user
@@ -432,7 +570,6 @@ class TestRma(common.TransactionCase):
         location_id = src.id
 
         res = {
-            "name": product.name,
             "partner_id": picking_in.partner_id.id,
             "origin": picking_in.name,
             "company_id": picking_in.picking_type_id.warehouse_id.company_id.id,
@@ -513,9 +650,7 @@ class TestRma(common.TransactionCase):
             self.rma_customer_id.action_view_supplier_lines()
             with self.assertRaises(ValidationError):
                 line.rma_id.partner_id = self.partner_id.id
-                self.rma_customer_id.rma_line_ids[0].partner_id = self.env.ref(
-                    "base.res_partner_3"
-                ).id
+                self.rma_customer_id.rma_line_ids[0].partner_id = self.partner_id2.id
         self.rma_customer_id.action_view_supplier_lines()
 
     def test_02_customer_rma(self):
@@ -887,7 +1022,9 @@ class TestRma(common.TransactionCase):
         wizard._create_picking()
         picking = self.rma_supplier_id.rma_line_ids._get_out_pickings()
         partner = picking.partner_id
-        self.assertTrue(partner, "Partner is not defined or False")
+        self.assertEqual(
+            partner, self.rma_supplier_id.partner_id, "Partner is not correct"
+        )
         moves = picking.move_ids
         self.assertEqual(len(moves), 3, "Incorrect number of moves created")
 
@@ -1326,7 +1463,7 @@ class TestRma(common.TransactionCase):
         rma_customer_id = self._create_rma_from_move(
             products2move,
             "customer",
-            self.env.ref("base.res_partner_2"),
+            self.partner_id,
             dropship=False,
         )
         rma = rma_customer_id.rma_line_ids
@@ -1374,7 +1511,7 @@ class TestRma(common.TransactionCase):
         rma_customer_id = self._create_rma_from_move(
             products2move,
             "customer",
-            self.env.ref("base.res_partner_2"),
+            self.partner_id,
             dropship=False,
         )
         rma = rma_customer_id.rma_line_ids
@@ -1441,7 +1578,7 @@ class TestRma(common.TransactionCase):
         rma_customer_id = self._create_rma_from_move(
             products2move,
             "customer",
-            self.env.ref("base.res_partner_2"),
+            self.partner_id,
             dropship=False,
         )
         rma = rma_customer_id.rma_line_ids
@@ -1512,7 +1649,7 @@ class TestRma(common.TransactionCase):
         rma_supplier_id = self._create_rma_from_move(
             products2move,
             "supplier",
-            self.env.ref("base.res_partner_2"),
+            self.partner_id,
             dropship=False,
         )
         rma = rma_supplier_id.rma_line_ids
@@ -1579,7 +1716,7 @@ class TestRma(common.TransactionCase):
         rma_customer = self._create_rma_from_move(
             [(self.product_1, 3)],
             "customer",
-            self.env.ref("base.res_partner_2"),
+            self.partner_id,
             dropship=False,
         )
         rma_customer.rma_line_ids.operation_id = self.rma_cust_replace_op_2sc_id
@@ -1685,7 +1822,7 @@ class TestRma(common.TransactionCase):
         rma_customer = self._create_rma_from_move(
             [(self.product_1, 3)],
             "customer",
-            self.env.ref("base.res_partner_2"),
+            self.partner_id,
             dropship=False,
         )
         rma_customer.rma_line_ids.operation_id = rma_cust_replace_op_2sc_new_id
@@ -1804,7 +1941,7 @@ class TestRma(common.TransactionCase):
         rma_supplier_id = self._create_rma_from_move(
             products2move,
             "supplier",
-            self.env.ref("base.res_partner_2"),
+            self.partner_id,
             dropship=False,
         )
         rma = rma_supplier_id.rma_line_ids

@@ -15,7 +15,7 @@ class StockMove(models.Model):
     def create(self, vals_list):
         for vals in vals_list:
             if vals.get("group_id"):
-                group = self.env["procurement.group"].browse(vals["group_id"])
+                group = self.env["stock.reference"].browse(vals["group_id"])
                 if group.rma_line_id:
                     vals["rma_line_id"] = group.rma_line_id.id
         return super().create(vals_list)

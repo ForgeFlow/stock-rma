@@ -12,7 +12,6 @@ class RmaMakePicking(models.TransientModel):
     _name = "rma_make_picking.wizard"
     _description = "Wizard to create Pickings from rma"
 
-    @api.returns("rma.order.line")
     def _prepare_item(self, line):
         values = {
             "product_id": line.product_id.id,
@@ -31,7 +30,7 @@ class RmaMakePicking(models.TransientModel):
         lines the supplier field is empty otherwise is the unique line
         supplier.
         """
-        context = self._context.copy()
+        context = self.env.context.copy()
         res = super().default_get(fields_list)
         rma_line_obj = self.env["rma.order.line"]
         rma_obj = self.env["rma.order"]
@@ -68,19 +67,18 @@ class RmaMakePicking(models.TransientModel):
 
     item_ids = fields.One2many("rma_make_picking.wizard.item", "wiz_id", string="Items")
 
-    def find_procurement_group(self, item):
+    def find_stock_reference(self, item):
         if item.line_id.rma_id:
-            return self.env["procurement.group"].search(
+            return self.env["stock.reference"].search(
                 [("rma_id", "=", item.line_id.rma_id.id)]
             )
         else:
-            return self.env["procurement.group"].search(
+            return self.env["stock.reference"].search(
                 [("rma_line_id", "=", item.line_id.id)]
             )
 
-    def _get_procurement_group_data(self, item):
+    def _get_stock_reference_data(self, item):
         group_data = {
-            "partner_id": item.line_id.partner_id.id,
             "name": item.line_id.rma_id.name or item.line_id.name,
             "rma_id": item.line_id.rma_id and item.line_id.rma_id.id or False,
         }
@@ -126,58 +124,55 @@ class RmaMakePicking(models.TransientModel):
         return location
 
     @api.model
-    def _get_procurement_data(self, item, group, qty, picking_type):
+    def _get_procurement_data(self, item, stock_ref, qty, picking_type):
         line = item.line_id
         delivery_address_id = self._get_address(item)
         date_planned = fields.Datetime.now()
-        location, warehouse, route = False, False, False
         location = self._get_procurement_location(
             line, picking_type, delivery_address_id
         )
         if picking_type == "incoming":
             warehouse = line.in_warehouse_id
             route = line.in_route_id
-        elif picking_type == "outgoing":
+        else:
             warehouse = line.out_warehouse_id
             route = line.out_route_id
             if line.product_id.sale_delay:
-                date_planned = date_planned + timedelta(days=line.product_id.sale_delay)
+                date_planned += timedelta(days=line.product_id.sale_delay)
         if not route:
             raise ValidationError(self.env._("No route specified"))
         if not warehouse:
             raise ValidationError(self.env._("No warehouse specified"))
-        procurement_data = {
+        values = {
             "name": line.product_id.display_name,
-            "group_id": group,
-            "origin": group and group.name or line.name,
-            "warehouse_id": warehouse,
+            "origin": stock_ref.name if stock_ref else line.name,
             "date_planned": date_planned,
-            "product_id": item.product_id,
-            "product_qty": qty,
-            "partner_id": delivery_address_id.id,
-            "product_uom": line.product_id.product_tmpl_id.uom_id.id,
+            "warehouse_id": warehouse,
             "location_id": location,
-            "rma_line_id": line.id,
             "route_ids": route,
+            "reference_ids": stock_ref,
+            "rma_line_id": line.id,
+            "partner_id": line.partner_id.id,
         }
         if (picking_type == "incoming" and line.operation_id.in_force_same_lot) or (
             picking_type == "outgoing" and line.operation_id.out_force_same_lot
         ):
-            procurement_data["restrict_lot_id"] = line.lot_id.id
-        return procurement_data
+            values["restrict_lot_id"] = line.lot_id.id
+        return values
 
     @api.model
     def _create_procurement(self, item, picking_type):
         errors = []
-        group = self.find_procurement_group(item)
-        if not group:
-            pg_data = self._get_procurement_group_data(item)
-            group = self.env["procurement.group"].create(pg_data)
+        # Odoo 19: stock.reference replaces procurement.group
+        stock_ref = self.find_stock_reference(item)
+        if not stock_ref:
+            sr_data = self._get_stock_reference_data(item)
+            stock_ref = self.env["stock.reference"].create(sr_data)
+        # determine qty
         if picking_type == "incoming":
             qty = item.qty_to_receive
         else:
             qty = item.qty_to_deliver
-        values = self._get_procurement_data(item, group, qty, picking_type)
         product = item.line_id.product_id
         if float_compare(qty, 0, precision_rounding=product.uom_id.rounding) != 1:
             raise ValidationError(
@@ -187,25 +182,23 @@ class RmaMakePicking(models.TransientModel):
                     arg2=product.default_code or product.name,
                 )
             )
-        # create picking
+        values = self._get_procurement_data(item, stock_ref, qty, picking_type)
         procurements = []
         try:
-            procurement = group.Procurement(
-                item.line_id.product_id,
+            procurement = self.env["stock.rule"].Procurement(
+                product,
                 qty,
-                item.line_id.product_id.product_tmpl_id.uom_id,
-                values.get("location_id"),
-                values.get("name"),
-                values.get("origin"),
+                product.uom_id,
+                values["location_id"],
+                values["name"],
+                values["origin"],
                 self.env.company,
                 values,
             )
-
             procurements.append(procurement)
-            # Trigger a route check with a mutable in the context that can be
-            # cleared after the first rule selection
-            self.env["procurement.group"].with_context(rma_route_check=[True]).run(
-                procurements
+            self.env["stock.rule"].with_context(rma_route_check=[True]).run(
+                procurements,
+                raise_user_error=True,
             )
         except UserError as error:
             errors.append(error.args[0])
@@ -220,7 +213,9 @@ class RmaMakePicking(models.TransientModel):
         for item in self.item_ids:
             line = item.line_id
             if line.state != "approved":
-                raise ValidationError(self.env._("RMA %s is not approved") % line.name)
+                raise ValidationError(
+                    self.env._("RMA ") + line.name + self.env._(" is not approved")
+                )
             if line.receipt_policy == "no" and picking_type == "incoming":
                 raise ValidationError(
                     self.env._("No shipments needed for this operation")

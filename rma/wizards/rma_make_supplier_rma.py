@@ -50,7 +50,7 @@ class RmaMakeSupplierRma(models.TransientModel):
 
     @api.model
     def default_get(self, fields_list):
-        context = self._context.copy()
+        context = self.env.context.copy()
         res = super().default_get(fields_list)
         rma_line_obj = self.env["rma.order.line"]
         rma_obj = self.env["rma.order"]

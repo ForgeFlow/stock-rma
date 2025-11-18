@@ -41,7 +41,7 @@
         <field name="view_mode">form</field>
         <field name="target">new</field>
         <field name="view_id" ref="view_rma_add_serial_wiz_customer" />
-        <field name="groups_id" eval="[(4, ref('rma.group_rma_customer_user'))]" />
+        <field name="group_ids" eval="[(4, ref('rma.group_rma_customer_user'))]" />
     </record>
 
     <record id="view_rma_add_serial_wiz_supplier" model="ir.ui.view">
@@ -63,6 +63,6 @@
         <field name="view_mode">form</field>
         <field name="target">new</field>
         <field name="view_id" ref="view_rma_add_serial_wiz_supplier" />
-        <field name="groups_id" eval="[(4, ref('rma.group_rma_supplier_user'))]" />
+        <field name="group_ids" eval="[(4, ref('rma.group_rma_supplier_user'))]" />
     </record>
 </odoo>

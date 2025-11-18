@@ -145,13 +145,13 @@ class RmaOrder(models.Model):
         comodel_name="stock.warehouse",
         string="Inbound Warehouse",
         required=False,
-        default=_default_warehouse_id,
+        default=lambda self: self._default_warehouse_id(),
     )
     out_warehouse_id = fields.Many2one(
         comodel_name="stock.warehouse",
         string="Outbound Warehouse",
         required=False,
-        default=_default_warehouse_id,
+        default=lambda self: self._default_warehouse_id(),
     )
     location_id = fields.Many2one(
         comodel_name="stock.location",
@@ -174,7 +174,7 @@ class RmaOrder(models.Model):
         help="Address of the customer in case of Supplier RMA operation dropship.",
     )
     state = fields.Selection(
-        compute=_compute_state,
+        compute="_compute_state",
         selection=[
             ("draft", "Draft"),
             ("to_approve", "To Approve"),
