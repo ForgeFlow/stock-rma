@@ -166,12 +166,12 @@ class RmaOrder(models.Model):
     supplier_address_id = fields.Many2one(
         comodel_name="res.partner",
         string="Supplier Address",
-        help="Address of the supplier in case of Customer RMA operation " "dropship.",
+        help="Address of the supplier in case of Customer RMA operation dropship.",
     )
     customer_address_id = fields.Many2one(
         comodel_name="res.partner",
         string="Customer Address",
-        help="Address of the customer in case of Supplier RMA operation " "dropship.",
+        help="Address of the customer in case of Supplier RMA operation dropship.",
     )
     state = fields.Selection(
         compute=_compute_state,

@@ -530,7 +530,7 @@ class TestRma(common.TransactionCase):
         ).create({})
         wizard._create_picking()
         res = self.rma_customer_id.rma_line_ids.action_view_in_shipments()
-        self.assertTrue("res_id" in res, "Incorrect number of pickings" "created")
+        self.assertTrue("res_id" in res, "Incorrect number of pickingscreated")
         picking = self.env["stock.picking"].browse(res["res_id"])
         self.assertEqual(len(picking), 1, "Incorrect number of pickings created")
         moves = picking.move_ids
@@ -652,7 +652,7 @@ class TestRma(common.TransactionCase):
         ).create({})
         wizard._create_picking()
         res = self.rma_customer_id.rma_line_ids.action_view_out_shipments()
-        self.assertTrue("res_id" in res, "Incorrect number of pickings" "created")
+        self.assertTrue("res_id" in res, "Incorrect number of pickingscreated")
         picking = self.env["stock.picking"].browse(res["res_id"])
         moves = picking.move_ids
         self.assertEqual(len(moves), 3, "Incorrect number of moves created")
@@ -1004,7 +1004,7 @@ class TestRma(common.TransactionCase):
         ).create({})
         wizard._create_picking()
         res = self.rma_supplier_id.rma_line_ids.action_view_in_shipments()
-        self.assertTrue("res_id" in res, "Incorrect number of pickings" "created")
+        self.assertTrue("res_id" in res, "Incorrect number of pickingscreated")
         pickings = self.env["stock.picking"].browse(res["res_id"])
         self.assertEqual(len(pickings), 1, "Incorrect number of pickings created")
         picking_in = pickings[0]
@@ -1389,7 +1389,7 @@ class TestRma(common.TransactionCase):
         ).create({})
         wizard.action_create_picking()
         res = rma.action_view_in_shipments()
-        self.assertTrue("res_id" in res, "Incorrect number of pickings" "created")
+        self.assertTrue("res_id" in res, "Incorrect number of pickingscreated")
         picking = self.env["stock.picking"].browse(res["res_id"])
         self.assertEqual(len(picking), 1, "Incorrect number of pickings created")
         moves = picking.move_ids
@@ -1456,7 +1456,7 @@ class TestRma(common.TransactionCase):
         ).create({})
         wizard.action_create_picking()
         res = rma.action_view_in_shipments()
-        self.assertTrue("res_id" in res, "Incorrect number of pickings" "created")
+        self.assertTrue("res_id" in res, "Incorrect number of pickingscreated")
         picking = self.env["stock.picking"].browse(res["res_id"])
         self.assertEqual(len(picking), 1, "Incorrect number of pickings created")
         moves = picking.move_ids
@@ -1543,7 +1543,7 @@ class TestRma(common.TransactionCase):
         ).create({})
         wizard.action_create_picking()
         res = rma.action_view_out_shipments()
-        self.assertTrue("res_id" in res, "Incorrect number of pickings" "created")
+        self.assertTrue("res_id" in res, "Incorrect number of pickingscreated")
         picking = self.env["stock.picking"].browse(res["res_id"])
         self.assertEqual(len(picking), 1, "Incorrect number of pickings created")
         moves = picking.move_ids
