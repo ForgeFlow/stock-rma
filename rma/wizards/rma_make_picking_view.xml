@@ -81,7 +81,7 @@
         <field name="view_mode">form</field>
         <field name="target">new</field>
         <field name="view_id" ref="view_rma_picking" />
-        <field name="groups_id" eval="[(4, ref('stock.group_stock_user'))]" />
+        <field name="group_ids" eval="[(4, ref('stock.group_stock_user'))]" />
         <field name="context">{'picking_type': 'incoming'}</field>
         <field name="binding_model_id" ref="rma.model_rma_order_line" />
     </record>
@@ -93,7 +93,7 @@
         <field name="view_mode">form</field>
         <field name="target">new</field>
         <field name="view_id" ref="view_rma_picking_out" />
-        <field name="groups_id" eval="[(4, ref('stock.group_stock_user'))]" />
+        <field name="group_ids" eval="[(4, ref('stock.group_stock_user'))]" />
         <field name="context">{'picking_type': 'outgoing'}</field>
         <field name="binding_model_id" ref="rma.model_rma_order_line" />
     </record>

@@ -420,7 +420,7 @@
                 <field name="name" />
                 <field name="partner_id" />
                 <separator />
-                <group expand="0" string="Group By">
+                <group name="Group By">
                     <filter
                         name="partner"
                         string="Partner"

@@ -142,7 +142,7 @@ class RmaAddSerialWiz(models.TransientModel):
         for lot in self.lot_ids:
             if lot in existing_lots:
                 raise ValidationError(
-                    self.env._("Lot/Serial Number %s already added.") % lot.name
+                    self.env._("Lot/Serial Number %s already added.", lot.name)
                 )
 
             vals = self._prepare_rma_line_from_lot_vals(lot)

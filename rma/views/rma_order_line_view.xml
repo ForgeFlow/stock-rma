@@ -478,7 +478,7 @@
                         help="To Send to Supplier RMA"
                     />
                 </group>
-                <group expand="0" string="Group By">
+                <group name="Group By">
                     <filter
                         name="status"
                         string="State"
