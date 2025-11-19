@@ -2,9 +2,10 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
 from odoo import fields
-from odoo.tests import common
+from odoo.tests import common, tagged
 
 
+@tagged("post_install", "-at_install")
 class TestRmaRepair(common.SingleTransactionCase):
     @classmethod
     def setUpClass(cls):
@@ -34,6 +35,42 @@ class TestRmaRepair(common.SingleTransactionCase):
             {
                 "name": "WH Repair Location",
                 "location_id": cls.wh.view_location_id.id,
+            }
+        )
+        cls.repair_picking_type = cls.env["stock.picking.type"].create(
+            {
+                "name": "RMA Repairs",
+                "code": "repair_operation",
+                "sequence_code": "RMA-RO",
+                "warehouse_id": cls.wh.id,
+                "default_product_location_src_id": cls.repair_loc.id,
+                "default_product_location_dest_id": cls.wh.lot_stock_id.id,
+                "default_location_src_id": cls.wh.lot_stock_id.id,
+            }
+        )
+        cls.env["stock.rule"].create(
+            {
+                "name": "customer => rma loc",
+                "action": "pull",
+                "picking_type_id": cls.env["stock.picking.type"]
+                .create(
+                    {
+                        "name": "Customer In",
+                        "code": "incoming",
+                        "sequence_code": "RMA CUS IN",
+                        "warehouse_id": cls.wh.id,
+                        "default_location_src_id": cls.env.ref(
+                            "stock.stock_location_customers"
+                        ).id,
+                        "default_location_dest_id": cls.stock_rma_location.id,
+                    }
+                )
+                .id,
+                "location_src_id": cls.env.ref("stock.stock_location_customers").id,
+                "location_dest_id": cls.stock_rma_location.id,
+                "procure_method": "make_to_stock",
+                "route_id": cls.rma_route_cust.id,
+                "warehouse_id": cls.wh.id,
             }
         )
         cls.repair_route = cls.env["stock.route"].create(
@@ -70,7 +107,7 @@ class TestRmaRepair(common.SingleTransactionCase):
                 "repair_type": "received",
                 "in_route_id": cls.rma_route_cust.id,
                 "out_route_id": cls.rma_route_cust.id,
-                "repair_location_id": cls.repair_loc.id,
+                "repair_picking_type_id": cls.repair_picking_type.id,
                 "repair_route_id": cls.repair_route.id,
             }
         )
@@ -83,7 +120,7 @@ class TestRmaRepair(common.SingleTransactionCase):
                 "repair_type": "ordered",
                 "in_route_id": cls.rma_route_cust.id,
                 "out_route_id": cls.rma_route_cust.id,
-                "repair_location_id": cls.repair_loc.id,
+                "repair_picking_type_id": cls.repair_picking_type.id,
                 "repair_route_id": cls.repair_route.id,
             }
         )
@@ -97,7 +134,7 @@ class TestRmaRepair(common.SingleTransactionCase):
                 "delivery_policy": "repair",
                 "in_route_id": cls.rma_route_cust.id,
                 "out_route_id": cls.rma_route_cust.id,
-                "repair_location_id": cls.repair_loc.id,
+                "repair_picking_type_id": cls.repair_picking_type.id,
                 "repair_route_id": cls.repair_route.id,
             }
         )
@@ -263,6 +300,11 @@ class TestRmaRepair(common.SingleTransactionCase):
         self.assertEqual(repair_transfer_move.location_id, self.stock_rma_location)
         self.assertEqual(repair_transfer_move.product_qty, 15.0)
         self.assertEqual(repair_transfer_move.product_id, rma.product_id)
+        repair = rma.repair_ids
+        self.assertEqual(repair.picking_type_id, self.repair_picking_type)
+        self.assertEqual(repair.product_location_src_id, self.repair_loc)
+        self.assertEqual(repair.location_id, self.wh.lot_stock_id)
+        self.assertEqual(repair.product_uom, rma.uom_id)
         rma.repair_ids.action_repair_start()
         self.assertEqual(rma.repair_count, 1)
         self.assertEqual(rma.qty_to_repair, 0.0)

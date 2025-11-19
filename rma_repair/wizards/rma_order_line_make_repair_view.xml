@@ -24,10 +24,10 @@
                                 groups="uom.group_uom"
                             />
                             <field name="partner_id" force_save="1" />
+                            <field name="picking_type_id" />
                             <field
                                 name="location_id"
                                 groups="stock.group_stock_multi_locations"
-                                force_save="1"
                             />
                         </list>
                     </field>
