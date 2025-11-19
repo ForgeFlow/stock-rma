@@ -19,13 +19,14 @@ class RmaOperation(models.Model):
     delivery_policy = fields.Selection(
         selection_add=[("repair", "Based on Repair Quantities")]
     )
-    repair_location_id = fields.Many2one(
-        string="Repair Location",
-        comodel_name="stock.location",
-        help="Indicate here the source location of the product to be repaired",
-    )
     repair_route_id = fields.Many2one(
         comodel_name="stock.route",
         string="Repair Route",
         domain=[("rma_selectable", "=", True)],
+    )
+    repair_picking_type_id = fields.Many2one(
+        comodel_name="stock.picking.type",
+        string="Repair Picking Type",
+        domain="[('code', '=', 'repair_operation')]",
+        required=True,
     )

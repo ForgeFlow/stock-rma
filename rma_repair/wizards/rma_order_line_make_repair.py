@@ -1,10 +1,8 @@
 # Copyright 2020 ForgeFlow S.L.
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
-import time
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DT_FORMAT
 
 
 class RmaLineMakeRepair(models.TransientModel):
@@ -27,8 +25,7 @@ class RmaLineMakeRepair(models.TransientModel):
             "out_route_id": line.out_route_id.id,
             "product_uom_id": line.uom_id.id,
             "partner_id": line.partner_id.id,
-            "location_id": line.operation_id.repair_location_id.id
-            or line.location_id.id,
+            "picking_type_id": line.operation_id.repair_picking_type_id.id,
         }
 
     @api.model
@@ -49,7 +46,10 @@ class RmaLineMakeRepair(models.TransientModel):
         return res
 
     def create_repair_procurement_condition_applies(self, rma_line, repair):
-        return rma_line.location_id != repair.location_id
+        return (
+            rma_line.location_id
+            != repair.picking_type_id.default_product_location_src_id
+        )
 
     def make_repair_order(self):
         self.ensure_one()
@@ -62,7 +62,8 @@ class RmaLineMakeRepair(models.TransientModel):
             res.append(repair.id)
             if self.create_repair_procurement_condition_applies(rma_line, repair):
                 item._run_procurement(
-                    rma_line.operation_id.repair_route_id, repair.location_id
+                    rma_line.operation_id.repair_route_id,
+                    repair.picking_type_id.default_product_location_src_id,
                 )
 
         return {
@@ -114,13 +115,28 @@ class RmaLineMakeRepairItem(models.TransientModel):
         domain=[("customer_rank", ">=", 1)],
         readonly=True,
     )
+    # Related becuase repairs are controlled by picking type since v18
     location_id = fields.Many2one(
-        comodel_name="stock.location", string="Location", required=True
+        comodel_name="stock.location",
+        related="picking_type_id.default_product_location_src_id",
+        required=True,
+    )
+    company_id = fields.Many2one(
+        comodel_name="res.company",
+        related="line_id.company_id",
+    )
+    picking_type_id = fields.Many2one(
+        comodel_name="stock.picking.type",
+        string="Picking Type",
+        domain="[('code', '=', 'repair_operation'), ('company_id', '=', company_id)]",
+        required=True,
     )
 
     def _prepare_repair_order(self, rma_line):
         self.ensure_one()
-        sellers = rma_line.product_id.seller_ids.filtered(lambda sel: sel.partner_id == rma_line.partner_id)
+        sellers = rma_line.product_id.seller_ids.filtered(
+            lambda sel: sel.partner_id == rma_line.partner_id
+        )
         seller_uom = sellers and sellers[0].product_uom_id or False
         if not seller_uom:
             seller_uom = rma_line.product_id.uom_id
@@ -131,7 +147,8 @@ class RmaLineMakeRepairItem(models.TransientModel):
             "rma_line_id": rma_line.id,
             "product_uom": seller_uom.id,
             "company_id": rma_line.company_id.id,
-            "location_id": self.location_id.id,
+            "picking_type_id": self.picking_type_id.id,
+            "location_id": self.picking_type_id.default_location_dest_id.id,
             "lot_id": rma_line.lot_id.id,
         }
 
@@ -150,7 +167,6 @@ class RmaLineMakeRepairItem(models.TransientModel):
         if errors:
             raise UserError("\n".join(errors))
         return procurements
-
 
     def find_stock_reference(self):
         if self.line_id.rma_id:
@@ -189,7 +205,6 @@ class RmaLineMakeRepairItem(models.TransientModel):
             "partner_id": self.line_id.partner_id,
         }
         return values
-
 
     @api.model
     def _prepare_procurement(self, route, dest_location):
