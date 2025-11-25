@@ -2,7 +2,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from odoo import api, fields, models
-from odoo.osv import expression
+from odoo.fields import Domain
 
 
 class AccountMoveLine(models.Model):
@@ -15,7 +15,7 @@ class AccountMoveLine(models.Model):
         will make impossible to get the desired result."""
         domain = domain or []
         if self.env.context.get("rma"):
-            domain = expression.AND(
+            domain = Domain.AND(
                 [
                     domain,
                     [("display_type", "in", ("product", "line_section", "line_note"))],
@@ -85,32 +85,5 @@ class AccountMoveLine(models.Model):
         help="This will contain the rma line that originated this line",
     )
 
-    def _stock_account_get_anglo_saxon_price_unit(self):
-        self.ensure_one()
-        price_unit = super()._stock_account_get_anglo_saxon_price_unit()
-        rma_line = self.rma_line_id or self.env["rma.order.line"]
-        if rma_line:
-            is_line_reversing = bool(self.move_id.reversed_entry_id)
-            qty_to_refund = self.product_uom_id._compute_quantity(
-                self.quantity, self.product_id.uom_id
-            )
-            posted_invoice_lines = rma_line.move_line_ids.filtered(
-                lambda line: line.move_id.move_type == "out_refund"
-                and line.move_id.state == "posted"
-                and bool(line.move_id.reversed_entry_id) == is_line_reversing
-            )
-            qty_refunded = sum(
-                x.product_uom_id._compute_quantity(x.quantity, x.product_id.uom_id)
-                for x in posted_invoice_lines
-            )
-            product = self.product_id.with_company(self.company_id).with_context(
-                is_returned=is_line_reversing
-            )
-            average_price_unit = product._compute_average_price(
-                qty_refunded, qty_to_refund, rma_line._get_in_moves()
-            )
-            if average_price_unit:
-                price_unit = self.product_id.uom_id.with_company(
-                    self.company_id
-                )._compute_price(average_price_unit, self.product_uom_id)
-        return price_unit
+    def _get_stock_moves(self):
+        return super()._get_stock_moves() | self.rma_line_id.move_ids

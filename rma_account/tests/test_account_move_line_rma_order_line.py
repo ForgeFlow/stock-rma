@@ -22,7 +22,11 @@ class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
         cls.aml_model = cls.env["account.move.line"]
         cls.res_users_model = cls.env["res.users"]
 
-        cls.partner1 = cls.env.ref("base.res_partner_1")
+        cls.partner1 = cls.env["res.partner"].create(
+            {
+                "name": "Test Partner",
+            }
+        )
         cls.location_stock = cls.env.ref("stock.stock_location_stock")
         cls.company = cls.env.ref("base.main_company")
         cls.group_rma_user = cls.env.ref("rma.group_rma_customer_user")
@@ -74,7 +78,7 @@ class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
                 "email": "test@yourcompany.com",
                 "company_id": company.id,
                 "company_ids": [(4, company.id)],
-                "groups_id": [(6, 0, group_ids)],
+                "group_ids": [(6, 0, group_ids)],
             }
         )
         return user.id
@@ -102,8 +106,6 @@ class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
                 "name": "test_product_ctg",
                 "property_stock_valuation_account_id": cls.account_inventory.id,
                 "property_valuation": "real_time",
-                "property_stock_account_input_categ_id": cls.account_grni.id,
-                "property_stock_account_output_categ_id": cls.account_cogs.id,
             }
         )
         product = cls.product_model.create(

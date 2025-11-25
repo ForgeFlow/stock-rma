@@ -1,7 +1,7 @@
 # Copyright 2017-22 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
 
@@ -176,14 +176,14 @@ class RmaOrderLine(models.Model):
                 [("type", "=", self.type)], limit=1
             )
             if not operation:
-                raise ValidationError(_("Please define an operation first"))
+                raise ValidationError(self.env._("Please define an operation first"))
 
         if not operation.in_route_id or not operation.out_route_id:
-            route = self.env["stock.location.route"].search(
+            route = self.env["stock.route"].search(
                 [("rma_selectable", "=", True)], limit=1
             )
             if not route:
-                raise ValidationError(_("Please define an rma route"))
+                raise ValidationError(self.env._("Please define an rma route"))
 
         if not operation.in_warehouse_id or not operation.out_warehouse_id:
             warehouse = self.env["stock.warehouse"].search(
@@ -192,7 +192,7 @@ class RmaOrderLine(models.Model):
             )
             if not warehouse:
                 raise ValidationError(
-                    _("Please define a warehouse with a default rma location")
+                    self.env._("Please define a warehouse with a default rma location")
                 )
         data = {
             "product_id": line.product_id.id,
@@ -243,7 +243,7 @@ class RmaOrderLine(models.Model):
                 and rec.account_move_line_id.move_id.partner_id != rec.partner_id
             ):
                 raise ValidationError(
-                    _(
+                    self.env._(
                         "RMA customer and originating invoice line customer "
                         "doesn't match."
                     )
@@ -270,7 +270,7 @@ class RmaOrderLine(models.Model):
             )
             if len(matching_inv_lines) > 1:
                 raise UserError(
-                    _(
+                    self.env._(
                         "There's an rma for the "
                         "invoice line %(arg1)s and invoice %(arg2)s",
                         arg1=line.account_move_line_id,
