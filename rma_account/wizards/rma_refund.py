@@ -1,7 +1,7 @@
 # Copyright 2017 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -21,7 +21,6 @@ class RmaRefund(models.TransientModel):
                 reason = self.env[active_model].browse(active_ids[0]).rma_id.name or ""
         return reason
 
-    @api.returns("rma.order.line")
     def _prepare_item(self, line):
         values = {
             "product_id": line.product_id.id,
@@ -43,7 +42,7 @@ class RmaRefund(models.TransientModel):
         lines the supplier field is empty otherwise is the unique line
         supplier.
         """
-        context = self._context.copy()
+        context = self.env.context.copy()
         res = super().default_get(fields_list)
         rma_line_obj = self.env["rma.order.line"]
         rma_obj = self.env["rma.order"]
@@ -64,7 +63,9 @@ class RmaRefund(models.TransientModel):
             lines = rma_line_obj.browse(active_ids)
         if len(lines.mapped("partner_id")) > 1:
             raise ValidationError(
-                _("Only RMAs from the same partner can be processed at the same time.")
+                self.env._(
+                    "Only RMAs from the same partner can be processed at the same time."
+                )
             )
         for line in lines:
             items.append([0, 0, self._prepare_item(line)])
@@ -105,7 +106,7 @@ class RmaRefund(models.TransientModel):
         lines = self.item_ids.line_id
         for line in lines:
             if line.state != "approved":
-                raise ValidationError(_("RMA %s is not approved") % line.name)
+                raise ValidationError(self.env._("RMA %s is not approved", line.name))
         new_invoice = self.compute_refund()
         action = (
             "action_move_out_refund_type"
@@ -175,12 +176,13 @@ class RmaRefund(models.TransientModel):
         reason = wizard.description
         if reason == rma_number_ref:
             reason = False
-        ref = _("Refund created by %(rma_number_ref)s, %(reason)s") % {
-            "rma_number_ref": rma_number_ref,
-            "reason": reason,
-        }
+        ref = self.env._(
+            "Refund created by %(rma)s, %(reason)s",
+            rma=rma_number_ref,
+            reason=reason,
+        )
         if not reason:
-            ref = _("Refund created by %s") % rma_number_ref
+            ref = self.env._("Refund created by %s", rma_number_ref)
         values = {
             "payment_reference": rma_number_ref,
             "invoice_origin": rma_number_ref,
@@ -221,7 +223,7 @@ class RmaRefund(models.TransientModel):
         addresses = self.item_ids.mapped("invoice_address_id")
         if len(addresses) > 1:
             raise ValidationError(
-                _("The invoice address must be the same for all the lines.")
+                self.env._("The invoice address must be the same for all the lines.")
             )
         return True
 

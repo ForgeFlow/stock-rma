@@ -28,13 +28,13 @@ class RmaOperation(models.Model):
         compute="_compute_domain_valid_journal",
     )
     automated_refund = fields.Boolean(
-        help="In the scenario where a company uses anglo-saxon accounting, if "
-        "you receive products from a customer and don't expect to refund the customer "
-        "but send a replacement unit, mark this flag to be accounting consistent"
+        help="If you receive products from a customer and don't expect to refund "
+        "the customer but send a replacement unit, mark this flag to keep the "
+        "stock valuation consistent with the accounting. A refund at zero price "
+        "is created and posted automatically when the products are received."
     )
     refund_free_of_charge = fields.Boolean(
-        help="In case of automated refund you should mark this option as long automated"
-        "refunds mean to compensate Stock Interim accounts only without hitting"
+        help="Create the refund at zero price, so that it does not hit the "
         "Accounts receivable"
     )
 

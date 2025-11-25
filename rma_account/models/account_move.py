@@ -108,49 +108,13 @@ class AccountMove(models.Model):
             result["res_id"] = rma_ids and rma_ids[0] or False
         return result
 
-    def _stock_account_prepare_anglo_saxon_out_lines_vals(self):
-        product_model = self.env["product.product"]
-        res = super()._stock_account_prepare_anglo_saxon_out_lines_vals()
-        for line in res:
-            if line.get("product_id", False):
-                product = product_model.browse(line.get("product_id", False))
-                if (
-                    line.get("account_id")
-                    != product.categ_id.property_stock_valuation_account_id.id
-                ):
-                    current_move = self.browse(line.get("move_id", False))
-                    current_rma = current_move.invoice_line_ids.filtered(
-                        lambda x, product=product: x.rma_line_id
-                        and x.product_id.id == product.id
-                    ).mapped("rma_line_id")
-                    if len(current_rma) == 1:
-                        line.update({"rma_line_id": current_rma.id})
-                    elif len(current_rma) > 1:
-                        find_with_label_rma = current_rma.filtered(
-                            lambda x, line=line: x.name == line.get("name")
-                        )
-                        if len(find_with_label_rma) == 1:
-                            line.update({"rma_line_id": find_with_label_rma.id})
-        return res
-
-    def _stock_account_get_last_step_stock_moves(self):
-        rslt = super()._stock_account_get_last_step_stock_moves()
-        for invoice in self.filtered(lambda x: x.move_type == "out_invoice"):
-            rslt += invoice.mapped("line_ids.rma_line_id.move_ids").filtered(
-                lambda x: x.state == "done" and x.location_dest_id.usage == "customer"
-            )
-            # Add refunds generated from the RMA
-        for invoice in self.filtered(
-            lambda x: x.move_type in ("out_invoice", "out_refund")
-        ):
-            rslt += invoice.mapped("line_ids.rma_line_id.move_ids").filtered(
-                lambda x: x.state == "done" and x.location_id.usage == "customer"
-            )
-        for invoice in self.filtered(
-            lambda x: x.move_type in ("in_invoice", "in_refund")
-        ):
-            # Add refunds generated from the RMA
-            rslt += invoice.mapped("line_ids.rma_line_id.move_ids").filtered(
-                lambda x: x.state == "done" and x.location_dest_id.usage == "supplier"
-            )
-        return rslt
+    def _stock_account_prepare_realtime_out_lines_vals(self):
+        lines_vals = super()._stock_account_prepare_realtime_out_lines_vals()
+        origin_lines = self.env["account.move.line"].browse(
+            [vals["cogs_origin_id"] for vals in lines_vals]
+        )
+        rma_line_by_origin = {line.id: line.rma_line_id.id for line in origin_lines}
+        for vals in lines_vals:
+            if rma_line_by_origin[vals["cogs_origin_id"]]:
+                vals["rma_line_id"] = rma_line_by_origin[vals["cogs_origin_id"]]
+        return lines_vals

@@ -1,7 +1,7 @@
 # Copyright 2017-22 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 
 
 class RmaOrder(models.Model):
@@ -121,5 +121,5 @@ class RmaOrder(models.Model):
         result = action.sudo().read()[0]
         result["domain"] = [("id", "in", move_ids)]
         result["views"] = [(list_view_ref.id, "list"), (form_view_ref.id, "form")]
-        result["name"] = _("Originating Invoice")
+        result["name"] = self.env._("Originating Invoice")
         return result

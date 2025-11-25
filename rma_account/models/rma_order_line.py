@@ -1,7 +1,7 @@
 # Copyright 2017-22 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
 
@@ -176,14 +176,14 @@ class RmaOrderLine(models.Model):
                 [("type", "=", self.type)], limit=1
             )
             if not operation:
-                raise ValidationError(_("Please define an operation first"))
+                raise ValidationError(self.env._("Please define an operation first"))
 
         if not operation.in_route_id or not operation.out_route_id:
-            route = self.env["stock.location.route"].search(
+            route = self.env["stock.route"].search(
                 [("rma_selectable", "=", True)], limit=1
             )
             if not route:
-                raise ValidationError(_("Please define an rma route"))
+                raise ValidationError(self.env._("Please define an rma route"))
 
         if not operation.in_warehouse_id or not operation.out_warehouse_id:
             warehouse = self.env["stock.warehouse"].search(
@@ -192,7 +192,7 @@ class RmaOrderLine(models.Model):
             )
             if not warehouse:
                 raise ValidationError(
-                    _("Please define a warehouse with a default rma location")
+                    self.env._("Please define a warehouse with a default rma location")
                 )
         data = {
             "product_id": line.product_id.id,
@@ -243,7 +243,7 @@ class RmaOrderLine(models.Model):
                 and rec.account_move_line_id.move_id.partner_id != rec.partner_id
             ):
                 raise ValidationError(
-                    _(
+                    self.env._(
                         "RMA customer and originating invoice line customer "
                         "doesn't match."
                     )
@@ -270,7 +270,7 @@ class RmaOrderLine(models.Model):
             )
             if len(matching_inv_lines) > 1:
                 raise UserError(
-                    _(
+                    self.env._(
                         "There's an rma for the "
                         "invoice line %(arg1)s and invoice %(arg2)s",
                         arg1=line.account_move_line_id,
@@ -310,55 +310,11 @@ class RmaOrderLine(models.Model):
         for rma in self:
             rma.display_name = f"{rma.name} {rma.product_id.name} qty:{rma.product_qty}"
 
-    def _stock_account_anglo_saxon_reconcile_valuation(self):
-        for rma in self:
-            prod = rma.product_id
-            if rma.product_id.valuation != "real_time":
-                continue
-            if not rma.company_id.anglo_saxon_accounting:
-                continue
-            product_accounts = prod.product_tmpl_id._get_product_accounts()
-            if rma.type == "customer":
-                product_interim_account = product_accounts["stock_output"]
-            else:
-                product_interim_account = product_accounts["stock_input"]
-            if product_interim_account.reconcile:
-                # Get the in and out moves
-                amls = self.env["account.move.line"].search(
-                    [
-                        ("rma_line_id", "=", rma.id),
-                        ("account_id", "=", product_interim_account.id),
-                        ("parent_state", "=", "posted"),
-                        ("reconciled", "=", False),
-                    ]
-                )
-                amls |= rma.move_ids.mapped(
-                    "stock_valuation_layer_ids.account_move_id.line_ids"
-                )
-                # Search for anglo-saxon lines linked to the product in the journal
-                # entry.
-                amls = amls.filtered(
-                    lambda line,
-                    prod=prod,
-                    product_interim_account=product_interim_account: line.product_id
-                    == prod
-                    and line.account_id == product_interim_account
-                    and not line.reconciled
-                )
-                # Reconcile.
-                amls.reconcile()
-
     def _get_price_unit(self):
         self.ensure_one()
         price_unit = super()._get_price_unit()
         if self.reference_move_id:
-            move = self.reference_move_id
-            layers = move.sudo().stock_valuation_layer_ids
-            if layers:
-                price_unit = sum(layers.mapped("value")) / sum(
-                    layers.mapped("quantity")
-                )
-                price_unit = price_unit
+            price_unit = self.reference_move_id.sudo()._get_price_unit()
         elif self.account_move_line_id and self.type == "supplier":
             # We get the cost from the original invoice line
             price_unit = self.account_move_line_id.price_unit
@@ -368,11 +324,7 @@ class RmaOrderLine(models.Model):
         make_refund = (
             self.env["rma.refund"]
             .with_context(
-                **{
-                    "customer": True,
-                    "active_ids": self.ids,
-                    "active_model": "rma.order.line",
-                }
+                customer=True, active_ids=self.ids, active_model="rma.order.line"
             )
             .create({"description": "RMA Anglosaxon Regularisation"})
         )
@@ -388,14 +340,13 @@ class RmaOrderLine(models.Model):
         """
         In the scenario where a company uses anglo-saxon accounting, if you receive
         products from a customer and don't expect to refund the customer but send a
-        replacement unit you still need to create a debit entry on the
-        Stock Interim (Delivered) account. In order to do this the best approach is
-        to create a customer refund from the RMA, but set as free of charge
-        (price unit = 0). The refund will be 0, but the Stock Interim (Delivered)
-        account will be posted anyways.
+        replacement unit, the stock valuation account still needs to be debited
+        against COGS. The best approach is to create a customer refund from the RMA,
+        but set as free of charge (price unit = 0): the refund will be 0, but the
+        COGS lines will be posted anyway.
         """
-        # For some reason api.depends on qty_received is not working. Using the
-        # _account_entry_move method in stock move as trigger then
-        for rec in self.filtered(lambda line: line.operation_id.automated_refund):
+        for rec in self.filtered(
+            lambda line: line.type == "customer" and line.operation_id.automated_refund
+        ):
             if rec.qty_received > rec.qty_refunded:
                 rec._refund_at_zero_cost()

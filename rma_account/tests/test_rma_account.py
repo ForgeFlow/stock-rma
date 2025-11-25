@@ -3,9 +3,10 @@
 
 from odoo import fields
 from odoo.fields import Date
-from odoo.tests import Form, common
+from odoo.tests import Form, common, tagged
 
 
+@tagged("post_install", "-at_install")
 class TestRmaAccount(common.SingleTransactionCase):
     @classmethod
     def setUpClass(cls):

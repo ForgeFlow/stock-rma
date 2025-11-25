@@ -1,9 +1,10 @@
 # Copyright 2017-22 ForgeFlow S.L. (www.forgeflow.com)
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
-from odoo.tests import common
+from odoo.tests import common, tagged
 
 
+@tagged("post_install", "-at_install")
 class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
     @classmethod
     def setUpClass(cls):
@@ -19,10 +20,13 @@ class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
         cls.product_model = cls.env["product.product"]
         cls.product_ctg_model = cls.env["product.category"]
         cls.account_model = cls.env["account.account"]
-        cls.aml_model = cls.env["account.move.line"]
         cls.res_users_model = cls.env["res.users"]
 
-        cls.partner1 = cls.env.ref("base.res_partner_1")
+        cls.partner1 = cls.env["res.partner"].create(
+            {
+                "name": "Test Partner",
+            }
+        )
         cls.location_stock = cls.env.ref("stock.stock_location_stock")
         cls.company = cls.env.ref("base.main_company")
         cls.group_rma_user = cls.env.ref("rma.group_rma_customer_user")
@@ -33,6 +37,7 @@ class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
         cls.stock_rma_location = wh.lot_rma_id
         cls.customer_location = cls.env.ref("stock.stock_location_customers")
         cls.supplier_location = cls.env.ref("stock.stock_location_suppliers")
+        cls._create_rma_customer_in_rule(wh)
         # Create account for Goods Received Not Invoiced
         name = "Goods Received Not Invoiced"
         code = "grni"
@@ -74,10 +79,37 @@ class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
                 "email": "test@yourcompany.com",
                 "company_id": company.id,
                 "company_ids": [(4, company.id)],
-                "groups_id": [(6, 0, group_ids)],
+                "group_ids": [(6, 0, group_ids)],
             }
         )
         return user.id
+
+    @classmethod
+    def _create_rma_customer_in_rule(cls, warehouse):
+        picking_type = cls.env["stock.picking.type"].create(
+            {
+                "name": "Customer In",
+                "code": "incoming",
+                "sequence_code": "RMA CUS IN",
+                "warehouse_id": warehouse.id,
+                "company_id": warehouse.company_id.id,
+                "default_location_src_id": cls.customer_location.id,
+                "default_location_dest_id": cls.stock_rma_location.id,
+            }
+        )
+        cls.env["stock.rule"].create(
+            {
+                "name": "customer => rma loc",
+                "action": "pull",
+                "picking_type_id": picking_type.id,
+                "location_src_id": cls.customer_location.id,
+                "location_dest_id": cls.stock_rma_location.id,
+                "procure_method": "make_to_stock",
+                "route_id": cls.env.ref("rma.route_rma_customer").id,
+                "warehouse_id": warehouse.id,
+                "company_id": warehouse.company_id.id,
+            }
+        )
 
     @classmethod
     def _create_account(cls, acc_type, name, code, company, reconcile=False):
@@ -102,10 +134,10 @@ class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
                 "name": "test_product_ctg",
                 "property_stock_valuation_account_id": cls.account_inventory.id,
                 "property_valuation": "real_time",
-                "property_stock_account_input_categ_id": cls.account_grni.id,
-                "property_stock_account_output_categ_id": cls.account_cogs.id,
+                "property_account_expense_categ_id": cls.account_cogs.id,
             }
         )
+        cls.company.anglo_saxon_accounting = True
         product = cls.product_model.create(
             {
                 "name": "test_product",
@@ -133,7 +165,6 @@ class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
         res = {
             "partner_id": cls.partner1.id,
             "product_id": product.id,
-            "name": product.partner_ref,
             "state": "confirmed",
             "product_uom": cls.product_uom_id.id or product.uom_id.id,
             "product_uom_qty": qty,
@@ -182,34 +213,6 @@ class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
             # cls.line = cls.rma_line_model.create(data)
         return rma_id
 
-    def _get_balance(self, domain):
-        """
-        Call read_group method and return the balance of particular account.
-        """
-        aml_rec = self.aml_model.read_group(
-            domain, ["debit", "credit", "account_id"], ["account_id"]
-        )
-        if aml_rec:
-            return aml_rec[0].get("debit", 0) - aml_rec[0].get("credit", 0)
-        else:
-            return 0.0
-
-    def _check_account_balance(self, account_id, rma_line=None, expected_balance=0.0):
-        """
-        Check the balance of the account
-        """
-        domain = [("account_id", "=", account_id)]
-        if rma_line:
-            domain.extend([("rma_line_id", "=", rma_line.id)])
-
-        balance = self._get_balance(domain)
-        if rma_line:
-            self.assertEqual(
-                balance,
-                expected_balance,
-                f"Balance is not {str(expected_balance)} for rma Line {rma_line.name}.",
-            )
-
     def test_rma_invoice(self):
         """Test that the rma line moves from the rma order to the
         account move line and to the invoice line.
@@ -246,12 +249,6 @@ class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
             picking = self.env["stock.picking"].browse(picking_ids)
         # picking.move_line_ids.write({"qty_done": 1.0})
         picking.button_validate()
-        # decreasing cogs
-        expected_balance = -1.0
-        for record in rma_line:
-            self._check_account_balance(
-                self.account_cogs.id, rma_line=record, expected_balance=expected_balance
-            )
         make_refund = self.rma_refund_wiz.with_context(
             **{
                 "customer": True,
@@ -270,9 +267,15 @@ class TestAccountMoveLineRmaOrderLine(common.TransactionCase):
                 }
             )
         make_refund.invoice_refund()
-        rma_line.refund_line_ids.move_id.filtered(
+        refund = rma_line.refund_line_ids.move_id.filtered(
             lambda x: x.state != "posted"
-        ).action_post()
+        )
+        refund.action_post()
+        cogs_line = refund.line_ids.filtered(
+            lambda line: line.display_type == "cogs"
+            and line.account_id == self.account_cogs
+        )
+        self.assertEqual(sum(cogs_line.mapped("balance")), -1.0)
         for aml in rma_line.refund_line_ids.move_id.invoice_line_ids:
             if aml.product_id == rma_line.product_id and aml.move_id:
                 self.assertEqual(
