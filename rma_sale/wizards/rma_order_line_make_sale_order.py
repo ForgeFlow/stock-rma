@@ -147,7 +147,9 @@ class RmaLineMakeSaleOrderItem(models.TransientModel):
     _description = "RMA Line Make Sale Order Item"
 
     wiz_id = fields.Many2one(
-        comodel_name="rma.order.line.make.sale.order", string="Wizard"
+        comodel_name="rma.order.line.make.sale.order",
+        string="Wizard",
+        ondelete="cascade",
     )
     line_id = fields.Many2one(
         comodel_name="rma.order.line", string="RMA Line", compute="_compute_line_id"

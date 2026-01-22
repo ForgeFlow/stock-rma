@@ -90,7 +90,9 @@ class RmaMakeScrapItem(models.TransientModel):
     _name = "rma_make_scrap_item.wizard"
     _description = "Items to Scrap"
 
-    wiz_id = fields.Many2one("rma_make_scrap.wizard", string="Wizard", required=True)
+    wiz_id = fields.Many2one(
+        "rma_make_scrap.wizard", string="Wizard", required=True, ondelete="cascade"
+    )
     line_id = fields.Many2one(
         "rma.order.line", string="RMA order Line", ondelete="cascade", required=True
     )
