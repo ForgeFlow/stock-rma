@@ -52,7 +52,7 @@ Authors
 Contributors
 ------------
 
--  Christopher Ormaza <chris.ormaza@forgeflow.com>
+- Christopher Ormaza <chris.ormaza@forgeflow.com>
 
 Maintainers
 -----------
