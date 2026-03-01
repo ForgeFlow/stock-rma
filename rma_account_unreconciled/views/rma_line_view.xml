@@ -14,7 +14,7 @@
                     groups="account.group_account_invoice"
                     class="oe_stat_button"
                     icon="fa-gears"
-                    attrs="{'invisible':[('unreconciled', '=', False)]}"
+                    invisible="not unreconciled"
                 />
                 <button
                     type="object"
@@ -23,7 +23,7 @@
                     groups="account.group_account_invoice"
                     class="oe_stat_button"
                     icon="fa-link"
-                    attrs="{'invisible':[('unreconciled', '=', False)]}"
+                    invisible="not unreconciled"
                 />
             </div>
         </field>
