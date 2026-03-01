@@ -7,7 +7,6 @@ from odoo.osv import expression
 
 
 class RmaOrderLine(models.Model):
-
     _inherit = "rma.order.line"
 
     unreconciled = fields.Boolean(
