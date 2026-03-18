@@ -275,4 +275,108 @@
             </t>
         </t>
     </template>
+
+    <template id="report_rma_return_label_document">
+        <t t-call="web.external_layout">
+            <t t-set="doc" t-value="doc.with_context({'lang':doc.partner_id.lang})" />
+            <div class="page">
+                <div class="row mb16">
+                    <div class="col-12 text-center">
+                        <h1
+                            style="font-size:28px; letter-spacing:2px;"
+                        >RETURN LABEL</h1>
+                    </div>
+                </div>
+
+                <div class="row mb24">
+                    <div class="col-12 text-center">
+                        <img
+                            t-att-src="'/report/barcode/?barcode_type=Code128&amp;value=%s&amp;width=600&amp;height=120' % doc.name"
+                            style="max-width:70%; height:80px;"
+                            alt="RMA Barcode"
+                        />
+                        <div
+                            style="font-size:16px; font-weight:bold; letter-spacing:3px; margin-top:4px;"
+                        >
+                            <span t-field="doc.name" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb24">
+                    <div class="col-6">
+                        <strong style="text-transform:uppercase;">Send To:</strong>
+                        <div
+                            class="mt8 p8"
+                            style="border:1px solid #ccc; border-radius:4px;"
+                        >
+                            <div
+                                t-field="doc.in_warehouse_id.partner_id"
+                                t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True, "phone_icons": True}'
+                            />
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <strong style="text-transform:uppercase;">From:</strong>
+                        <div
+                            class="mt8 p8"
+                            style="border:1px solid #ccc; border-radius:4px;"
+                        >
+                            <div
+                                t-field="doc.partner_id"
+                                t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True, "phone_icons": True}'
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <table class="table table-condensed table-bordered mt16">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Product</th>
+                            <th t-if="doc.lot_id">Lot / Serial Number</th>
+                            <th class="text-right">Quantity</th>
+                            <th t-if="doc.origin">Origin Reference</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <span t-field="doc.product_id" />
+                            </td>
+                            <td t-if="doc.lot_id">
+                                <span t-field="doc.lot_id" />
+                            </td>
+                            <td class="text-right">
+                                <span t-field="doc.product_qty" />
+                                <span t-field="doc.uom_id" groups="uom.group_uom" />
+                            </td>
+                            <td t-if="doc.origin">
+                                <span t-field="doc.origin" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div
+                    class="mt16 text-muted"
+                    style="font-size:11px; border-top:1px solid #eee; padding-top:8px;"
+                >
+                    <strong
+                >Instructions:</strong> Please include this label inside the package and attach a copy to the outside of the box. Make sure the item is securely packed before shipping.
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="report_rma_return_label">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t
+                    t-call="rma.report_rma_return_label_document"
+                    t-lang="doc.partner_id.lang"
+                />
+            </t>
+        </t>
+    </template>
 </odoo>
