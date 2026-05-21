@@ -17,6 +17,7 @@
         "data/rma_sequence.xml",
         "data/stock_data.xml",
         "data/rma_operation.xml",
+        "data/mail_template_rma_return_label.xml",
         "report/rma_report.xml",
         "report/rma_report_templates.xml",
         "report/report_deliveryslip.xml",

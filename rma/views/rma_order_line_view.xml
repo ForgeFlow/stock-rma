@@ -107,6 +107,14 @@
                         invisible="type != 'customer' or state != 'approved'"
                         type="action"
                     />
+                    <button
+                        name="action_send_return_label"
+                        type="object"
+                        string="Send Return Label"
+                        invisible="type != 'customer' or state not in ('approved', 'done')"
+                        icon="fa-envelope"
+                        groups="rma.group_rma_customer_user"
+                    />
                     <field
                         name="state"
                         widget="statusbar"

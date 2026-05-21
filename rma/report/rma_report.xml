@@ -20,4 +20,16 @@
         <field name="binding_model_id" ref="model_rma_order" />
         <field name="binding_type">report</field>
     </record>
+    <record id="rma_order_line_return_label_report" model="ir.actions.report">
+        <field name="name">RMA Return Label</field>
+        <field name="model">rma.order.line</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">rma.report_rma_return_label</field>
+        <field name="report_file">rma.report_rma_return_label</field>
+        <field
+            name="print_report_name"
+        >('RMA Return Label - %s' % (object.name))</field>
+        <field name="binding_model_id" ref="model_rma_order_line" />
+        <field name="binding_type">report</field>
+    </record>
 </odoo>

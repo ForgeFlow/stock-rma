@@ -697,6 +697,28 @@ class RmaOrderLine(models.Model):
             price_unit = self.product_id.with_company(self.company_id).standard_price
         return price_unit
 
+    def action_send_return_label(self):
+        self.ensure_one()
+        template = self.env.ref(
+            "rma.email_template_rma_return_label", raise_if_not_found=False
+        )
+        ctx = {
+            "default_model": "rma.order.line",
+            "default_res_ids": self.ids,
+            "default_composition_mode": "comment",
+            "default_template_id": template.id if template else False,
+            "force_email": True,
+        }
+        return {
+            "type": "ir.actions.act_window",
+            "view_mode": "form",
+            "res_model": "mail.compose.message",
+            "views": [(False, "form")],
+            "view_id": False,
+            "target": "new",
+            "context": ctx,
+        }
+
     @api.onchange("product_id")
     def _onchange_product_id(self):
         result = {}

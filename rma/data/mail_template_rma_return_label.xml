@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="email_template_rma_return_label" model="mail.template">
+        <field name="name">RMA: Send Return Label</field>
+        <field name="model_id" ref="rma.model_rma_order_line" />
+        <field name="subject">Return Label for RMA {{ object.name }}</field>
+        <field
+            name="email_from"
+        >{{ (object.assigned_to.email_formatted or object.company_id.email_formatted or user.email_formatted) }}</field>
+        <field name="partner_to">{{ object.partner_id.id }}</field>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px;">
+                <p style="margin: 0px; padding: 0px; font-size: 13px;">
+        Hello <t t-out="object.partner_id.name or ''">Customer</t>,
+        <br /><br />
+        Please find attached the return label for your RMA <span
+                    style="font-weight: bold;"
+                    t-out="object.name or ''"
+                >RMA/0001</span>.
+        <br /><br />
+        Please print the label, include one copy inside the package, and attach another copy to the outside of the box before shipping the item(s) back to us.
+        <t t-if="object.product_id">
+                    <br />
+                    <br />
+                    <strong>Product:</strong>
+                    <t t-out="object.product_id.display_name or ''" />
+                    <t t-if="object.lot_id">
+                &amp;nbsp;— <strong>Lot/Serial:</strong> <t
+                        t-out="object.lot_id.name or ''"
+                    />
+            </t>
+                </t>
+        <br /><br />
+        Do not hesitate to contact us if you have any questions.
+        <t t-if="not is_html_empty(object.assigned_to.signature)">
+                    <br />
+                    <br />
+                    <t t-out="object.assigned_to.signature or ''" />
+                </t>
+        <br /><br />
+    </p>
+            </div>
+        </field>
+        <field
+            name="report_template_ids"
+            eval="[(4, ref('rma.rma_order_line_return_label_report'))]"
+        />
+        <field name="lang">{{ object.partner_id.lang }}</field>
+        <field name="auto_delete" eval="True" />
+    </record>
+</odoo>
