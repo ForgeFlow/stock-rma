@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="rma_recall_form" model="ir.ui.view">
+        <field name="name">rma.recall.form</field>
+        <field name="model">rma.recall</field>
+        <field name="arch" type="xml">
+            <form string="Recalls">
+                <header>
+                    <button
+                        name="action_search"
+                        invisible="state != 'new'"
+                        class="oe_highlight"
+                        type="object"
+                        string="Search"
+                    />
+                    <button
+                        name="action_done"
+                        invisible="state != 'in_progress'"
+                        class="oe_highlight"
+                        type="object"
+                        string="Done"
+                    />
+                    <button
+                        name="action_cancel"
+                        invisible="state not in ('new', 'in_progress')"
+                        class="oe_highlight"
+                        type="object"
+                        string="Cancel"
+                    />
+                    <field name="state" widget="statusbar" />
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1" />
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="lot_id" readonly="state != 'new'" />
+                            <field name="product_id" />
+                        </group>
+                        <group>
+                            <field name="rma_date" readonly="state != 'new'" />
+                            <field name="origin" readonly="state != 'new'" />
+                        </group>
+                    </group>
+                    <group>
+                        <field name="line_ids" nolabel="1">
+                            <list>
+                                <field name="location_id" />
+                                <field name="partner_id" />
+                                <field name="product_id" />
+                                <field name="lot_id" />
+                                <field name="qty" />
+                                <field name="uom_id" groups="uom.group_uom" />
+                                <field name="rma_id" />
+                                <field name="scrap_id" />
+                                <field name="state" />
+                                <button
+                                    name="button_rma_order"
+                                    type="object"
+                                    string="RMA order"
+                                    invisible="not partner_id or rma_id"
+                                />
+                                <button
+                                    name="button_scrap_order"
+                                    type="object"
+                                    string="Scrap Order"
+                                    class="btn-success"
+                                    invisible="partner_id or scrap_id"
+                                />
+                            </list>
+                            <form string="Recall Line">
+                                <header>
+                                    <button
+                                        name="button_rma_order"
+                                        type="object"
+                                        string="RMA Order"
+                                        class="btn-success"
+                                        invisible="not partner_id or rma_id"
+                                    />
+                                    <button
+                                        name="button_scrap_order"
+                                        type="object"
+                                        string="Scrap Order"
+                                        class="btn-success"
+                                        invisible="partner_id or scrap_id"
+                                    />
+                                </header>
+                                <group>
+                                    <group>
+                                        <field name="state" />
+                                        <field name="product_id" />
+                                        <field name="lot_id" />
+                                        <field name="qty" />
+                                        <field name="uom_id" groups="uom.group_uom" />
+                                        <field name="location_id" />
+                                        <field name="partner_id" />
+                                    </group>
+                                    <group>
+                                        <field name="rma_id" />
+                                        <field name="scrap_id" />
+                                    </group>
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                </sheet>
+                <chatter />
+            </form>
+        </field>
+    </record>
+
+    <record id="rma_recall_tree" model="ir.ui.view">
+        <field name="name">rma.recall.list</field>
+        <field name="model">rma.recall</field>
+        <field name="arch" type="xml">
+            <list string="Recalls">
+                <field name="name" />
+                <field name="lot_id" />
+                <field name="product_id" />
+                <field name="rma_date" />
+                <field name="origin" />
+                <field name="state" />
+            </list>
+        </field>
+    </record>
+
+    <record id="rma_recall_search" model="ir.ui.view">
+        <field name="name">rma.recall.search</field>
+        <field name="model">rma.recall</field>
+        <field name="arch" type="xml">
+            <search string="Search Recalls">
+                <field
+                    name="name"
+                    filter_domain="[('name', 'ilike', self)]"
+                    string="Name"
+                />
+                <field name="lot_id" />
+                <field name="product_id" />
+                <field name="origin" />
+                <group name="groupby">
+                    <filter
+                        name="state"
+                        string="Status"
+                        context="{'group_by': 'state'}"
+                    />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="rma_recall_action" model="ir.actions.act_window">
+        <field name="name">Recalls</field>
+        <field name="res_model">rma.recall</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem
+        id="rma_recall_menu"
+        name="Recalls"
+        parent="rma.menu_rma_root"
+        sequence="20"
+        action="rma_recall_action"
+    />
+</odoo>
