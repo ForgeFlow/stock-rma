@@ -43,7 +43,7 @@ class TestRmaPurchase(common.TransactionCase):
                 "order_id": self.po.id,
                 "product_id": self.product_1.id,
                 "product_qty": 20.0,
-                "product_uom": self.product_1.uom_id.id,
+                "product_uom_id": self.product_1.uom_id.id,
                 "price_unit": 100.0,
                 "date_planned": Datetime.now(),
             }
@@ -54,7 +54,7 @@ class TestRmaPurchase(common.TransactionCase):
                 "order_id": self.po.id,
                 "product_id": self.product_2.id,
                 "product_qty": 18.0,
-                "product_uom": self.product_2.uom_id.id,
+                "product_uom_id": self.product_2.uom_id.id,
                 "price_unit": 150.0,
                 "date_planned": Datetime.now(),
             }

@@ -23,7 +23,7 @@ class PurchaseOrder(models.Model):
             line.update(
                 {
                     "product_qty": rma_line.qty_to_purchase,
-                    "product_uom": rma_line.uom_id.id,
+                    "product_uom_id": rma_line.uom_id.id,
                 }
             )
             res.order_line = line

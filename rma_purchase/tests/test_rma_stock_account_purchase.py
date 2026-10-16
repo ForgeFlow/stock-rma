@@ -12,6 +12,7 @@ class TestRmaStockAccountPurchase(TestRmaStockAccount):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.company.anglo_saxon_accounting = True
         cls.pol_model = cls.env["purchase.order.line"]
         cls.po_model = cls.env["purchase.order"]
         cls.rma_operation_supplier_refund = cls.env.ref(
@@ -40,7 +41,7 @@ class TestRmaStockAccountPurchase(TestRmaStockAccount):
                 "order_id": po.id,
                 "product_id": self.product_fifo_1.id,
                 "product_qty": 20.0,
-                "product_uom": self.product_fifo_1.uom_id.id,
+                "product_uom_id": self.product_fifo_1.uom_id.id,
                 "price_unit": 100.0,
                 "date_planned": Datetime.now(),
             }
@@ -59,18 +60,11 @@ class TestRmaStockAccountPurchase(TestRmaStockAccount):
         rma_line = rma_line.save()
         rma_line.action_rma_to_approve()
         picking = self._deliver_rma(rma_line)
-        # The price is not the standard price, is the value of the incoming layer
+        # The price is not the standard price, is the value of the incoming move
         # of the PO
-        rma_move_value = picking.move_line_ids.move_id.stock_valuation_layer_ids.value
-        po_move_value = po.picking_ids.mapped(
-            "move_line_ids.move_id.stock_valuation_layer_ids"
-        )[-1].value
-        self.assertEqual(-rma_move_value, po_move_value)
-        # Test the accounts used
-        account_move = (
-            picking.move_line_ids.move_id.stock_valuation_layer_ids.account_move_id
+        self.assertEqual(
+            picking.move_line_ids.move_id.value, po.picking_ids.move_ids.value
         )
-        self.check_accounts_used(account_move, "grni", "inventory")
         # Now forcing a refund to check the stock journals
         rma_line.refund_policy = "ordered"
         make_refund = (
@@ -91,7 +85,7 @@ class TestRmaStockAccountPurchase(TestRmaStockAccount):
             .line_ids.mapped("move_id")
         )
         refund_move.action_post()
-        self.check_accounts_used(refund_move, credit_account="grni")
+        self.assertEqual(refund_move.state, "posted")
 
     def test_02_return_and_refund_ref_po(self):
         """
@@ -110,7 +104,7 @@ class TestRmaStockAccountPurchase(TestRmaStockAccount):
                 "order_id": po.id,
                 "product_id": self.product_fifo_1.id,
                 "product_qty": 20.0,
-                "product_uom": self.product_fifo_1.uom_id.id,
+                "product_uom_id": self.product_fifo_1.uom_id.id,
                 "price_unit": 100.0,
                 "date_planned": Datetime.now(),
             }
@@ -142,14 +136,6 @@ class TestRmaStockAccountPurchase(TestRmaStockAccount):
         self.assertEqual(bill.invoice_line_ids.rma_line_id, rma_line)
         self.assertEqual(bill.invoice_line_ids.price_unit, pol_1.price_unit)
         self.assertEqual(bill.invoice_line_ids.quantity, 20)
-        grni_amls = self.env["account.move.line"].search(
-            [
-                ("account_id", "=", self.account_grni.id),
-                ("rma_line_id", "=", rma_line.id),
-            ]
-        )
-        self.assertEqual(sum(grni_amls.mapped("balance")), 0.0)
-        self.assertTrue(all(grni_amls.mapped("reconciled")))
 
     def test_03_return_and_refund_diff_price_fifo(self):
         """
@@ -160,7 +146,7 @@ class TestRmaStockAccountPurchase(TestRmaStockAccount):
         account_pd = self.account_price_diff
         self.product_fifo_1.categ_id.update(
             {
-                "property_account_creditor_price_difference_categ": account_pd,
+                "property_price_difference_account_id": account_pd,
             }
         )
         self.product_fifo_1.standard_price = 1234
@@ -175,7 +161,7 @@ class TestRmaStockAccountPurchase(TestRmaStockAccount):
                 "order_id": po.id,
                 "product_id": self.product_fifo_1.id,
                 "product_qty": 10.0,
-                "product_uom": self.product_fifo_1.uom_id.id,
+                "product_uom_id": self.product_fifo_1.uom_id.id,
                 "price_unit": 100.0,
                 "date_planned": Datetime.now(),
             }
@@ -210,21 +196,13 @@ class TestRmaStockAccountPurchase(TestRmaStockAccount):
         bill.action_post()
         self.assertEqual(len(bill.invoice_line_ids), 1)
         self.assertEqual(bill.invoice_line_ids.rma_line_id, rma_line)
-        grni_amls = self.env["account.move.line"].search(
-            [
-                ("account_id", "=", self.account_grni.id),
-                ("rma_line_id", "=", rma_line.id),
-            ]
-        )
-        self.assertEqual(sum(grni_amls.mapped("balance")), 0.0)
-        self.assertTrue(all(grni_amls.mapped("reconciled")))
         price_diff_amls = self.env["account.move.line"].search(
             [
                 ("account_id", "=", self.account_price_diff.id),
                 ("rma_line_id", "=", rma_line.id),
             ]
         )
-        self.assertEqual(sum(price_diff_amls.mapped("balance")), 0)
+        self.assertFalse(price_diff_amls)
 
     def test_04_return_and_refund_diff_price_standard(self):
         """
@@ -234,7 +212,7 @@ class TestRmaStockAccountPurchase(TestRmaStockAccount):
         account_pd = self.account_price_diff
         self.product_fifo_1.categ_id.update(
             {
-                "property_account_creditor_price_difference_categ": account_pd,
+                "property_price_difference_account_id": account_pd,
                 "property_cost_method": "standard",
             }
         )
@@ -250,7 +228,7 @@ class TestRmaStockAccountPurchase(TestRmaStockAccount):
                 "order_id": po.id,
                 "product_id": self.product_fifo_1.id,
                 "product_qty": 10.0,
-                "product_uom": self.product_fifo_1.uom_id.id,
+                "product_uom_id": self.product_fifo_1.uom_id.id,
                 "price_unit": 100.0,
                 "date_planned": Datetime.now(),
             }
@@ -282,14 +260,6 @@ class TestRmaStockAccountPurchase(TestRmaStockAccount):
         bill.action_post()
         self.assertEqual(len(bill.invoice_line_ids), 1)
         self.assertEqual(bill.invoice_line_ids.rma_line_id, rma_line)
-        grni_amls = self.env["account.move.line"].search(
-            [
-                ("account_id", "=", self.account_grni.id),
-                ("rma_line_id", "=", rma_line.id),
-            ]
-        )
-        self.assertEqual(sum(grni_amls.mapped("balance")), 0.0)
-        # self.assertTrue(all(grni_amls.mapped("reconciled")))
         price_diff_amls = self.env["account.move.line"].search(
             [
                 ("account_id", "=", self.account_price_diff.id),

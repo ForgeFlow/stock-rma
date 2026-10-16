@@ -1,7 +1,7 @@
 # Copyright 2017-2022 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -10,19 +10,17 @@ class RmaOrderLine(models.Model):
 
     def _compute_purchase_count(self):
         for rec in self:
-            purchase_line_count = self.env["purchase.order.line"].search(
-                [("rma_line_id", "=", rec.id)]
-            )
-            rec.purchase_count = len(purchase_line_count.mapped("order_id"))
+            rec.purchase_count = len(rec.purchase_order_line_ids.order_id)
 
     def _compute_purchase_order_lines(self):
         for rec in self:
-            purchase_list = []
-            for line in self.env["purchase.order.line"].search(
-                [("rma_line_id", "=", rec.id)]
-            ):
-                purchase_list.append(line.id)
-            rec.purchase_order_line_ids = [(6, 0, purchase_list)]
+            rec.purchase_order_line_ids = (
+                self.env["purchase.order.line"].search(
+                    [("rma_line_id", "=", rec._origin.id)]
+                )
+                if rec._origin
+                else self.env["purchase.order.line"]
+            )
 
     @api.depends("operation_id", "purchase_policy")
     def _compute_qty_purchase(self):
@@ -129,14 +127,14 @@ class RmaOrderLine(models.Model):
                 [("type", "=", self.type)], limit=1
             )
             if not operation:
-                raise ValidationError(_("Please define an operation first"))
+                raise ValidationError(self.env._("Please define an operation first"))
 
         if not operation.in_route_id or not operation.out_route_id:
-            route = self.env["stock.location.route"].search(
+            route = self.env["stock.route"].search(
                 [("rma_selectable", "=", True)], limit=1
             )
             if not route:
-                raise ValidationError(_("Please define a rma route."))
+                raise ValidationError(self.env._("Please define a rma route."))
 
         if not operation.in_warehouse_id or not operation.out_warehouse_id:
             warehouse = self.env["stock.warehouse"].search(
@@ -145,13 +143,13 @@ class RmaOrderLine(models.Model):
             )
             if not warehouse:
                 raise ValidationError(
-                    _("Please define a warehouse with a default rma location.")
+                    self.env._("Please define a warehouse with a default rma location.")
                 )
 
         data = {
             "product_id": line.product_id.id,
             "origin": line.order_id.name,
-            "uom_id": line.product_uom.id,
+            "uom_id": line.product_uom_id.id,
             "operation_id": operation.id,
             "product_qty": line.product_qty,
             "price_unit": line.currency_id._convert(
@@ -193,7 +191,7 @@ class RmaOrderLine(models.Model):
                 and rec.purchase_order_line_id.order_id.partner_id != rec.partner_id
             ):
                 raise ValidationError(
-                    _(
+                    self.env._(
                         "RMA customer and originating purchase line customer "
                         "doesn't match."
                     )
@@ -226,27 +224,16 @@ class RmaOrderLine(models.Model):
         for line in self.purchase_order_line_ids.filtered(
             lambda p: p.state not in ("draft", "sent", "cancel")
         ):
-            qty += self.uom_id._compute_quantity(line.product_qty, line.product_uom)
+            qty += self.uom_id._compute_quantity(line.product_qty, line.product_uom_id)
         return qty
 
     def _get_price_unit(self):
         self.ensure_one()
         price_unit = super()._get_price_unit()
-        if self.purchase_order_line_id:
-            moves = self.purchase_order_line_id.move_ids
-            if moves:
-                layers = moves.sudo().mapped("stock_valuation_layer_ids")
-                if layers:
-                    price_unit = sum(layers.mapped("value")) / sum(
-                        layers.mapped("quantity")
-                    )
-        elif self.account_move_line_id.purchase_line_id:
-            purchase_lines = self.account_move_line_id.purchase_line_id
-            moves = purchase_lines.mapped("move_ids")
-            if moves:
-                layers = moves.sudo().mapped("stock_valuation_layer_ids")
-                if layers:
-                    price_unit = sum(layers.mapped("value")) / sum(
-                        layers.mapped("quantity")
-                    )
+        purchase_lines = (
+            self.purchase_order_line_id or self.account_move_line_id.purchase_line_id
+        )
+        moves = purchase_lines.move_ids.filtered(lambda x: x.state == "done")
+        if moves:
+            price_unit = moves.sudo()._get_price_unit()
         return price_unit

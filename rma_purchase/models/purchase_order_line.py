@@ -2,34 +2,24 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
 from odoo import api, fields, models
-from odoo.osv import expression
+from odoo.fields import Domain
 
 
 class PurchaseOrderLine(models.Model):
     _inherit = "purchase.order.line"
-    _rec_names_search = ["name", "order_id"]
+    _rec_names_search = ["name", "order_id.name"]
 
     rma_line_id = fields.Many2one(
         comodel_name="rma.order.line",
         string="RMA",
     )
 
-    def _name_search(self, name, domain=None, operator="ilike", limit=None, order=None):
-        domain = domain or []
+    @api.model
+    def _search_display_name(self, operator, value):
+        domain = super()._search_display_name(operator, value)
         if self.env.context.get("rma"):
-            domain = expression.AND([domain, [("display_type", "=", False)]])
-        lines = self.search([("order_id.name", operator, name)] + domain, limit=limit)
-        if limit:
-            limit_rest = limit - len(lines)
-        else:
-            # limit can be 0 or None representing infinite
-            limit_rest = limit
-        if limit_rest or not limit:
-            domain += [("id", "in", lines.ids)]
-            return super()._name_search(
-                name, domain=domain, operator=operator, limit=limit_rest, order=order
-            )
-        return self._search(domain, limit=limit, order=order)
+            domain = Domain.AND([domain, [("display_type", "=", False)]])
+        return domain
 
     def _get_purchase_line_rma_name_get_label(self):
         self.ensure_one()

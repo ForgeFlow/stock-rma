@@ -1,10 +1,8 @@
 # Copyright 2017-2022 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from datetime import datetime
-
-from odoo import _, api, exceptions, fields, models
-from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DF
+from odoo import api, fields, models
+from odoo.exceptions import UserError
 
 
 class RmaLineMakePurchaseOrder(models.TransientModel):
@@ -70,8 +68,8 @@ class RmaLineMakePurchaseOrder(models.TransientModel):
         if len(suppliers) == 1:
             res["partner_id"] = suppliers.id
         else:
-            raise exceptions.Warning(
-                _(
+            raise UserError(
+                self.env._(
                     "Only RMA lines from the same partner can be processed at "
                     "the same time"
                 )
@@ -82,7 +80,7 @@ class RmaLineMakePurchaseOrder(models.TransientModel):
     @api.model
     def _prepare_purchase_order(self, item):
         if not self.partner_id:
-            raise exceptions.Warning(_("Enter a supplier."))
+            raise UserError(self.env._("Enter a supplier."))
         supplier = self.partner_id
         data = {
             "origin": "",
@@ -102,8 +100,8 @@ class RmaLineMakePurchaseOrder(models.TransientModel):
             "order_id": po.id,
             "product_id": product.id,
             "price_unit": item.line_id.price_unit,
-            "date_planned": datetime.today().strftime(DF),
-            "product_uom": product.uom_po_id.id,
+            "date_planned": fields.Datetime.now(),
+            "product_uom_id": item.product_uom_id.id or product.uom_id.id,
             "product_qty": item.product_qty,
             "rma_line_id": item.line_id.id,
         }
@@ -118,7 +116,7 @@ class RmaLineMakePurchaseOrder(models.TransientModel):
 
         for item in self.item_ids:
             if item.product_qty <= 0.0:
-                raise exceptions.UserError(_("Enter a positive quantity."))
+                raise UserError(self.env._("Enter a positive quantity."))
 
             purchase = self.purchase_order_id
             if not purchase:

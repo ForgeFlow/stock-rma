@@ -1,7 +1,7 @@
 # Copyright 2017-2022 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -21,5 +21,5 @@ class RmaOperation(models.Model):
     def _check_purchase_policy(self):
         if self.filtered(lambda r: r.purchase_policy != "no" and r.type != "supplier"):
             raise ValidationError(
-                _("Purchase Policy can only apply to supplier operations")
+                self.env._("Purchase Policy can only apply to supplier operations")
             )

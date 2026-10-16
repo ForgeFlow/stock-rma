@@ -1,6 +1,6 @@
 # Copyright 2017-2022 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -57,13 +57,13 @@ class RmaAddPurchase(models.TransientModel):
                 [("type", "=", self.rma_id.type)], limit=1
             )
             if not operation:
-                raise ValidationError(_("Please define an operation first"))
+                raise ValidationError(self.env._("Please define an operation first"))
         if not operation.in_route_id or not operation.out_route_id:
-            route = self.env["stock.location.route"].search(
+            route = self.env["stock.route"].search(
                 [("rma_selectable", "=", True)], limit=1
             )
             if not route:
-                raise ValidationError(_("Please define a rma route."))
+                raise ValidationError(self.env._("Please define a rma route."))
         if not operation.in_warehouse_id or not operation.out_warehouse_id:
             warehouse = self.env["stock.warehouse"].search(
                 [
@@ -74,7 +74,7 @@ class RmaAddPurchase(models.TransientModel):
             )
             if not warehouse:
                 raise ValidationError(
-                    _("Please define a warehouse with a default rma location.")
+                    self.env._("Please define a warehouse with a default rma location.")
                 )
         data = {
             "partner_id": self.partner_id.id,
@@ -82,7 +82,7 @@ class RmaAddPurchase(models.TransientModel):
             "purchase_order_line_id": line.id,
             "product_id": line.product_id.id,
             "origin": line.order_id.name,
-            "uom_id": line.product_uom.id,
+            "uom_id": line.product_uom_id.id,
             "operation_id": operation.id,
             "product_qty": line.product_qty,
             "price_unit": line.currency_id._convert(
