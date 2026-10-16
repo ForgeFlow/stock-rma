@@ -114,7 +114,7 @@ class RmaAddSale(models.TransientModel):
                 )
                 if not warehouse:
                     raise ValidationError(
-                        _("Please define a warehouse with a " "default rma location.")
+                        _("Please define a warehouse with a default rma location.")
                     )
         location = self.rma_id.location_id
         if not location:
