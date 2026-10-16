@@ -1,7 +1,7 @@
 # Copyright 2020 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -44,7 +44,7 @@ class RmaMakeSaleOrder(models.TransientModel):
 
     @api.model
     def default_get(self, fields_list):
-        context = self._context.copy()
+        context = self.env.context.copy()
         res = super().default_get(fields_list)
         rma_line_obj = self.env["rma.order.line"]
         rma_obj = self.env["rma.order"]
@@ -71,7 +71,7 @@ class RmaMakeSaleOrder(models.TransientModel):
             res["partner_id"] = customers.id
         else:
             raise ValidationError(
-                _(
+                self.env._(
                     "Only RMA lines from the same partner can be processed at "
                     "the same time"
                 )
@@ -82,7 +82,7 @@ class RmaMakeSaleOrder(models.TransientModel):
     @api.model
     def _prepare_sale_order(self, line):
         if not self.partner_id:
-            raise ValidationError(_("Enter a customer."))
+            raise ValidationError(self.env._("Enter a customer."))
         customer = self.partner_id
         auto = self.env["account.fiscal.position"].search(
             [("auto_apply", "=", True), ("country_id", "=", customer.country_id.id)],
@@ -113,7 +113,7 @@ class RmaMakeSaleOrder(models.TransientModel):
             "name": item.name,
             "order_id": so.id,
             "product_id": product.id,
-            "product_uom": product.uom_po_id.id,
+            "product_uom_id": item.product_uom_id.id or product.uom_id.id,
             "product_uom_qty": item.product_qty,
             "rma_line_id": item.line_id.id,
         }
@@ -133,7 +133,7 @@ class RmaMakeSaleOrder(models.TransientModel):
         sale = False
         for item in self.item_ids:
             if item.product_qty <= 0.0:
-                raise ValidationError(_("Enter a positive quantity."))
+                raise ValidationError(self.env._("Enter a positive quantity."))
 
             if self.sale_order_id:
                 sale = self.sale_order_id

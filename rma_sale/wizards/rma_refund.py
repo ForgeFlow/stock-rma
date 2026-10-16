@@ -1,12 +1,11 @@
 # Copyright 2020 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
-from odoo import api, fields, models
+from odoo import fields, models
 
 
 class RmaRefund(models.TransientModel):
     _inherit = "rma.refund"
 
-    @api.returns("rma.order.line")
     def _prepare_item(self, line):
         res = super()._prepare_item(line)
         res["sale_line_id"] = line.sale_line_id.id

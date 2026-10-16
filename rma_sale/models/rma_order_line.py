@@ -1,6 +1,6 @@
 # Copyright 2020 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -117,13 +117,13 @@ class RmaOrderLine(models.Model):
                 [("type", "=", self.type)], limit=1
             )
             if not operation:
-                raise ValidationError(_("Please define an operation first"))
+                raise ValidationError(self.env._("Please define an operation first"))
         if not operation.in_route_id or not operation.out_route_id:
-            route = self.env["stock.location.route"].search(
+            route = self.env["stock.route"].search(
                 [("rma_selectable", "=", True)], limit=1
             )
             if not route:
-                raise ValidationError(_("Please define an RMA route"))
+                raise ValidationError(self.env._("Please define an RMA route"))
         if not operation.in_warehouse_id or not operation.out_warehouse_id:
             warehouse = self.env["stock.warehouse"].search(
                 [("company_id", "=", self.company_id.id), ("lot_rma_id", "!=", False)],
@@ -131,12 +131,12 @@ class RmaOrderLine(models.Model):
             )
             if not warehouse:
                 raise ValidationError(
-                    _("Please define a warehouse with a default RMA location.")
+                    self.env._("Please define a warehouse with a default RMA location.")
                 )
         data = {
             "product_id": line.product_id.id,
             "origin": line.order_id.name,
-            "uom_id": line.product_uom.id,
+            "uom_id": line.product_uom_id.id,
             "operation_id": operation.id,
             "product_qty": line.product_uom_qty,
             "delivery_address_id": line.order_id.partner_shipping_id.id,
@@ -187,7 +187,7 @@ class RmaOrderLine(models.Model):
                 and rec.sale_line_id.order_id.partner_id.parent_id != rec.partner_id
             ):
                 raise ValidationError(
-                    _(
+                    self.env._(
                         "RMA customer and originating sales order line customer "
                         "doesn't match."
                     )
@@ -222,32 +222,21 @@ class RmaOrderLine(models.Model):
             qty += sale_line.product_uom_qty
         return qty
 
+    def _get_sale_delivery_moves(self):
+        self.ensure_one()
+        sale_lines = self.sale_line_id or self.account_move_line_id.sale_line_ids
+        return sale_lines.move_ids.filtered(
+            lambda x: (
+                x.state == "done"
+                and x.location_id.usage in ("internal", "supplier")
+                and x.location_dest_id.usage == "customer"
+            )
+        )
+
     def _get_price_unit(self):
         self.ensure_one()
         price_unit = super()._get_price_unit()
-        if self.sale_line_id:
-            moves = self.sale_line_id.move_ids.filtered(
-                lambda x: x.state == "done"
-                and x.location_id.usage in ("internal", "supplier")
-                and x.location_dest_id.usage == "customer"
-            )
-            if moves:
-                layers = moves.sudo().mapped("stock_valuation_layer_ids")
-                if layers:
-                    price_unit = sum(layers.mapped("value")) / sum(
-                        layers.mapped("quantity")
-                    )
-        elif self.account_move_line_id:
-            sale_lines = self.account_move_line_id.sale_line_ids
-            moves = sale_lines.mapped("move_ids").filtered(
-                lambda x: x.state == "done"
-                and x.location_id.usage in ("internal", "supplier")
-                and x.location_dest_id.usage == "customer"
-            )
-            if moves:
-                layers = moves.sudo().mapped("stock_valuation_layer_ids")
-                if layers:
-                    price_unit = sum(layers.mapped("value")) / sum(
-                        layers.mapped("quantity")
-                    )
+        moves = self._get_sale_delivery_moves()
+        if moves:
+            price_unit = moves.sudo()._get_price_unit()
         return price_unit

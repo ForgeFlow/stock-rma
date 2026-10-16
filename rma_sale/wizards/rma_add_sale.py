@@ -1,7 +1,7 @@
 # Copyright 2020 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -75,7 +75,7 @@ class RmaAddSale(models.TransientModel):
         )
         return {
             "type": "ir.actions.act_window",
-            "name": _("Add Sale Order"),
+            "name": self.env._("Add Sale Order"),
             "view_mode": "form",
             "res_model": self._name,
             "res_id": self.id,
@@ -95,13 +95,13 @@ class RmaAddSale(models.TransientModel):
                 [("type", "=", self.rma_id.type)], limit=1
             )
             if not operation:
-                raise ValidationError(_("Please define an operation first"))
+                raise ValidationError(self.env._("Please define an operation first"))
         if not operation.in_route_id or not operation.out_route_id:
-            route = self.env["stock.location.route"].search(
+            route = self.env["stock.route"].search(
                 [("rma_selectable", "=", True)], limit=1
             )
             if not route:
-                raise ValidationError(_("Please define an rma route"))
+                raise ValidationError(self.env._("Please define an rma route"))
         warehouse = self.rma_id.in_warehouse_id
         if not warehouse:
             if not operation.in_warehouse_id or not operation.out_warehouse_id:
@@ -114,7 +114,9 @@ class RmaAddSale(models.TransientModel):
                 )
                 if not warehouse:
                     raise ValidationError(
-                        _("Please define a warehouse with a default rma location.")
+                        self.env._(
+                            "Please define a warehouse with a default rma location."
+                        )
                     )
         location = self.rma_id.location_id
         if not location:
@@ -184,7 +186,7 @@ class RmaAddSale(models.TransientModel):
         outgoing_lines = self.env["stock.move.line"]
         incoming_lines = self.env["stock.move.line"]
         sent_moves = sale_line.move_ids.filtered(
-            lambda m: m.state == "done" and not m.scrapped
+            lambda m: m.state == "done" and not m.scrap_id
         )
         for move in sent_moves:
             if move.location_dest_id.usage == "customer" and (
@@ -235,7 +237,7 @@ class RmaAddSale(models.TransientModel):
                     line,
                     line.product_id,
                     line.product_uom_qty,
-                    uom_id=line.product_uom.id,
+                    uom_id=line.product_uom_id.id,
                     lot=False,
                 )
                 rec = rma_line_obj.create(data)

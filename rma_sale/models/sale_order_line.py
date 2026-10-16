@@ -1,30 +1,18 @@
 # Copyright 2020 ForgeFlow S.L.
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html)
 from odoo import api, fields, models
-from odoo.osv import expression
+from odoo.fields import Domain
 
 
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
-    _rec_names_search = ["name", "order_id"]
 
     @api.model
-    def _name_search(self, name, domain=None, operator="ilike", limit=None, order=None):
-        domain = domain or []
+    def _search_display_name(self, operator, value):
+        domain = super()._search_display_name(operator, value)
         if self.env.context.get("rma"):
-            domain = expression.AND([domain, [("display_type", "=", False)]])
-        lines = self.search([("order_id.name", operator, name)] + domain, limit=limit)
-        if limit:
-            limit_rest = limit - len(lines)
-        else:
-            # limit can be 0 or None representing infinite
-            limit_rest = limit
-        if limit_rest or not limit:
-            domain += [("id", "in", lines.ids)]
-            return super()._name_search(
-                name, domain=domain, operator=operator, limit=limit_rest, order=order
-            )
-        return self._search(domain, limit=limit, order=order)
+            domain = Domain.AND([domain, [("display_type", "=", False)]])
+        return domain
 
     def _get_sale_line_rma_name_get_label(self):
         self.ensure_one()
@@ -51,7 +39,7 @@ class SaleOrderLine(models.Model):
         comodel_name="rma.order.line", string="RMA", ondelete="restrict", copy=False
     )
 
-    def _prepare_order_line_procurement(self, group_id=False):
-        vals = super()._prepare_order_line_procurement(group_id=group_id)
+    def _prepare_procurement_values(self):
+        vals = super()._prepare_procurement_values()
         vals.update({"rma_line_id": self.rma_line_id.id})
         return vals

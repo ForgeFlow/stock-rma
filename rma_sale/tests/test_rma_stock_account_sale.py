@@ -30,7 +30,7 @@ class TestRmaStockAccountSale(TestRmaStockAccount):
                             "name": cls.product_fifo_1.name,
                             "product_id": cls.product_fifo_1.id,
                             "product_uom_qty": 20.0,
-                            "product_uom": cls.product_fifo_1.uom_id.id,
+                            "product_uom_id": cls.product_fifo_1.uom_id.id,
                             "price_unit": 800,
                         },
                     ),
@@ -63,18 +63,9 @@ class TestRmaStockAccountSale(TestRmaStockAccount):
         rma_line = rma_line.save()
         rma_line.action_rma_to_approve()
         picking = self._receive_rma(rma_line)
-        # The price is not the standard price, is the value of the outgoing layer
+        # The price is not the standard price, is the value of the outgoing move
         # of the SO
-        rma_move_value = picking.move_ids.stock_valuation_layer_ids.value
-        so_move_value = self.so1.picking_ids.mapped(
-            "move_ids.stock_valuation_layer_ids"
-        )[-1].value
-        self.assertEqual(rma_move_value, -so_move_value)
-        # Test the accounts used
-        account_move = picking.move_ids.stock_valuation_layer_ids.account_move_id
-        self.check_accounts_used(
-            account_move, debit_account="inventory", credit_account="gdni"
-        )
+        self.assertEqual(picking.move_ids.value, self.so1.picking_ids.move_ids.value)
 
     def test_02_return_and_refund_ref_so(self):
         """
@@ -109,14 +100,13 @@ class TestRmaStockAccountSale(TestRmaStockAccount):
         refund.action_post()
         self.assertEqual(refund.invoice_line_ids[0].price_unit, so_line.price_unit)
         self.assertEqual(refund.invoice_line_ids[0].currency_id, so_line.currency_id)
-        gdni_amls = self.env["account.move.line"].search(
-            [
-                ("account_id", "=", self.account_gdni.id),
-                ("rma_line_id", "=", rma_line.id),
-            ]
+        cogs_lines = refund.line_ids.filtered(lambda line: line.display_type == "cogs")
+        self.assertEqual(cogs_lines.rma_line_id, rma_line)
+        self.assertAlmostEqual(sum(cogs_lines.mapped("balance")), 0.0)
+        self.assertAlmostEqual(
+            sum(cogs_lines.filtered(lambda line: line.balance > 0).mapped("balance")),
+            self.so1.picking_ids.move_ids.value,
         )
-        self.assertEqual(sum(gdni_amls.mapped("balance")), 0.0)
-        self.assertTrue(all(gdni_amls.mapped("reconciled")))
 
     def test_03_return_and_refund_ref_inv(self):
         """
@@ -151,11 +141,10 @@ class TestRmaStockAccountSale(TestRmaStockAccount):
         refund.action_post()
         self.assertEqual(refund.invoice_line_ids[0].price_unit, so_line.price_unit)
         self.assertEqual(refund.invoice_line_ids[0].currency_id, so_line.currency_id)
-        gdni_amls = self.env["account.move.line"].search(
-            [
-                ("account_id", "=", self.account_gdni.id),
-                ("rma_line_id", "=", rma_line.id),
-            ]
+        cogs_lines = refund.line_ids.filtered(lambda line: line.display_type == "cogs")
+        self.assertEqual(cogs_lines.rma_line_id, rma_line)
+        self.assertAlmostEqual(sum(cogs_lines.mapped("balance")), 0.0)
+        self.assertAlmostEqual(
+            sum(cogs_lines.filtered(lambda line: line.balance > 0).mapped("balance")),
+            self.so1.picking_ids.move_ids.value,
         )
-        self.assertEqual(sum(gdni_amls.mapped("balance")), 0.0)
-        self.assertTrue(all(gdni_amls.mapped("reconciled")))

@@ -34,7 +34,7 @@
                         <field name="qty_invoiced" />
                         <field name="qty_to_invoice" />
                         <field
-                            name="product_uom"
+                            name="product_uom_id"
                             string="Unit of Measure"
                             groups="uom.group_uom"
                         />
@@ -93,7 +93,7 @@
         <field name="target">new</field>
         <field name="view_id" ref="view_rma_add_sale" />
         <field
-            name="groups_id"
+            name="group_ids"
             eval="[(4, ref('rma.group_rma_customer_user')), (4, ref('rma.group_rma_customer_user'))]"
         />
     </record>
