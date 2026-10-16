@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_rma_order_line_make_repair_customer_user_item,rma.order.line.make.repair.customer.user,model_rma_order_line_make_repair,rma.group_rma_customer_user,1,1,1,1
+access_rma_order_line_make_supplier_user_item,rma.order.line.make.repair.supplier.user,model_rma_order_line_make_repair,rma.group_rma_supplier_user,1,1,1,1
+access_rma_order_line_make_repair_item_customer_user_item,rma.order.line.make.repair.item.customer.user,model_rma_order_line_make_repair_item,rma.group_rma_customer_user,1,1,1,1
+access_rma_order_line_make_repair_item_supplier_user_item,rma.order.line.make.repair.item.supplier.user,model_rma_order_line_make_repair_item,rma.group_rma_supplier_user,1,1,1,1
