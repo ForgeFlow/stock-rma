@@ -43,6 +43,13 @@ class StockRule(models.Model):
             elif line.rma_id.partner_id:
                 res["partner_id"] = line.rma_id.partner_id.id
             res["price_unit"] = line._get_price_unit()
+            if (
+                line.operation_id.customer_owned
+                and line.type == "customer"
+                and self.env["stock.location"].browse(res.get("location_dest_id")).usage
+                == "customer"
+            ):
+                res["restrict_partner_id"] = line.partner_id.commercial_partner_id.id
             origin_move = line._get_return_origin_move(res)
             if origin_move:
                 res["origin_returned_move_id"] = origin_move.id

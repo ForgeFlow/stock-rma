@@ -110,6 +110,13 @@ class RmaOperation(models.Model):
         help="Forces the same lot to be used "
         "in outgoing pickings as the one indicated in the RMA",
     )
+    customer_owned = fields.Boolean(
+        string="Goods stay customer-owned",
+        help="The goods received through this operation remain the property "
+        "of the customer, as in a repair or a calibration. They are received "
+        "with the customer as owner, so they are not valued as company stock "
+        "and leave again with the same owner.",
+    )
 
     @api.onchange("type")
     def _onchange_type(self):

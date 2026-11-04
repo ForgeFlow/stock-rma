@@ -514,6 +514,10 @@ class RmaOrderLine(models.Model):
         origin_move = self.reference_move_id
         if self.type != "customer" or not origin_move:
             return self.env["stock.move"]
+        if self.operation_id.customer_owned:
+            return self.env["stock.move"]
+        if origin_move.product_id != self.product_id:
+            return self.env["stock.move"]
         if (
             origin_move.location_id.usage != "internal"
             or origin_move.location_dest_id.usage != "customer"
