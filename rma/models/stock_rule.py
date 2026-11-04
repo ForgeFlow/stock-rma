@@ -43,6 +43,9 @@ class StockRule(models.Model):
             elif line.rma_id.partner_id:
                 res["partner_id"] = line.rma_id.partner_id.id
             res["price_unit"] = line._get_price_unit()
+            origin_move = line._get_return_origin_move(res)
+            if origin_move:
+                res["origin_returned_move_id"] = origin_move.id
         return res
 
     @api.model

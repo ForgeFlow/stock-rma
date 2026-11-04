@@ -1952,3 +1952,26 @@ class TestRma(common.TransactionCase):
         res = rma.action_view_out_shipments()
         picking = self.env["stock.picking"].browse(res["res_id"])
         self.assertEqual(picking.location_dest_id, supplier_loc)
+
+    def test_19_customer_rma_reception_links_its_delivery(self):
+        """The reception carries the delivery it brings the goods back from."""
+        lines = self.rma_customer_id.rma_line_ids
+        lines.filtered(lambda x: x.state == "draft").action_rma_to_approve()
+        wizard = self.rma_make_picking.with_context(
+            **{
+                "active_ids": lines.ids,
+                "active_model": "rma.order.line",
+                "picking_type": "incoming",
+                "active_id": 1,
+            }
+        ).create({})
+        wizard._create_picking()
+        incoming = lines.mapped("move_ids").filtered(
+            lambda m: m.location_id.usage == "customer"
+        )
+        self.assertTrue(incoming)
+        for move in incoming:
+            self.assertTrue(move.rma_line_id.reference_move_id)
+            self.assertEqual(
+                move.origin_returned_move_id, move.rma_line_id.reference_move_id
+            )
