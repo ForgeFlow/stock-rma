@@ -74,11 +74,23 @@ class StockMove(models.Model):
             return self.env["res.partner"]
         return line.partner_id.commercial_partner_id
 
+    def _key_assign_picking(self):
+        keys = super()._key_assign_picking()
+        if self.rma_line_id:
+            keys += (self._rma_customer_owner(),)
+        return keys
+
+    def _search_picking_for_assignation_domain(self):
+        domain = super()._search_picking_for_assignation_domain()
+        if self.rma_line_id:
+            domain += [("owner_id", "=", self._rma_customer_owner().id or False)]
+        return domain
+
     def _get_new_picking_values(self):
         vals = super()._get_new_picking_values()
-        owners = [move._rma_customer_owner() for move in self]
-        if owners and owners[0] and len(set(owners)) == 1:
-            vals["owner_id"] = owners[0].id
+        owner = self[:1]._rma_customer_owner()
+        if owner:
+            vals["owner_id"] = owner.id
         return vals
 
 

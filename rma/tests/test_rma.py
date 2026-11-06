@@ -2021,3 +2021,31 @@ class TestRma(common.TransactionCase):
         )
         self.assertTrue(quants)
         self.assertEqual(quants.owner_id, owner)
+
+    def test_21_customer_owned_and_regular_lines_get_separate_receipts(self):
+        """Each receipt has a single owner, so lines never share one across owners."""
+        lines = self.rma_customer_id.rma_line_ids
+        self.assertGreater(len(lines), 1)
+        owned_operation = lines[0].operation_id.sudo().copy({"customer_owned": True})
+        lines[0].operation_id = owned_operation
+        lines.filtered(lambda x: x.state == "draft").action_rma_to_approve()
+        wizard = self.rma_make_picking.with_context(
+            **{
+                "active_ids": lines.ids,
+                "active_model": "rma.order.line",
+                "picking_type": "incoming",
+                "active_id": 1,
+            }
+        ).create({})
+        wizard._create_picking()
+        pickings = (
+            lines.mapped("move_ids")
+            .filtered(lambda m: m.location_id.usage == "customer")
+            .picking_id
+        )
+        self.assertEqual(len(pickings), 2)
+        owner = lines[0].partner_id.commercial_partner_id
+        owned = pickings.filtered(lambda p: p.owner_id)
+        self.assertEqual(owned.owner_id, owner)
+        self.assertEqual(owned.move_ids.rma_line_id, lines[0])
+        self.assertFalse((pickings - owned).owner_id)
