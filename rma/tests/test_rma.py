@@ -1952,3 +1952,100 @@ class TestRma(common.TransactionCase):
         res = rma.action_view_out_shipments()
         picking = self.env["stock.picking"].browse(res["res_id"])
         self.assertEqual(picking.location_dest_id, supplier_loc)
+
+    def test_19_customer_rma_reception_links_its_delivery(self):
+        """The reception carries the delivery it brings the goods back from."""
+        lines = self.rma_customer_id.rma_line_ids
+        lines.filtered(lambda x: x.state == "draft").action_rma_to_approve()
+        wizard = self.rma_make_picking.with_context(
+            **{
+                "active_ids": lines.ids,
+                "active_model": "rma.order.line",
+                "picking_type": "incoming",
+                "active_id": 1,
+            }
+        ).create({})
+        wizard._create_picking()
+        incoming = lines.mapped("move_ids").filtered(
+            lambda m: m.location_id.usage == "customer"
+        )
+        self.assertTrue(incoming)
+        for move in incoming:
+            self.assertTrue(move.rma_line_id.reference_move_id)
+            self.assertEqual(
+                move.origin_returned_move_id, move.rma_line_id.reference_move_id
+            )
+        line = lines[0]
+        move_vals = {"location_id": incoming[0].location_id.id}
+        self.assertTrue(line._get_return_origin_move(move_vals))
+        line.operation_id.sudo().customer_owned = True
+        self.assertFalse(line._get_return_origin_move(move_vals))
+        line.operation_id.sudo().customer_owned = False
+        line.product_id = self.product_2
+        self.assertFalse(line._get_return_origin_move(move_vals))
+
+    def test_20_customer_owned_reception_keeps_its_owner(self):
+        """Goods received for repair stay the customer's, so they are not valued."""
+        lines = self.rma_customer_id.rma_line_ids
+        lines.operation_id.sudo().customer_owned = True
+        lines.filtered(lambda x: x.state == "draft").action_rma_to_approve()
+        wizard = self.rma_make_picking.with_context(
+            **{
+                "active_ids": lines.ids,
+                "active_model": "rma.order.line",
+                "picking_type": "incoming",
+                "active_id": 1,
+            }
+        ).create({})
+        wizard._create_picking()
+        picking = self.env["stock.picking"].browse(
+            lines.action_view_in_shipments()["res_id"]
+        )
+        owner = lines[0].partner_id.commercial_partner_id
+        self.assertEqual(picking.owner_id, owner)
+        self.assertFalse(picking.move_ids.origin_returned_move_id)
+        picking.action_assign()
+        for move in picking.move_ids:
+            move.quantity = move.product_uom_qty
+            move.picked = True
+        picking._action_done()
+        self.assertTrue(picking.move_line_ids)
+        for move_line in picking.move_line_ids:
+            self.assertEqual(move_line.owner_id, owner)
+        quants = self.env["stock.quant"].search(
+            [
+                ("product_id", "in", picking.move_ids.product_id.ids),
+                ("location_id", "in", picking.move_ids.location_dest_id.ids),
+                ("quantity", ">", 0),
+            ]
+        )
+        self.assertTrue(quants)
+        self.assertEqual(quants.owner_id, owner)
+
+    def test_21_customer_owned_and_regular_lines_get_separate_receipts(self):
+        """Each receipt has a single owner, so lines never share one across owners."""
+        lines = self.rma_customer_id.rma_line_ids
+        self.assertGreater(len(lines), 1)
+        owned_operation = lines[0].operation_id.sudo().copy({"customer_owned": True})
+        lines[0].operation_id = owned_operation
+        lines.filtered(lambda x: x.state == "draft").action_rma_to_approve()
+        wizard = self.rma_make_picking.with_context(
+            **{
+                "active_ids": lines.ids,
+                "active_model": "rma.order.line",
+                "picking_type": "incoming",
+                "active_id": 1,
+            }
+        ).create({})
+        wizard._create_picking()
+        pickings = (
+            lines.mapped("move_ids")
+            .filtered(lambda m: m.location_id.usage == "customer")
+            .picking_id
+        )
+        self.assertEqual(len(pickings), 2)
+        owner = lines[0].partner_id.commercial_partner_id
+        owned = pickings.filtered(lambda p: p.owner_id)
+        self.assertEqual(owned.owner_id, owner)
+        self.assertEqual(owned.move_ids.rma_line_id, lines[0])
+        self.assertFalse((pickings - owned).owner_id)

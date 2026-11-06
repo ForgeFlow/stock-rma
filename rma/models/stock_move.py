@@ -64,6 +64,35 @@ class StockMove(models.Model):
         res["rma_line_id"] = self.rma_line_id.id
         return res
 
+    def _rma_customer_owner(self):
+        """The customer keeping the ownership of the goods this move brings in."""
+        self.ensure_one()
+        line = self.rma_line_id
+        if not line.operation_id.customer_owned:
+            return self.env["res.partner"]
+        if self.location_id.usage != "customer":
+            return self.env["res.partner"]
+        return line.partner_id.commercial_partner_id
+
+    def _key_assign_picking(self):
+        keys = super()._key_assign_picking()
+        if self.rma_line_id:
+            keys += (self._rma_customer_owner(),)
+        return keys
+
+    def _search_picking_for_assignation_domain(self):
+        domain = super()._search_picking_for_assignation_domain()
+        if self.rma_line_id:
+            domain += [("owner_id", "=", self._rma_customer_owner().id or False)]
+        return domain
+
+    def _get_new_picking_values(self):
+        vals = super()._get_new_picking_values()
+        owner = self[:1]._rma_customer_owner()
+        if owner:
+            vals["owner_id"] = owner.id
+        return vals
+
 
 class StockMoveLine(models.Model):
     _inherit = "stock.move.line"

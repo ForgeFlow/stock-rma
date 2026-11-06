@@ -56,6 +56,10 @@
                                 name="in_force_same_lot"
                                 groups="stock.group_production_lot"
                             />
+                            <field
+                                name="customer_owned"
+                                invisible="type == 'supplier'"
+                            />
                         </group>
                         <group name="outbound" string="Outbound">
                             <field name="out_route_id" />

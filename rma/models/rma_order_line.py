@@ -507,6 +507,27 @@ class RmaOrderLine(models.Model):
         self.ensure_one()
         return self.reference_move_id
 
+    def _get_return_origin_move(self, move_vals):
+        # The delivery this reception brings the goods back from, so that
+        # stock_account values it at the cost they left at
+        self.ensure_one()
+        origin_move = self.reference_move_id
+        if self.type != "customer" or not origin_move:
+            return self.env["stock.move"]
+        if self.operation_id.customer_owned:
+            return self.env["stock.move"]
+        if origin_move.product_id != self.product_id:
+            return self.env["stock.move"]
+        if (
+            origin_move.location_id.usage != "internal"
+            or origin_move.location_dest_id.usage != "customer"
+        ):
+            return self.env["stock.move"]
+        source = self.env["stock.location"].browse(move_vals.get("location_id"))
+        if source.usage != "customer":
+            return self.env["stock.move"]
+        return origin_move
+
     def _prepare_rma_line_from_stock_move(self, sm, lot=False):
         if not self.type:
             self.type = self._get_default_type()
