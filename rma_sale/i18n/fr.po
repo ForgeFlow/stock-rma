@@ -1,0 +1,502 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* rma_sale
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-09-16 14:27+0000\n"
+"PO-Revision-Date: 2024-09-16 14:27+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order__src_sale_count
+msgid "# of Origin Sales"
+msgstr "# de Ventes Sources"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_sale_order__rma_count
+msgid "# of RMA"
+msgstr "# de RMA"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order__sale_count
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order_line__sales_count
+msgid "# of Sales"
+msgstr "# de Commandes de Ventes"
+
+#. module: rma_sale
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_form
+msgid "Add From Sale Order"
+msgstr "Ajouter à partir des Ventes"
+
+#. module: rma_sale
+#. odoo-python
+#: code:addons/rma_sale/wizards/rma_add_sale.py:0
+#: model:ir.actions.act_window,name:rma_sale.action_rma_add_sale
+#, python-format
+msgid "Add Sale Order"
+msgstr "Ajouter Commande de Vente"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_operation__auto_confirm_rma_sale
+msgid "Auto confirm Sales Order upon creation from RMA"
+msgstr "Confirmer automatiquement la commande client lors de sa création à partir du RMA"
+
+#. module: rma_sale
+#: model:ir.model.fields.selection,name:rma_sale.selection__rma_operation__sale_policy__ordered
+#: model:ir.model.fields.selection,name:rma_sale.selection__rma_order_line__sale_policy__ordered
+msgid "Based on Ordered Quantities"
+msgstr "Basé sur les Quantités Commandées"
+
+#. module: rma_sale
+#: model:ir.model.fields.selection,name:rma_sale.selection__rma_operation__sale_policy__received
+#: model:ir.model.fields.selection,name:rma_sale.selection__rma_order_line__sale_policy__received
+msgid "Based on Received Quantities"
+msgstr "Basé sur les Qauntités Reçues"
+
+#. module: rma_sale
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_add_sale
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_order_line_make_sale_order
+msgid "Cancel"
+msgstr "Annuler"
+
+#. module: rma_sale
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_add_sale
+msgid "Confirm"
+msgstr "Confirmer"
+
+#. module: rma_sale
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_order_line_make_sale_order
+msgid "Create Quotation"
+msgstr "Créer Devis"
+
+#. module: rma_sale
+#: model:ir.actions.act_window,name:rma_sale.action_rma_make_sale_order
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_form
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_line_form
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_order_line_make_sale_order
+msgid "Create Sales Quotation"
+msgstr "Créer Commandes/Devis"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_add_sale__create_uid
+#: model:ir.model.fields,field_description:rma_sale.field_rma_make_sale_order__create_uid
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order_line_make_sale_order_item__create_uid
+msgid "Created by"
+msgstr "Créé par"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_add_sale__create_date
+#: model:ir.model.fields,field_description:rma_sale.field_rma_make_sale_order__create_date
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order_line_make_sale_order_item__create_date
+msgid "Created on"
+msgstr "Créé le"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_make_sale_order__partner_id
+msgid "Customer"
+msgstr "Client"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order_line_make_sale_order_item__name
+msgid "Description"
+msgstr ""
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_add_sale__display_name
+#: model:ir.model.fields,field_description:rma_sale.field_rma_make_sale_order__display_name
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order_line_make_sale_order_item__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: rma_sale
+#. odoo-python
+#: code:addons/rma_sale/wizards/rma_make_sale_order.py:0
+#, python-format
+msgid "Enter a customer."
+msgstr "Entrer un client"
+
+#. module: rma_sale
+#. odoo-python
+#: code:addons/rma_sale/wizards/rma_make_sale_order.py:0
+#, python-format
+msgid "Enter a positive quantity."
+msgstr "Entrer une quantité"
+
+#. module: rma_sale
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_order_line_make_sale_order
+msgid "Existing Quotation to update:"
+msgstr "devis existant à mettre à jour:"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order_line_make_sale_order_item__free_of_charge
+msgid "Free of Charge"
+msgstr "Gratuit"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_operation__free_of_charge_rma_sale
+msgid "Free of charge RMA Sales Order"
+msgstr "Commande RMA gratuite"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_add_sale__id
+#: model:ir.model.fields,field_description:rma_sale.field_rma_make_sale_order__id
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order_line_make_sale_order_item__id
+msgid "ID"
+msgstr ""
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_make_sale_order__item_ids
+msgid "Items"
+msgstr "Articles"
+
+#. module: rma_sale
+#: model:ir.model,name:rma_sale.model_rma_make_picking_wizard_item
+msgid "Items to receive"
+msgstr "Articles à recevoir"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_add_sale____last_update
+#: model:ir.model.fields,field_description:rma_sale.field_rma_make_sale_order____last_update
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order_line_make_sale_order_item____last_update
+msgid "Last Modified on"
+msgstr ""
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_add_sale__write_uid
+#: model:ir.model.fields,field_description:rma_sale.field_rma_make_sale_order__write_uid
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order_line_make_sale_order_item__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_add_sale__write_date
+#: model:ir.model.fields,field_description:rma_sale.field_rma_make_sale_order__write_date
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order_line_make_sale_order_item__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_add_sale__lot_domain_ids
+msgid "Lots Domain"
+msgstr ""
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_add_sale__lot_ids
+msgid "Lots/Serials selected"
+msgstr "Lots/Séries sélectionnés"
+
+#. module: rma_sale
+#: model:ir.model,name:rma_sale.model_rma_make_sale_order
+msgid "Make Sales Order from RMA"
+msgstr "Créer commande client à partir de RMA"
+
+#. module: rma_sale
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_order_line_make_sale_order
+msgid "New Sales Order details:"
+msgstr "Détails de la nouvelle commande client:"
+
+#. module: rma_sale
+#: model:ir.model.fields.selection,name:rma_sale.selection__rma_operation__sale_policy__no
+#: model:ir.model.fields.selection,name:rma_sale.selection__rma_order_line__sale_policy__no
+msgid "Not required"
+msgstr "Non requis"
+
+#. module: rma_sale
+#. odoo-python
+#: code:addons/rma_sale/wizards/rma_make_sale_order.py:0
+#, python-format
+msgid "Only RMA lines from the same partner can be processed at the same time"
+msgstr "Seules les lignes RMA du même partenaire peuvent être traitées en même temps"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_add_sale__sale_id
+msgid "Order"
+msgstr "Commande"
+
+#. module: rma_sale
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_form
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_line_form
+msgid "Origin Sale Order"
+msgstr "Commandes de Vente Sources"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order_line__sale_line_id
+msgid "Originating Sales Order Line"
+msgstr "Ligne de commande d'origine"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order_line_make_sale_order_item__out_warehouse_id
+msgid "Outbound Warehouse"
+msgstr "Entrepôt sortant"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_add_sale__partner_id
+msgid "Partner"
+msgstr "Partenaire"
+
+#. module: rma_sale
+#. odoo-python
+#: code:addons/rma_sale/models/rma_order_line.py:0
+#, python-format
+msgid "Please define a warehouse with a default RMA location."
+msgstr "Veuillez définir un entrepôt avec un emplacement RMA par défaut."
+
+#. module: rma_sale
+#. odoo-python
+#: code:addons/rma_sale/wizards/rma_add_sale.py:0
+#, python-format
+msgid "Please define a warehouse with a default rma location."
+msgstr "Veuillez définir un entrepôt avec un emplacement rma par défaut."
+
+#. module: rma_sale
+#. odoo-python
+#: code:addons/rma_sale/models/rma_order_line.py:0
+#, python-format
+msgid "Please define an RMA route"
+msgstr "Veuillez définir une route RMA"
+
+#. module: rma_sale
+#. odoo-python
+#: code:addons/rma_sale/models/rma_order_line.py:0
+#: code:addons/rma_sale/wizards/rma_add_sale.py:0
+#, python-format
+msgid "Please define an operation first"
+msgstr "Veuillez d'abord définir une opération"
+
+#. module: rma_sale
+#. odoo-python
+#: code:addons/rma_sale/wizards/rma_add_sale.py:0
+#, python-format
+msgid "Please define an rma route"
+msgstr "Veuillez définir une route RMA"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order_line_make_sale_order_item__product_id
+msgid "Product"
+msgstr "Produit"
+
+#. module: rma_sale
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_add_sale
+msgid "Qty"
+msgstr "Qté"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order_line__qty_sold
+msgid "Qty Sold"
+msgstr "Qté Vendue"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order__qty_to_sell
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order_line__qty_to_sell
+msgid "Qty To Sell"
+msgstr "Qté à Vendre"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order_line_make_sale_order_item__product_qty
+msgid "Quantity to sell"
+msgstr "Quantité à vendre"
+
+#. module: rma_sale
+#: model:ir.model,name:rma_sale.model_rma_order_line
+#: model:ir.model.fields,field_description:rma_sale.field_sale_order_line__rma_line_id
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_order_form_inherit_sale_rma
+msgid "RMA"
+msgstr ""
+
+#. module: rma_sale
+#: model:ir.model,name:rma_sale.model_rma_order
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order_line_make_sale_order_item__rma_id
+msgid "RMA Group"
+msgstr "Groupe RMA"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order_line_make_sale_order_item__line_id
+msgid "RMA Line"
+msgstr "Ligne RMA"
+
+#. module: rma_sale
+#: model:ir.model,name:rma_sale.model_rma_order_line_make_sale_order_item
+msgid "RMA Line Make Sale Order Item"
+msgstr "Ligne RMA Crée une ligne de commande de vente"
+
+#. module: rma_sale
+#: model:ir.model,name:rma_sale.model_rma_refund_item
+msgid "RMA Lines to refund"
+msgstr "Lignes RMA à rembourser"
+
+#. module: rma_sale
+#: model:ir.model,name:rma_sale.model_rma_operation
+msgid "RMA Operation"
+msgstr "Opération RMA"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_add_sale__rma_id
+msgid "RMA Order"
+msgstr "Commande RMA"
+
+#. module: rma_sale
+#. odoo-python
+#: code:addons/rma_sale/models/rma_order_line.py:0
+#, python-format
+msgid "RMA customer and originating sales order line customer doesn't match."
+msgstr "Le client RMA et le client sur la ligne de commande d'origine ne correspondent pas"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_sale_order__rma_line_ids
+msgid "Rma Line"
+msgstr "Ligne RMA"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_make_picking_wizard_item__sale_line_id
+msgid "Sale Line"
+msgstr "Ligne de vente"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_add_sale__sale_line_ids
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_line_form
+msgid "Sale Lines"
+msgstr "Lignes de vente"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_refund_item__sale_line_id
+msgid "Sale Order Line"
+msgstr ""
+
+#. module: rma_sale
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_add_sale
+msgid "Sale Order Lines"
+msgstr "Lignes de commande de vente"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_operation__sale_policy
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order_line__sale_policy
+msgid "Sale Policy"
+msgstr "Politique de vente"
+
+#. module: rma_sale
+#: model:ir.model,name:rma_sale.model_sale_order
+#: model:ir.model.fields,field_description:rma_sale.field_rma_make_sale_order__sale_order_id
+msgid "Sales Order"
+msgstr "Bon de commande"
+
+#. module: rma_sale
+#: model:ir.model,name:rma_sale.model_sale_order_line
+msgid "Sales Order Line"
+msgstr "Ligne de commande"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order_line__sale_line_ids
+msgid "Sales Order Lines"
+msgstr "Lignes de commande de vente"
+
+#. module: rma_sale
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_form
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_line_form
+msgid "Sales Orders"
+msgstr "Bons de commande"
+
+#. module: rma_sale
+#: model:ir.model.fields,help:rma_sale.field_rma_operation__free_of_charge_rma_sale
+msgid "Sales orders created from RMA are free of charge by default"
+msgstr "Les commandes client créées à partir de RMA sont gratuites par défaut"
+
+#. module: rma_sale
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_add_sale
+msgid "Select Sale Order Lines to Add"
+msgstr "Sélectionner les lignes de commande à ajouter"
+
+#. module: rma_sale
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_add_sale
+msgid "Select Sale Order from customer"
+msgstr "Sélectionner la commande de vente du client"
+
+#. module: rma_sale
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_add_sale
+msgid "Select all"
+msgstr "Sélectionner tout"
+
+#. module: rma_sale
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_add_sale
+msgid "Selected Lot/Serial Numbers"
+msgstr "Numéros de lot/série sélectionnés"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_add_sale__show_lot_filter
+msgid "Show lot filter?"
+msgstr "Afficher le filtre de lot ?"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order_line__sale_id
+msgid "Source Sales Order"
+msgstr "Bons de commande Sources"
+
+#. module: rma_sale
+#: model:ir.model,name:rma_sale.model_stock_rule
+msgid "Stock Rule"
+msgstr "Règle de stock minimum"
+
+#. module: rma_sale
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_add_sale
+msgid ""
+"The creation of the RMA Lines will be separated according to the lots or "
+"serials selected"
+msgstr ""
+"La création des lignes RMA sera séparée en fonction des lots ou "
+"séries sélectionnés"
+#. module: rma_sale
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_rma_line_filter
+msgid "To Sell"
+msgstr "A Vendre"
+
+#. module: rma_sale
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_add_sale
+msgid "Total"
+msgstr ""
+
+#. module: rma_sale
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_add_sale
+msgid "Unit of Measure"
+msgstr "Unité de mesure"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order_line_make_sale_order_item__product_uom_id
+msgid "UoM"
+msgstr ""
+
+#. module: rma_sale
+#: model:ir.model.fields,help:rma_sale.field_rma_operation__auto_confirm_rma_sale
+msgid "When a sales is created from an RMA, automatically confirm it"
+msgstr "Lorsqu'une vente est créée à partir d'un RMA, confirmez-la automatiquement"
+
+#. module: rma_sale
+#: model:ir.model.fields,field_description:rma_sale.field_rma_order_line_make_sale_order_item__wiz_id
+msgid "Wizard"
+msgstr "Assistant"
+
+#. module: rma_sale
+#: model:ir.model,name:rma_sale.model_rma_refund
+msgid "Wizard for RMA Refund"
+msgstr "Assistant de remboursement RMA"
+
+#. module: rma_sale
+#: model:ir.model,name:rma_sale.model_rma_add_sale
+msgid "Wizard to add rma lines from SO lines"
+msgstr "Assistant pour ajouter des lignes rma à partir de lignes SO"
+
+#. module: rma_sale
+#: model:ir.model,name:rma_sale.model_rma_make_picking_wizard
+msgid "Wizard to create Pickings from rma"
+msgstr "Assistant pour créer des transferts à partir de rma"
+
+#. module: rma_sale
+#: model_terms:ir.ui.view,arch_db:rma_sale.view_rma_add_sale
+msgid "or"
+msgstr "ou"
