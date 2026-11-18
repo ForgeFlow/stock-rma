@@ -5,7 +5,7 @@
         <field name="inherit_id" ref="rma.view_rma_line_form" />
         <field name="arch" type="xml">
             <field name="description" position="after">
-            <field
+                <field
                     name="category_ids"
                     widget="many2many_tags"
                     options="{'no_create': True}"

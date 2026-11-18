@@ -7,7 +7,7 @@
     "category": "RMA",
     "summary": "Add RMA categories to classify RMAs",
     "author": "Akretion,ForgeFlow",
-    "website": "https://github.com/ForgeFlow/stock-rma",
+    "website": "https://github.com/ForgeFlow",
     "depends": ["rma"],
     "data": [
         "security/ir.model.access.csv",
