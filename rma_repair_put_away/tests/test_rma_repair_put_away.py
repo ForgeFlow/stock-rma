@@ -7,7 +7,7 @@ from odoo.tests import common
 class TestRmaRepairPutAway(common.SingleTransactionCase):
     @classmethod
     def setUpClass(cls):
-        super(TestRmaRepairPutAway, cls).setUpClass()
+        super().setUpClass()
 
         cls.rma_obj = cls.env["rma.order"]
         cls.rma_make_picking = cls.env["rma_make_picking.wizard"]

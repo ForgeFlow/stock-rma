@@ -7,7 +7,7 @@
     "category": "RMA",
     "summary": "RMA repairs with Put away",
     "author": "ForgeFlow",
-    "website": "https://github.com/ForgeFlow/stock-rma",
+    "website": "https://github.com/ForgeFlow",
     "depends": ["rma_repair", "rma_put_away"],
     "installable": True,
     "auto_install": True,
