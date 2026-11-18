@@ -38,10 +38,10 @@
         <field name="model">rma.category</field>
         <field eval="6" name="priority" />
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="name" />
                 <field name="active" />
-            </tree>
+            </list>
         </field>
     </record>
 
